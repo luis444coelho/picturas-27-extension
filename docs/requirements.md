@@ -10,8 +10,8 @@
 | **Grupo / Equipa** | Grupo 27 |
 | **Autores** | Equipa PictuRAS-27 |
 | **Data** | 2026-10-18 |
-| **Versão do Dossiê** | v2.2 (Modularização da ERS em ficheiros individuais por Caso de Uso) |
-| **Caso de Uso / Âmbito** | UC-VID-000 a UC-VID-005 — Extensão para Suporte a Vídeo Digital (Carregamento/Visualização, Trim, Áudio, Velocidade, Marca de Água e Fotogramas) |
+| **Versão do Dossiê** | v2.3 (Novos requisitos RF1–RF10: casos de uso UC-VID-006 a UC-VID-015) |
+| **Caso de Uso / Âmbito** | UC-VID-000 a UC-VID-015 — Extensão para Suporte a Vídeo Digital (Carregamento/Visualização, Trim, Áudio, Velocidade, Marca de Água, Fotogramas, Descarregamento, Informações, Ajustes, Filtros, Redimensionamento, Orientação, Conversão, Junção, Encadeamento e Lote) |
 | **Baseline do Exercício 1** | `docs/requirements.md` (v1.2) e `docs/use-cases.md` (v1.2) |
 | **Norma de Referência de Qualidade** | ISO/IEC 25010:2011 / ISO/IEC 25010:2023 |
 | **Unidade Curricular** | Requisitos e Arquiteturas de Software — MEI, Universidade do Minho |
@@ -27,11 +27,22 @@
 - **[UC-VID-003](use-cases/UC-VID-003.md)**: Alteração da velocidade de reprodução de um vídeo
 - **[UC-VID-004](use-cases/UC-VID-004.md)**: Aplicação de marca de água a um vídeo
 - **[UC-VID-005](use-cases/UC-VID-005.md)**: Extração de fotogramas de um vídeo para o projeto
+- **[UC-VID-006](use-cases/UC-VID-006.md)**: Descarregar um vídeo do projeto
+- **[UC-VID-007](use-cases/UC-VID-007.md)**: Consultar as informações de um vídeo
+- **[UC-VID-008](use-cases/UC-VID-008.md)**: Ajustar as propriedades visuais de um vídeo
+- **[UC-VID-009](use-cases/UC-VID-009.md)**: Aplicar um filtro visual a um vídeo
+- **[UC-VID-010](use-cases/UC-VID-010.md)**: Redimensionar um vídeo
+- **[UC-VID-011](use-cases/UC-VID-011.md)**: Rodar e espelhar um vídeo
+- **[UC-VID-012](use-cases/UC-VID-012.md)**: Converter o formato de um vídeo
+- **[UC-VID-013](use-cases/UC-VID-013.md)**: Juntar vídeos
+- **[UC-VID-014](use-cases/UC-VID-014.md)**: Encadear operações de edição num vídeo
+- **[UC-VID-015](use-cases/UC-VID-015.md)**: Processar vários vídeos em lote
 
 **Baseline e Evolução do Exercício 1 para o Exercício 2:**
 - A baseline inicial do Exercício 1 cobria apenas as cinco operações de transformação temporal e espacial de vídeo (UC-VID-001 a 005). Contudo, dado que o PictuRAS é uma plataforma originalmente desenvolvida em exclusivo para processamento de imagem estática, tornou-se mandatória a definição formal do caso de uso de ingestão, validação e reprodução de vídeo (**UC-VID-000**), indispensável para viabilizar qualquer processamento subsequente.
 - Na presente versão da ERS, todos os requisitos funcionais foram rigorosamente decompostos segundo o princípio da **estrita atomicidade**: cada requisito enuncia uma única obrigação não divisível do sistema através do fraseamento canónico (*"O sistema deve..."* ou *"O sistema deve permitir ao {ator}..."*), eliminando ambiguidades e formulações compostas.
 - Para assegurar clareza e permitir a integração modular no relatório final (e.g., tabelas Typst paisagem por capítulo), os requisitos encontram-se **organizados em ficheiros independentes por caso de uso e domínio transversal** na pasta [`docs/requirements/`](requirements/).
+- Na versão v2.3, a ERS foi estendida com dez novas funcionalidades (RF1 a RF10 de [`docs/novo.md`](novo.md)), especificadas nos casos de uso **UC-VID-006** a **UC-VID-015**: descarregamento, consulta de informações, ajuste de propriedades visuais, filtros, redimensionamento, rotação/espelho, conversão de formato, junção de vídeos, encadeamento de operações e processamento em lote. O encadeamento e o lote de vídeos passaram a integrar o MVP e a matriz de formatos foi alargada a MP4, MOV e AVI (DQ-002, DQ-012 a DQ-025).
 
 ---
 
@@ -41,30 +52,44 @@
 
 | **Secção** | **Âmbito / Caso de Uso** | **Prefixo dos Requisitos** | **Qtd.** | **Ficheiro de Especificação** |
 |---|---|---|:---:|---|
-| **4.1.1.1** | Requisitos Comuns e Transversais (Sessão, Quotas, Storage, Tasks, Erros) | `REQ-VID-COM`, `AUTH`, `QUOTA`, `STORAGE`, `TASK`, `ERROR` | 25 | [REQ-VID-COM.md](requirements/REQ-VID-COM.md) |
-| **4.1.1.2** | UC-VID-000: Carregamento, Ingestão e Visualização de Vídeo | `REQ-VID-UPLOAD` | 15 | [REQ-VID-UPLOAD.md](requirements/REQ-VID-UPLOAD.md) |
+| **4.1.1.1** | Requisitos Comuns e Transversais (Sessão, Quotas, Storage, Tasks, Erros) | `REQ-VID-COM`, `AUTH`, `QUOTA`, `STORAGE`, `TASK`, `ERROR` | 31 | [REQ-VID-COM.md](requirements/REQ-VID-COM.md) |
+| **4.1.1.2** | UC-VID-000: Carregamento, Ingestão e Visualização de Vídeo | `REQ-VID-UPLOAD` | 17 | [REQ-VID-UPLOAD.md](requirements/REQ-VID-UPLOAD.md) |
 | **4.1.1.3** | UC-VID-001: Recorte Temporal (*Trim*) | `REQ-VID-TRIM` | 9 | [REQ-VID-TRIM.md](requirements/REQ-VID-TRIM.md) |
 | **4.1.1.4** | UC-VID-002: Remoção do Áudio | `REQ-VID-AUDIO` | 6 | [REQ-VID-AUDIO.md](requirements/REQ-VID-AUDIO.md) |
 | **4.1.1.5** | UC-VID-003: Alteração da Velocidade de Reprodução | `REQ-VID-SPEED` | 8 | [REQ-VID-SPEED.md](requirements/REQ-VID-SPEED.md) |
 | **4.1.1.6** | UC-VID-004: Marca de Água em Vídeo | `REQ-VID-WATERMARK` | 11 | [REQ-VID-WATERMARK.md](requirements/REQ-VID-WATERMARK.md) |
 | **4.1.1.7** | UC-VID-005: Extração de Fotogramas para o Projeto | `REQ-VID-FRAMES` | 13 | [REQ-VID-FRAMES.md](requirements/REQ-VID-FRAMES.md) |
-| **Total** | **Requisitos Funcionais do Subsistema de Vídeo** | — | **87** | — |
+| **4.1.1.8** | UC-VID-006: Descarregamento de Vídeo | `REQ-VID-DOWNLOAD` | 9 | [REQ-VID-DOWNLOAD.md](requirements/REQ-VID-DOWNLOAD.md) |
+| **4.1.1.9** | UC-VID-007: Consulta de Informações do Vídeo | `REQ-VID-INFO` | 9 | [REQ-VID-INFO.md](requirements/REQ-VID-INFO.md) |
+| **4.1.1.10** | UC-VID-008: Ajuste de Propriedades Visuais | `REQ-VID-ADJUST` | 9 | [REQ-VID-ADJUST.md](requirements/REQ-VID-ADJUST.md) |
+| **4.1.1.11** | UC-VID-009: Filtros Visuais Predefinidos | `REQ-VID-FILTER` | 7 | [REQ-VID-FILTER.md](requirements/REQ-VID-FILTER.md) |
+| **4.1.1.12** | UC-VID-010: Redimensionamento de Vídeo | `REQ-VID-RESIZE` | 9 | [REQ-VID-RESIZE.md](requirements/REQ-VID-RESIZE.md) |
+| **4.1.1.13** | UC-VID-011: Rotação e Espelho de Vídeo | `REQ-VID-ORIENT` | 9 | [REQ-VID-ORIENT.md](requirements/REQ-VID-ORIENT.md) |
+| **4.1.1.14** | UC-VID-012: Conversão de Formato de Vídeo | `REQ-VID-CONVERT` | 9 | [REQ-VID-CONVERT.md](requirements/REQ-VID-CONVERT.md) |
+| **4.1.1.15** | UC-VID-013: Junção de Vídeos | `REQ-VID-CONCAT` | 11 | [REQ-VID-CONCAT.md](requirements/REQ-VID-CONCAT.md) |
+| **4.1.1.16** | UC-VID-014: Encadeamento de Operações de Vídeo | `REQ-VID-CHAIN` | 14 | [REQ-VID-CHAIN.md](requirements/REQ-VID-CHAIN.md) |
+| **4.1.1.17** | UC-VID-015: Processamento de Vídeos em Lote | `REQ-VID-BATCH` | 15 | [REQ-VID-BATCH.md](requirements/REQ-VID-BATCH.md) |
+| **Total** | **Requisitos Funcionais do Subsistema de Vídeo** | — | **196** | — |
 
 ---
 
 #### 4.1.2 Requisitos Não Funcionais e de Qualidade (ISO/IEC 25010)
 
-Os 11 requisitos de qualidade do sistema encontram-se especificados no documento individual dedicado:
+Os 16 requisitos de qualidade do sistema encontram-se especificados no documento individual dedicado:
 👉 **[Ver Tabela Completa de Requisitos Não Funcionais — REQ-VID-NFR.md](requirements/REQ-VID-NFR.md)**
 
 A classificação cobre:
 - **Segurança** (`REQ-VID-NFR-001`): Autenticação JWT e URLs pré-assinados temporários.
 - **Fiabilidade** (`REQ-VID-NFR-002`, `007`): `correlationId` distribuído e integridade transacional de dados sem ficheiros órfãos.
-- **Compatibilidade** (`REQ-VID-NFR-003`, `004`): Contentor MP4 (H.264/AAC) exclusivo e exportação JPEG/PNG nativa.
+- **Compatibilidade** (`REQ-VID-NFR-003`, `004`): Contentores MP4, MOV e AVI na entrada segundo a matriz de codecs aprovada, resultados em MP4 (H.264/AAC) salvo na conversão de formato, e exportação JPEG/PNG nativa.
 - **Desempenho** (`REQ-VID-NFR-005`, `006`): Resposta síncrona HTTP $\le 1$ s e workers 100% assíncronos via RabbitMQ.
 - **Capacidade** (`REQ-VID-NFR-008`): Limites contratuais rígidos de duração, tamanho e concorrência máxima de 1 tarefa ativa por projeto.
 - **Usabilidade** (`REQ-VID-NFR-009`): Progresso numérico WebSocket (0–100%) em operações contínuas.
 - **Portabilidade e Manutenibilidade** (`REQ-VID-NFR-010`, `011`): Contentores Docker com FFmpeg e fila desacoplada `video_operations_queue`.
+- **Compatibilidade dos resultados** (`REQ-VID-NFR-012`): Vídeos produzidos descodificáveis sem erros e reproduzíveis em leitores de referência.
+- **Eficiência** (`REQ-VID-NFR-013`, `016`): No máximo uma recodificação por cadeia de operações e descarregamento direto do storage com retoma (`Range`).
+- **Capacidade de composição** (`REQ-VID-NFR-014`): Limites de vídeos por lote e por junção e de passos por cadeia.
+- **Usabilidade das pré-visualizações** (`REQ-VID-NFR-015`): Pré-visualizações estáticas de ajustes, filtros, redimensionamento e orientação em $\le 1$ s.
 
 ---
 
@@ -73,12 +98,15 @@ A classificação cobre:
 | **Tópico a verificar** | **Aplicável?** | **Decisão / justificação** | **Requisito(s) relacionado(s)** |
 |---|:---:|---|---|
 | **Carregamento, ingestão e visualização de vídeo** | **Sim** | O sistema suporta nativamente o carregamento por seleção e arrastamento, validação de cabeçalhos e codecs, armazenamento em SeaweedFS/S3, extração de metadados técnicos, geração de miniatura JPEG e visualização num leitor multimédia integrado com controlos de navegação e atalhos para edição. | REQ-VID-UPLOAD-001 a 015, REQ-VID-NFR-001, REQ-VID-NFR-003, REQ-VID-NFR-008 |
-| **Formato, codec, duração e dimensão do vídeo** | **Sim** | O sistema suporta exclusivamente o contentor MP4 com codecs H.264 e AAC para todas as operações de entrada e saída de vídeo, e JPEG/PNG para fotogramas extraídos. Impõe limites de duração e tamanho diferenciados por perfil (Registado: $\leq 5$ min e $\leq 200$ MB; Premium: $\leq 60$ min e $\leq 2$ GB). | REQ-VID-UPLOAD-003, REQ-VID-UPLOAD-004, REQ-VID-UPLOAD-009 a 011, REQ-VID-NFR-003, REQ-VID-NFR-004, REQ-VID-NFR-008 |
+| **Formato, codec, duração e dimensão do vídeo** | **Sim** | O sistema aceita na entrada os contentores MP4, MOV e AVI com os codecs da matriz aprovada (H.264/AAC em MP4 e MOV; H.264 ou MPEG-4 Part 2 / AAC ou MP3 em AVI), gera os resultados das operações em MP4 (H.264/AAC) e, na conversão de formato, no contentor escolhido entre MP4, MOV e AVI; os originais e resultados MOV/AVI são reproduzidos através de uma cópia de pré-visualização MP4; exporta fotogramas em JPEG/PNG. Impõe limites de duração e tamanho diferenciados por perfil (Registado: $\leq 5$ min e $\leq 200$ MB; Premium: $\leq 60$ min e $\leq 2$ GB). | REQ-VID-UPLOAD-003, REQ-VID-UPLOAD-004, REQ-VID-UPLOAD-009 a 011, REQ-VID-UPLOAD-016, REQ-VID-UPLOAD-017, REQ-VID-CONVERT-005, REQ-VID-NFR-003, REQ-VID-NFR-004, REQ-VID-NFR-008, REQ-VID-NFR-012 |
 | **Estado, progresso, cancelamento e resultado** | **Sim** | Implementado ciclo de vida assíncrono completo com estados `queued → processing → completed \| failed \| cancelled`. Progresso contínuo 0–100% via WebSocket nas operações que processam fotograma a fotograma (marca de água e extração). Cancelamento suportado com interrupção do worker e limpeza de temporários. | REQ-VID-TASK-001 a 005, REQ-VID-NFR-005, REQ-VID-NFR-006, REQ-VID-NFR-009 |
 | **Falhas durante o processamento** | **Sim** | Política estrita de integridade: em caso de falha durante a descodificação, recorte ou codificação, o vídeo original é preservado, nenhum resultado parcial é gravado no projeto, os temporários são purgados e a operação de quota reservada é estornada ao utilizador registado. | REQ-VID-COM-002, REQ-VID-QUOTA-004, REQ-VID-FRAMES-013, REQ-VID-ERROR-001 a 003, REQ-VID-NFR-007 |
 | **Persistência e expiração dos ficheiros** | **Sim** | Os vídeos e resultados de transformações são armazenados como recursos de projeto permanentes no SeaweedFS/S3, com metadados persistidos no MongoDB e referência ao vídeo de origem (`sourceVideoId`). Seguem o ciclo de vida e permissões do projeto onde residem. | REQ-VID-COM-003, REQ-VID-STORAGE-001 a 003, REQ-VID-UPLOAD-007, REQ-VID-UPLOAD-013, REQ-VID-NFR-001 |
 | **Perfis e contagem de operações** | **Sim** | Acesso reservado a utilizadores Registados e Premium (Anónimos excluídos). O carregamento de vídeo é livre de débito de quota. Cada operação de manipulação consome exatamente 1 crédito da quota diária de 5 operações do utilizador Registado. O perfil Premium tem acesso ilimitado. Em projetos partilhados, a quota é imputada ao utilizador executor da operação. | REQ-VID-AUTH-001 a 003, REQ-VID-QUOTA-001 a 006, REQ-VID-UPLOAD-014, REQ-VID-NFR-008 |
-| **Encadeamento de ferramentas e processamento em lote** | **Sim (com exclusão explícita)** | **Decisão de Âmbito para o MVP:** O encadeamento de ferramentas (*tool chaining*) e o processamento em lote (*batch processing*) aplicam-se **exclusivamente aos fotogramas extraídos** após a sua conversão em imagens normais do projeto. O encadeamento de operações de vídeo entre si e o processamento em lote de múltiplos vídeos em simultâneo ficam **explicitamente excluídos do âmbito do MVP da Fase 1**. | REQ-VID-FRAMES-011, REQ-VID-STORAGE-001 (Justificado no UC-VID-005 RN11 e A6) |
+| **Encadeamento de ferramentas e processamento em lote** | **Sim** | **Decisão de Âmbito para o MVP (revista na v2.3):** O encadeamento de operações de vídeo (UC-VID-014), incluindo a composição com junção de vários clips, e o processamento em lote de vários vídeos (UC-VID-015) fazem parte do MVP da Fase 1. A extração de fotogramas não é elegível como passo de cadeia nem como operação de lote de vídeos; os fotogramas extraídos continuam a poder ser encadeados e processados em lote como imagens normais do projeto. | REQ-VID-CHAIN-001 a 014, REQ-VID-BATCH-001 a 015, REQ-VID-COM-006, REQ-VID-TASK-006, REQ-VID-TASK-007, REQ-VID-QUOTA-007, REQ-VID-QUOTA-008, REQ-VID-FRAMES-011 (Justificado no UC-VID-005 RN11 e A6, DQ-016 a DQ-018) |
+| **Descarregamento e consulta de informações** | **Sim** | Os vídeos concluídos (originais ou resultantes) podem ser descarregados por URL assinado temporário com retoma, no formato armazenado, e as suas informações técnicas consultadas a partir dos metadados persistidos; nenhuma das ações consome quota. | REQ-VID-DOWNLOAD-001 a 009, REQ-VID-INFO-001 a 009, REQ-VID-QUOTA-008, REQ-VID-NFR-016 |
+| **Transformações visuais e geométricas** | **Sim** | Ajuste de brilho, contraste e saturação, filtros predefinidos, redimensionamento e rotação/espelho, com pré-visualização estática e utilização isolada, em cadeia ou em lote. | REQ-VID-ADJUST-001 a 009, REQ-VID-FILTER-001 a 007, REQ-VID-RESIZE-001 a 009, REQ-VID-ORIENT-001 a 009, REQ-VID-NFR-015 |
+| **Junção de vídeos** | **Sim** | Concatenação de 2 a 10 (Registado) ou 50 (Premium) clips com normalização para o primeiro clip, silêncio nos clips sem áudio e corte seco; as transições ficam fora do MVP (Q-ERS-006). | REQ-VID-CONCAT-001 a 011, REQ-VID-STORAGE-002, REQ-VID-STORAGE-004, REQ-VID-NFR-014 |
 
 ---
 
@@ -90,20 +118,20 @@ A tabela seguinte documenta a análise detalhada de impacto na arquitetura exist
 |---|:---:|---|---|
 | `apiGateway/routes/projects.js` | **Estender** | Expor rotas dedicadas para carregamento de vídeo (`POST /projects/:id/videos`) e submissão das cinco operações de manipulação (`/video/trim`, `/audio`, `/speed`, `/watermark`, `/extract-frames`). Validar token JWT, permissões e parâmetros antes de despachar mensagens. | REQ-VID-COM-001, REQ-VID-COM-004, REQ-VID-COM-005, REQ-VID-AUTH-001 a 003, REQ-VID-UPLOAD-001 a 004, REQ-VID-NFR-005 |
 | Serviço de Projetos (`projects/routes/projects.js`) | **Estender** | Incorporar lógica de negócio para orquestração de vídeo, associação de recursos de vídeo e fotogramas ao projeto, e gestão de permissões partilhadas (read/edit). | REQ-VID-COM-001 a 003, REQ-VID-UPLOAD-013, REQ-VID-FRAMES-011, REQ-VID-STORAGE-001 a 003 |
-| Modelos de Dados MongoDB (`projects/models/`) | **Alterar** | Criar esquema específico para recursos de vídeo (`videos`), armazenando metadados técnicos de codec, resolução, duração, thumbnail e streams. Alterar esquema de tarefas para suportar operações de vídeo e relacionar resultados ao vídeo de origem (`sourceVideoId`). | REQ-VID-STORAGE-001, REQ-VID-STORAGE-002, REQ-VID-UPLOAD-013, REQ-VID-TASK-002, REQ-VID-NFR-002 |
-| Mensageria e Filas (`projects/utils/project_msg.js`, RabbitMQ) | **Estender** | Criar nova fila dedicada (`video_operations_queue`) e contratos de mensagem com campos para tipo de operação, parâmetros validados e identificadores de correlação, preservando as filas existentes de imagem intactas. | REQ-VID-TASK-001, REQ-VID-TASK-002, REQ-VID-TASK-004, REQ-VID-NFR-002, REQ-VID-NFR-011 |
-| Workers de Processamento (`Tools/` e serviços Python) | **Estender** | Desenvolver novos workers em Python com FFmpeg para recorte temporal, remoção de áudio, alteração de velocidade, marca de água e extração de fotogramas, suportando cancelamento e emissão de progresso. | REQ-VID-TRIM-008, REQ-VID-AUDIO-005, REQ-VID-SPEED-006, REQ-VID-WATERMARK-010, REQ-VID-FRAMES-009, REQ-VID-TASK-005, REQ-VID-NFR-003, REQ-VID-NFR-010 |
-| Armazenamento de Objetos (`imageStorageService`, SeaweedFS/S3) | **Estender** | Suportar upload em streaming, leitura e geração de URLs assinados temporários para ficheiros de grande porte de vídeo (até 2 GB) e gestão de ficheiros temporários, sem colisão com artefactos de imagem. | REQ-VID-COM-002, REQ-VID-STORAGE-001, REQ-VID-UPLOAD-005 a 007, REQ-VID-ERROR-003, REQ-VID-NFR-001 |
+| Modelos de Dados MongoDB (`projects/models/`) | **Alterar** | Criar esquema específico para recursos de vídeo (`videos`), armazenando metadados técnicos de codec, resolução, duração, thumbnail e streams. Alterar esquema de tarefas para suportar operações de vídeo e relacionar resultados ao vídeo de origem (`sourceVideoId`). Na v2.3: suportar `sourceVideoIds` ordenados, a descrição dos passos aplicados, a referência à cópia de pré-visualização, os lotes e as predefinições de cadeia por utilizador. | REQ-VID-STORAGE-001, REQ-VID-STORAGE-002, REQ-VID-UPLOAD-013, REQ-VID-TASK-002, REQ-VID-NFR-002, REQ-VID-STORAGE-004, REQ-VID-INFO-008, REQ-VID-CHAIN-014, REQ-VID-TASK-007, REQ-VID-UPLOAD-016 |
+| Mensageria e Filas (`projects/utils/project_msg.js`, RabbitMQ) | **Estender** | Criar nova fila dedicada (`video_operations_queue`) e contratos de mensagem com campos para tipo de operação, parâmetros validados e identificadores de correlação, preservando as filas existentes de imagem intactas. Na v2.3: suportar mensagens de tarefas compostas (lista de passos e sub-cadeias) e de lotes (`batchId` com subtarefas), com estado agregado, passo corrente e processamento sequencial que conta como 1 tarefa ativa por projeto. | REQ-VID-TASK-001, REQ-VID-TASK-002, REQ-VID-TASK-004, REQ-VID-NFR-002, REQ-VID-NFR-011, REQ-VID-TASK-006, REQ-VID-TASK-007, REQ-VID-CHAIN-010, REQ-VID-CHAIN-012, REQ-VID-BATCH-008 a 014 |
+| Workers de Processamento (`Tools/` e serviços Python) | **Estender** | Desenvolver novos workers em Python com FFmpeg para recorte temporal, remoção de áudio, alteração de velocidade, marca de água e extração de fotogramas, suportando cancelamento e emissão de progresso. Na v2.3: acrescentar workers FFmpeg para ajuste (`eq`), filtros, redimensionamento (`scale`), orientação (`transpose`/`hflip`/`vflip`), conversão (remux/transcodificação), junção (`concat` com normalização) e um executor de cadeias que compõe os passos num único *filtergraph*; gerar cópias de pré-visualização MP4. | REQ-VID-TRIM-008, REQ-VID-AUDIO-005, REQ-VID-SPEED-006, REQ-VID-WATERMARK-010, REQ-VID-FRAMES-009, REQ-VID-TASK-005, REQ-VID-NFR-003, REQ-VID-NFR-010, REQ-VID-ADJUST-008, REQ-VID-FILTER-006, REQ-VID-RESIZE-008, REQ-VID-ORIENT-008, REQ-VID-CONVERT-005 a 008, REQ-VID-CONCAT-008 a 010, REQ-VID-CHAIN-010 a 013, REQ-VID-UPLOAD-016, REQ-VID-NFR-013 |
+| Armazenamento de Objetos (`imageStorageService`, SeaweedFS/S3) | **Estender** | Suportar upload em streaming, leitura e geração de URLs assinados temporários para ficheiros de grande porte de vídeo (até 2 GB) e gestão de ficheiros temporários, sem colisão com artefactos de imagem. Na v2.3: servir descarregamentos por URL assinado com pedidos `Range`, gerar arquivos ZIP de lotes e guardar cópias de pré-visualização MP4 associadas aos originais e resultados MOV/AVI. | REQ-VID-COM-002, REQ-VID-STORAGE-001, REQ-VID-UPLOAD-005 a 007, REQ-VID-ERROR-003, REQ-VID-NFR-001, REQ-VID-DOWNLOAD-002, REQ-VID-DOWNLOAD-006, REQ-VID-DOWNLOAD-007, REQ-VID-BATCH-015, REQ-VID-UPLOAD-016, REQ-VID-UPLOAD-017, REQ-VID-NFR-016 |
 | Subsistema de Autenticação JWT e Partilha (`shareAuth`) | **Estender** | Reutilizar a infraestrutura de validação de token JWT e permissões de link de partilha, adicionando a verificação de que o utilizador autenticado que dispara a operação é aquele a quem a quota diária é debitada. | REQ-VID-AUTH-001 a 003, REQ-VID-QUOTA-006, REQ-VID-NFR-001 |
-| Serviço de Subscrições e Quotas (`users/`, `subscriptions/`) | **Alterar** | Manter o carregamento de vídeo isento de quota. Contabilizar operações de manipulação (1 operação = 1 crédito da quota diária de 5 ops do utilizador registado). Implementar mecanismos de reserva (`reserve`), consolidação (`commit`) e estorno (`rollback`). | REQ-VID-QUOTA-001 a 005, REQ-VID-UPLOAD-014, REQ-VID-NFR-008 |
+| Serviço de Subscrições e Quotas (`users/`, `subscriptions/`) | **Alterar** | Manter o carregamento de vídeo isento de quota. Contabilizar operações de manipulação (1 operação = 1 crédito da quota diária de 5 ops do utilizador registado). Implementar mecanismos de reserva (`reserve`), consolidação (`commit`) e estorno (`rollback`). Na v2.3: calcular o custo por pedido (N créditos por cadeia, custo × vídeos concluídos no lote) e reservar, confirmar e estornar vários créditos de uma só vez. | REQ-VID-QUOTA-001 a 005, REQ-VID-UPLOAD-014, REQ-VID-NFR-008, REQ-VID-QUOTA-007, REQ-VID-QUOTA-008, REQ-VID-CHAIN-009, REQ-VID-CHAIN-013, REQ-VID-BATCH-007, REQ-VID-BATCH-011 |
 | Gateway de WebSockets (`wsGateway`) | **Estender** | Suportar tópicos de progresso para tarefas de vídeo, transmitindo eventos de transição de estado e percentagem de progresso numérico (0–100%) para operações contínuas (marca de água e fotogramas). | REQ-VID-TASK-002, REQ-VID-TASK-003, REQ-VID-NFR-009 |
-| Interface Web Frontend (`frontend/`) | **Estender** | Desenvolver componentes de UI dedicados a vídeo: zona de arrastamento e barra de upload, leitor multimédia integrado com controlos, seletores temporais de recorte, seletores de velocidade, painel de marca de água com pré-visualização e configurador de fotogramas. | REQ-VID-UPLOAD-001, REQ-VID-UPLOAD-002, REQ-VID-UPLOAD-015, REQ-VID-TRIM-001 a 004, REQ-VID-SPEED-001 a 003, REQ-VID-WATERMARK-001 a 009, REQ-VID-FRAMES-001 a 008, REQ-VID-TASK-004, REQ-VID-NFR-009 |
+| Interface Web Frontend (`frontend/`) | **Estender** | Desenvolver componentes de UI dedicados a vídeo: zona de arrastamento e barra de upload, leitor multimédia integrado com controlos, seletores temporais de recorte, seletores de velocidade, painel de marca de água com pré-visualização e configurador de fotogramas. Na v2.3: acrescentar os painéis de ajuste, filtros, redimensionamento, orientação e conversão com pré-visualização, a linha temporal de junção, o editor de cadeias (incluindo sub-cadeias por clip) com contador de créditos, a configuração de lotes com pré-validação, o painel de informações e as ações de descarregamento. | REQ-VID-UPLOAD-001, REQ-VID-UPLOAD-002, REQ-VID-UPLOAD-015, REQ-VID-TRIM-001 a 004, REQ-VID-SPEED-001 a 003, REQ-VID-WATERMARK-001 a 009, REQ-VID-FRAMES-001 a 008, REQ-VID-TASK-004, REQ-VID-NFR-009, REQ-VID-DOWNLOAD-001, REQ-VID-INFO-001 a 006, REQ-VID-ADJUST-001 a 005, REQ-VID-FILTER-001 a 004, REQ-VID-RESIZE-001 a 005, REQ-VID-ORIENT-001 a 005, REQ-VID-CONVERT-001 a 003, REQ-VID-CONCAT-001 a 004, REQ-VID-CHAIN-001 a 009, REQ-VID-BATCH-001 a 007 |
 
 ---
 
 ### 4.3 Matriz de Rastreabilidade
 
-A matriz seguinte rastreia detalhadamente cada requisito do sistema até aos elementos concretos dos casos de uso (`UC-VID-000` a `UC-VID-005`) e às decisões de qualidade tomadas pela equipa.
+A matriz seguinte rastreia detalhadamente cada requisito do sistema até aos elementos concretos dos casos de uso (`UC-VID-000` a `UC-VID-015`) e às decisões de qualidade tomadas pela equipa.
 
 #### 4.3.1 Matriz de Rastreabilidade Estruturada por Caso de Uso
 
@@ -124,7 +152,7 @@ A matriz seguinte rastreia detalhadamente cada requisito do sistema até aos ele
 | **UC-VID-000 FA2** | Cancelamento durante a transferência com limpeza de temporários | REQ-VID-UPLOAD-006, REQ-VID-ERROR-003 |
 | **UC-VID-000 FA3** | Utilizador com perfil Premium (limites alargados 2 GB / 60 min) | REQ-VID-UPLOAD-004, REQ-VID-UPLOAD-011, REQ-VID-NFR-008 |
 | **UC-VID-000 FA4** | Carregamento de vídeo sem stream de áudio (silencioso de origem) | REQ-VID-UPLOAD-010 |
-| **UC-VID-000 Exceção 1** | Formato ou extensão não MP4 | REQ-VID-UPLOAD-003, REQ-VID-ERROR-001, REQ-VID-NFR-003 |
+| **UC-VID-000 Exceção 1** | Formato ou extensão não MP4, MOV nem AVI | REQ-VID-UPLOAD-003, REQ-VID-ERROR-001, REQ-VID-NFR-003 |
 | **UC-VID-000 Exceção 2** | Tamanho do ficheiro superior ao limite do perfil | REQ-VID-UPLOAD-004, REQ-VID-ERROR-001, REQ-VID-NFR-008 |
 | **UC-VID-000 Exceção 3** | Codecs internos não correspondentes a H.264/AAC | REQ-VID-UPLOAD-009, REQ-VID-UPLOAD-010, REQ-VID-ERROR-001, REQ-VID-NFR-003 |
 | **UC-VID-000 Exceção 4** | Duração do vídeo superior ao limite do perfil | REQ-VID-UPLOAD-011, REQ-VID-ERROR-001, REQ-VID-NFR-008 |
@@ -132,7 +160,9 @@ A matriz seguinte rastreia detalhadamente cada requisito do sistema até aos ele
 | **UC-VID-000 Exceção 6** | Falha de rede ou interrupção durante a transferência | REQ-VID-UPLOAD-006, REQ-VID-ERROR-001, REQ-VID-ERROR-003 |
 | **UC-VID-000 Garantia Sucesso** | Ficheiro gravado, metadados e miniatura no MongoDB, visível no leitor, sem débito de quota | REQ-VID-UPLOAD-007, REQ-VID-UPLOAD-013, REQ-VID-UPLOAD-014, REQ-VID-UPLOAD-015, REQ-VID-STORAGE-001 |
 | **UC-VID-000 Garantia Mínima** | Sem artefactos residuais no storage, sem registos órfãos no MongoDB, projeto inalterado | REQ-VID-UPLOAD-006, REQ-VID-UPLOAD-012, REQ-VID-ERROR-003, REQ-VID-NFR-007 |
-| **UC-VID-000 RN1 a RN7** | Regras de autenticação, isenção de quota, MP4/H.264, limites, miniatura e reprodutor | REQ-VID-AUTH-001 a 002, REQ-VID-UPLOAD-003 a 015, REQ-VID-STORAGE-001 a 003, REQ-VID-NFR-003, REQ-VID-NFR-008 |
+| **UC-VID-000 RN1 a RN7** | Regras de autenticação, isenção de quota, formatos MP4/MOV/AVI, limites, miniatura e reprodutor | REQ-VID-AUTH-001 a 002, REQ-VID-UPLOAD-003 a 015, REQ-VID-STORAGE-001 a 003, REQ-VID-NFR-003, REQ-VID-NFR-008 |
+| **UC-VID-000 FA5** | Carregamento de vídeo em MOV ou AVI com cópia de pré-visualização MP4 | REQ-VID-UPLOAD-003, REQ-VID-UPLOAD-009, REQ-VID-UPLOAD-010, REQ-VID-UPLOAD-016, REQ-VID-UPLOAD-017, REQ-VID-NFR-003 |
+| **UC-VID-000 RN8** | Cópia de pré-visualização exclusiva do reprodutor; operações e descarregamento usam o original | REQ-VID-UPLOAD-016, REQ-VID-UPLOAD-017, REQ-VID-DOWNLOAD-006 |
 
 ---
 
@@ -140,7 +170,7 @@ A matriz seguinte rastreia detalhadamente cada requisito do sistema até aos ele
 
 | **Elemento de Origem** | **Descrição Abreviada** | **Requisito(s) Relacionado(s)** |
 |---|---|---|
-| **UC-VID-001 Pré-condições** | JWT válido, permissão no projeto, vídeo MP4 elegível, sem outra tarefa ativa | REQ-VID-AUTH-001, REQ-VID-AUTH-003, REQ-VID-COM-001, REQ-VID-STORAGE-001, REQ-VID-NFR-001, REQ-VID-NFR-003, REQ-VID-NFR-008 |
+| **UC-VID-001 Pré-condições** | JWT válido, permissão no projeto, vídeo elegível (MP4/MOV/AVI), sem outra tarefa ativa | REQ-VID-AUTH-001, REQ-VID-AUTH-003, REQ-VID-COM-001, REQ-VID-STORAGE-001, REQ-VID-NFR-001, REQ-VID-NFR-003, REQ-VID-NFR-008 |
 | **UC-VID-001 Passo 1** | Seleção do vídeo e apresentação das operações disponíveis | REQ-VID-COM-001 |
 | **UC-VID-001 Passo 2** | Apresentação dos controlos de intervalo temporal | REQ-VID-TRIM-001, REQ-VID-TRIM-002 |
 | **UC-VID-001 Passo 3** | Definição do intervalo, sincronização com reprodução e duração estimada | REQ-VID-TRIM-001, REQ-VID-TRIM-002, REQ-VID-TRIM-003, REQ-VID-TRIM-004, REQ-VID-COM-004 |
@@ -160,7 +190,7 @@ A matriz seguinte rastreia detalhadamente cada requisito do sistema até aos ele
 | **UC-VID-001 Exceção 6** | Falha de processamento durante a execução | REQ-VID-ERROR-001, REQ-VID-ERROR-002, REQ-VID-QUOTA-004, REQ-VID-COM-002, REQ-VID-NFR-007 |
 | **UC-VID-001 Garantia Sucesso** | Novo vídeo MP4 no projeto com intervalo válido, original preservado, 1 quota debitada | REQ-VID-TRIM-008, REQ-VID-TRIM-009, REQ-VID-COM-002, REQ-VID-COM-003, REQ-VID-QUOTA-003, REQ-VID-NFR-003 |
 | **UC-VID-001 Garantia Mínima** | Original inalterado, sem resultados parciais gravados, quota devolvida | REQ-VID-COM-002, REQ-VID-QUOTA-004, REQ-VID-ERROR-003, REQ-VID-NFR-007 |
-| **UC-VID-001 RN1 a RN9** | Regras de perfis, formato MP4, assincronismo, limites e quotas de trim | REQ-VID-AUTH-002, REQ-VID-TRIM-001 a 009, REQ-VID-QUOTA-001 a 005, REQ-VID-TASK-001, REQ-VID-NFR-003, REQ-VID-NFR-008 |
+| **UC-VID-001 RN1 a RN9** | Regras de perfis, formatos de entrada MP4/MOV/AVI e saída MP4, assincronismo, limites e quotas de trim | REQ-VID-AUTH-002, REQ-VID-TRIM-001 a 009, REQ-VID-QUOTA-001 a 005, REQ-VID-TASK-001, REQ-VID-NFR-003, REQ-VID-NFR-008 |
 
 ---
 
@@ -193,7 +223,7 @@ A matriz seguinte rastreia detalhadamente cada requisito do sistema até aos ele
 
 | **Elemento de Origem** | **Descrição Abreviada** | **Requisito(s) Relacionado(s)** |
 |---|---|---|
-| **UC-VID-003 Pré-condições** | JWT válido, permissão no projeto, vídeo MP4 elegível, sem outra tarefa ativa | REQ-VID-AUTH-001, REQ-VID-AUTH-003, REQ-VID-COM-001, REQ-VID-STORAGE-001, REQ-VID-NFR-001, REQ-VID-NFR-003, REQ-VID-NFR-008 |
+| **UC-VID-003 Pré-condições** | JWT válido, permissão no projeto, vídeo elegível (MP4/MOV/AVI), sem outra tarefa ativa | REQ-VID-AUTH-001, REQ-VID-AUTH-003, REQ-VID-COM-001, REQ-VID-STORAGE-001, REQ-VID-NFR-001, REQ-VID-NFR-003, REQ-VID-NFR-008 |
 | **UC-VID-003 Passo 1** | Apresentação do vídeo, predefinições de velocidade e campo numérico | REQ-VID-COM-001, REQ-VID-SPEED-001, REQ-VID-SPEED-002 |
 | **UC-VID-003 Passo 2** | Indicação do fator e cálculo instantâneo da duração estimada | REQ-VID-SPEED-001, REQ-VID-SPEED-002, REQ-VID-SPEED-003, REQ-VID-COM-004 |
 | **UC-VID-003 Passo 3** | Confirmação da operação, validação e reserva de quota | REQ-VID-COM-004, REQ-VID-QUOTA-001, REQ-VID-QUOTA-002, REQ-VID-TASK-001, REQ-VID-NFR-005 |
@@ -279,13 +309,306 @@ A matriz seguinte rastreia detalhadamente cada requisito do sistema até aos ele
 
 ---
 
+##### Rastreabilidade — UC-VID-006 (Descarregamento de Vídeo)
+
+| **Elemento de Origem** | **Descrição Abreviada** | **Requisito(s) Relacionado(s)** |
+|---|---|---|
+| **UC-VID-006 Pré-condições** | JWT válido, permissão de leitura ou superior, recurso de vídeo concluído | REQ-VID-AUTH-001, REQ-VID-DOWNLOAD-001, REQ-VID-DOWNLOAD-003, REQ-VID-NFR-001 |
+| **UC-VID-006 Passo 1** | Seleção do vídeo, verificação de permissão e estado, nome, formato e tamanho | REQ-VID-DOWNLOAD-001, REQ-VID-DOWNLOAD-003, REQ-VID-DOWNLOAD-005 |
+| **UC-VID-006 Passo 2** | Geração de URL assinado temporário (15 min) sem débito de quota | REQ-VID-DOWNLOAD-002, REQ-VID-DOWNLOAD-004, REQ-VID-QUOTA-008, REQ-VID-NFR-001 |
+| **UC-VID-006 Passo 3** | Transferência direta do storage com nome de ficheiro sugerido | REQ-VID-DOWNLOAD-005, REQ-VID-DOWNLOAD-006, REQ-VID-NFR-016 |
+| **UC-VID-006 Passo 4** | Registo do descarregamento com `correlationId` | REQ-VID-DOWNLOAD-009, REQ-VID-NFR-002 |
+| **UC-VID-006 FA1** | Descarregamento a partir do reprodutor integrado | REQ-VID-DOWNLOAD-001, REQ-VID-UPLOAD-015 |
+| **UC-VID-006 FA2** | Retoma de transferência interrompida (HTTP `Range`) | REQ-VID-DOWNLOAD-007, REQ-VID-NFR-016 |
+| **UC-VID-006 FA3** | Regeneração de URL expirado | REQ-VID-DOWNLOAD-008 |
+| **UC-VID-006 FA4** | Descarregamento do original no formato carregado (não a pré-visualização) | REQ-VID-DOWNLOAD-006, REQ-VID-UPLOAD-017 |
+| **UC-VID-006 Exceção 1** | Recurso ainda não concluído | REQ-VID-DOWNLOAD-003, REQ-VID-ERROR-001 |
+| **UC-VID-006 Exceção 2** | Utilizador sem permissão sobre o projeto | REQ-VID-AUTH-001, REQ-VID-DOWNLOAD-001, REQ-VID-ERROR-001 |
+| **UC-VID-006 Exceção 3** | URL usado por outro utilizador ou após expirar | REQ-VID-DOWNLOAD-002, REQ-VID-NFR-001 |
+| **UC-VID-006 Exceção 4** | Objeto inexistente no armazenamento | REQ-VID-DOWNLOAD-009, REQ-VID-ERROR-001, REQ-VID-ERROR-002 |
+| **UC-VID-006 Garantia Sucesso** | Cópia no dispositivo no formato armazenado, recurso inalterado, sem quota | REQ-VID-DOWNLOAD-004, REQ-VID-DOWNLOAD-006 |
+| **UC-VID-006 Garantia Mínima** | Nenhum URL exposto a não autorizados, recurso e quota inalterados | REQ-VID-DOWNLOAD-002, REQ-VID-DOWNLOAD-004, REQ-VID-NFR-001 |
+| **UC-VID-006 RN1 a RN7** | Regras de perfis e permissões, isenção de quota, estado, URL assinado, nome e formato | REQ-VID-AUTH-002, REQ-VID-DOWNLOAD-001 a 009, REQ-VID-QUOTA-008, REQ-VID-NFR-001, REQ-VID-NFR-016 |
+
+---
+
+##### Rastreabilidade — UC-VID-007 (Consulta de Informações do Vídeo)
+
+| **Elemento de Origem** | **Descrição Abreviada** | **Requisito(s) Relacionado(s)** |
+|---|---|---|
+| **UC-VID-007 Pré-condições** | JWT válido, permissão de leitura ou superior, recurso de vídeo existente | REQ-VID-AUTH-001, REQ-VID-INFO-001 |
+| **UC-VID-007 Passo 1** | Abertura do painel a partir dos metadados persistidos, sem tarefa nem quota | REQ-VID-INFO-001, REQ-VID-INFO-007, REQ-VID-QUOTA-008 |
+| **UC-VID-007 Passo 2** | Apresentação de duração, resolução, formato, tamanho e taxa de fotogramas | REQ-VID-INFO-002, REQ-VID-INFO-003, REQ-VID-INFO-004, REQ-VID-INFO-005, REQ-VID-INFO-006, REQ-VID-UPLOAD-013, REQ-VID-STORAGE-001 |
+| **UC-VID-007 Passo 3** | Fecho do painel sem alterações | REQ-VID-INFO-007 |
+| **UC-VID-007 FA1** | Proveniência e operações aplicadas em vídeos resultantes | REQ-VID-INFO-008, REQ-VID-STORAGE-002, REQ-VID-STORAGE-004 |
+| **UC-VID-007 FA2** | Formato original de MOV/AVI (não a pré-visualização) | REQ-VID-INFO-004, REQ-VID-UPLOAD-017 |
+| **UC-VID-007 FA3** | Consulta a partir do reprodutor integrado | REQ-VID-INFO-001, REQ-VID-UPLOAD-015 |
+| **UC-VID-007 Exceção 1** | Metadado indisponível | REQ-VID-INFO-009, REQ-VID-ERROR-002 |
+| **UC-VID-007 Exceção 2** | Utilizador sem permissão sobre o projeto | REQ-VID-AUTH-001, REQ-VID-ERROR-001 |
+| **UC-VID-007 Exceção 3** | Recurso ainda em processamento | REQ-VID-TASK-002, REQ-VID-COM-002 |
+| **UC-VID-007 Garantia Sucesso** | Informações apresentadas, sem tarefa nem quota | REQ-VID-INFO-001 a 007 |
+| **UC-VID-007 Garantia Mínima** | Projeto, recurso e quota inalterados | REQ-VID-INFO-007 |
+| **UC-VID-007 RN1 a RN5** | Regras de permissões, isenção de quota, fonte dos metadados e unidades | REQ-VID-AUTH-002, REQ-VID-INFO-001 a 009, REQ-VID-QUOTA-008 |
+
+---
+
+##### Rastreabilidade — UC-VID-008 (Ajuste de Propriedades Visuais)
+
+| **Elemento de Origem** | **Descrição Abreviada** | **Requisito(s) Relacionado(s)** |
+|---|---|---|
+| **UC-VID-008 Pré-condições** | JWT válido, permissão no projeto, vídeo elegível (MP4/MOV/AVI), sem outra tarefa ativa | REQ-VID-AUTH-001, REQ-VID-AUTH-003, REQ-VID-COM-001, REQ-VID-STORAGE-001, REQ-VID-NFR-001, REQ-VID-NFR-003, REQ-VID-NFR-008 |
+| **UC-VID-008 Passo 1** | Apresentação dos controlos de brilho, contraste e saturação no neutro 1.0 | REQ-VID-COM-001, REQ-VID-ADJUST-001, REQ-VID-ADJUST-002, REQ-VID-ADJUST-003, REQ-VID-ADJUST-004 |
+| **UC-VID-008 Passo 2** | Ajuste dos fatores e pré-visualização estática do primeiro fotograma | REQ-VID-ADJUST-001, REQ-VID-ADJUST-002, REQ-VID-ADJUST-003, REQ-VID-ADJUST-005, REQ-VID-NFR-015 |
+| **UC-VID-008 Passo 3** | Confirmação da operação, validação e verificação de quota | REQ-VID-ADJUST-006, REQ-VID-ADJUST-007, REQ-VID-COM-004, REQ-VID-QUOTA-001, REQ-VID-TASK-001, REQ-VID-NFR-005 |
+| **UC-VID-008 Passo 4** | Reserva de quota e notificação do estado `queued` | REQ-VID-QUOTA-002, REQ-VID-TASK-002, REQ-VID-TASK-003 |
+| **UC-VID-008 Passo 5** | Aplicação uniforme dos ajustes a todos os fotogramas com progresso | REQ-VID-ADJUST-008, REQ-VID-TASK-002, REQ-VID-NFR-006, REQ-VID-NFR-009 |
+| **UC-VID-008 Passo 6** | Geração do MP4 com duração, resolução, fps e áudio preservados | REQ-VID-ADJUST-009, REQ-VID-NFR-003, REQ-VID-COM-003, REQ-VID-STORAGE-002, REQ-VID-QUOTA-003 |
+| **UC-VID-008 Passo 7** | Disponibilização do resultado e preservação do original | REQ-VID-COM-002, REQ-VID-COM-003, REQ-VID-STORAGE-003 |
+| **UC-VID-008 FA1** | Reposição dos valores neutros | REQ-VID-ADJUST-004 |
+| **UC-VID-008 FA2** | Cancelamento antes do início do processamento (`queued`) | REQ-VID-TASK-004, REQ-VID-QUOTA-004, REQ-VID-COM-002 |
+| **UC-VID-008 FA3** | Cancelamento durante o processamento (`processing`) | REQ-VID-TASK-004, REQ-VID-TASK-005, REQ-VID-QUOTA-004, REQ-VID-COM-002 |
+| **UC-VID-008 FA4** | Execução por utilizador com perfil Premium | REQ-VID-QUOTA-005, REQ-VID-NFR-008 |
+| **UC-VID-008 FA5** | Utilização como passo de cadeia ou em lote | REQ-VID-COM-006, REQ-VID-CHAIN-002, REQ-VID-BATCH-002 |
+| **UC-VID-008 Exceção 1** | Fator de ajuste fora do intervalo [0.0, 2.0] | REQ-VID-COM-005, REQ-VID-ADJUST-006, REQ-VID-ERROR-001 |
+| **UC-VID-008 Exceção 2** | Todos os fatores no neutro (sem alterações) | REQ-VID-ADJUST-007, REQ-VID-ERROR-001 |
+| **UC-VID-008 Exceção 3** | Formato ou codec de vídeo não suportado | REQ-VID-ERROR-001, REQ-VID-NFR-003 |
+| **UC-VID-008 Exceção 4** | Duração ou tamanho superior ao limite do perfil | REQ-VID-ERROR-001, REQ-VID-NFR-008 |
+| **UC-VID-008 Exceção 5** | Quota diária esgotada no perfil Registado | REQ-VID-QUOTA-001, REQ-VID-ERROR-001 |
+| **UC-VID-008 Exceção 6** | Falha de processamento durante a execução | REQ-VID-ERROR-001, REQ-VID-ERROR-002, REQ-VID-ERROR-003, REQ-VID-QUOTA-004, REQ-VID-COM-002, REQ-VID-NFR-007 |
+| **UC-VID-008 Garantia Sucesso** | Novo vídeo MP4 com ajustes uniformes, original preservado, 1 quota debitada | REQ-VID-ADJUST-008, REQ-VID-ADJUST-009, REQ-VID-COM-002, REQ-VID-COM-003, REQ-VID-QUOTA-003 |
+| **UC-VID-008 Garantia Mínima** | Original inalterado, sem resultados parciais gravados, quota devolvida | REQ-VID-COM-002, REQ-VID-QUOTA-004, REQ-VID-ERROR-003, REQ-VID-NFR-007 |
+| **UC-VID-008 RN1 a RN11** | Regras de perfis, intervalo e neutro dos fatores, uniformidade, formato de saída e quotas | REQ-VID-AUTH-002, REQ-VID-ADJUST-001 a 009, REQ-VID-QUOTA-001 a 005, REQ-VID-TASK-001, REQ-VID-COM-006, REQ-VID-NFR-003, REQ-VID-NFR-008 |
+
+---
+
+##### Rastreabilidade — UC-VID-009 (Filtros Visuais Predefinidos)
+
+| **Elemento de Origem** | **Descrição Abreviada** | **Requisito(s) Relacionado(s)** |
+|---|---|---|
+| **UC-VID-009 Pré-condições** | JWT válido, permissão no projeto, vídeo elegível (MP4/MOV/AVI), sem outra tarefa ativa | REQ-VID-AUTH-001, REQ-VID-AUTH-003, REQ-VID-COM-001, REQ-VID-STORAGE-001, REQ-VID-NFR-001, REQ-VID-NFR-003, REQ-VID-NFR-008 |
+| **UC-VID-009 Passo 1** | Apresentação do catálogo de filtros com miniaturas de exemplo | REQ-VID-COM-001, REQ-VID-FILTER-001, REQ-VID-FILTER-002 |
+| **UC-VID-009 Passo 2** | Seleção de um filtro e pré-visualização estática | REQ-VID-FILTER-003, REQ-VID-FILTER-004, REQ-VID-NFR-015 |
+| **UC-VID-009 Passo 3** | Confirmação da operação, validação e verificação de quota | REQ-VID-FILTER-005, REQ-VID-COM-004, REQ-VID-QUOTA-001, REQ-VID-TASK-001, REQ-VID-NFR-005 |
+| **UC-VID-009 Passo 4** | Reserva de quota e notificação do estado `queued` | REQ-VID-QUOTA-002, REQ-VID-TASK-002, REQ-VID-TASK-003 |
+| **UC-VID-009 Passo 5** | Aplicação uniforme do filtro a todos os fotogramas com progresso | REQ-VID-FILTER-006, REQ-VID-TASK-002, REQ-VID-NFR-006, REQ-VID-NFR-009 |
+| **UC-VID-009 Passo 6** | Geração do MP4 com duração, resolução, fps e áudio preservados | REQ-VID-FILTER-007, REQ-VID-NFR-003, REQ-VID-COM-003, REQ-VID-STORAGE-002, REQ-VID-QUOTA-003 |
+| **UC-VID-009 Passo 7** | Disponibilização do resultado e preservação do original | REQ-VID-COM-002, REQ-VID-COM-003, REQ-VID-STORAGE-003 |
+| **UC-VID-009 FA1** | Troca de filtro após pré-visualização | REQ-VID-FILTER-003, REQ-VID-FILTER-004 |
+| **UC-VID-009 FA2** | Cancelamento antes do início do processamento (`queued`) | REQ-VID-TASK-004, REQ-VID-QUOTA-004, REQ-VID-COM-002 |
+| **UC-VID-009 FA3** | Cancelamento durante o processamento (`processing`) | REQ-VID-TASK-004, REQ-VID-TASK-005, REQ-VID-QUOTA-004, REQ-VID-COM-002 |
+| **UC-VID-009 FA4** | Execução por utilizador com perfil Premium | REQ-VID-QUOTA-005, REQ-VID-NFR-008 |
+| **UC-VID-009 FA5** | Utilização como passo de cadeia ou em lote | REQ-VID-COM-006, REQ-VID-CHAIN-002, REQ-VID-BATCH-002 |
+| **UC-VID-009 Exceção 1** | Nenhum filtro selecionado ou filtro inexistente | REQ-VID-COM-005, REQ-VID-FILTER-005, REQ-VID-ERROR-001 |
+| **UC-VID-009 Exceção 2** | Formato ou codec de vídeo não suportado | REQ-VID-ERROR-001, REQ-VID-NFR-003 |
+| **UC-VID-009 Exceção 3** | Duração ou tamanho superior ao limite do perfil | REQ-VID-ERROR-001, REQ-VID-NFR-008 |
+| **UC-VID-009 Exceção 4** | Quota diária esgotada no perfil Registado | REQ-VID-QUOTA-001, REQ-VID-ERROR-001 |
+| **UC-VID-009 Exceção 5** | Falha de processamento durante a execução | REQ-VID-ERROR-001, REQ-VID-ERROR-002, REQ-VID-ERROR-003, REQ-VID-QUOTA-004, REQ-VID-COM-002, REQ-VID-NFR-007 |
+| **UC-VID-009 Garantia Sucesso** | Novo vídeo MP4 com o filtro aplicado, original preservado, 1 quota debitada | REQ-VID-FILTER-006, REQ-VID-FILTER-007, REQ-VID-COM-002, REQ-VID-COM-003, REQ-VID-QUOTA-003 |
+| **UC-VID-009 Garantia Mínima** | Original inalterado, sem resultados parciais gravados, quota devolvida | REQ-VID-COM-002, REQ-VID-QUOTA-004, REQ-VID-ERROR-003, REQ-VID-NFR-007 |
+| **UC-VID-009 RN1 a RN11** | Regras de perfis, catálogo fechado, um filtro por operação, uniformidade e quotas | REQ-VID-AUTH-002, REQ-VID-FILTER-001 a 007, REQ-VID-QUOTA-001 a 005, REQ-VID-TASK-001, REQ-VID-COM-006, REQ-VID-NFR-003, REQ-VID-NFR-008 |
+
+---
+
+##### Rastreabilidade — UC-VID-010 (Redimensionamento de Vídeo)
+
+| **Elemento de Origem** | **Descrição Abreviada** | **Requisito(s) Relacionado(s)** |
+|---|---|---|
+| **UC-VID-010 Pré-condições** | JWT válido, permissão no projeto, vídeo elegível (MP4/MOV/AVI), sem outra tarefa ativa | REQ-VID-AUTH-001, REQ-VID-AUTH-003, REQ-VID-COM-001, REQ-VID-STORAGE-001, REQ-VID-NFR-001, REQ-VID-NFR-003, REQ-VID-NFR-008 |
+| **UC-VID-010 Passo 1** | Apresentação da resolução atual, bloqueio de proporção e predefinições | REQ-VID-COM-001, REQ-VID-RESIZE-001, REQ-VID-RESIZE-002, REQ-VID-RESIZE-003 |
+| **UC-VID-010 Passo 2** | Escolha das dimensões com recálculo proporcional e arredondamento par | REQ-VID-RESIZE-001, REQ-VID-RESIZE-002, REQ-VID-RESIZE-003 |
+| **UC-VID-010 Passo 3** | Confirmação da operação, validação e verificação de quota | REQ-VID-RESIZE-006, REQ-VID-RESIZE-007, REQ-VID-COM-004, REQ-VID-QUOTA-001, REQ-VID-TASK-001, REQ-VID-NFR-005 |
+| **UC-VID-010 Passo 4** | Reserva de quota e notificação do estado `queued` | REQ-VID-QUOTA-002, REQ-VID-TASK-002, REQ-VID-TASK-003 |
+| **UC-VID-010 Passo 5** | Reamostragem de todos os fotogramas com progresso | REQ-VID-RESIZE-008, REQ-VID-TASK-002, REQ-VID-NFR-006, REQ-VID-NFR-009 |
+| **UC-VID-010 Passo 6** | Geração do MP4 com as dimensões exatas e duração, fps e áudio preservados | REQ-VID-RESIZE-008, REQ-VID-RESIZE-009, REQ-VID-NFR-003, REQ-VID-COM-003, REQ-VID-STORAGE-002, REQ-VID-QUOTA-003 |
+| **UC-VID-010 Passo 7** | Disponibilização do resultado e preservação do original | REQ-VID-COM-002, REQ-VID-COM-003, REQ-VID-STORAGE-003 |
+| **UC-VID-010 FA1** | Desbloqueio da proporção com aviso de distorção | REQ-VID-RESIZE-004 |
+| **UC-VID-010 FA2** | Ampliação acima da resolução original com aviso | REQ-VID-RESIZE-005 |
+| **UC-VID-010 FA3** | Cancelamento antes do início do processamento (`queued`) | REQ-VID-TASK-004, REQ-VID-QUOTA-004, REQ-VID-COM-002 |
+| **UC-VID-010 FA4** | Cancelamento durante o processamento (`processing`) | REQ-VID-TASK-004, REQ-VID-TASK-005, REQ-VID-QUOTA-004, REQ-VID-COM-002 |
+| **UC-VID-010 FA5** | Execução por utilizador Premium (teto 3840×2160) | REQ-VID-QUOTA-005, REQ-VID-RESIZE-006, REQ-VID-NFR-008 |
+| **UC-VID-010 FA6** | Utilização como passo de cadeia ou em lote | REQ-VID-COM-006, REQ-VID-CHAIN-002, REQ-VID-BATCH-002 |
+| **UC-VID-010 Exceção 1** | Dimensões ímpares, inferiores a 128 px ou acima do teto do perfil | REQ-VID-COM-005, REQ-VID-RESIZE-006, REQ-VID-ERROR-001 |
+| **UC-VID-010 Exceção 2** | Dimensões iguais às do original | REQ-VID-RESIZE-007, REQ-VID-ERROR-001 |
+| **UC-VID-010 Exceção 3** | Formato ou codec de vídeo não suportado | REQ-VID-ERROR-001, REQ-VID-NFR-003 |
+| **UC-VID-010 Exceção 4** | Duração ou tamanho superior ao limite do perfil | REQ-VID-ERROR-001, REQ-VID-NFR-008 |
+| **UC-VID-010 Exceção 5** | Quota diária esgotada no perfil Registado | REQ-VID-QUOTA-001, REQ-VID-ERROR-001 |
+| **UC-VID-010 Exceção 6** | Falha de processamento durante a execução | REQ-VID-ERROR-001, REQ-VID-ERROR-002, REQ-VID-ERROR-003, REQ-VID-QUOTA-004, REQ-VID-COM-002, REQ-VID-NFR-007 |
+| **UC-VID-010 Garantia Sucesso** | Novo vídeo MP4 com as dimensões confirmadas, original preservado, 1 quota debitada | REQ-VID-RESIZE-008, REQ-VID-RESIZE-009, REQ-VID-COM-002, REQ-VID-COM-003, REQ-VID-QUOTA-003 |
+| **UC-VID-010 Garantia Mínima** | Original inalterado, sem resultados parciais gravados, quota devolvida | REQ-VID-COM-002, REQ-VID-QUOTA-004, REQ-VID-ERROR-003, REQ-VID-NFR-007 |
+| **UC-VID-010 RN1 a RN12** | Regras de perfis, dimensões pares e tetos, proporção, ampliação, formato de saída e quotas | REQ-VID-AUTH-002, REQ-VID-RESIZE-001 a 009, REQ-VID-QUOTA-001 a 005, REQ-VID-TASK-001, REQ-VID-COM-006, REQ-VID-NFR-003, REQ-VID-NFR-008 |
+
+---
+
+##### Rastreabilidade — UC-VID-011 (Rotação e Espelho de Vídeo)
+
+| **Elemento de Origem** | **Descrição Abreviada** | **Requisito(s) Relacionado(s)** |
+|---|---|---|
+| **UC-VID-011 Pré-condições** | JWT válido, permissão no projeto, vídeo elegível (MP4/MOV/AVI), sem outra tarefa ativa | REQ-VID-AUTH-001, REQ-VID-AUTH-003, REQ-VID-COM-001, REQ-VID-STORAGE-001, REQ-VID-NFR-001, REQ-VID-NFR-003, REQ-VID-NFR-008 |
+| **UC-VID-011 Passo 1** | Apresentação das rotações (90°/180°/270°) e espelhos | REQ-VID-COM-001, REQ-VID-ORIENT-001, REQ-VID-ORIENT-002, REQ-VID-ORIENT-003 |
+| **UC-VID-011 Passo 2** | Escolha da transformação combinada e pré-visualização com dimensões resultantes | REQ-VID-ORIENT-001, REQ-VID-ORIENT-002, REQ-VID-ORIENT-003, REQ-VID-ORIENT-004, REQ-VID-ORIENT-005, REQ-VID-NFR-015 |
+| **UC-VID-011 Passo 3** | Confirmação da operação, validação e verificação de quota | REQ-VID-ORIENT-006, REQ-VID-ORIENT-007, REQ-VID-COM-004, REQ-VID-QUOTA-001, REQ-VID-TASK-001, REQ-VID-NFR-005 |
+| **UC-VID-011 Passo 4** | Reserva de quota e notificação do estado `queued` | REQ-VID-QUOTA-002, REQ-VID-TASK-002, REQ-VID-TASK-003 |
+| **UC-VID-011 Passo 5** | Aplicação da transformação a todos os fotogramas com progresso | REQ-VID-ORIENT-004, REQ-VID-TASK-002, REQ-VID-NFR-006, REQ-VID-NFR-009 |
+| **UC-VID-011 Passo 6** | Geração do MP4 com dimensões trocadas a 90°/270° e duração, fps e áudio preservados | REQ-VID-ORIENT-008, REQ-VID-ORIENT-009, REQ-VID-NFR-003, REQ-VID-COM-003, REQ-VID-STORAGE-002, REQ-VID-QUOTA-003 |
+| **UC-VID-011 Passo 7** | Disponibilização do resultado e preservação do original | REQ-VID-COM-002, REQ-VID-COM-003, REQ-VID-STORAGE-003 |
+| **UC-VID-011 FA1** | Alteração da transformação após pré-visualização | REQ-VID-ORIENT-005 |
+| **UC-VID-011 FA2** | Cancelamento antes do início do processamento (`queued`) | REQ-VID-TASK-004, REQ-VID-QUOTA-004, REQ-VID-COM-002 |
+| **UC-VID-011 FA3** | Cancelamento durante o processamento (`processing`) | REQ-VID-TASK-004, REQ-VID-TASK-005, REQ-VID-QUOTA-004, REQ-VID-COM-002 |
+| **UC-VID-011 FA4** | Execução por utilizador com perfil Premium | REQ-VID-QUOTA-005, REQ-VID-NFR-008 |
+| **UC-VID-011 FA5** | Utilização como passo de cadeia ou em lote | REQ-VID-COM-006, REQ-VID-CHAIN-002, REQ-VID-BATCH-002 |
+| **UC-VID-011 Exceção 1** | Ângulo de rotação fora de {90°, 180°, 270°} | REQ-VID-COM-005, REQ-VID-ORIENT-006, REQ-VID-ERROR-001 |
+| **UC-VID-011 Exceção 2** | Nenhuma transformação definida | REQ-VID-ORIENT-007, REQ-VID-ERROR-001 |
+| **UC-VID-011 Exceção 3** | Formato ou codec de vídeo não suportado | REQ-VID-ERROR-001, REQ-VID-NFR-003 |
+| **UC-VID-011 Exceção 4** | Duração ou tamanho superior ao limite do perfil | REQ-VID-ERROR-001, REQ-VID-NFR-008 |
+| **UC-VID-011 Exceção 5** | Quota diária esgotada no perfil Registado | REQ-VID-QUOTA-001, REQ-VID-ERROR-001 |
+| **UC-VID-011 Exceção 6** | Falha de processamento durante a execução | REQ-VID-ERROR-001, REQ-VID-ERROR-002, REQ-VID-ERROR-003, REQ-VID-QUOTA-004, REQ-VID-COM-002, REQ-VID-NFR-007 |
+| **UC-VID-011 Garantia Sucesso** | Novo vídeo MP4 com a orientação pretendida, original preservado, 1 quota debitada | REQ-VID-ORIENT-008, REQ-VID-ORIENT-009, REQ-VID-COM-002, REQ-VID-COM-003, REQ-VID-QUOTA-003 |
+| **UC-VID-011 Garantia Mínima** | Original inalterado, sem resultados parciais gravados, quota devolvida | REQ-VID-COM-002, REQ-VID-QUOTA-004, REQ-VID-ERROR-003, REQ-VID-NFR-007 |
+| **UC-VID-011 RN1 a RN12** | Regras de perfis, ângulos, combinação rotação/espelho, troca de dimensões, formato e quotas | REQ-VID-AUTH-002, REQ-VID-ORIENT-001 a 009, REQ-VID-QUOTA-001 a 005, REQ-VID-TASK-001, REQ-VID-COM-006, REQ-VID-NFR-003, REQ-VID-NFR-008 |
+
+---
+
+##### Rastreabilidade — UC-VID-012 (Conversão de Formato de Vídeo)
+
+| **Elemento de Origem** | **Descrição Abreviada** | **Requisito(s) Relacionado(s)** |
+|---|---|---|
+| **UC-VID-012 Pré-condições** | JWT válido, permissão no projeto, vídeo elegível (MP4/MOV/AVI), sem outra tarefa ativa | REQ-VID-AUTH-001, REQ-VID-AUTH-003, REQ-VID-COM-001, REQ-VID-STORAGE-001, REQ-VID-NFR-001, REQ-VID-NFR-003, REQ-VID-NFR-008 |
+| **UC-VID-012 Passo 1** | Apresentação do formato atual e dos formatos de saída suportados | REQ-VID-COM-001, REQ-VID-CONVERT-001 |
+| **UC-VID-012 Passo 2** | Seleção do formato de saída e indicação de codecs e de cópia direta/recodificação | REQ-VID-CONVERT-002, REQ-VID-CONVERT-003 |
+| **UC-VID-012 Passo 3** | Confirmação da operação, validação e verificação de quota | REQ-VID-CONVERT-004, REQ-VID-COM-004, REQ-VID-QUOTA-001, REQ-VID-TASK-001, REQ-VID-NFR-005 |
+| **UC-VID-012 Passo 4** | Reserva de quota e notificação do estado `queued` | REQ-VID-QUOTA-002, REQ-VID-TASK-002, REQ-VID-TASK-003 |
+| **UC-VID-012 Passo 5** | Remux ou recodificação para os codecs da matriz com progresso | REQ-VID-CONVERT-005, REQ-VID-CONVERT-006, REQ-VID-TASK-002, REQ-VID-NFR-006, REQ-VID-NFR-009 |
+| **UC-VID-012 Passo 6** | Armazenamento com duração/resolução/fps preservados e cópia de pré-visualização MOV/AVI | REQ-VID-CONVERT-007, REQ-VID-CONVERT-008, REQ-VID-NFR-012, REQ-VID-COM-003, REQ-VID-STORAGE-002, REQ-VID-QUOTA-003 |
+| **UC-VID-012 Passo 7** | Disponibilização do resultado e preservação do original | REQ-VID-COM-002, REQ-VID-COM-003, REQ-VID-STORAGE-003 |
+| **UC-VID-012 FA1** | Conversão por cópia direta de streams | REQ-VID-CONVERT-006 |
+| **UC-VID-012 FA2** | Cancelamento antes do início do processamento (`queued`) | REQ-VID-TASK-004, REQ-VID-QUOTA-004, REQ-VID-COM-002 |
+| **UC-VID-012 FA3** | Cancelamento durante o processamento (`processing`) | REQ-VID-TASK-004, REQ-VID-TASK-005, REQ-VID-QUOTA-004, REQ-VID-COM-002 |
+| **UC-VID-012 FA4** | Execução por utilizador com perfil Premium | REQ-VID-QUOTA-005, REQ-VID-NFR-008 |
+| **UC-VID-012 FA5** | Utilização como último passo de cadeia ou em lote | REQ-VID-CONVERT-009, REQ-VID-COM-006, REQ-VID-BATCH-002 |
+| **UC-VID-012 Exceção 1** | Formato de saída igual ao atual | REQ-VID-COM-005, REQ-VID-CONVERT-004, REQ-VID-ERROR-001 |
+| **UC-VID-012 Exceção 2** | Formato de saída fora da matriz suportada | REQ-VID-COM-005, REQ-VID-CONVERT-004, REQ-VID-ERROR-001, REQ-VID-NFR-003 |
+| **UC-VID-012 Exceção 3** | Formato ou codec de vídeo não suportado | REQ-VID-ERROR-001, REQ-VID-NFR-003 |
+| **UC-VID-012 Exceção 4** | Duração ou tamanho superior ao limite do perfil | REQ-VID-ERROR-001, REQ-VID-NFR-008 |
+| **UC-VID-012 Exceção 5** | Quota diária esgotada no perfil Registado | REQ-VID-QUOTA-001, REQ-VID-ERROR-001 |
+| **UC-VID-012 Exceção 6** | Falha de processamento durante a execução | REQ-VID-ERROR-001, REQ-VID-ERROR-002, REQ-VID-ERROR-003, REQ-VID-QUOTA-004, REQ-VID-COM-002, REQ-VID-NFR-007 |
+| **UC-VID-012 Garantia Sucesso** | Novo vídeo no formato escolhido, conforme à matriz, original preservado, 1 quota debitada | REQ-VID-CONVERT-005, REQ-VID-CONVERT-007, REQ-VID-CONVERT-008, REQ-VID-COM-002, REQ-VID-COM-003, REQ-VID-QUOTA-003 |
+| **UC-VID-012 Garantia Mínima** | Original inalterado, sem resultados parciais gravados, quota devolvida | REQ-VID-COM-002, REQ-VID-QUOTA-004, REQ-VID-ERROR-003, REQ-VID-NFR-007 |
+| **UC-VID-012 RN1 a RN13** | Regras de perfis, matriz de formatos e codecs, remux, preservação, pré-visualização e posição na cadeia | REQ-VID-AUTH-002, REQ-VID-CONVERT-001 a 009, REQ-VID-QUOTA-001 a 005, REQ-VID-TASK-001, REQ-VID-NFR-003, REQ-VID-NFR-008, REQ-VID-NFR-012 |
+
+---
+
+##### Rastreabilidade — UC-VID-013 (Junção de Vídeos)
+
+| **Elemento de Origem** | **Descrição Abreviada** | **Requisito(s) Relacionado(s)** |
+|---|---|---|
+| **UC-VID-013 Pré-condições** | JWT válido, permissão de edição, pelo menos dois vídeos elegíveis, sem outra tarefa ativa | REQ-VID-AUTH-001, REQ-VID-AUTH-003, REQ-VID-COM-001, REQ-VID-STORAGE-001, REQ-VID-NFR-001, REQ-VID-NFR-003, REQ-VID-NFR-008 |
+| **UC-VID-013 Passo 1** | Lista de vídeos elegíveis e limites do perfil | REQ-VID-COM-001, REQ-VID-CONCAT-001, REQ-VID-NFR-014 |
+| **UC-VID-013 Passo 2** | Seleção de dois ou mais vídeos na linha temporal com duração total | REQ-VID-CONCAT-001, REQ-VID-CONCAT-002, REQ-VID-CONCAT-004 |
+| **UC-VID-013 Passo 3** | Reordenação e indicação da resolução/fps do resultado | REQ-VID-CONCAT-002, REQ-VID-CONCAT-004 |
+| **UC-VID-013 Passo 4** | Confirmação, validação de número, duração e formatos, verificação de quota | REQ-VID-COM-004, REQ-VID-CONCAT-005, REQ-VID-CONCAT-006, REQ-VID-CONCAT-007, REQ-VID-QUOTA-001, REQ-VID-TASK-001, REQ-VID-NFR-005 |
+| **UC-VID-013 Passo 5** | Reserva de quota e notificação do estado `queued` | REQ-VID-QUOTA-002, REQ-VID-TASK-002, REQ-VID-TASK-003 |
+| **UC-VID-013 Passo 6** | Normalização, silêncio nos clips mudos, concatenação e progresso | REQ-VID-CONCAT-008, REQ-VID-CONCAT-009, REQ-VID-CONCAT-010, REQ-VID-TASK-002, REQ-VID-NFR-006, REQ-VID-NFR-009 |
+| **UC-VID-013 Passo 7** | Geração do MP4, associação com `sourceVideoIds` e consolidação de quota | REQ-VID-CONCAT-010, REQ-VID-COM-003, REQ-VID-STORAGE-002, REQ-VID-STORAGE-004, REQ-VID-QUOTA-003, REQ-VID-NFR-003 |
+| **UC-VID-013 Passo 8** | Disponibilização do resultado e preservação dos originais | REQ-VID-COM-002, REQ-VID-COM-003, REQ-VID-STORAGE-003 |
+| **UC-VID-013 FA1** | Remoção de um clip da seleção | REQ-VID-CONCAT-003, REQ-VID-CONCAT-005 |
+| **UC-VID-013 FA2** | Repetição de um vídeo na linha temporal | REQ-VID-CONCAT-001 |
+| **UC-VID-013 FA3** | Cancelamento antes do início do processamento (`queued`) | REQ-VID-TASK-004, REQ-VID-QUOTA-004, REQ-VID-CONCAT-011 |
+| **UC-VID-013 FA4** | Cancelamento durante o processamento (`processing`) | REQ-VID-TASK-004, REQ-VID-TASK-005, REQ-VID-QUOTA-004, REQ-VID-CONCAT-011 |
+| **UC-VID-013 FA5** | Execução por utilizador Premium (até 50 vídeos e 60 min) | REQ-VID-QUOTA-005, REQ-VID-CONCAT-006, REQ-VID-CONCAT-007, REQ-VID-NFR-014 |
+| **UC-VID-013 FA6** | Junção como passo de uma cadeia | REQ-VID-CHAIN-005, REQ-VID-CHAIN-006 |
+| **UC-VID-013 Exceção 1** | Menos de dois vídeos selecionados | REQ-VID-COM-005, REQ-VID-CONCAT-005, REQ-VID-ERROR-001 |
+| **UC-VID-013 Exceção 2** | Número de vídeos acima do limite do perfil | REQ-VID-COM-005, REQ-VID-CONCAT-006, REQ-VID-ERROR-001, REQ-VID-NFR-014 |
+| **UC-VID-013 Exceção 3** | Duração total acima do limite do perfil | REQ-VID-COM-005, REQ-VID-CONCAT-007, REQ-VID-ERROR-001, REQ-VID-NFR-008 |
+| **UC-VID-013 Exceção 4** | Formato ou codec de algum vídeo não suportado | REQ-VID-ERROR-001, REQ-VID-NFR-003 |
+| **UC-VID-013 Exceção 5** | Quota diária esgotada no perfil Registado | REQ-VID-QUOTA-001, REQ-VID-ERROR-001 |
+| **UC-VID-013 Exceção 6** | Falha de processamento em qualquer clip | REQ-VID-CONCAT-011, REQ-VID-ERROR-001, REQ-VID-ERROR-002, REQ-VID-ERROR-003, REQ-VID-QUOTA-004, REQ-VID-NFR-007 |
+| **UC-VID-013 Garantia Sucesso** | Único MP4 com os clips por ordem, origens registadas, 1 quota debitada | REQ-VID-CONCAT-010, REQ-VID-STORAGE-002, REQ-VID-STORAGE-004, REQ-VID-COM-003, REQ-VID-QUOTA-003 |
+| **UC-VID-013 Garantia Mínima** | Sem resultado parcial, temporários purgados, quota devolvida, originais inalterados | REQ-VID-CONCAT-011, REQ-VID-COM-002, REQ-VID-QUOTA-004, REQ-VID-ERROR-003, REQ-VID-NFR-007 |
+| **UC-VID-013 RN1 a RN13** | Regras de número de clips, duração total, ordem, normalização, silêncio, quota, atomicidade e proveniência | REQ-VID-AUTH-002, REQ-VID-CONCAT-001 a 011, REQ-VID-QUOTA-001 a 008, REQ-VID-STORAGE-002, REQ-VID-STORAGE-004, REQ-VID-NFR-003, REQ-VID-NFR-008, REQ-VID-NFR-014 |
+
+---
+
+##### Rastreabilidade — UC-VID-014 (Encadeamento de Operações de Vídeo)
+
+| **Elemento de Origem** | **Descrição Abreviada** | **Requisito(s) Relacionado(s)** |
+|---|---|---|
+| **UC-VID-014 Pré-condições** | JWT válido, permissão de edição, vídeo(s) elegível(eis), quota para o custo total, sem outra tarefa ativa | REQ-VID-AUTH-001, REQ-VID-AUTH-003, REQ-VID-COM-001, REQ-VID-STORAGE-001, REQ-VID-QUOTA-007, REQ-VID-NFR-001, REQ-VID-NFR-003, REQ-VID-NFR-008 |
+| **UC-VID-014 Passo 1** | Editor de cadeia com operações elegíveis e contador de créditos | REQ-VID-CHAIN-001, REQ-VID-CHAIN-002, REQ-VID-CHAIN-009, REQ-VID-COM-006 |
+| **UC-VID-014 Passo 2** | Adição e configuração de passo validado face ao passo anterior | REQ-VID-CHAIN-001, REQ-VID-CHAIN-003, REQ-VID-COM-004 |
+| **UC-VID-014 Passo 3** | Cadeia completa, limite de 10 passos, custo total e duração estimada | REQ-VID-CHAIN-004, REQ-VID-CHAIN-008, REQ-VID-CHAIN-009, REQ-VID-QUOTA-008 |
+| **UC-VID-014 Passo 4** | Revalidação da estrutura e dos passos, limites e quota para o custo total | REQ-VID-CHAIN-003, REQ-VID-CHAIN-007, REQ-VID-QUOTA-001, REQ-VID-QUOTA-007, REQ-VID-TASK-001, REQ-VID-NFR-005 |
+| **UC-VID-014 Passo 5** | Reserva da totalidade dos créditos e notificação do estado `queued` | REQ-VID-QUOTA-007, REQ-VID-TASK-002, REQ-VID-TASK-003, REQ-VID-TASK-006 |
+| **UC-VID-014 Passo 6** | Execução numa única tarefa, uma recodificação, passo corrente e progresso | REQ-VID-CHAIN-010, REQ-VID-CHAIN-012, REQ-VID-TASK-006, REQ-VID-NFR-006, REQ-VID-NFR-009, REQ-VID-NFR-013 |
+| **UC-VID-014 Passo 7** | Gravação apenas do vídeo final com proveniência e passos, consolidação de créditos | REQ-VID-CHAIN-011, REQ-VID-COM-003, REQ-VID-STORAGE-002, REQ-VID-STORAGE-004, REQ-VID-QUOTA-003 |
+| **UC-VID-014 Passo 8** | Disponibilização do resultado e preservação dos originais | REQ-VID-COM-002, REQ-VID-COM-003, REQ-VID-STORAGE-003 |
+| **UC-VID-014 FA1** | Composição com junção: sub-cadeias por clip, junção e cadeia sobre o resultado | REQ-VID-CHAIN-005, REQ-VID-CHAIN-006, REQ-VID-CONCAT-008 a 010, REQ-VID-STORAGE-004 |
+| **UC-VID-014 FA2** | Reordenação ou remoção de passos com revalidação | REQ-VID-CHAIN-004 |
+| **UC-VID-014 FA3** | Guardar e reutilizar a cadeia como predefinição | REQ-VID-CHAIN-014 |
+| **UC-VID-014 FA4** | Cancelamento antes do início do processamento (`queued`) | REQ-VID-TASK-004, REQ-VID-QUOTA-004, REQ-VID-CHAIN-013 |
+| **UC-VID-014 FA5** | Cancelamento durante o processamento (`processing`) | REQ-VID-TASK-004, REQ-VID-TASK-005, REQ-VID-QUOTA-004, REQ-VID-CHAIN-013 |
+| **UC-VID-014 FA6** | Execução por utilizador com perfil Premium | REQ-VID-QUOTA-005, REQ-VID-CHAIN-008, REQ-VID-NFR-008 |
+| **UC-VID-014 FA7** | Utilizador abandona a sessão com continuidade assíncrona | REQ-VID-TASK-001, REQ-VID-TASK-006, REQ-VID-NFR-006 |
+| **UC-VID-014 Exceção 1** | Parâmetros inválidos num passo | REQ-VID-COM-005, REQ-VID-CHAIN-003, REQ-VID-ERROR-001 |
+| **UC-VID-014 Exceção 2** | Estrutura de cadeia inválida | REQ-VID-CHAIN-007, REQ-VID-CONVERT-009, REQ-VID-ERROR-001 |
+| **UC-VID-014 Exceção 3** | Cadeia com mais de 10 passos | REQ-VID-CHAIN-008, REQ-VID-NFR-014 |
+| **UC-VID-014 Exceção 4** | Quota inferior ao custo total da cadeia | REQ-VID-QUOTA-001, REQ-VID-QUOTA-007, REQ-VID-ERROR-001 |
+| **UC-VID-014 Exceção 5** | Duração ou tamanho acima do limite do perfil | REQ-VID-ERROR-001, REQ-VID-NFR-008 |
+| **UC-VID-014 Exceção 6** | Formato ou codec de algum vídeo não suportado | REQ-VID-ERROR-001, REQ-VID-NFR-003 |
+| **UC-VID-014 Exceção 7** | Falha num qualquer passo durante a execução | REQ-VID-CHAIN-013, REQ-VID-ERROR-001, REQ-VID-ERROR-002, REQ-VID-ERROR-003, REQ-VID-QUOTA-004, REQ-VID-NFR-007 |
+| **UC-VID-014 Garantia Sucesso** | Único vídeo final com todos os passos, sem intermédios, N créditos debitados | REQ-VID-CHAIN-010, REQ-VID-CHAIN-011, REQ-VID-STORAGE-004, REQ-VID-COM-003, REQ-VID-QUOTA-003, REQ-VID-QUOTA-008 |
+| **UC-VID-014 Garantia Mínima** | Política tudo-ou-nada, temporários purgados, todos os créditos devolvidos | REQ-VID-CHAIN-013, REQ-VID-COM-002, REQ-VID-QUOTA-004, REQ-VID-ERROR-003, REQ-VID-NFR-007 |
+| **UC-VID-014 RN1 a RN14** | Regras de operações elegíveis, estrutura, limite de passos, validação, custo N, tarefa única, atomicidade e recodificação | REQ-VID-AUTH-002, REQ-VID-CHAIN-001 a 014, REQ-VID-QUOTA-001 a 008, REQ-VID-TASK-006, REQ-VID-COM-006, REQ-VID-NFR-003, REQ-VID-NFR-013, REQ-VID-NFR-014 |
+
+---
+
+##### Rastreabilidade — UC-VID-015 (Processamento de Vídeos em Lote)
+
+| **Elemento de Origem** | **Descrição Abreviada** | **Requisito(s) Relacionado(s)** |
+|---|---|---|
+| **UC-VID-015 Pré-condições** | JWT válido, permissão de edição, dois ou mais vídeos elegíveis, quota para o custo total, sem outra tarefa ativa | REQ-VID-AUTH-001, REQ-VID-AUTH-003, REQ-VID-COM-001, REQ-VID-STORAGE-001, REQ-VID-QUOTA-007, REQ-VID-NFR-001, REQ-VID-NFR-003, REQ-VID-NFR-008 |
+| **UC-VID-015 Passo 1** | Seleção dos vídeos e apresentação dos limites do perfil | REQ-VID-BATCH-001, REQ-VID-NFR-014 |
+| **UC-VID-015 Passo 2** | Definição de uma operação ou cadeia sem junção | REQ-VID-BATCH-002, REQ-VID-BATCH-003, REQ-VID-COM-004, REQ-VID-COM-006 |
+| **UC-VID-015 Passo 3** | Pré-validação por vídeo e custo total | REQ-VID-BATCH-004, REQ-VID-BATCH-007, REQ-VID-QUOTA-008 |
+| **UC-VID-015 Passo 4** | Verificação de quota, criação do lote (`batchId`) como 1 tarefa ativa | REQ-VID-BATCH-006, REQ-VID-BATCH-008, REQ-VID-BATCH-009, REQ-VID-QUOTA-001, REQ-VID-QUOTA-007, REQ-VID-TASK-007, REQ-VID-NFR-005 |
+| **UC-VID-015 Passo 5** | Reserva da totalidade dos créditos e notificação do estado `queued` | REQ-VID-QUOTA-007, REQ-VID-TASK-002, REQ-VID-TASK-003, REQ-VID-TASK-007 |
+| **UC-VID-015 Passo 6** | Processamento sequencial com estado por vídeo e progresso agregado | REQ-VID-BATCH-009, REQ-VID-BATCH-013, REQ-VID-TASK-007, REQ-VID-NFR-006, REQ-VID-NFR-009 |
+| **UC-VID-015 Passo 7** | Associação de cada resultado e débito/estorno por vídeo | REQ-VID-BATCH-010, REQ-VID-BATCH-011, REQ-VID-COM-003, REQ-VID-STORAGE-002, REQ-VID-QUOTA-003, REQ-VID-QUOTA-004 |
+| **UC-VID-015 Passo 8** | Estado final agregado e resumo | REQ-VID-BATCH-012, REQ-VID-TASK-002, REQ-VID-TASK-003 |
+| **UC-VID-015 Passo 9** | Disponibilização dos resultados e preservação dos originais | REQ-VID-COM-002, REQ-VID-COM-003, REQ-VID-STORAGE-003 |
+| **UC-VID-015 FA1** | Descarregamento dos resultados em ZIP | REQ-VID-BATCH-015, REQ-VID-DOWNLOAD-002 |
+| **UC-VID-015 FA2** | Exclusão dos vídeos incompatíveis com recálculo do custo | REQ-VID-BATCH-005, REQ-VID-BATCH-007 |
+| **UC-VID-015 FA3** | Carregamento de uma cadeia predefinida | REQ-VID-CHAIN-014 |
+| **UC-VID-015 FA4** | Cancelamento do lote mantendo os vídeos concluídos | REQ-VID-BATCH-014, REQ-VID-TASK-004, REQ-VID-TASK-005, REQ-VID-QUOTA-004 |
+| **UC-VID-015 FA5** | Execução por utilizador Premium (até 50 vídeos) | REQ-VID-QUOTA-005, REQ-VID-BATCH-006, REQ-VID-NFR-014 |
+| **UC-VID-015 FA6** | Utilizador abandona a sessão com continuidade assíncrona | REQ-VID-TASK-001, REQ-VID-TASK-007, REQ-VID-NFR-006 |
+| **UC-VID-015 Exceção 1** | Menos de dois vídeos ou acima do limite do perfil | REQ-VID-COM-005, REQ-VID-BATCH-006, REQ-VID-ERROR-001, REQ-VID-NFR-014 |
+| **UC-VID-015 Exceção 2** | Configuração com junção ou extração de fotogramas | REQ-VID-BATCH-003, REQ-VID-ERROR-001 |
+| **UC-VID-015 Exceção 3** | Nenhum vídeo compatível com a configuração | REQ-VID-BATCH-004, REQ-VID-ERROR-001 |
+| **UC-VID-015 Exceção 4** | Quota inferior ao custo total do lote | REQ-VID-QUOTA-001, REQ-VID-QUOTA-007, REQ-VID-ERROR-001 |
+| **UC-VID-015 Exceção 5** | Falha no processamento de um vídeo | REQ-VID-BATCH-010, REQ-VID-BATCH-011, REQ-VID-ERROR-001, REQ-VID-ERROR-002, REQ-VID-ERROR-003 |
+| **UC-VID-015 Exceção 6** | Falha geral do worker | REQ-VID-BATCH-010, REQ-VID-BATCH-011, REQ-VID-ERROR-002, REQ-VID-ERROR-003, REQ-VID-NFR-007 |
+| **UC-VID-015 Garantia Sucesso** | Um novo vídeo por vídeo concluído, créditos apenas pelos concluídos | REQ-VID-BATCH-010, REQ-VID-BATCH-011, REQ-VID-BATCH-012, REQ-VID-COM-003, REQ-VID-QUOTA-003, REQ-VID-QUOTA-008 |
+| **UC-VID-015 Garantia Mínima** | Falhados sem parciais e com créditos devolvidos, concluídos mantidos | REQ-VID-BATCH-010, REQ-VID-BATCH-011, REQ-VID-COM-002, REQ-VID-QUOTA-004, REQ-VID-ERROR-003, REQ-VID-NFR-007 |
+| **UC-VID-015 RN1 a RN9** | Regras de número de vídeos, operações elegíveis, custo, concorrência, independência e estorno | REQ-VID-AUTH-002, REQ-VID-BATCH-001 a 015, REQ-VID-QUOTA-001 a 008, REQ-VID-TASK-007, REQ-VID-NFR-003, REQ-VID-NFR-014 |
+
+---
+
+##### Rastreabilidade — Requisitos Transversais de Arquitetura (UC-VID-000 a UC-VID-015)
+
+| **Elemento de Origem** | **Descrição Abreviada** | **Requisito(s) Relacionado(s)** |
+|---|---|---|
+| **Todos os casos: execução dos workers (DQ-002)** | Processamento e descodificação de vídeo em contentores Docker com FFmpeg, sem binários instalados no host | REQ-VID-NFR-010 |
+| **Todos os casos: extensibilidade das operações (Tabela de Impacto 4.2)** | Fila AMQP dedicada (`video_operations_queue`) que permite acrescentar operações sem alterar as ferramentas de imagem | REQ-VID-NFR-011, REQ-VID-COM-006 |
+
+---
+
 #### 4.3.2 Verificações de Cobertura
 
-- [x] **Cada requisito funcional e não funcional aparece na matriz**: Todos os 87 requisitos funcionais e 11 requisitos não funcionais da ERS estão mapeados na secção 4.3.
+- [x] **Cada requisito funcional e não funcional aparece na matriz**: Todos os 196 requisitos funcionais e 16 requisitos não funcionais da ERS estão mapeados na secção 4.3.
 - [x] **Cada requisito tem origem identificada**: Todas as linhas possuem ligação direta a um passo do fluxo, exceção, regra de negócio ou decisão de qualidade documentada nos casos de uso.
-- [x] **Todos os elementos relevantes dos casos de uso têm requisito associado**: Pré-condições, passos dos fluxos principais, fluxos alternativos, exceções, garantias pós-condicionais e regras de negócio de `UC-VID-000` a `UC-VID-005` estão integralmente cobertos.
-- [x] **Os tópicos excluídos na secção 4.1.3 estão justificados**: O encadeamento de ferramentas entre vídeos e o processamento em lote de múltiplos vídeos foram formalmente excluídos do MVP na secção 4.1.3 com fundamentação de escopo.
-- [x] **O impacto no sistema existente está atualizado e ligado aos requisitos relevantes**: A secção 4.2 abrange todos os serviços afetados, incluindo upload de vídeo, reprodutor integrado e serviços de storage SeaweedFS/S3 com os respetivos identificadores de requisitos.
+- [x] **Todos os elementos relevantes dos casos de uso têm requisito associado**: Pré-condições, passos dos fluxos principais, fluxos alternativos, exceções, garantias pós-condicionais e regras de negócio de `UC-VID-000` a `UC-VID-015` estão integralmente cobertos.
+- [x] **Os tópicos de âmbito da secção 4.1.3 estão justificados**: O encadeamento de operações de vídeo e o processamento em lote de vários vídeos passaram a integrar o MVP (v2.3); as exclusões remanescentes (extração de fotogramas como passo de cadeia ou de lote de vídeos, transições na junção) estão justificadas na secção 4.1.3, na DQ-017 e na Q-ERS-006.
+- [x] **O impacto no sistema existente está atualizado e ligado aos requisitos relevantes**: A secção 4.2 abrange todos os serviços afetados, incluindo upload de vídeo, reprodutor integrado e serviços de storage SeaweedFS/S3 com os respetivos identificadores de requisitos. A partir da v2.3, inclui também as novas operações (descarregamento, informações, ajustes, filtros, redimensionamento, orientação, conversão, junção, cadeias e lotes) e as cópias de pré-visualização MOV/AVI.
 
 ---
 
@@ -294,7 +617,7 @@ A matriz seguinte rastreia detalhadamente cada requisito do sistema até aos ele
 | **ID** | **Decisão de Qualidade** | **Justificação** | **Requisito(s) Relacionado(s)** |
 |---|---|---|---|
 | **DQ-001** | Acesso restrito a utilizadores autenticados Registados e Premium com quota diária (5 ops/dia no plano Registado e ilimitado no Premium); exclusão de perfis anónimos. | Protege a capacidade de computação contra abusos e ataques de negação de serviço, sustentando o modelo de negócio da plataforma através de controlo transacional de créditos de processamento. | REQ-VID-AUTH-001 a 003, REQ-VID-QUOTA-001 a 005, REQ-VID-NFR-001, REQ-VID-NFR-008 |
-| **DQ-002** | Contentor MP4 de entrada e saída com codecs H.264 (vídeo) e AAC (áudio); exportação de fotogramas em JPEG/PNG. | Garante 100% de interoperabilidade nos navegadores web modernos sem necessidade de transcodificação onerosa em tempo real durante o MVP da Fase 1. | REQ-VID-NFR-003, REQ-VID-NFR-004, REQ-VID-UPLOAD-003, REQ-VID-UPLOAD-009, REQ-VID-UPLOAD-010, REQ-VID-TRIM-008, REQ-VID-AUDIO-005, REQ-VID-SPEED-008, REQ-VID-WATERMARK-011, REQ-VID-FRAMES-003, REQ-VID-FRAMES-010 |
+| **DQ-002** | Contentores MP4, MOV e AVI na entrada com matriz de codecs aprovada (H.264/AAC em MP4 e MOV; H.264 ou MPEG-4 Part 2 / AAC ou MP3 em AVI); conversão entre MP4, MOV e AVI (MPEG-4 Part 2/MP3 na saída AVI); exportação de fotogramas em JPEG/PNG. | Alarga a compatibilidade aos formatos mais comuns de câmaras e de arquivos antigos, mantendo uma matriz fechada e testável; a reprodução no navegador é assegurada pela cópia de pré-visualização MP4 (DQ-012). | REQ-VID-NFR-003, REQ-VID-NFR-004, REQ-VID-NFR-012, REQ-VID-UPLOAD-003, REQ-VID-UPLOAD-009, REQ-VID-UPLOAD-010, REQ-VID-CONVERT-002, REQ-VID-CONVERT-005, REQ-VID-TRIM-008, REQ-VID-AUDIO-005, REQ-VID-SPEED-008, REQ-VID-WATERMARK-011, REQ-VID-FRAMES-003, REQ-VID-FRAMES-010 |
 | **DQ-003** | Modelação explícita de recursos de vídeo na base de dados (MongoDB) e referência de proveniência (`sourceVideoId`). | Separa a semântica de fluxos contínuos audiovisuais dos artefactos de imagem estática, permitindo rastrear o histórico completo de transformações do projeto. | REQ-VID-STORAGE-001, REQ-VID-STORAGE-002, REQ-VID-COM-003, REQ-VID-UPLOAD-013, REQ-VID-FRAMES-012 |
 | **DQ-004** | Orquestração assíncrona orientada a eventos via RabbitMQ e WebSockets com máquina de estados canónica (`queued → processing → completed \| failed \| cancelled`). | Desacopla o gateway HTTP da carga computacional pesada, assegurando que o utilizador recebe confirmação imediata e navega livremente enquanto o trabalho decorre. | REQ-VID-TASK-001 a 005, REQ-VID-NFR-005, REQ-VID-NFR-006, REQ-VID-NFR-009 |
 | **DQ-005** | Limites contratuais rígidos de duração e volume no MVP (Registado: $\leq 5$ min / 200 MB / 50 frames; Premium: $\leq 60$ min / 2 GB / 500 frames; máx. 1 tarefa ativa/projeto). | Evita o esgotamento do armazenamento e saturação dos workers por ficheiros anómalos durante a fase de validação funcional do produto. | REQ-VID-UPLOAD-004, REQ-VID-UPLOAD-011, REQ-VID-SPEED-005, REQ-VID-FRAMES-006, REQ-VID-NFR-008 |
@@ -304,6 +627,20 @@ A matriz seguinte rastreia detalhadamente cada requisito do sistema até aos ele
 | **DQ-009** | Geometria estática invariante da marca de água ao longo de toda a duração temporal do vídeo. | Simplifica a validação e o algoritmo do worker na Fase 1 do MVP, garantindo consistência visual estável sem sobrecarga de interpolação espacial de keyframes. | REQ-VID-WATERMARK-004, REQ-VID-WATERMARK-008, REQ-VID-WATERMARK-010 |
 | **DQ-010** | Distinção formal entre Alvo MVP e Alvo de Produção segundo a ISO/IEC 25010 para sustentação da Fase 2 de melhoria por refactoring. | Permite validar funcionalmente a extensão na Fase 1 sem impor prematuramente metas de alta disponibilidade, clusterização elástica ou SLA de produção industrial. | REQ-VID-NFR-001 a REQ-VID-NFR-011 |
 | **DQ-011** | Isenção de consumo de quota diária para o carregamento e reprodução de vídeos no projeto. | Fomenta a adoção da plataforma permitindo que os utilizadores criem a sua mediateca e visualizem vídeos sem barreiras transacionais, incidindo a cobrança exclusivamente sobre as tarefas de processamento/manipulação. | REQ-VID-UPLOAD-014, REQ-VID-QUOTA-001 |
+| **DQ-012** | Pré-visualização de originais e resultados em MOV ou AVI através de uma cópia MP4 (H.264/AAC) gerada na ingestão e na conversão, usada exclusivamente pelo reprodutor integrado; as operações e o descarregamento usam sempre o ficheiro original. | Os navegadores não reproduzem AVI e reproduzem MOV de forma inconsistente; a alternativa "disponível apenas para descarregar" foi rejeitada por impedir a inspeção visual antes da edição (UC-VID-000, passo 8). | REQ-VID-UPLOAD-016, REQ-VID-UPLOAD-017, REQ-VID-CONVERT-008, REQ-VID-DOWNLOAD-006, REQ-VID-INFO-004, REQ-VID-NFR-012 |
+| **DQ-013** | Os resultados de todas as operações de vídeo são gerados em MP4 (H.264/AAC), salvo na conversão de formato, que gera o contentor escolhido. | Um único formato de trabalho simplifica os workers, as cadeias e a reprodução; a conversão é o único ponto de saída para outros formatos. | REQ-VID-ADJUST-009, REQ-VID-FILTER-007, REQ-VID-RESIZE-009, REQ-VID-ORIENT-009, REQ-VID-CONCAT-010, REQ-VID-CONVERT-005, REQ-VID-NFR-003 |
+| **DQ-014** | Política de quota: 1 crédito por operação isolada ou junção; N créditos por cadeia de N passos (a junção conta 1); num lote, custo da operação ou cadeia × vídeos concluídos; descarregamento e consulta de informações gratuitos; custo total verificado e reservado antes da aceitação. | O custo reflete o trabalho de processamento efetivamente pedido e entregue, mantendo a regra base de 1 operação = 1 crédito. | REQ-VID-QUOTA-007, REQ-VID-QUOTA-008, REQ-VID-CHAIN-009, REQ-VID-CHAIN-013, REQ-VID-BATCH-007, REQ-VID-BATCH-011, REQ-VID-DOWNLOAD-004, REQ-VID-INFO-007 |
+| **DQ-015** | Limites de composição: lote e junção com 2–10 vídeos (Registado) ou 2–50 (Premium); cadeia com máximo de 10 passos; duração total da junção ≤ limite de duração do perfil. | Protege os workers e o armazenamento contra pedidos desproporcionados durante a validação do MVP. | REQ-VID-CONCAT-006, REQ-VID-CONCAT-007, REQ-VID-CHAIN-008, REQ-VID-BATCH-006, REQ-VID-NFR-014 |
+| **DQ-016** | Uma cadeia ou um lote conta como 1 tarefa ativa no projeto; os vídeos de um lote são processados sequencialmente. | Mantém o limite de 1 tarefa ativa por projeto (REQ-VID-NFR-008) sem impedir cadeias e lotes. | REQ-VID-TASK-006, REQ-VID-TASK-007, REQ-VID-CHAIN-010, REQ-VID-BATCH-009, REQ-VID-NFR-008 |
+| **DQ-017** | Âmbito da cadeia e do lote: são elegíveis o recorte, a remoção de áudio, a velocidade, a marca de água, os ajustes, os filtros, o redimensionamento, a orientação, a conversão (apenas como último passo) e a junção (no máximo uma, com sub-cadeias por clip e cadeia sobre o resultado); a extração de fotogramas é excluída; o lote aplica uma operação ou cadeia sem junção. | Garante cadeias executáveis com um formato de trabalho único e resultados de vídeo; a junção é incompatível com o princípio de um resultado por vídeo do lote. | REQ-VID-COM-006, REQ-VID-CHAIN-002, REQ-VID-CHAIN-005, REQ-VID-CHAIN-006, REQ-VID-CHAIN-007, REQ-VID-CONVERT-009, REQ-VID-BATCH-002, REQ-VID-BATCH-003 |
+| **DQ-018** | Política de falhas: a cadeia e a junção são atómicas (tudo-ou-nada); no lote, os resultados são independentes por vídeo. | Uma cadeia ou junção parcial não corresponde à edição pedida; num lote, um vídeo problemático não deve invalidar o trabalho válido dos restantes. | REQ-VID-CONCAT-011, REQ-VID-CHAIN-013, REQ-VID-BATCH-010, REQ-VID-BATCH-011 |
+| **DQ-019** | Normalização na junção: o resultado adota a resolução e a taxa de fotogramas do primeiro clip, com barras pretas quando a proporção difere, silêncio nos clips sem áudio e corte seco entre clips. | Regra simples e previsível para clips heterogéneos; o utilizador pode controlar a resolução final encadeando um redimensionamento. | REQ-VID-CONCAT-004, REQ-VID-CONCAT-008, REQ-VID-CONCAT-009, REQ-VID-CONCAT-010 |
+| **DQ-020** | Ajustes visuais como fatores multiplicativos no intervalo [0.0, 2.0], com passo de 0.05 e neutro 1.0. | Mantém a semântica das ferramentas de imagem existentes (brilho, contraste e saturação), reduzindo a curva de aprendizagem. | REQ-VID-ADJUST-001 a 007 |
+| **DQ-021** | Catálogo fechado de filtros no MVP: Preto e Branco, Sépia, Negativo, Vintage, Frio e Quente; um filtro por operação, sem controlo de intensidade. | Resultados previsíveis e testáveis com filtros FFmpeg standard; combinações fazem-se por encadeamento. | REQ-VID-FILTER-001, REQ-VID-FILTER-003, REQ-VID-FILTER-005 |
+| **DQ-022** | Redimensionamento com dimensões pares ≥ 128 px, teto de 1920×1080 (Registado) ou 3840×2160 (Premium), proporção bloqueada por omissão e ampliação permitida com aviso. | Compatibilidade com H.264 e controlo da carga de processamento e armazenamento por perfil. | REQ-VID-RESIZE-002, REQ-VID-RESIZE-004, REQ-VID-RESIZE-005, REQ-VID-RESIZE-006 |
+| **DQ-023** | Descarregamento de qualquer vídeo concluído (original ou resultante) com permissão de leitura, no formato armazenado, por URL assinado de 15 min com suporte a `Range` e sem consumo de quota. | O descarregamento não consome processamento; servi-lo diretamente do storage protege o API Gateway de transferências de até 2 GB. | REQ-VID-DOWNLOAD-001 a 007, REQ-VID-NFR-016 |
+| **DQ-024** | Todas as novas funcionalidades (UC-VID-006 a UC-VID-015) estão restritas a utilizadores Registados e Premium; os Anónimos ficam excluídos. | Coerente com a DQ-001: os recursos residem em projetos autenticados e o processamento exige controlo de abuso e de quota. | REQ-VID-AUTH-002, REQ-VID-DOWNLOAD-001, REQ-VID-INFO-001, REQ-VID-ADJUST-001, REQ-VID-FILTER-001, REQ-VID-RESIZE-001, REQ-VID-ORIENT-001, REQ-VID-CONVERT-002, REQ-VID-CONCAT-001, REQ-VID-CHAIN-001, REQ-VID-BATCH-001 |
+| **DQ-025** | O perfil Registado fica limitado, pela quota diária de 5 créditos, a cadeias com no máximo 5 passos por dia; não existem pacotes de créditos adicionais no MVP e as necessidades maiores são cobertas pelo perfil Premium. | Preserva o modelo de negócio e a diferenciação entre os planos Registado e Premium, sem regras de quota específicas para cadeias. | REQ-VID-QUOTA-007, REQ-VID-QUOTA-008, REQ-VID-CHAIN-008, REQ-VID-CHAIN-009 |
 
 ---
 
@@ -316,6 +653,12 @@ A matriz seguinte rastreia detalhadamente cada requisito do sistema até aos ele
 | **Q-ERS-001** | Deve ser suportada a ingestão de vídeos através de URL externo (e.g. YouTube, HTTP direto) além do upload de ficheiro local? | Baixo | Rejeitada para o MVP. O upload é estritamente via ficheiro binário local para controlar os limites e a integridade de rede. |
 | **Q-ERS-002** | Deve ser permitida a substituição direta de um ficheiro de vídeo existente mantendo o mesmo identificador de recurso? | Médio | Não permitida no MVP. O ficheiro original é imutável; novas versões geram novos recursos com novo UUID. |
 | **Q-ERS-003** | Deve ser disponibilizada a seleção interativa da marca de água por arrastamento (*drag-to-position*) na interface web? | Baixo | Para o MVP, o posicionamento é feito através de botões predefinidos (cantos/centro) e campos numéricos de coordenadas X e Y. |
+| **Q-ERS-004** | As cópias de pré-visualização MP4 de vídeos MOV/AVI contam para os limites de armazenamento do projeto ou do perfil? | Baixo | Não contam no MVP; são eliminadas juntamente com o recurso original e podem ser regeneradas. |
+| **Q-ERS-005** | O utilizador Registado fica limitado, pela quota diária de 5 créditos, a cadeias de no máximo 5 passos. Deve existir um pacote de créditos adicional? | Médio | **Fechada (v2.3).** Aceite a limitação a 5 passos por dia no perfil Registado; o Premium cobre os casos maiores (DQ-025). |
+| **Q-ERS-006** | Devem ser suportadas transições entre clips na junção (e.g. *fade*, *crossfade*)? | Baixo | Não no MVP; a junção usa corte seco. Transições ficam para a Fase 2. |
+| **Q-ERS-007** | Se a quota não cobrir o custo total de um lote, deve o sistema aceitar apenas os vídeos que a quota cobre? | Médio | Não no MVP. O lote é rejeitado (REQ-VID-QUOTA-007) e o utilizador pode reduzir a seleção. |
+| **Q-ERS-008** | Deve existir controlo de intensidade dos filtros visuais? | Baixo | Não no MVP (DQ-021). A intensidade fica para a Fase 2. |
+| **Q-ERS-009** | As pré-condições dos UC-VID-001 a UC-VID-005 e os requisitos REQ-VID-TRIM-009 e REQ-VID-AUDIO-005 referem apenas MP4 (H.264/AAC). Como se comportam estas operações sobre originais MOV ou AVI? | Médio | **Fechada (v2.3).** Os UC-VID-001 a UC-VID-005 (pré-condições, passos, exceções, regras de negócio e assunções) e os requisitos REQ-VID-TRIM-009, REQ-VID-AUDIO-005, REQ-VID-SPEED-008 e REQ-VID-WATERMARK-011 foram atualizados para aceitar MP4, MOV e AVI segundo a DQ-002, gerando resultados em MP4 (H.264/AAC) segundo a DQ-013. |
 
 ### 4.5.2 Lista de Verificação antes de Entregar
 
@@ -327,4 +670,6 @@ A matriz seguinte rastreia detalhadamente cada requisito do sistema até aos ele
 - [x] Os requisitos não funcionais encontram-se classificados segundo a norma **ISO/IEC 25010** e distinguem formalmente o **Alvo MVP** do **Alvo de Produção**.
 - [x] A matriz de rastreabilidade (secção 4.3) estabelece uma cobertura bidirecional exaustiva, garantindo zero requisitos órfãos e zero passos/exceções/regras de negócio por cobrir.
 - [x] A análise de impacto no sistema existente (secção 4.2) mapeia todos os componentes afetados pela ingestão de vídeo e pelas ferramentas de manipulação.
-- [x] As decisões de qualidade e arquitetura (`DQ-001` a `DQ-011`) encontram-se catalogadas com justificações técnicas e ligação aos requisitos correspondentes.
+- [x] As decisões de qualidade e arquitetura (`DQ-001` a `DQ-025`) encontram-se catalogadas com justificações técnicas e ligação aos requisitos correspondentes.
+- [x] Os novos requisitos RF1 a RF10 (`docs/novo.md`) foram especificados nos casos de uso `UC-VID-006` a `UC-VID-015` e nos ficheiros `REQ-VID-DOWNLOAD`, `INFO`, `ADJUST`, `FILTER`, `RESIZE`, `ORIENT`, `CONVERT`, `CONCAT`, `CHAIN` e `BATCH` (101 requisitos funcionais), com 6 requisitos comuns, 2 de carregamento e 5 não funcionais adicionais.
+- [x] O encadeamento de operações e o processamento em lote de vídeos foram incluídos no MVP e a matriz de formatos foi alargada a MP4, MOV e AVI, com cópia de pré-visualização MP4 (DQ-002, DQ-012 a DQ-017).

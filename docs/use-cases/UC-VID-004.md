@@ -9,14 +9,14 @@
 |------------|--------------|
 | **ID do Caso de Uso** | UC-VID-004 |
 | **Nome** | Aplicar marca de água a um vídeo |
-| **Versão** | v1.2 |
+| **Versão** | v1.3 |
 | **Autor** | Equipa PictuRAS-27 |
 | **Data** | 2026-10-18 |
 | **Objetivo** | Permitir ao utilizador aplicar uma marca de água (texto ou imagem) com posição, tamanho e opacidade configuráveis sobre todos os fotogramas de um vídeo do projeto, gerando um novo vídeo protegido, sem alterar o original. |
 | **Âmbito** | Módulo de processamento de vídeo e gestão de recursos do PictuRAS |
 | **Ator Principal** | Utilizador **Registado** ou **Premium** com sessão iniciada e acesso ao projeto |
 | **Stakeholders e Interesses** | - **Utilizador Registado / Premium**: pretende proteger os seus direitos de autor sobre o vídeo com identificação visual clara e não obstrutiva.<br>- **Sistema PictuRAS**: deve compor a marca de água fotograma a fotograma com estabilidade e desempenho previsível.<br>- **Administrador**: pretende garantir que o processamento intensivo respeita as quotas e os limites de infraestrutura. |
-| **Pré-condições** | - O utilizador tem sessão iniciada (JWT válido).<br>- O utilizador tem permissão de edição sobre o projeto.<br>- O projeto contém um vídeo em formato MP4 (H.264 + AAC), com duração ≤ 5 min e tamanho ≤ 200 MB (Registado) ou ≤ 60 min e ≤ 2 GB (Premium).<br>- Se a marca for imagem, o ficheiro de imagem está acessível (formato PNG ou JPEG).<br>- Não existe outra tarefa de vídeo ativa no projeto. |
+| **Pré-condições** | - O utilizador tem sessão iniciada (JWT válido).<br>- O utilizador tem permissão de edição sobre o projeto.<br>- O projeto contém um vídeo num formato suportado (MP4, MOV ou AVI, segundo a matriz da DQ-002), com duração ≤ 5 min e tamanho ≤ 200 MB (Registado) ou ≤ 60 min e ≤ 2 GB (Premium).<br>- Se a marca for imagem, o ficheiro de imagem está acessível (formato PNG ou JPEG).<br>- Não existe outra tarefa de vídeo ativa no projeto. |
 | **Trigger** | O utilizador seleciona um vídeo do projeto e escolhe a operação de aplicação de marca de água. |
 
 ---
@@ -31,7 +31,7 @@
 | 4 | O utilizador confirma a operação. | O sistema valida as dimensões e limites geométricos em relação ao quadro do vídeo, verifica a quota diária disponível (se Registado) e cria a tarefa assíncrona. |
 | 5 | — | O sistema reserva 1 operação da quota diária (se Registado), coloca a tarefa na fila com estado `queued` e notifica o utilizador da aceitação. |
 | 6 | — | O worker inicia o processamento (estado `processing`), sobrepõe a marca fotograma a fotograma (filtro FFmpeg `drawtext` para texto ou `overlay` para imagem), mantendo a posição fixa, e emite eventos de progresso percentual (0–100%) via WebSocket. |
-| 7 | — | O worker recompõe o vídeo no contentor MP4 com o codec H.264, remuxa a stream de áudio original sem recodificação e armazena o ficheiro resultante. |
+| 7 | — | O worker recompõe o vídeo no contentor MP4 com o codec H.264, remuxa a stream de áudio original sem recodificação quando esta é AAC (recodificando-a para AAC quando é MP3, em AVI) e armazena o ficheiro resultante. |
 | 8 | — | O sistema associa o novo vídeo ao projeto como novo recurso (referenciando o vídeo de origem), transita a tarefa para `completed`, confirma o consumo da quota e notifica o utilizador via WebSocket. |
 | 9 | O utilizador consulta o projeto. | O sistema apresenta o novo vídeo com marca de água na lista de recursos; o vídeo original permanece inalterado. |
 
@@ -53,7 +53,7 @@
 
 | **Condição** | **Comportamento do Sistema** |
 |--------------|------------------------------|
-| **Formato ou codec de vídeo não suportado.** | No passo 4, o sistema rejeita a operação se o vídeo não for MP4 com H.264 (`UNSUPPORTED_FORMAT`). A tarefa não é criada e a quota não é afetada. |
+| **Formato ou codec de vídeo não suportado.** | No passo 4, o sistema rejeita a operação se o vídeo não estiver num formato suportado (MP4, MOV ou AVI, segundo a matriz da DQ-002) (`UNSUPPORTED_FORMAT`). A tarefa não é criada e a quota não é afetada. |
 | **Conteúdo da marca de água vazio ou inválido.** | No passo 3, se o texto estiver vazio ou a imagem for ilegível/corrompida → O sistema rejeita com erro (`INVALID_WATERMARK_CONTENT`). A tarefa não é criada e a quota não é afetada. |
 | **Posição ou dimensão fora dos limites do vídeo.** | No passo 4, se a marca configurada ultrapassar as margens visíveis do quadro do vídeo → O sistema rejeita com erro (`WATERMARK_OUT_OF_BOUNDS`). A tarefa não é criada e a quota não é afetada. |
 | **Duração ou tamanho superior ao limite do perfil.** | No passo 4, o sistema rejeita a operação se os limites forem excedidos (`LIMIT_EXCEEDED`). A tarefa não é criada e a quota não é afetada. |
@@ -78,7 +78,7 @@
 | **RN1** | Apenas utilizadores Registados e Premium com sessão iniciada e permissão de edição no projeto podem executar a operação. |
 | **RN2** | No MVP, a marca de água tem posição, tamanho e opacidade fixos e constantes ao longo de toda a duração do vídeo. |
 | **RN3** | A marca de água deve estar integralmente contida nos limites do quadro do vídeo ($X + \text{largura} \le \text{largura\_vídeo}$ e $Y + \text{altura} \le \text{altura\_vídeo}$). |
-| **RN4** | O vídeo de entrada e de saída devem estar em formato MP4 com H.264 (vídeo) e AAC (áudio, se presente). Se o vídeo contiver áudio, este é remuxado sem recodificação. |
+| **RN4** | O vídeo de entrada pode estar em qualquer formato suportado (MP4, MOV ou AVI, segundo a matriz da DQ-002); o vídeo de saída é gerado em MP4 com H.264 (vídeo) e AAC (áudio, se presente) (DQ-013). Se o vídeo contiver áudio AAC, este é remuxado sem recodificação; áudio MP3 é recodificado para AAC. |
 | **RN5** | Limites por perfil: Registado — duração ≤ 5 minutos e tamanho ≤ 200 MB; Premium — duração ≤ 60 minutos e tamanho ≤ 2 GB. |
 | **RN6** | Cada operação concluída consome exatamente 1 crédito da quota diária do utilizador Registado (limite de 5 operações/dia). Utilizadores Premium têm quota ilimitada. |
 | **RN7** | Em caso de cancelamento ou falha técnica, o crédito de quota reservado é integralmente devolvido ao utilizador Registado. |
@@ -92,7 +92,7 @@
 
 | **ID** | **Assunção** |
 |--------|--------------|
-| **A1** | O utilizador tem acesso a um projeto com pelo menos um vídeo MP4 elegível carregado. |
+| **A1** | O utilizador tem acesso a um projeto com pelo menos um vídeo elegível (MP4, MOV ou AVI) carregado. |
 | **A2** | O FFmpeg suporta a sobreposição de texto com fontes TrueType (`drawtext`) e de imagens com canal alfa (`overlay`). |
 | **A3** | A quota diária é reposta diariamente às 00:00 UTC. |
 

@@ -9,14 +9,14 @@
 |------------|--------------|
 | **ID do Caso de Uso** | UC-VID-001 |
 | **Nome** | Recortar temporalmente um vídeo |
-| **Versão** | v1.2 |
+| **Versão** | v1.3 |
 | **Autor** | Equipa PictuRAS-27 |
 | **Data** | 2026-10-18 |
 | **Objetivo** | Permitir ao utilizador selecionar um intervalo temporal válido de um vídeo do seu projeto e obter um novo vídeo que preserve apenas esse intervalo, sem alterar o original. |
 | **Âmbito** | Módulo de processamento de vídeo e gestão de recursos do PictuRAS |
 | **Ator Principal** | Utilizador **Registado** ou **Premium** com sessão iniciada e acesso ao projeto |
 | **Stakeholders e Interesses** | - **Utilizador Registado / Premium**: pretende reduzir o vídeo às partes relevantes sem perder o ficheiro original e sem esgotar desnecessariamente a quota diária.<br>- **Sistema PictuRAS**: deve validar o intervalo, executar o recorte de forma assíncrona e produzir um resultado consistente.<br>- **Administrador / Equipa de produto**: pretende garantir que o processo respeita as políticas de acesso, quota e armazenamento. |
-| **Pré-condições** | - O utilizador tem sessão iniciada (JWT válido).<br>- O utilizador tem permissão de edição sobre o projeto.<br>- O projeto contém um vídeo em formato MP4 (H.264 + AAC), com duração ≤ 5 min e tamanho ≤ 200 MB (Registado) ou ≤ 60 min e ≤ 2 GB (Premium), disponível para processamento.<br>- Não existe outra tarefa de vídeo ativa no projeto. |
+| **Pré-condições** | - O utilizador tem sessão iniciada (JWT válido).<br>- O utilizador tem permissão de edição sobre o projeto.<br>- O projeto contém um vídeo num formato suportado (MP4, MOV ou AVI, segundo a matriz da DQ-002), com duração ≤ 5 min e tamanho ≤ 200 MB (Registado) ou ≤ 60 min e ≤ 2 GB (Premium), disponível para processamento.<br>- Não existe outra tarefa de vídeo ativa no projeto. |
 | **Trigger** | O utilizador seleciona um vídeo do projeto e escolhe a operação de recorte temporal. |
 
 ---
@@ -29,7 +29,7 @@
 | 2 | O utilizador define o instante inicial e o instante final do intervalo a conservar. | O sistema valida preliminarmente os valores na interface e apresenta a duração estimada do segmento resultante. |
 | 3 | O utilizador confirma a operação de recorte. | O sistema valida os limites temporais em relação à duração do vídeo, verifica que o instante inicial é estritamente menor que o final, verifica a quota disponível do utilizador (se Registado) e cria a tarefa de processamento assíncrono. |
 | 4 | — | O sistema reserva 1 operação da quota diária do utilizador (se Registado), coloca a tarefa na fila com estado `queued` e notifica o utilizador de que a operação foi aceite. |
-| 5 | — | O worker inicia o processamento (estado `processing`), extrai o segmento especificado e gera um novo ficheiro MP4 com o mesmo codec e resolução do original. |
+| 5 | — | O worker inicia o processamento (estado `processing`), extrai o segmento especificado e gera um novo ficheiro MP4 (H.264/AAC) com a mesma resolução e taxa de fotogramas do original, copiando as streams sem recodificação quando a origem já é H.264/AAC e recodificando-as caso contrário (DQ-013). |
 | 6 | — | O sistema armazena o novo vídeo, associa-o ao projeto como novo recurso (referenciando o vídeo de origem), transita a tarefa para `completed`, confirma o consumo da quota e notifica o utilizador através de WebSocket. |
 | 7 | O utilizador consulta o projeto. | O sistema apresenta o novo vídeo recortado na lista de recursos do projeto; o vídeo original permanece inalterado. |
 
@@ -52,7 +52,7 @@
 |--------------|------------------------------|
 | **Instante inicial maior ou igual ao instante final.** | No passo 3, o sistema rejeita a operação com erro de validação temporal (`INVALID_INTERVAL`), informando que o início deve ser anterior ao fim. A tarefa não é criada e a quota não é afetada. |
 | **Instantes definidos fora da duração total do vídeo.** | No passo 3, o sistema rejeita a operação com erro de limites (`OUT_OF_BOUNDS`), indicando a duração máxima permitida. A tarefa não é criada e a quota não é afetada. |
-| **Formato ou codec de vídeo não suportado.** | No passo 3, o sistema rejeita a operação se o vídeo não for MP4 com H.264/AAC (`UNSUPPORTED_FORMAT`). A tarefa não é criada e a quota não é afetada. |
+| **Formato ou codec de vídeo não suportado.** | No passo 3, o sistema rejeita a operação se o vídeo não estiver num formato suportado (MP4, MOV ou AVI, segundo a matriz da DQ-002) (`UNSUPPORTED_FORMAT`). A tarefa não é criada e a quota não é afetada. |
 | **Duração ou tamanho superior ao limite do perfil.** | No passo 3, o sistema rejeita a operação se o vídeo exceder 5 min / 200 MB (Registado) ou 60 min / 2 GB (Premium), com código `LIMIT_EXCEEDED`. A tarefa não é criada e a quota não é afetada. |
 | **Quota diária esgotada (utilizador Registado).** | No passo 3, o sistema informa que o limite diário de 5 operações foi atingido (`QUOTA_EXCEEDED`) e sugere o upgrade para Premium. A tarefa não é criada. |
 | **Falha de processamento durante a execução.** | No passo 5, se o worker falhar (erro de descodificação, falta de espaço em disco, etc.) → O sistema transita a tarefa para `failed`, liberta recursos temporários, estorna a quota diária reservada (se Registado) e notifica o utilizador com mensagem de erro explicativa. Nenhum ficheiro corrompido é associado ao projeto. |
@@ -74,7 +74,7 @@
 |--------|-----------|
 | **RN1** | Apenas utilizadores Registados e Premium com sessão iniciada e permissão de edição no projeto podem executar a operação. Utilizadores Anónimos não têm acesso. |
 | **RN2** | O intervalo temporal de recorte é definido por $[t_{início}, t_{fim}]$ com $0 \le t_{início} < t_{fim} \le \text{duração do vídeo}$. |
-| **RN3** | O vídeo de entrada e o vídeo de saída devem estar em formato MP4, codificados com H.264 (vídeo) e AAC (áudio). |
+| **RN3** | O vídeo de entrada pode estar em qualquer formato suportado (MP4, MOV ou AVI, segundo a matriz da DQ-002); o vídeo de saída é gerado em MP4, codificado com H.264 (vídeo) e AAC (áudio) (DQ-013). |
 | **RN4** | Limites por perfil: Registado — vídeo original com duração ≤ 5 minutos e tamanho ≤ 200 MB; Premium — duração ≤ 60 minutos e tamanho ≤ 2 GB. |
 | **RN5** | Cada operação de recorte concluída consome exatamente 1 crédito da quota diária de operações do utilizador Registado (limite de 5 operações/dia). Utilizadores Premium têm quota diária ilimitada. |
 | **RN6** | Em caso de cancelamento da tarefa ou de falha técnica, o crédito de quota reservado é integralmente devolvido ao saldo do utilizador Registado. |

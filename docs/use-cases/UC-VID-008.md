@@ -1,0 +1,103 @@
+# Caso de Uso: UC-VID-008 — Ajustar as propriedades visuais de um vídeo
+### PictuRAS (v27.1) · Fase 1: Suporte a Vídeo Digital
+
+---
+
+## 2.1 Cabeçalho
+
+| **Secção** | **Detalhes** |
+|------------|--------------|
+| **ID do Caso de Uso** | UC-VID-008 |
+| **Nome** | Ajustar as propriedades visuais de um vídeo |
+| **Versão** | v1.0 |
+| **Autor** | Equipa PictuRAS-27 |
+| **Data** | 2026-10-18 |
+| **Objetivo** | Permitir ao utilizador ajustar o brilho, o contraste e a saturação de um vídeo do projeto, obtendo um novo vídeo com os ajustes aplicados de forma uniforme a todos os fotogramas, sem alterar o original. |
+| **Âmbito** | Módulo de processamento de vídeo e gestão de recursos do PictuRAS |
+| **Ator Principal** | Utilizador **Registado** ou **Premium** com sessão iniciada e acesso ao projeto |
+| **Stakeholders e Interesses** | - **Utilizador Registado / Premium**: pretende corrigir vídeos escuros, lavados ou com cores pouco vivas, validando o efeito antes de gastar quota.<br>- **Sistema PictuRAS**: deve aplicar os ajustes com a mesma semântica das ferramentas de imagem existentes (brilho, contraste e saturação) e produzir um resultado consistente.<br>- **Administrador**: pretende garantir que o processamento respeita quotas e limites de infraestrutura. |
+| **Pré-condições** | - O utilizador tem sessão iniciada (JWT válido).<br>- O utilizador tem permissão de edição sobre o projeto.<br>- O projeto contém um vídeo num formato suportado (MP4, MOV ou AVI, segundo a matriz da DQ-002), com duração ≤ 5 min e tamanho ≤ 200 MB (Registado) ou ≤ 60 min e ≤ 2 GB (Premium).<br>- Não existe outra tarefa de vídeo ativa no projeto. |
+| **Trigger** | O utilizador seleciona um vídeo do projeto e escolhe a operação "Ajustar Imagem". |
+
+---
+
+## 2.2 Fluxo Principal
+
+| **Passo** | **Ação do Ator** | **Resposta do Sistema** |
+|-----------|------------------|-------------------------|
+| 1 | O utilizador acede ao projeto, seleciona um vídeo e escolhe a operação "Ajustar Imagem". | O sistema apresenta o vídeo e três controlos deslizantes (brilho, contraste e saturação), todos no valor neutro 1.0. |
+| 2 | O utilizador ajusta um ou mais controlos no intervalo 0.0 a 2.0. | O sistema apresenta, em ≤ 1 s, uma pré-visualização estática do primeiro fotograma com os ajustes aplicados. |
+| 3 | O utilizador confirma a operação. | O sistema valida que os valores estão no intervalo permitido e que pelo menos um difere do neutro, verifica a quota disponível (se Registado) e cria a tarefa assíncrona. |
+| 4 | — | O sistema reserva 1 operação da quota diária (se Registado), coloca a tarefa na fila com estado `queued` e notifica o utilizador da aceitação. |
+| 5 | — | O worker inicia o processamento (estado `processing`), aplica os ajustes de forma uniforme a todos os fotogramas e emite progresso percentual (0–100%) via WebSocket. |
+| 6 | — | O worker gera o novo vídeo em MP4 (H.264/AAC), preservando a duração, a resolução, a taxa de fotogramas e o áudio; o sistema associa-o ao projeto como novo recurso (referenciando o vídeo de origem), transita a tarefa para `completed`, confirma o consumo da quota e notifica o utilizador. |
+| 7 | O utilizador consulta o projeto. | O sistema apresenta o novo vídeo ajustado na lista de recursos; o vídeo original permanece inalterado. |
+
+---
+
+## 2.3 Fluxos Alternativos
+
+| **Fluxo** | **Descrição** |
+|-----------|---------------|
+| **FA1 – Repor valores neutros** | No passo 2, o utilizador clica em "Repor" → O sistema repõe os três controlos em 1.0 e atualiza a pré-visualização. |
+| **FA2 – Cancelamento antes do início do processamento** | No passo 4, com a tarefa no estado `queued`, o utilizador solicita o cancelamento → O sistema remove a tarefa da fila, devolve a quota reservada (se Registado), transita a tarefa para `cancelled` e notifica o utilizador. |
+| **FA3 – Cancelamento durante o processamento** | No passo 5, com a tarefa no estado `processing`, o utilizador solicita o cancelamento → O sistema interrompe o worker, elimina os ficheiros temporários, devolve a quota reservada (se Registado), transita a tarefa para `cancelled` e notifica o utilizador. |
+| **FA4 – Utilizador com perfil Premium** | No passo 3, o utilizador tem perfil Premium → O sistema não verifica nem debita quota diária e aplica os limites alargados. |
+| **FA5 – Utilização como passo de cadeia ou lote** | A operação é configurada como passo de uma cadeia (UC-VID-014) ou aplicada em lote (UC-VID-015) → As mesmas regras de validação aplicam-se e a execução segue o caso de uso respetivo. |
+
+---
+
+## 2.4 Exceções
+
+| **Condição** | **Comportamento do Sistema** |
+|--------------|------------------------------|
+| **Valor de ajuste fora do intervalo 0.0 a 2.0.** | No passo 3, o sistema rejeita a operação (`INVALID_ADJUST_PARAMS`), indicando o controlo incorreto. A tarefa não é criada e a quota não é afetada. |
+| **Todos os valores no neutro (1.0).** | No passo 3, o sistema bloqueia a confirmação (`NO_CHANGES`) informando que nenhum ajuste foi definido. |
+| **Formato ou codec de vídeo não suportado.** | No passo 3, o sistema rejeita a operação (`UNSUPPORTED_FORMAT`). A tarefa não é criada e a quota não é afetada. |
+| **Duração ou tamanho superior ao limite do perfil.** | No passo 3, o sistema rejeita a operação (`LIMIT_EXCEEDED`). A tarefa não é criada e a quota não é afetada. |
+| **Quota diária esgotada (utilizador Registado).** | No passo 3, o sistema informa que o limite diário de 5 operações foi atingido (`QUOTA_EXCEEDED`). A tarefa não é criada. |
+| **Falha de processamento durante a execução.** | No passo 5, se o worker falhar → O sistema transita a tarefa para `failed`, elimina ficheiros temporários, estorna a quota reservada (se Registado) e notifica o utilizador. Nenhum recurso parcial é gravado no projeto. |
+
+---
+
+## 2.5 Pós-condições
+
+| **Tipo** | **Resultado** |
+|----------|---------------|
+| **Garantia de Sucesso** | Um novo vídeo MP4 com o brilho, o contraste e a saturação ajustados em todos os fotogramas é persistido e associado ao projeto (com referência ao vídeo de origem). O vídeo original permanece inalterado. A quota diária é consumida em 1 operação (apenas Registado). A tarefa transita para `completed`. |
+| **Garantia Mínima** | Em caso de erro ou cancelamento, nenhum novo recurso é associado ao projeto, os ficheiros temporários são purgados, a quota reservada é devolvida e a tarefa transita para `failed` ou `cancelled`. O vídeo original permanece inalterado. |
+
+---
+
+## 2.6 Regras de Negócio e Restrições
+
+| **ID** | **Regra** |
+|--------|-----------|
+| **RN1** | Apenas utilizadores Registados e Premium com sessão iniciada e permissão de edição no projeto podem executar a operação. |
+| **RN2** | Cada propriedade (brilho, contraste, saturação) é um fator multiplicativo no intervalo [0.0, 2.0], com passo de 0.05 e valor neutro 1.0, à semelhança das ferramentas de imagem existentes (DQ-020). |
+| **RN3** | Pelo menos uma propriedade deve ter valor diferente do neutro. |
+| **RN4** | Os ajustes são aplicados de forma uniforme a todos os fotogramas do vídeo. |
+| **RN5** | O resultado é gerado em MP4 (H.264/AAC), preservando a duração, a resolução, a taxa de fotogramas e o áudio do original (DQ-013). |
+| **RN6** | Cada operação concluída consome exatamente 1 crédito da quota diária do utilizador Registado (limite de 5 operações/dia). Utilizadores Premium têm quota ilimitada. |
+| **RN7** | Em caso de cancelamento ou falha técnica, o crédito reservado é integralmente devolvido ao utilizador Registado. |
+| **RN8** | A operação é assíncrona; o progresso numérico (0–100%) é emitido via WebSocket. |
+| **RN9** | O vídeo original nunca é alterado nem eliminado; o resultado é um novo recurso independente no projeto. |
+| **RN10** | Apenas pode existir 1 tarefa de processamento de vídeo ativa em simultâneo por projeto. |
+| **RN11** | A operação pode ser usada como passo de uma cadeia (UC-VID-014) e no processamento em lote (UC-VID-015). |
+
+---
+
+## 2.7 Assunções
+
+| **ID** | **Assunção** |
+|--------|--------------|
+| **A1** | O FFmpeg (filtro `eq`) permite aplicar brilho, contraste e saturação com semântica equivalente à dos fatores da biblioteca de imagem utilizada nas ferramentas existentes. |
+| **A2** | A quota diária é reposta diariamente às 00:00 UTC. |
+
+---
+
+## 2.8 Questões em Aberto
+
+| **ID** | **Questão** | **Resolução / Decisão** |
+|--------|-------------|-------------------------|
+| **Q1** | Devem ser suportados outros ajustes (gama, nitidez, temperatura de cor)? | Não no MVP. Os ajustes adicionais ficam para a Fase 2; a temperatura de cor é parcialmente coberta pelos filtros "Frio" e "Quente" (UC-VID-009). |

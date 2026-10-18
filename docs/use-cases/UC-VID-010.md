@@ -1,0 +1,105 @@
+# Caso de Uso: UC-VID-010 — Redimensionar um vídeo
+### PictuRAS (v27.1) · Fase 1: Suporte a Vídeo Digital
+
+---
+
+## 2.1 Cabeçalho
+
+| **Secção** | **Detalhes** |
+|------------|--------------|
+| **ID do Caso de Uso** | UC-VID-010 |
+| **Nome** | Redimensionar um vídeo |
+| **Versão** | v1.0 |
+| **Autor** | Equipa PictuRAS-27 |
+| **Data** | 2026-10-18 |
+| **Objetivo** | Permitir ao utilizador alterar a resolução de um vídeo do projeto, selecionando as dimensões de saída pretendidas, e obter um novo vídeo com essas dimensões, sem alterar o original. |
+| **Âmbito** | Módulo de processamento de vídeo e gestão de recursos do PictuRAS |
+| **Ator Principal** | Utilizador **Registado** ou **Premium** com sessão iniciada e acesso ao projeto |
+| **Stakeholders e Interesses** | - **Utilizador Registado / Premium**: pretende reduzir o tamanho do vídeo para partilha ou adaptá-lo a uma resolução-alvo (e.g. 720p).<br>- **Sistema PictuRAS**: deve garantir dimensões compatíveis com o codec H.264 e com os limites do perfil.<br>- **Administrador**: pretende evitar resoluções excessivas que sobrecarreguem os workers e o armazenamento. |
+| **Pré-condições** | - O utilizador tem sessão iniciada (JWT válido).<br>- O utilizador tem permissão de edição sobre o projeto.<br>- O projeto contém um vídeo num formato suportado (MP4, MOV ou AVI, segundo a matriz da DQ-002), com duração ≤ 5 min e tamanho ≤ 200 MB (Registado) ou ≤ 60 min e ≤ 2 GB (Premium).<br>- Não existe outra tarefa de vídeo ativa no projeto. |
+| **Trigger** | O utilizador seleciona um vídeo do projeto e escolhe a operação "Redimensionar". |
+
+---
+
+## 2.2 Fluxo Principal
+
+| **Passo** | **Ação do Ator** | **Resposta do Sistema** |
+|-----------|------------------|-------------------------|
+| 1 | O utilizador acede ao projeto, seleciona um vídeo e escolhe a operação "Redimensionar". | O sistema apresenta a resolução atual, os campos de largura e altura preenchidos com os valores atuais, o bloqueio de proporção ativo e as predefinições 1080p, 720p, 480p e 360p. |
+| 2 | O utilizador escolhe uma predefinição ou introduz a largura (ou a altura) pretendida. | Com a proporção bloqueada, o sistema recalcula a outra dimensão, arredondando-a para o número par mais próximo, e apresenta as dimensões finais. |
+| 3 | O utilizador confirma a operação. | O sistema valida que as dimensões são pares, ≥ 128 px, dentro do limite do perfil e diferentes das atuais, verifica a quota disponível (se Registado) e cria a tarefa assíncrona. |
+| 4 | — | O sistema reserva 1 operação da quota diária (se Registado), coloca a tarefa na fila com estado `queued` e notifica o utilizador da aceitação. |
+| 5 | — | O worker inicia o processamento (estado `processing`), reamostra todos os fotogramas para as dimensões pretendidas e emite progresso percentual (0–100%) via WebSocket. |
+| 6 | — | O worker gera o novo vídeo em MP4 (H.264/AAC) com as dimensões exatas, preservando a duração, a taxa de fotogramas e o áudio; o sistema associa-o ao projeto como novo recurso (referenciando o vídeo de origem), transita a tarefa para `completed`, confirma o consumo da quota e notifica o utilizador. |
+| 7 | O utilizador consulta o projeto. | O sistema apresenta o novo vídeo redimensionado na lista de recursos; o vídeo original permanece inalterado. |
+
+---
+
+## 2.3 Fluxos Alternativos
+
+| **Fluxo** | **Descrição** |
+|-----------|---------------|
+| **FA1 – Desbloqueio da proporção** | No passo 2, o utilizador desativa o bloqueio de proporção e define largura e altura de forma independente → O sistema apresenta um aviso de que a imagem ficará distorcida. O fluxo continua no passo 3. |
+| **FA2 – Ampliação acima da resolução original** | No passo 2, as dimensões pretendidas são superiores às originais → O sistema apresenta um aviso de que a ampliação não acrescenta detalhe. O fluxo continua no passo 3. |
+| **FA3 – Cancelamento antes do início do processamento** | No passo 4, com a tarefa no estado `queued`, o utilizador solicita o cancelamento → O sistema remove a tarefa da fila, devolve a quota reservada (se Registado), transita a tarefa para `cancelled` e notifica o utilizador. |
+| **FA4 – Cancelamento durante o processamento** | No passo 5, com a tarefa no estado `processing`, o utilizador solicita o cancelamento → O sistema interrompe o worker, elimina os ficheiros temporários, devolve a quota reservada (se Registado), transita a tarefa para `cancelled` e notifica o utilizador. |
+| **FA5 – Utilizador com perfil Premium** | No passo 3, o utilizador tem perfil Premium → O sistema não verifica nem debita quota diária e aplica o limite de resolução alargado (3840×2160). |
+| **FA6 – Utilização como passo de cadeia ou lote** | A operação é configurada como passo de uma cadeia (UC-VID-014) ou aplicada em lote (UC-VID-015) → As mesmas regras de validação aplicam-se e a execução segue o caso de uso respetivo. |
+
+---
+
+## 2.4 Exceções
+
+| **Condição** | **Comportamento do Sistema** |
+|--------------|------------------------------|
+| **Dimensões ímpares, inferiores a 128 px ou acima do limite do perfil.** | No passo 3, o sistema rejeita a operação (`INVALID_RESIZE_PARAMS`), indicando a dimensão incorreta e o limite aplicável. A tarefa não é criada e a quota não é afetada. |
+| **Dimensões iguais às do vídeo original.** | No passo 3, o sistema bloqueia a confirmação (`NO_CHANGES`). |
+| **Formato ou codec de vídeo não suportado.** | No passo 3, o sistema rejeita a operação (`UNSUPPORTED_FORMAT`). A tarefa não é criada e a quota não é afetada. |
+| **Duração ou tamanho superior ao limite do perfil.** | No passo 3, o sistema rejeita a operação (`LIMIT_EXCEEDED`). A tarefa não é criada e a quota não é afetada. |
+| **Quota diária esgotada (utilizador Registado).** | No passo 3, o sistema informa que o limite diário de 5 operações foi atingido (`QUOTA_EXCEEDED`). A tarefa não é criada. |
+| **Falha de processamento durante a execução.** | No passo 5, se o worker falhar → O sistema transita a tarefa para `failed`, elimina ficheiros temporários, estorna a quota reservada (se Registado) e notifica o utilizador. Nenhum recurso parcial é gravado no projeto. |
+
+---
+
+## 2.5 Pós-condições
+
+| **Tipo** | **Resultado** |
+|----------|---------------|
+| **Garantia de Sucesso** | Um novo vídeo MP4 com exatamente as dimensões confirmadas é persistido e associado ao projeto (com referência ao vídeo de origem). O vídeo original permanece inalterado. A quota diária é consumida em 1 operação (apenas Registado). A tarefa transita para `completed`. |
+| **Garantia Mínima** | Em caso de erro ou cancelamento, nenhum novo recurso é associado ao projeto, os ficheiros temporários são purgados, a quota reservada é devolvida e a tarefa transita para `failed` ou `cancelled`. O vídeo original permanece inalterado. |
+
+---
+
+## 2.6 Regras de Negócio e Restrições
+
+| **ID** | **Regra** |
+|--------|-----------|
+| **RN1** | Apenas utilizadores Registados e Premium com sessão iniciada e permissão de edição no projeto podem executar a operação. |
+| **RN2** | A largura e a altura de saída são números inteiros pares, com mínimo de 128 px (requisito de compatibilidade do codec H.264). |
+| **RN3** | Limites de resolução de saída por perfil (maior dimensão × menor dimensão): Registado — até 1920×1080; Premium — até 3840×2160 (DQ-022). |
+| **RN4** | Por omissão, a proporção original é mantida; o desbloqueio da proporção é permitido mediante aviso de distorção. |
+| **RN5** | A ampliação acima da resolução original é permitida, mediante aviso. |
+| **RN6** | O resultado é gerado em MP4 (H.264/AAC), preservando a duração, a taxa de fotogramas e o áudio do original (DQ-013). |
+| **RN7** | Cada operação concluída consome exatamente 1 crédito da quota diária do utilizador Registado (limite de 5 operações/dia). Utilizadores Premium têm quota ilimitada. |
+| **RN8** | Em caso de cancelamento ou falha técnica, o crédito reservado é integralmente devolvido ao utilizador Registado. |
+| **RN9** | A operação é assíncrona; o progresso numérico (0–100%) é emitido via WebSocket. |
+| **RN10** | O vídeo original nunca é alterado nem eliminado; o resultado é um novo recurso independente no projeto. |
+| **RN11** | Apenas pode existir 1 tarefa de processamento de vídeo ativa em simultâneo por projeto. |
+| **RN12** | A operação pode ser usada como passo de uma cadeia (UC-VID-014) e no processamento em lote (UC-VID-015). |
+
+---
+
+## 2.7 Assunções
+
+| **ID** | **Assunção** |
+|--------|--------------|
+| **A1** | O FFmpeg (filtro `scale`) suporta a reamostragem para as dimensões pretendidas com qualidade adequada. |
+| **A2** | Os limites de resolução são valores de MVP, configuráveis e a validar pela equipa. |
+
+---
+
+## 2.8 Questões em Aberto
+
+| **ID** | **Questão** | **Resolução / Decisão** |
+|--------|-------------|-------------------------|
+| **Q1** | Com a proporção desbloqueada, deve ser oferecido o preenchimento com barras pretas (*letterbox*) em vez da distorção? | Não no MVP. Com a proporção desbloqueada, a imagem é esticada mediante aviso; o *letterbox* fica para a Fase 2. |

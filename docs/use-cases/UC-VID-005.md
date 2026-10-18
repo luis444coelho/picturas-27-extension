@@ -9,14 +9,14 @@
 |------------|--------------|
 | **ID do Caso de Uso** | UC-VID-005 |
 | **Nome** | Extrair fotogramas de um vídeo para o projeto |
-| **Versão** | v1.2 |
+| **Versão** | v1.3 |
 | **Autor** | Equipa PictuRAS-27 |
 | **Data** | 2026-10-18 |
 | **Objetivo** | Permitir ao utilizador extrair um conjunto de fotogramas discretos de um vídeo do projeto segundo um intervalo temporal e passo regular, convertendo-os em imagens normais associadas ao projeto, sem alterar o vídeo original. |
 | **Âmbito** | Módulo de processamento de vídeo e integração com a galeria de imagens do PictuRAS |
 | **Ator Principal** | Utilizador **Registado** ou **Premium** com sessão iniciada e acesso ao projeto |
 | **Stakeholders e Interesses** | - **Utilizador Registado / Premium**: pretende obter imagens estáticas com qualidade a partir do vídeo para aplicar as ferramentas de imagem já existentes na plataforma.<br>- **Sistema PictuRAS**: deve extrair os fotogramas com rigor temporal, convertê-los no formato pretendido (JPEG ou PNG) e adicioná-los de forma atómica ao projeto.<br>- **Administrador**: pretende garantir que a extração não sobrecarrega a base de dados nem excede as quotas de armazenamento. |
-| **Pré-condições** | - O utilizador tem sessão iniciada (JWT válido).<br>- O utilizador tem permissão de edição sobre o projeto.<br>- O projeto contém um vídeo em formato MP4 (H.264), com duração ≤ 5 min e tamanho ≤ 200 MB (Registado) ou ≤ 60 min e ≤ 2 GB (Premium).<br>- O utilizador tem quota diária disponível (se Registado).<br>- O número estimado de fotogramas a extrair não excede o limite do perfil (50 para Registado, 500 para Premium).<br>- Não existe outra tarefa de vídeo ativa no projeto. |
+| **Pré-condições** | - O utilizador tem sessão iniciada (JWT válido).<br>- O utilizador tem permissão de edição sobre o projeto.<br>- O projeto contém um vídeo num formato suportado (MP4, MOV ou AVI, segundo a matriz da DQ-002), com duração ≤ 5 min e tamanho ≤ 200 MB (Registado) ou ≤ 60 min e ≤ 2 GB (Premium).<br>- O utilizador tem quota diária disponível (se Registado).<br>- O número estimado de fotogramas a extrair não excede o limite do perfil (50 para Registado, 500 para Premium).<br>- Não existe outra tarefa de vídeo ativa no projeto. |
 | **Trigger** | O utilizador seleciona um vídeo do projeto e escolhe a operação "Extrair Fotogramas". |
 
 ---
@@ -54,7 +54,7 @@
 |--------------|------------------------------|
 | **Parâmetros inválidos ($t_{\text{início}} \ge t_{\text{fim}}$, $t_{\text{fim}} > \text{duração}$, ou $N < 1\text{s}$).** | No passo 3, o sistema rejeita a operação com erro de validação (`INVALID_EXTRACTION_PARAMS`), indicando os campos incorretos. A tarefa não é criada e a quota não é afetada. |
 | **Número de fotogramas excede o limite do perfil.** | No passo 3, se a estimativa exceder 50 (Registado) ou 500 (Premium), o sistema rejeita a operação (`FRAME_COUNT_EXCEEDED`), sugere o aumento do passo $N$ e, se Registado, sugere o upgrade para Premium. A tarefa não é criada. |
-| **Formato ou codec de vídeo não suportado.** | No passo 3, o sistema rejeita a operação se o vídeo não for MP4 com H.264 (`UNSUPPORTED_FORMAT`). A tarefa não é criada e a quota não é afetada. |
+| **Formato ou codec de vídeo não suportado.** | No passo 3, o sistema rejeita a operação se o vídeo não estiver num formato suportado (MP4, MOV ou AVI, segundo a matriz da DQ-002) (`UNSUPPORTED_FORMAT`). A tarefa não é criada e a quota não é afetada. |
 | **Duração ou tamanho superior ao limite do perfil.** | No passo 3, o sistema rejeita a operação se os limites forem excedidos (`LIMIT_EXCEEDED`). A tarefa não é criada e a quota não é afetada. |
 | **Quota diária esgotada (utilizador Registado).** | No passo 3, o sistema informa que o limite diário de 5 operações foi atingido (`QUOTA_EXCEEDED`). A tarefa não é criada. |
 | **Ficheiro corrompido ou erro de descodificação.** | No passo 5, se o worker não conseguir ler fotogramas em determinados timestamps → O sistema transita a tarefa para `failed`, elimina fotogramas parciais gerados, estorna a quota reservada (se Registado) e notifica o utilizador com mensagem de erro. |
@@ -96,12 +96,12 @@
 
 | **ID** | **Assunção** |
 |--------|--------------|
-| **A1** | O utilizador tem acesso a um projeto com pelo menos um vídeo MP4 elegível carregado. |
+| **A1** | O utilizador tem acesso a um projeto com pelo menos um vídeo elegível (MP4, MOV ou AVI) carregado. |
 | **A2** | Os fotogramas extraídos herdam a resolução espacial (largura × altura) do vídeo original. |
 | **A3** | O armazenamento de objetos suporta a gravação eficiente de múltiplos ficheiros de imagem em lote. |
 | **A4** | Quando o timestamp teórico $t_k$ não coincide exatamente com um fotograma codificado no vídeo, o FFmpeg seleciona o fotograma mais próximo sem interpolação. |
 | **A5** | A quota diária é redefinida diariamente às 00:00 UTC. |
-| **A6** | O processamento em lote (*batch processing*) no MVP aplica-se exclusivamente aos fotogramas após a sua extração (como imagens normais do projeto). O lote de múltiplos vídeos não é suportado no MVP. |
+| **A6** | O processamento em lote de vários vídeos e o encadeamento de operações de vídeo são suportados no MVP (UC-VID-014 e UC-VID-015). A extração de fotogramas não é elegível como passo de cadeia nem como operação de lote de vídeos, por produzir imagens; os fotogramas extraídos, enquanto imagens normais do projeto, podem ser processados em lote com as ferramentas de imagem existentes. |
 
 ---
 
