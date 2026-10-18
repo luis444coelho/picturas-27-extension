@@ -1,0 +1,215 @@
+@startuml modelo_dominio
+skinparam monochrome false
+skinparam roundcorner 8
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam linetype ortho
+
+skinparam class {
+    BackgroundColor #FFFFFF
+    ArrowColor #2C3E50
+    BorderColor #2C3E50
+    FontSize 11
+}
+
+' Estilos destacados para o delta da Fase 1 (Vídeo)
+skinparam class<<DeltaVideo>> {
+    BackgroundColor #FFF3E0
+    BorderColor #E65100
+    BorderThickness 1.5
+}
+
+skinparam class<<Baseline>> {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+}
+
+title Modelo de Domínio Atualizado — Suporte a Vídeo Digital (PictuRAS v27.1 · Fase 1)
+
+' ==========================================
+' UTILIZADORES E CONTAS
+' ==========================================
+abstract class "Utilizador" as Utilizador <<Baseline>> {
+    + id: UUID
+    + email: String
+    + nome: String
+}
+
+class "Anónimo" as Anonimo <<Baseline>>
+class "Registado / Gratuito" as Gratuito <<Baseline>> {
+    + saldoQuotaDiária: Integer = 5
+    + limiteDuraçãoVídeo: Integer = 300s
+    + limiteTamanhoVídeo: Integer = 200MB
+    + limiteFotogramas: Integer = 50
+}
+class "Premium" as Premium <<Baseline>> {
+    + saldoQuotaDiária: String = "Ilimitado"
+    + limiteDuraçãoVídeo: Integer = 3600s
+    + limiteTamanhoVídeo: Integer = 2048MB
+    + limiteFotogramas: Integer = 500
+}
+
+Utilizador <|-- Anonimo
+Utilizador <|-- Gratuito
+Utilizador <|-- Premium
+
+Utilizador "1" -- "0..*" Utilizador : convida >
+
+' ==========================================
+' PROJETO E RECURSOS
+' ==========================================
+class "Projeto" as Projeto <<Baseline>> {
+    + id: UUID
+    + título: String
+    + dataCriação: DateTime
+    + permissãoEdição: Boolean
+}
+
+Utilizador "1..*" -- "0..*" Projeto : gere / colabora >
+
+abstract class "RecursoMultimédia" as Recurso <<DeltaVideo>> {
+    + id: UUID
+    + nomeFicheiro: String
+    + tamanhoBytes: Long
+    + dataUpload: DateTime
+    + storageRef: URI
+}
+
+class "Imagem" as Imagem <<Baseline>> {
+    + largura: Integer
+    + altura: Integer
+    + formato: FormatoImagem [JPEG, PNG]
+    + timestampOrigem: Optional<Float>
+}
+
+class "Vídeo" as Video <<DeltaVideo>> {
+    + duraçãoSegundos: Float
+    + resoluçãoEspacial: String [ex: 1920x1080]
+    + taxaFotogramas: Float [fps]
+    + bitrate: Integer [kbps]
+    + codecVídeo: CodecVideo [H.264/AVC]
+    + codecÁudio: Optional<CodecAudio> [AAC]
+    + thumbnailRef: URI
+}
+
+Recurso <|-- Imagem
+Recurso <|-- Video
+
+Projeto "1" *-- "0..*" Recurso : contém (misto) >
+Utilizador "1" -- "0..*" Recurso : carrega / adiciona >
+Video "0..1" <-- "0..*" Recurso : provém de (sourceVideoId) <
+
+' ==========================================
+' PROCESSAMENTO ASSÍNCRONO DE VÍDEO
+' ==========================================
+class "TrabalhoProcessamento" as Job <<DeltaVideo>> {
+    + id: UUID
+    + tipoOperação: TipoOperacaoVideo
+    + estado: EstadoTarefa
+    + progressoPercentual: Integer [0..100%]
+    + dataCriação: DateTime
+    + dataConclusão: Optional<DateTime>
+    + mensagemErro: Optional<String>
+}
+
+enum "EstadoTarefa" as EstadoTarefa <<DeltaVideo>> {
+    queued
+    processing
+    completed
+    failed
+    cancelled
+}
+
+enum "TipoOperacaoVideo" as TipoOperacao <<DeltaVideo>> {
+    TRIM
+    REMOVE_AUDIO
+    CHANGE_SPEED
+    APPLY_WATERMARK
+    EXTRACT_FRAMES
+    ADJUST_VISUALS
+    APPLY_FILTER
+    RESIZE
+    ORIENT
+    CONVERT_FORMAT
+    CONCAT
+    CHAIN
+    BATCH
+}
+
+Job ..> EstadoTarefa
+Job ..> TipoOperacao
+
+Projeto "1" -- "0..*" Job : regista >
+Utilizador "1" -- "0..*" Job : submete / debita quota >
+Job "0..*" --> "1" Video : processa >
+Job "0..*" --> "0..*" Recurso : gera no sucesso >
+
+' ==========================================
+' FERRAMENTAS E PRESETS
+' ==========================================
+abstract class "Ferramenta" as Ferramenta <<Baseline>> {
+    + id: String
+    + nome: String
+}
+
+class "FerramentaImagem" as FerramentaImagem <<Baseline>>
+class "FerramentaVídeo" as FerramentaVideo <<DeltaVideo>> {
+    + parâmetrosValidados: Map<String, Any>
+}
+
+Ferramenta <|-- FerramentaImagem
+Ferramenta <|-- FerramentaVideo
+
+class "RecorteTemporal" as Recorte <<DeltaVideo>> {
+    + instanteInício: Float
+    + instanteFim: Float
+}
+class "RemoçãoÁudio" as RemocaoAudio <<DeltaVideo>>
+class "AlteraçãoVelocidade" as Velocidade <<DeltaVideo>> {
+    + fatorVelocidade: Float [0.25..4.0]
+}
+class "MarcaÁguaVídeo" as MarcaAgua <<DeltaVideo>> {
+    + tipoMarca: TipoMarca [Texto, Imagem]
+    + conteúdoTexto: Optional<String>
+    + imagemRef: Optional<URI>
+    + escala: Float [5..50%]
+    + opacidade: Float [10..100%]
+    + posição: Posição [X, Y]
+}
+class "ExtraçãoFotogramas" as ExtracaoFotogramas <<DeltaVideo>> {
+    + intervaloInício: Float
+    + intervaloFim: Float
+    + passoSegundos: Integer [N >= 1]
+    + formatoSaída: FormatoImagem [JPEG, PNG]
+}
+
+FerramentaVideo <|-- Recorte
+FerramentaVideo <|-- RemocaoAudio
+FerramentaVideo <|-- Velocidade
+FerramentaVideo <|-- MarcaAgua
+FerramentaVideo <|-- ExtracaoFotogramas
+
+FerramentaVideo "1" -- "0..*" Job : parametriza >
+FerramentaImagem "0..*" -- "0..*" Imagem : altera / encadeia >
+
+class "Preset" as Preset <<Baseline>> {
+    + id: UUID
+    + nome: String
+}
+Preset "0..*" o-- "1..*" FerramentaImagem : contém >
+Utilizador "1" -- "0..*" Preset : cria >
+
+note bottom of Recurso
+  <b>Resposta às 4 Perguntas do Guia:</b>
+  1. <b>Vídeo vs Imagem:</b> Ambos especializam <b>RecursoMultimédia</b>.
+  2. <b>Projetos Mistos:</b> O Projeto agrega instâncias de Imagem e Vídeo.
+  3. <b>Processamento Demorado:</b> Entidade <b>TrabalhoProcessamento</b> com máquina de estados.
+  4. <b>Ferramentas e Quotas:</b> Ferramentas de imagem aplicam-se a fotogramas extraídos.
+     Registado: 5 créditos/dia; Premium: ilimitado.
+     Operação isolada: 1 crédito; cadeia: 1 por passo;
+     lote: custo por vídeo concluído. Upload, consulta, pré-visualização e download são isentos.
+end note
+
+@enduml
+
