@@ -1,102 +1,36 @@
 #import "../template.typ": *
 
-// =============================================================================
-//  CASO DE USO — um ficheiro por caso de uso (UC-VID-001.typ, UC-VID-002.typ, …).
-//  Copiar este ficheiro e acrescentar o #include em capitulos/04-casos-de-uso.typ.
-//  Os requisitos derivados deste caso de uso vão para as tabelas partilhadas dos
-//  capítulos seguintes (ERS, impacto, rastreabilidade).
-// =============================================================================
-
-== UC-VID-001 — #preencher[nome]
+== UC-VID-001 — Recortar temporalmente um vídeo
 
 === Cabeçalho
 
-#tab([Caso de uso UC-VID-001 — #preencher[nome]],
-  tabela-campos(
-    [ID do Caso de Uso], [UC-VID-001],
-    [Nome], [#preencher[…]],
-    [Versão], [#preencher[v1.2]],
-    [Autor], [#preencher[…]],
-    [Data], [#preencher[AAAA-MM-DD]],
-    [Objetivo], [#preencher[o que o ator consegue alcançar]],
-    [Âmbito], [#preencher[módulo/componente do PictuRAS afetado]],
-    [Ator Principal], [#preencher[ator + perfil de utilização]],
-    [_Stakeholders_ e Interesses], [
-      - *#preencher[stakeholder]*: #preencher[interesse]
-      - *#preencher[stakeholder]*: #preencher[interesse]
-    ],
-    [Pré-condições], [
-      - #preencher[…]
-    ],
-    [_Trigger_], [#preencher[o que dá início ao caso de uso]],
-  ),
-)
+#tab([UC-VID-001 — Cabeçalho], tabela(colunas: (4.3cm, 1fr), tamanho: 8.5pt, [Secção], [Detalhes], [*ID do Caso de Uso*], [UC-VID-001], [*Nome*], [Recortar temporalmente um vídeo], [*Versão*], [v1.3], [*Autor*], [Equipa PictuRAS-27], [*Data*], [2026-10-18], [*Objetivo*], [Permitir ao utilizador selecionar um intervalo temporal válido de um vídeo do seu projeto e obter um novo vídeo que preserve apenas esse intervalo, sem alterar o original.], [*Âmbito*], [Módulo de processamento de vídeo e gestão de recursos do PictuRAS], [*Ator Principal*], [Utilizador *Registado* ou *Premium* com sessão iniciada e acesso ao projeto], [*Stakeholders e Interesses*], [- *Utilizador Registado / Premium*: pretende reduzir o vídeo às partes relevantes sem perder o ficheiro original e sem esgotar desnecessariamente a quota diária. / - *Sistema PictuRAS*: deve validar o intervalo, executar o recorte de forma assíncrona e produzir um resultado consistente. / - *Administrador / Equipa de produto*: pretende garantir que o processo respeita as políticas de acesso, quota e armazenamento.], [*Pré-condições*], [- O utilizador tem sessão iniciada (JWT válido). / - O utilizador tem permissão de edição sobre o projeto. / - O projeto contém um vídeo num formato suportado (MP4, MOV ou AVI, segundo a matriz da DQ-002), com duração ≤ 5 min e tamanho ≤ 200 MB (Registado) ou ≤ 60 min e ≤ 2 GB (Premium), disponível para processamento. / - Não existe outra tarefa de vídeo ativa no projeto.], [*Trigger*], [O utilizador seleciona um vídeo do projeto e escolhe a operação de recorte temporal.]))
 
-=== Fluxo Principal
+=== Fluxo principal
 
-#tab([UC-VID-001 — Fluxo principal],
-  tabela(
-    colunas: (1.2cm, 1fr, 1fr),
-    [Passo], [Ação do Ator], [Resposta do Sistema],
-    [1], [#preencher[…]], [#preencher[…]],
-    [2], [#preencher[…]], [—],
-    [3], [—], [#preencher[…]],
-  ),
-)
+#tab([UC-VID-001 — Fluxo principal], tabela(colunas: (1.1cm, 1fr, 1fr), tamanho: 8.5pt, [Passo], [Ação do Ator], [Resposta do Sistema], [1], [O utilizador acede ao projeto, seleciona um vídeo e escolhe a operação "Recortar Vídeo".], [O sistema apresenta o vídeo selecionado e os controlos de recorte temporal.], [2], [O utilizador define o instante inicial e o instante final do intervalo a conservar.], [O sistema valida preliminarmente os valores na interface e apresenta a duração estimada do segmento resultante.], [3], [O utilizador confirma a operação de recorte.], [O sistema valida os limites temporais em relação à duração do vídeo, verifica que o instante inicial é estritamente menor que o final, verifica a quota disponível do utilizador (se Registado) e cria a tarefa de processamento assíncrono.], [4], [—], [O sistema reserva 1 operação da quota diária do utilizador (se Registado), coloca a tarefa na fila com estado queued e notifica o utilizador de que a operação foi aceite.], [5], [—], [O worker inicia o processamento (estado processing), extrai o segmento especificado e gera um novo ficheiro MP4 (H.264/AAC) com a mesma resolução e taxa de fotogramas do original, copiando as streams sem recodificação quando a origem já é H.264/AAC e recodificando-as caso contrário (DQ-013).], [6], [—], [O sistema armazena o novo vídeo, associa-o ao projeto como novo recurso (referenciando o vídeo de origem), transita a tarefa para completed, confirma o consumo da quota e notifica o utilizador através de WebSocket.], [7], [O utilizador consulta o projeto.], [O sistema apresenta o novo vídeo recortado na lista de recursos do projeto; o vídeo original permanece inalterado.]))
 
-=== Fluxos Alternativos
+=== Fluxos alternativos
 
-#tab([UC-VID-001 — Fluxos alternativos],
-  tabela(
-    colunas: (4cm, 1fr),
-    [Fluxo], [Descrição (passo de origem: condição → comportamento → retorno)],
-    [FA1 – #preencher[nome]], [#preencher[…]],
-  ),
-)
+#tab([UC-VID-001 — Fluxos alternativos], tabela(colunas: (4.3cm, 1fr), tamanho: 8.5pt, [Fluxo], [Descrição], [*FA1 – Alteração do intervalo antes de confirmar*], [No passo 2, o utilizador ajusta repetidamente os instantes inicial e final (inclusive com recurso a pré-visualização em repetição / *loop preview*) → O sistema atualiza dinamicamente a duração prevista a cada alteração. O fluxo continua no passo 3.], [*FA2 – Cancelamento antes do início do processamento*], [No passo 4, enquanto a tarefa está no estado queued, o utilizador solicita o cancelamento → O sistema remove a tarefa da fila, devolve a operação reservada à quota do utilizador (se Registado), transita a tarefa para cancelled e notifica o utilizador. Nenhum novo vídeo é gerado.], [*FA3 – Cancelamento durante o processamento*], [No passo 5, com a tarefa no estado processing, o utilizador solicita o cancelamento → O sistema envia sinal de cancelamento ao worker, elimina ficheiros temporários gerados, devolve a quota reservada (se Registado), transita a tarefa para cancelled e notifica o utilizador. Nenhum novo recurso é criado no projeto.], [*FA4 – Utilizador com perfil Premium*], [No passo 3, o utilizador tem perfil Premium → O sistema não verifica nem debita quota diária de operações (quota ilimitada) e aplica os limites de duração alargados (até 60 min).]))
 
 === Exceções
 
-#orientacao[Incluam pelo menos uma exceção específica de vídeo (formato/_codec_ não suportado, duração ou tamanho excedidos, falha a meio do processamento, quota esgotada, …).]
-
-#tab([UC-VID-001 — Exceções],
-  tabela(
-    colunas: (1fr, 1fr),
-    [Condição], [Comportamento do Sistema],
-    [#preencher[…]], [#preencher[…]],
-  ),
-)
+#tab([UC-VID-001 — Exceções], tabela(colunas: (4.3cm, 1fr), tamanho: 8.5pt, [Condição], [Comportamento do Sistema], [*Instante inicial maior ou igual ao instante final.*], [No passo 3, o sistema rejeita a operação com erro de validação temporal (INVALID_INTERVAL), informando que o início deve ser anterior ao fim. A tarefa não é criada e a quota não é afetada.], [*Instantes definidos fora da duração total do vídeo.*], [No passo 3, o sistema rejeita a operação com erro de limites (OUT_OF_BOUNDS), indicando a duração máxima permitida. A tarefa não é criada e a quota não é afetada.], [*Formato ou codec de vídeo não suportado.*], [No passo 3, o sistema rejeita a operação se o vídeo não estiver num formato suportado (MP4, MOV ou AVI, segundo a matriz da DQ-002) (UNSUPPORTED_FORMAT). A tarefa não é criada e a quota não é afetada.], [*Duração ou tamanho superior ao limite do perfil.*], [No passo 3, o sistema rejeita a operação se o vídeo exceder 5 min / 200 MB (Registado) ou 60 min / 2 GB (Premium), com código LIMIT_EXCEEDED. A tarefa não é criada e a quota não é afetada.], [*Quota diária esgotada (utilizador Registado).*], [No passo 3, o sistema informa que o limite diário de 5 operações foi atingido (QUOTA_EXCEEDED) e sugere o upgrade para Premium. A tarefa não é criada.], [*Falha de processamento durante a execução.*], [No passo 5, se o worker falhar (erro de descodificação, falta de espaço em disco, etc.) → O sistema transita a tarefa para failed, liberta recursos temporários, estorna a quota diária reservada (se Registado) e notifica o utilizador com mensagem de erro explicativa. Nenhum ficheiro corrompido é associado ao projeto.]))
 
 === Pós-condições
 
-#tabela(
-  colunas: (4cm, 1fr),
-  [Tipo], [Resultado],
-  [Garantia de Sucesso], [#preencher[estado do sistema quando tudo corre bem]],
-  [Garantia Mínima], [#preencher[estado do sistema quando falha]],
-)
+#tab([UC-VID-001 — Pós-condições], tabela(colunas: (4.3cm, 1fr), tamanho: 8.5pt, [Tipo], [Resultado], [*Garantia de Sucesso*], [Um novo ficheiro de vídeo MP4 contendo exclusivamente o intervalo selecionado é persistido no armazenamento de objetos e registado na base de dados associado ao projeto (com referência ao vídeo de origem). O vídeo original permanece inalterado. A quota diária do utilizador é consumida em 1 operação (apenas perfil Registado). A tarefa transita para completed.], [*Garantia Mínima*], [Em caso de erro ou cancelamento, nenhum novo recurso é associado ao projeto, ficheiros temporários são eliminados, a quota diária reservada é devolvida integralmente ao utilizador registado e a tarefa transita para failed ou cancelled. O vídeo original permanece inalterado.]))
 
-=== Regras de Negócio e Restrições
+=== Regras de negócio e restrições
 
-#tabela(
-  colunas: (1.4cm, 1fr),
-  [ID], [Regra],
-  [RN1], [#preencher[e.g., utilizador registado limitado a vídeos de duração ≤ X s]],
-)
+#tab([UC-VID-001 — Regras de negócio e restrições], tabela(colunas: (4.3cm, 1fr), tamanho: 8.5pt, [ID], [Regra], [*RN1*], [Apenas utilizadores Registados e Premium com sessão iniciada e permissão de edição no projeto podem executar a operação. Utilizadores Anónimos não têm acesso.], [*RN2*], [O intervalo temporal de recorte é definido por [t_início, t_fim] com 0 ≤ t_início < t_fim ≤ duração do vídeo.], [*RN3*], [O vídeo de entrada pode estar em qualquer formato suportado (MP4, MOV ou AVI, segundo a matriz da DQ-002); o vídeo de saída é gerado em MP4, codificado com H.264 (vídeo) e AAC (áudio) (DQ-013).], [*RN4*], [Limites por perfil: Registado — vídeo original com duração ≤ 5 minutos e tamanho ≤ 200 MB; Premium — duração ≤ 60 minutos e tamanho ≤ 2 GB.], [*RN5*], [Cada operação de recorte concluída consome exatamente 1 crédito da quota diária de operações do utilizador Registado (limite de 5 operações/dia). Utilizadores Premium têm quota diária ilimitada.], [*RN6*], [Em caso de cancelamento da tarefa ou de falha técnica, o crédito de quota reservado é integralmente devolvido ao saldo do utilizador Registado.], [*RN7*], [A operação é estritamente assíncrona; o utilizador pode abandonar a página após submissão sem interromper o processamento.], [*RN8*], [O vídeo original nunca é substituído nem eliminado pela operação de recorte; o resultado é sempre um novo recurso com o seu próprio identificador único no projeto.], [*RN9*], [Apenas pode existir 1 tarefa de processamento de vídeo ativa em simultâneo por projeto.]))
 
 === Assunções
 
-#tabela(
-  colunas: (1.4cm, 1fr),
-  [ID], [Assunção],
-  [A1], [#preencher[…]],
-)
+#tab([UC-VID-001 — Assunções], tabela(colunas: (4.3cm, 1fr), tamanho: 8.5pt, [ID], [Assunção], [*A1*], [O utilizador tem acesso prévio a um projeto existente que já contém pelo menos um vídeo elegível carregado.], [*A2*], [O worker dispõe de FFmpeg com capacidade de corte preciso (*frame-accurate*) com recodificação mínima apenas nos limites de GOP (*Group of Pictures*), caso necessário.], [*A3*], [A quota diária é redefinida automaticamente às 00:00 UTC para todos os utilizadores Registados.]))
 
-=== Questões em Aberto
+=== Questões em aberto e resolução
 
-#orientacao[Na entrega, cada questão deve estar resolvida (indicar a decisão e onde ficou registada: RN, assunção, DQ, requisito) ou justificadamente adiada.]
+#tab([UC-VID-001 — Questões em aberto e resolução], tabela(colunas: (1.5cm, 1fr, 5cm), tamanho: 8.5pt, [ID], [Questão], [Resolução / Decisão], [*Q1*], [Como é medido o progresso durante o recorte de vídeo?], [No MVP, o progresso do recorte não emite percentagem intermédia: reporta os estados queued, processing e completed. O cancelamento é suportado em queued e processing.], [*Q2*], [O recorte deve ser exacto ao fotograma (*frame-accurate*) ou ao fotograma-chave (*keyframe/I-frame*)?], [No MVP, deve priorizar precisão ao fotograma (*frame-accurate*), preservando a coerência visual entre os pontos selecionados na interface e o ficheiro resultante.]))
 
-#tabela(
-  colunas: (1.4cm, 1fr, 5cm),
-  [ID], [Questão], [Resolução],
-  [Q1], [#preencher[…]], [#preencher[decidida → RN3 / adiada para Fase 3 / …]],
-)
