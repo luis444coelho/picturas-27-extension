@@ -1,147 +1,110 @@
 @startuml diagrama_casos_uso
 skinparam monochrome false
-skinparam roundcorner 8
-skinparam packageStyle rectangle
 skinparam shadowing false
+skinparam roundcorner 0
+skinparam defaultFontName Arial
+skinparam defaultFontSize 16
+skinparam actorStyle stickman
+skinparam usecaseBackgroundColor #55C8EC
+skinparam usecaseBorderColor black
+skinparam actorBackgroundColor #55C8EC
+skinparam actorBorderColor black
+skinparam ArrowColor black
+skinparam ArrowThickness 1.2
+skinparam noteBackgroundColor #55C8EC
+skinparam noteBorderColor black
+skinparam nodesep 35
+skinparam ranksep 40
 left to right direction
 
-skinparam actor {
-    BackgroundColor #FFFFFF
-    BorderColor #2C3E50
-}
+title Diagrama de Casos de Uso — PictuRAS (Baseline + Vídeo)
 
-' Casos de uso da baseline (Imagem / Geral)
-skinparam usecase {
-    BackgroundColor #E1F5FE
-    BorderColor #0277BD
-    FontSize 11
-}
-
-' Casos de uso novos da Fase 1 (Vídeo)
-skinparam usecase<<VideoExtension>> {
-    BackgroundColor #FFF3E0
-    BorderColor #E65100
-    BorderThickness 1.5
-}
-
-title Diagrama de Casos de Uso Consolidado — PictuRAS v27.1 (Fase 1: Suporte a Vídeo)
-
-' ==========================================
-' ATORES
-' ==========================================
+' Atores e generalizações da baseline
 actor "Anónimo" as Anonimo
-actor "Utilizador autenticado" as Utilizador
-actor "Registado / Gratuito" as Registado
+actor "Utilizador" as Utilizador
 actor "Utilizador Convidado" as Convidado
+actor "Registado / Gratuito" as Gratuito
 actor "Premium" as Premium
+actor "Utilizador autorizado para vídeo\n(Registado / Premium)" as UtilizadorVideo
 
-Utilizador <|-- Registado
+Utilizador <|-- Anonimo
+Utilizador <|-- Convidado
+Utilizador <|-- Gratuito
 Utilizador <|-- Premium
+UtilizadorVideo <|-- Gratuito
+UtilizadorVideo <|-- Premium
 
-' ==========================================
-' SISTEMA PICTURAS
-' ==========================================
-rectangle "Sistema PictuRAS" {
+rectangle "Sistema" {
+  usecase "Registo" as UC_Registo
+  usecase "Login" as UC_Login
+  usecase "Carregar imagens" as UC_CarregarImagens
+  usecase "Aplicar encadeamento de ferramentas\na conjunto de imagens" as UC_EncadeamentoImagens
+  usecase "Criar filtro personalizado" as UC_FiltroPersonalizado
+  usecase "Partilhar projeto" as UC_Partilhar
+  usecase "Assistente IA na edição" as UC_AssistenteIA
 
-    ' Casos de uso gerais / Imagem (Baseline)
-    package "Casos de Uso da Baseline (Geral e Imagem)" #F9FBE7 {
-        usecase "Registo" as UC_Registo
-        usecase "Login" as UC_Login
-        usecase "Partilhar projeto" as UC_Partilhar
-        usecase "Carregar imagens" as UC_CarregarImagens
-        usecase "Criar filtro personalizado" as UC_FiltroPersonalizado
-        usecase "Aplicar encadeamento de\nferramentas a imagens" as UC_EncadeamentoImagens
-        usecase "Assistente IA na edição" as UC_AssistenteIA
-    }
-
-    ' Casos de uso da Extensão de Vídeo (Fase 1)
-    package "Extensão de Vídeo Digital (Fase 1 — MVP)" #FFFDE7 {
-        usecase "UC-VID-000\nCarregar e visualizar\nvídeo no projeto" as UC_VID_000 <<VideoExtension>>
-        usecase "UC-VID-001\nRecortar temporalmente\num vídeo (trim)" as UC_VID_001 <<VideoExtension>>
-        usecase "UC-VID-002\nRemover o áudio\nde um vídeo" as UC_VID_002 <<VideoExtension>>
-        usecase "UC-VID-003\nAlterar a velocidade\nde reprodução" as UC_VID_003 <<VideoExtension>>
-        usecase "UC-VID-004\nAplicar marca de água\na um vídeo" as UC_VID_004 <<VideoExtension>>
-        usecase "UC-VID-005\nExtrair fotogramas\npara o projeto" as UC_VID_005 <<VideoExtension>>
-        usecase "UC-VID-006\nDescarregar vídeo\ndo projeto" as UC_VID_006 <<VideoExtension>>
-        usecase "UC-VID-007\nConsultar informações\ndo vídeo" as UC_VID_007 <<VideoExtension>>
-        usecase "UC-VID-008\nAjustar propriedades\nvisuais" as UC_VID_008 <<VideoExtension>>
-        usecase "UC-VID-009\nAplicar filtro visual\na um vídeo" as UC_VID_009 <<VideoExtension>>
-        usecase "UC-VID-010\nRedimensionar\nvídeo" as UC_VID_010 <<VideoExtension>>
-        usecase "UC-VID-011\nRodar e espelhar\nvídeo" as UC_VID_011 <<VideoExtension>>
-        usecase "UC-VID-012\nConverter formato\nde vídeo" as UC_VID_012 <<VideoExtension>>
-        usecase "UC-VID-013\nJuntar vídeos" as UC_VID_013 <<VideoExtension>>
-        usecase "UC-VID-014\nEncadear operações\nde vídeo" as UC_VID_014 <<VideoExtension>>
-        usecase "UC-VID-015\nProcessar vídeos\nem lote" as UC_VID_015 <<VideoExtension>>
-    }
-
-    ' A disponibilidade do vídeo no projeto é pré-condição, não inclusão do upload.
-
-    ' Ponte entre vídeo e ferramentas de imagem existentes
-    UC_VID_005 ..> UC_EncadeamentoImagens : <<extend>>\n(fotogramas alimentam\nferramentas de imagem)
+  usecase "UC-VID-000\nCarregar e visualizar vídeo" as UC_VID_000
+  usecase "UC-VID-001\nRecortar vídeo (trim)" as UC_VID_001
+  usecase "UC-VID-002\nRemover áudio" as UC_VID_002
+  usecase "UC-VID-003\nAlterar velocidade" as UC_VID_003
+  usecase "UC-VID-004\nAplicar marca de água" as UC_VID_004
+  usecase "UC-VID-005\nExtrair fotogramas para o projeto" as UC_VID_005
+  usecase "UC-VID-006\nDescarregar vídeo" as UC_VID_006
+  usecase "UC-VID-007\nConsultar informações do vídeo" as UC_VID_007
+  usecase "UC-VID-008\nAjustar propriedades visuais" as UC_VID_008
+  usecase "UC-VID-009\nAplicar filtro visual" as UC_VID_009
+  usecase "UC-VID-010\nRedimensionar vídeo" as UC_VID_010
+  usecase "UC-VID-011\nRodar e espelhar vídeo" as UC_VID_011
+  usecase "UC-VID-012\nConverter formato" as UC_VID_012
+  usecase "UC-VID-013\nJuntar vídeos" as UC_VID_013
+  usecase "UC-VID-014\nEncadear operações" as UC_VID_014
+  usecase "UC-VID-015\nProcessar vídeos em lote" as UC_VID_015
 }
 
-' ==========================================
-' ASSOCIAÇÕES ATORES -> CASOS DE USO
-' ==========================================
-Anonimo --> UC_Registo
-Anonimo --> UC_Login
+' Casos de uso da baseline
+Anonimo -- UC_Registo
+Anonimo -- UC_Login
+Utilizador -- UC_CarregarImagens
+Utilizador -- UC_EncadeamentoImagens
+Utilizador -- UC_FiltroPersonalizado
+Utilizador -- UC_Partilhar
+Premium -- UC_AssistenteIA
 
-Utilizador --> UC_Partilhar
-Utilizador --> UC_CarregarImagens
-Utilizador --> UC_FiltroPersonalizado
-Utilizador --> UC_EncadeamentoImagens
+' Apenas perfis Registado e Premium acedem aos casos de uso de vídeo.
+UtilizadorVideo -- UC_VID_000
+UtilizadorVideo -- UC_VID_001
+UtilizadorVideo -- UC_VID_002
+UtilizadorVideo -- UC_VID_003
+UtilizadorVideo -- UC_VID_004
+UtilizadorVideo -- UC_VID_005
+UtilizadorVideo -- UC_VID_006
+UtilizadorVideo -- UC_VID_007
+UtilizadorVideo -- UC_VID_008
+UtilizadorVideo -- UC_VID_009
+UtilizadorVideo -- UC_VID_010
+UtilizadorVideo -- UC_VID_011
+UtilizadorVideo -- UC_VID_012
+UtilizadorVideo -- UC_VID_013
+UtilizadorVideo -- UC_VID_014
+UtilizadorVideo -- UC_VID_015
 
-' Acesso ao subsistema de vídeo reservado a Utilizadores autenticados
-Utilizador --> UC_VID_000
-Utilizador --> UC_VID_001
-Utilizador --> UC_VID_002
-Utilizador --> UC_VID_003
-Utilizador --> UC_VID_004
-Utilizador --> UC_VID_005
-Utilizador --> UC_VID_006
-Utilizador --> UC_VID_007
-Utilizador --> UC_VID_008
-Utilizador --> UC_VID_009
-Utilizador --> UC_VID_010
-Utilizador --> UC_VID_011
-Utilizador --> UC_VID_012
-Utilizador --> UC_VID_013
-Utilizador --> UC_VID_014
-Utilizador --> UC_VID_015
-
-Premium --> UC_AssistenteIA
+' Os fotogramas extraídos passam a ser imagens do projeto.
+UC_VID_005 ..> UC_EncadeamentoImagens : <<extend>>
 
 note right of UC_VID_000
-  <b>Upload e Visualização (UC-VID-000):</b>
-  Isento de débito de quota diária (DQ-011).
-  Apenas utilizadores Registados e Premium
-  podem carregar e aceder a vídeos.
-end note
-
-note right of Convidado
-  O <b>Utilizador Convidado</b> herda
-  as permissões do Utilizador normal
-  a partir do momento que é convidado
-  via link com permissão de edição.
-  A quota é debitada ao convidado (DQ-008).
+  O utilizador autenticado carrega um vídeo
+  para um projeto com permissão de edição.
+  Upload e reprodução não consomem quota.
 end note
 
 note right of UC_VID_014
-  Cadeias: até 10 passos;
-  conversão apenas no fim;
+  Cadeia: até 10 passos; conversão no fim;
   sem extração de fotogramas.
 end note
 
-note left of UC_VID_000
-  As operações seguintes requerem
-  um vídeo acessível no projeto;
-  não obrigam a carregar outro vídeo.
-end note
-
-note bottom of UC_VID_015
-  Lotes processam sequencialmente.
-  Junção e extração não são elegíveis.
+note right of UC_VID_015
+  Lote: 2–10 vídeos (Registado), 2–50 (Premium).
+  Processamento sequencial; sem junção ou extração.
 end note
 
 @enduml
-
