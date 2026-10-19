@@ -1,4 +1,6 @@
 # 📝 Exercício 1 — Casos de uso refinados para suporte a vídeo
+
+> **Documento histórico da proposta inicial.** Os casos canónicos atuais são `docs/use-cases/UC-VID-000.md` a `UC-VID-015.md`; usar esses ficheiros e a ERS v2.3 para implementação.
 ### Casos de Uso · Fase 1: Suporte a Vídeo no PictuRAS
 
 ## 0. Identificação

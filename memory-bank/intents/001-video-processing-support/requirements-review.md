@@ -1,12 +1,14 @@
 ---
 intent: 001-video-processing-support
 phase: inception
-status: in-progress
+status: superseded
 created: 2026-10-09T16:57:05Z
 updated: 2026-10-09T16:57:05Z
 ---
 
 # Requirements Review: Video Processing Support
+
+> **Revisão histórica da proposta inicial (5 operações).** A revisão atual é `docs/requirements/quality-review.md`; a ERS v2.3 e o relatório dos capítulos 1–7 são as referências vigentes.
 
 ## Review Criteria
 

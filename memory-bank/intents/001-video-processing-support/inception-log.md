@@ -1,73 +1,58 @@
 ---
 intent: 001-video-processing-support
 created: 2026-10-09T16:57:05Z
+updated: 2026-10-19T17:31:16Z
 completed: null
 status: in-progress
 ---
 
 # Inception Log: 001-video-processing-support
 
-## Overview
+## Âmbito atual
 
-**Intent**: Transformar os cinco casos de uso de suporte a video numa especificacao de requisitos candidata, verificavel e rastreavel, sem implementar codigo.
-**Type**: brown-field
-**Created**: 2026-10-09T16:57:05Z
+Extensão de vídeo da ERS v2.3: UC-VID-000 a UC-VID-015. A ERS canónica está em `docs/requirements.md` e `docs/requirements/` (214 FR, 26 NFR); os casos de uso estão em `docs/use-cases/`. `requirements.md` neste diretório é o índice SpecsMD atual; a primeira proposta de 5 funcionalidades foi preservada em `requirements-initial-proposal.md` como histórico e não deve ser usada na Construção.
 
-## Artifacts Created
+## Estado dos artefactos
 
-| Artifact | Status | File |
-|----------|--------|------|
-| Requirements | Completed v1.2 | docs/requirements.md |
-| Requirements review | Completed | requirements-review.md |
-| Case review and ID normalization | Completed | case-review.md |
-| Refined academic use cases | Completed v1.1 | docs/use-cases.md |
-| Traceability matrix | Completed v1.2 | docs/requirements.md §4.3 |
-| Decisions and open questions | Approved | decisions.md |
-| System Context | Not started | system-context.md |
-| Units | Not started | units.md |
-| Stories | Not started | units/*/stories/ |
-| Bolt Plan | Not started | memory-bank/bolts/ |
+| Artefacto | Estado | Localização / referência |
+|---|---|---|
+| Requisitos atuais | Índice SpecsMD alinhado; texto normativo canónico na ERS | `requirements.md`, `docs/requirements.md`, `docs/requirements/` |
+| Casos de uso | Completo: 16 casos | `docs/use-cases/UC-VID-000.md` a `UC-VID-015.md` |
+| Contexto e modelo de domínio | Contexto e limites registados | `system-context.md`, `docs/inception/artefactos-finais.md`, capítulos 2–3 do relatório |
+| Units e briefs | Revistos | `units.md`, `units/001-*` a `003-*` |
+| Stories | Criadas: 16 UCs + 1 transversal | `units/*/stories/`, índice em `memory-bank/story-index.md` |
+| Bolts | Planeados: 9 | `memory-bank/bolts/001-*` a `009-*` |
+| Rastreabilidade | Matriz de requisitos ligada a Story, Unit e Bolt | `traceability.md`; capítulo 7 do relatório preserva origem/critério/estado |
+| Relatório académico | Capítulos 1–7 revistos | `Documentos consulta/src-doc-ext-requisitos-template/capitulos/` |
 
-## Summary
+## Resumo atual
 
-| Metric | Count |
-|--------|-------|
-| Candidate functional requirements | 26 |
-| Candidate non-functional requirements | 6 |
-| Refined academic use cases | 5 |
-| Units | 0 |
-| Stories | 0 |
-| Bolts Planned | 0 |
+| Métrica | Total |
+|---|---:|
+| Requisitos funcionais | 214 |
+| Requisitos não funcionais | 26 |
+| Casos de uso | 16 |
+| Units | 3 |
+| Stories | 17 |
+| Bolts planeados | 9 |
 
-## Decision Log
+## Revisão das Units e Bolts
 
-| Date | Decision | Rationale | Approved |
-|------|----------|-----------|----------|
-| 2026-10-09T16:57:05Z | Candidate scope includes all five video functionalities | User explicitly requested the complete initial scope | Yes |
-| 2026-10-09T16:57:05Z | Extraction normalized provisionally to UC-VID-005 in work artefacts | Original duplicates UC-VID-004; source document remains unchanged | No, proposal |
-| 2026-10-09T16:57:05Z | First requirements version keeps limits, formats and quotas pending | Source document labels them as proposals or open questions | Yes, for this draft only |
+Em 2026-10-19, foram alinhados os briefs, Stories e Bolts com a ERS v2.3 e com o relatório revisto. As 3 Units atribuem cada FR uma única vez (71 + 93 + 50 = 214); os 26 NFR estão atribuídos por responsabilidade técnica (13 + 8 + 5). Foram corrigidos IDs e dependências de Bolt, substituídas referências a casos de uso como Stories por ficheiros Story rastreáveis, criado o contexto do sistema e substituídas as matrizes de rastreabilidade obsoletas por uma matriz com 240 IDs.
 
-## Scope Changes
+## Estado de prontidão
 
-| Date | Change | Reason | Impact |
-|------|--------|--------|--------|
-| 2026-10-09T16:57:05Z | Created first candidate requirements for all five operations | User requested transformation rather than analysis-only output | Requirements, traceability and decision artefacts created |
+- [x] Requisitos atuais indexados, com texto canónico na ERS e rastreabilidade completa
+- [x] Casos de uso consolidados
+- [x] Contexto e modelo de domínio documentados
+- [x] Units e dependências definidas
+- [x] Stories com critérios de aceitação e ligação a requisitos
+- [x] Bolts com histórias, requisitos, dependências e critérios de passagem
+- [ ] Revisão humana destes artefactos concluída
+- [ ] Inception marcada completa
 
-## Ready for Construction
+O estado mantém-se `in-progress` até à revisão/aceitação humana dos artefactos. Não se declara a fase de Inception concluída nem se inicia Construção por este registo.
 
-- [x] Candidate requirements documented
-- [x] Source cases reviewed
-- [x] Traceability matrix created
-- [x] Open decisions recorded
-- [ ] System context defined
-- [ ] Units decomposed
-- [ ] Stories created for all units
-- [ ] Bolts planned
-- [ ] Human review complete
+## Próximo passo
 
-## Next Steps
-
-1. Review candidate requirements and priority decisions.
-2. Resolve the highest-impact open decisions.
-3. Update requirements and traceability after feedback.
-4. Only after review, continue with context, units, stories and bolts.
+Rever o mapa de Units, Stories e sequência dos 9 Bolts; após aprovação, a Construção pode iniciar por `001-video-lifecycle`.

@@ -1,12 +1,14 @@
 ---
 intent: 001-video-processing-support
 phase: inception
-status: in-progress
+status: superseded
 created: 2026-10-09T16:57:05Z
 updated: 2026-10-09T16:57:05Z
 ---
 
 # Case Review: Video Processing Support
+
+> **Revisão histórica de IDs/conteúdo inicial.** Os casos atuais e estáveis são `docs/use-cases/UC-VID-000.md` a `UC-VID-015.md`; não usar as propostas desta revisão antiga como estado atual.
 
 ## Source
 

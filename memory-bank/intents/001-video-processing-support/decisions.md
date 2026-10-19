@@ -1,12 +1,14 @@
 ---
 intent: 001-video-processing-support
 phase: inception
-status: decisions-approved
+status: superseded
 created: 2026-10-09T16:57:05Z
 updated: 2026-10-13T11:26:00Z
 ---
 
 # Decisions: Video Processing Support
+
+> **Decisões históricas da primeira proposta; supersedidas.** As regras e decisões atuais são DQ-001 a DQ-025 em `docs/requirements.md`, `docs/inception/artefactos-finais.md` e nos capítulos 3, 5 e 6 do relatório.
 
 Todas as decisões abaixo foram **aprovadas** em 2026-10-13 para efeitos do MVP.
 

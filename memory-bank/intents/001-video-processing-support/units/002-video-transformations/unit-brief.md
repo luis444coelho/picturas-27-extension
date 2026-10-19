@@ -4,29 +4,41 @@ intent: 001-video-processing-support
 phase: inception
 status: ready
 created: 2026-10-18T18:00:00Z
-updated: 2026-10-18T18:00:00Z
+updated: 2026-10-19T17:31:16Z
+default_bolt_type: ddd-construction-bolt
 ---
 
 # Unit Brief: Transformações de vídeo
 
-## Purpose and scope
+## Objetivo e âmbito
 
-Implement non-destructive isolated video operations and export selected frames as project images.
+Implementar operações isoladas não destrutivas de vídeo, incluindo a exportação de fotogramas como recursos de imagem do projeto. Cada operação integra a interface, validação, submissão assíncrona, worker e persistência do resultado, conforme os contratos da Unit 001.
 
-**In scope:** UC-VID-001–005 and UC-VID-008–012. **Out of scope:** resource ingestion/access, joins, chains and batches.
+**Casos:** UC-VID-001 a UC-VID-005 e UC-VID-008 a UC-VID-012. **Stories:** ST-VID-001 a ST-VID-005 e ST-VID-008 a ST-VID-012.
 
-## Assigned requirements
+## Requisitos atribuídos
 
-`REQ-VID-TRIM-*`, `AUDIO-*`, `SPEED-*`, `WATERMARK-*`, `FRAMES-*`, `ADJUST-*`, `FILTER-*`, `RESIZE-*`, `ORIENT-*`, `CONVERT-*`; applicable `REQ-VID-NFR-*`.
+- **93 FR (propriedade exclusiva):** `REQ-VID-TRIM-*` (10), `AUDIO-*` (6), `SPEED-*` (8), `WATERMARK-*` (11), `FRAMES-*` (13), `ADJUST-*` (10), `FILTER-*` (7), `RESIZE-*` (9), `ORIENT-*` (9), `CONVERT-*` (10).
+- **NFR (8):** `REQ-VID-NFR-004`, `010`, `012`, `015`, `018`, `019`, `020`, `026`.
+- Usa sem assumir propriedade dos contratos comuns de autorização, tarefa, quota e storage da Unit 001.
 
-## Domain concepts and operations
+## Conceitos, interfaces e limites
 
-`Vídeo`, `Imagem`, `FerramentaVídeo`, `FerramentaImagem`, `TrabalhoProcessamento`. Validate operation parameters; submit async work; persist a new derived resource on success; add extracted images with source video and timestamp.
+- Conceitos: Vídeo, Imagem, FerramentaVídeo, FerramentaImagem, TrabalhoProcessamento.
+- Responsabilidades: validação específica de parâmetros; configuração e pré-visualização quando requeridas; submissão de operação isolada; armazenamento de novo resultado após sucesso; extração de imagens com resolução, timestamp e proveniência.
+- Entradas/saídas: vídeo elegível e parâmetros aprovados → tarefa assíncrona → novo vídeo ou imagens normais do projeto. Os originais nunca são modificados.
+- A ferramenta de imagem continua a aceitar imagens; não processa vídeos. Fotogramas extraídos podem seguir o fluxo normal de imagem.
+- Não implementa ingestão/acesso, junção, cadeias ou lotes.
 
-## Dependencies and success criteria
+## Dependências e critérios de sucesso
 
-Depends on Unit 001 task, storage, authorization and quota contracts; UC-VID-005 additionally depends on existing image resources. Preserve originals, enforce profile/format rules and do not publish partial output.
+- Depende da Unit 001 para autorização, seleção de recursos, contratos de tarefas, quota, erros e storage.
+- UC-VID-005 depende adicionalmente do modelo, serviço e pipeline de imagens existente na baseline.
+- Critérios: os 11 casos atribuídos cumprem os AC dos requisitos; nenhum resultado é publicado antes de concluído; falha/cancelamento não altera o original nem deixa artefactos parciais; as saídas respeitam a matriz da ERS.
 
-## Bolt suggestions
+## Bolts
 
-B004 `004-video-basic-edits` (DDD); B005 `005-video-visual-edits` (Simple); B006 `006-video-frame-export` (DDD); B007 `007-video-format-conversion` (Simple).
+- B004 `004-video-basic-edits` (DDD): UC-VID-001/002/003.
+- B005 `005-video-visual-edits` (Simple): UC-VID-004/008/009/010/011.
+- B006 `006-video-frame-export` (DDD): UC-VID-005; requer integração com a baseline de imagens.
+- B007 `007-video-format-conversion` (Simple): UC-VID-012.

@@ -46,13 +46,13 @@ O diagrama consolidado é [`diagrama_casos_uso.puml`](../diagrams/diagrama_casos
 | UC-VID-014 | Encadear operações | `REQ-VID-CHAIN` |
 | UC-VID-015 | Processar vídeos em lote | `REQ-VID-BATCH` |
 
-Todos os casos de vídeo exigem utilizador autenticado Registado ou Premium e permissão de edição no projeto. As operações de edição dependem de recursos de vídeo elegíveis; UC-VID-006 e UC-VID-007 aplicam-se a vídeos concluídos. UC-VID-005 é a ponte para o domínio de imagem. UC-VID-015 pode aplicar uma operação isolada ou uma cadeia UC-VID-014 válida; junção (UC-VID-013) e extração de fotogramas não são operações de lote.
+Todos os casos de vídeo exigem utilizador autenticado Registado ou Premium. UC-VID-000 e as operações que alteram recursos exigem permissão de edição; UC-VID-006 e UC-VID-007 exigem permissão de leitura ou superior e aplicam-se a vídeos concluídos. UC-VID-005 é a ponte para o domínio de imagem. UC-VID-015 pode aplicar uma operação isolada ou uma cadeia UC-VID-014 válida; junção (UC-VID-013) e extração de fotogramas não são operações de lote.
 
 ## 3. Regras de negócio transversais
 
 | ID | Regra transversal | Rastreabilidade |
 |---|---|---|
-| RNG-01 | Só utilizadores Registados e Premium autenticados, com permissão de edição no projeto, podem usar as funcionalidades de vídeo. A quota é debitada à identidade do utilizador que submete o trabalho. | `REQ-VID-AUTH-*`; UC-VID-000 a 015 |
+| RNG-01 | Só utilizadores Registados e Premium autenticados podem usar as funcionalidades de vídeo. Consultar informações e descarregar requer permissão de leitura ou superior; carregar e alterar recursos requer permissão de edição ou propriedade. A quota é debitada à identidade autenticada que submete o trabalho. | `REQ-VID-AUTH-*`; UC-VID-000 a 015 |
 | RNG-02 | Entrada: MP4/MOV com H.264 e AAC (faixa áudio opcional); AVI com H.264 ou MPEG-4 Part 2 e AAC ou MP3. Formatos/codecs fora da matriz são rejeitados. Operações produzem MP4 H.264/AAC; UC-VID-012 pode produzir MP4, MOV ou AVI conforme a matriz aprovada. | `REQ-VID-UPLOAD-*`, `REQ-VID-CONVERT-*`, `REQ-VID-NFR-003`; DQ-002, DQ-013 |
 | RNG-03 | Limites: Registado ≤5 min, ≤200 MB, até 50 fotogramas por extração; Premium ≤60 min, ≤2 GB, até 500 fotogramas. Restrições adicionais de resolução, número de entradas e passos aplicam-se conforme UC-VID-010 e UC-VID-013 a 015. | `REQ-VID-UPLOAD-*`, `REQ-VID-FRAMES-*`, `REQ-VID-NFR-008`, `REQ-VID-NFR-014`; DQ-005, DQ-015 |
 | RNG-04 | No máximo uma tarefa de vídeo ativa por projeto. Submissão de edição é assíncrona e segue `queued → processing → completed`, `failed` ou `cancelled`; trabalhos concluídos associam resultados ao projeto. | `REQ-VID-TASK-*`, `REQ-VID-NFR-005`, `006`, `008`; DQ-004, DQ-016 |
