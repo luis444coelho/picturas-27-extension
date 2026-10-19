@@ -10,27 +10,29 @@ Os casos de uso de consulta e descarregamento são distinguíveis das operaçõe
 
 #tab([Objetivos funcionais de vídeo do MVP e respetivos casos de uso],
   tabela(
-      colunas: (2fr, 1fr, 1.1fr, 1.6fr),
-      tamanho: 8.5pt,
-      [Caso de uso e objetivo], [Prefixo principal], [Perfis], [Dependência funcional],
-      [UC-VID-000 — Carregar e visualizar um vídeo], [UPLOAD], [Registado, Premium], [Projeto com permissão de edição],
-      [UC-VID-001 — Recortar um intervalo temporal], [TRIM], [Registado, Premium], [Vídeo no projeto; permissão de edição],
-      [UC-VID-002 — Remover a faixa de áudio], [AUDIO], [Registado, Premium], [Vídeo no projeto; permissão de edição],
-      [UC-VID-003 — Alterar a velocidade], [SPEED], [Registado, Premium], [Vídeo no projeto; permissão de edição],
-      [UC-VID-004 — Aplicar marca de água], [WATERMARK], [Registado, Premium], [Vídeo no projeto; permissão de edição],
-      [UC-VID-005 — Extrair fotogramas como imagens], [FRAMES], [Registado, Premium], [Vídeo no projeto; permissão de edição],
-      [UC-VID-006 — Descarregar um vídeo], [DOWNLOAD], [Registado, Premium], [Vídeo no projeto; permissão de leitura],
-      [UC-VID-007 — Consultar informações do vídeo], [INFO], [Registado, Premium], [Vídeo no projeto; permissão de leitura],
-      [UC-VID-008 — Ajustar propriedades visuais], [ADJUST], [Registado, Premium], [Vídeo no projeto; permissão de edição],
-      [UC-VID-009 — Aplicar um filtro visual], [FILTER], [Registado, Premium], [Vídeo no projeto; permissão de edição],
-      [UC-VID-010 — Redimensionar um vídeo], [RESIZE], [Registado, Premium], [Vídeo no projeto; permissão de edição],
-      [UC-VID-011 — Rodar ou espelhar um vídeo], [ORIENT], [Registado, Premium], [Vídeo no projeto; permissão de edição],
-      [UC-VID-012 — Converter o formato], [CONVERT], [Registado, Premium], [Vídeo no projeto; permissão de edição],
-      [UC-VID-013 — Juntar vários vídeos], [CONCAT], [Registado, Premium], [Dois ou mais vídeos compatíveis; edição],
-      [UC-VID-014 — Encadear operações], [CHAIN], [Registado, Premium], [Vídeo(s) no projeto; até 10 passos válidos],
-      [UC-VID-015 — Processar vídeos em lote], [BATCH], [Registado, Premium], [Lote dentro dos limites do perfil],
+      colunas: (2fr, 0.8fr, 1fr, 1.5fr, 1.3fr),
+      tamanho: 7.4pt,
+      [Caso de uso e objetivo], [Prefixo principal], [Perfis], [Dependência funcional], [Estado na Fase 1],
+      [UC-VID-000 — Carregar e visualizar um vídeo], [UPLOAD], [Registado, Premium, Convidado], [Projeto com permissão de edição], [Não implementado; especificado para construção],
+      [UC-VID-001 — Recortar um intervalo temporal], [TRIM], [Registado, Premium, Convidado], [Vídeo no projeto; permissão de edição], [Não implementado; especificado para construção],
+      [UC-VID-002 — Remover a faixa de áudio], [AUDIO], [Registado, Premium, Convidado], [Vídeo no projeto; permissão de edição], [Não implementado; especificado para construção],
+      [UC-VID-003 — Alterar a velocidade], [SPEED], [Registado, Premium, Convidado], [Vídeo no projeto; permissão de edição], [Não implementado; especificado para construção],
+      [UC-VID-004 — Aplicar marca de água], [WATERMARK], [Registado, Premium, Convidado], [Vídeo no projeto; permissão de edição], [Não implementado; especificado para construção],
+      [UC-VID-005 — Extrair fotogramas como imagens], [FRAMES], [Registado, Premium, Convidado], [Vídeo no projeto; permissão de edição], [Não implementado; especificado para construção],
+      [UC-VID-006 — Descarregar um vídeo], [DOWNLOAD], [Registado, Premium, Convidado], [Vídeo no projeto; permissão de leitura], [Não implementado; especificado para construção],
+      [UC-VID-007 — Consultar informações do vídeo], [INFO], [Registado, Premium, Convidado], [Vídeo no projeto; permissão de leitura], [Não implementado; especificado para construção],
+      [UC-VID-008 — Ajustar propriedades visuais], [ADJUST], [Registado, Premium, Convidado], [Vídeo no projeto; permissão de edição], [Não implementado; especificado para construção],
+      [UC-VID-009 — Aplicar um filtro visual], [FILTER], [Registado, Premium, Convidado], [Vídeo no projeto; permissão de edição], [Não implementado; especificado para construção],
+      [UC-VID-010 — Redimensionar um vídeo], [RESIZE], [Registado, Premium, Convidado], [Vídeo no projeto; permissão de edição], [Não implementado; especificado para construção],
+      [UC-VID-011 — Rodar ou espelhar um vídeo], [ORIENT], [Registado, Premium, Convidado], [Vídeo no projeto; permissão de edição], [Não implementado; especificado para construção],
+      [UC-VID-012 — Converter o formato], [CONVERT], [Registado, Premium, Convidado], [Vídeo no projeto; permissão de edição], [Não implementado; especificado para construção],
+      [UC-VID-013 — Juntar vários vídeos], [CONCAT], [Registado, Premium, Convidado], [Dois ou mais vídeos compatíveis; edição], [Não implementado; especificado para construção],
+      [UC-VID-014 — Encadear operações], [CHAIN], [Registado, Premium, Convidado], [Vídeo(s) no projeto; até 10 passos válidos], [Não implementado; especificado para construção],
+      [UC-VID-015 — Processar vídeos em lote], [BATCH], [Registado, Premium, Convidado], [Lote dentro dos limites do perfil], [Não implementado; especificado para construção],
   ),
 )
+
+*Nota sobre convidados.* Um utilizador autenticado que acede através de uma partilha: a permissão de leitura permite consultar ou descarregar; a permissão de edição permite carregar ou transformar. Os limites e a quota seguem o perfil da conta executora, e não o proprietário do projeto (REQ-VID-QUOTA-006).
 
 *Justificação dos objetivos no contexto do MVP.* Os objetivos formam um percurso coerente de utilização e exercitam capacidades com complexidade própria, em vez de se limitarem a operações triviais. `UC-VID-000` estabelece a entrada do recurso e a sua consulta no projeto. `UC-VID-001` a `UC-VID-004` abrangem edição temporal, áudio e composição visual; `UC-VID-005` transforma fotogramas em recursos de imagem do projeto, ligando o novo fluxo ao domínio já existente. `UC-VID-006` e `UC-VID-007` permitem obter o ficheiro e os seus dados sem iniciar uma transformação. `UC-VID-008` a `UC-VID-012` cobrem ajustes, filtros, dimensões, orientação e conversão de formato. Por fim, `UC-VID-013` trata a composição de vários vídeos, `UC-VID-014` organiza operações numa cadeia validada e `UC-VID-015` aplica operações a um conjunto de vídeos. As tarefas assíncronas, estados, validação de parâmetros, quota e tratamento de falhas são preocupações transversais especificadas uma vez nos requisitos comuns, embora sejam acionadas por vários destes casos.
 
@@ -41,9 +43,9 @@ Os casos de uso de consulta e descarregamento são distinguíveis das operaçõe
   caption: [Diagrama consolidado de casos de uso: funcionalidades da baseline e extensão de vídeo],
 )
 
-O diagrama mantém em cinzento os casos de uso da baseline e identifica a azul os casos de uso novos `UC-VID-000` a `UC-VID-015`. A herança entre `Utilizador Convidado`, `Premium` e `Utilizador` representa os perfis já existentes. Os quatro símbolos com a designação “Utilizador autenticado (Registado ou Premium)” são repetições gráficas do mesmo ator, agrupadas para reduzir cruzamentos: respetivamente, representam ciclo de vida e acesso (`UC-VID-000`, `006`, `007`), edição temporal e extração (`001`–`005`), edição visual e formato (`008`–`012`) e composição/processamento (`013`–`015`).
+O diagrama mantém em cinzento os casos de uso da baseline e identifica a azul os novos casos de uso `UC-VID-000` a `UC-VID-015`. `Utilizador Convidado` e `Premium` especializam o ator `Utilizador` e herdam as associações representadas. O ator base corresponde ao utilizador autenticado Registado. Um convidado autenticado herda as associações, mas só pode consultar ou descarregar com permissão de leitura e carregar ou transformar com permissão de edição. O perfil da conta define limites e quota, debitada à identidade que executa a operação. O diagrama mostra uma única associação do ator base a cada caso de uso de vídeo.
 
-Esta distribuição é coerente com a tabela e com as permissões descritas nos casos de uso: ambos os perfis autenticados podem iniciar os casos de vídeo, mas cada operação continua sujeita à autorização do projeto. O carregamento e a reprodução não debitam quota; a consulta e o descarregamento são operações de leitura sem custo; as transformações, cadeias e lotes seguem os custos definidos nas regras transversais e nos casos correspondentes. A extração de fotogramas cria imagens no projeto. O diagrama representa o acesso dos atores aos casos de uso; os pormenores de autorização, sequência e custo são especificados nos requisitos e nos casos de uso, não através de relações UML implícitas entre elipses.
+As associações do diagrama indicam os perfis que podem iniciar os casos de uso, sujeitas à autorização do projeto. O carregamento exige permissão de edição; consulta de informações e descarregamento exigem permissão de leitura; as restantes operações alteram ou acrescentam recursos e exigem permissão de edição. O carregamento e a reprodução não debitam quota; consulta e descarregamento são operações de leitura sem custo; transformações, cadeias e lotes seguem os custos definidos nas regras transversais e nos casos correspondentes. A extração de fotogramas cria imagens no projeto. O diagrama representa o acesso dos atores aos casos de uso; os pormenores de autorização, sequência e custo são especificados nos requisitos e nos casos de uso, não através de relações UML implícitas entre elipses.
 
 == Modelo de domínio
 
