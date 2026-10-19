@@ -1,67 +1,89 @@
 @startuml diagrama_casos_uso
+
+' Diagrama consolidado: funcionalidades da baseline + extensão de vídeo.
+left to right direction
 skinparam monochrome false
 skinparam shadowing false
-skinparam roundcorner 0
+skinparam linetype ortho
+skinparam packageStyle rectangle
+skinparam roundcorner 8
 skinparam defaultFontName Arial
-skinparam defaultFontSize 16
+skinparam defaultFontSize 14
 skinparam actorStyle stickman
-skinparam usecaseBackgroundColor #55C8EC
-skinparam usecaseBorderColor black
-skinparam actorBackgroundColor #55C8EC
-skinparam actorBorderColor black
-skinparam ArrowColor black
+skinparam ArrowColor #4B5563
 skinparam ArrowThickness 1.2
-skinparam noteBackgroundColor #55C8EC
-skinparam noteBorderColor black
-skinparam nodesep 35
-skinparam ranksep 40
-left to right direction
+skinparam usecaseBorderColor #263238
+skinparam usecaseFontColor #17212B
+skinparam actorBackgroundColor #55C8EC
+skinparam actorBorderColor #263238
+skinparam actorFontColor #17212B
+skinparam packageBorderColor #73808C
+skinparam packageFontColor #263238
+skinparam rectangleBorderColor #263238
+skinparam rectangleFontColor #17212B
+skinparam noteBackgroundColor #FFF4CC
+skinparam noteBorderColor #9A7B20
+skinparam nodesep 38
+skinparam ranksep 45
 
 title Diagrama de Casos de Uso — PictuRAS (Baseline + Vídeo)
 
-' Atores e generalizações da baseline
+' Atores da baseline e perfis autorizados para o novo subsistema.
 actor "Anónimo" as Anonimo
 actor "Utilizador" as Utilizador
 actor "Utilizador Convidado" as Convidado
-actor "Registado / Gratuito" as Gratuito
 actor "Premium" as Premium
-actor "Utilizador autorizado para vídeo\n(Registado / Premium)" as UtilizadorVideo
+actor "Utilizador autenticado\n(Registado ou Premium)" as AtorCiclo
+actor "Utilizador autenticado\n(Registado ou Premium)" as AtorEdicaoTemporal
+actor "Utilizador autenticado\n(Registado ou Premium)" as AtorEdicaoVisual
+actor "Utilizador autenticado\n(Registado ou Premium)" as AtorComposicao
 
-Utilizador <|-- Anonimo
-Utilizador <|-- Convidado
-Utilizador <|-- Gratuito
-Utilizador <|-- Premium
-UtilizadorVideo <|-- Gratuito
-UtilizadorVideo <|-- Premium
+Convidado -up-|> Utilizador
+Premium -down-|> Utilizador
 
-rectangle "Sistema" {
-  usecase "Registo" as UC_Registo
-  usecase "Login" as UC_Login
-  usecase "Carregar imagens" as UC_CarregarImagens
-  usecase "Aplicar encadeamento de ferramentas\na conjunto de imagens" as UC_EncadeamentoImagens
-  usecase "Criar filtro personalizado" as UC_FiltroPersonalizado
-  usecase "Partilhar projeto" as UC_Partilhar
-  usecase "Assistente IA na edição" as UC_AssistenteIA
+rectangle "Sistema PictuRAS" {
+  package "Funcionalidades existentes — baseline" as Baseline #F1F1F1 {
+    usecase "Registo" as UC_Registo #D9D9D9
+    usecase "Login" as UC_Login #D9D9D9
+    usecase "Carregar imagens" as UC_CarregarImagens #D9D9D9
+    usecase "Aplicar encadeamento de ferramentas\na conjunto de imagens" as UC_EncadeamentoImagens #D9D9D9
+    usecase "Criar filtro personalizado" as UC_FiltroPersonalizado #D9D9D9
+    usecase "Partilhar projeto" as UC_Partilhar #D9D9D9
+    usecase "Assistente IA na edição" as UC_AssistenteIA #D9D9D9
+  }
 
-  usecase "UC-VID-000\nCarregar e visualizar vídeo" as UC_VID_000
-  usecase "UC-VID-001\nRecortar vídeo (trim)" as UC_VID_001
-  usecase "UC-VID-002\nRemover áudio" as UC_VID_002
-  usecase "UC-VID-003\nAlterar velocidade" as UC_VID_003
-  usecase "UC-VID-004\nAplicar marca de água" as UC_VID_004
-  usecase "UC-VID-005\nExtrair fotogramas para o projeto" as UC_VID_005
-  usecase "UC-VID-006\nDescarregar vídeo" as UC_VID_006
-  usecase "UC-VID-007\nConsultar informações do vídeo" as UC_VID_007
-  usecase "UC-VID-008\nAjustar propriedades visuais" as UC_VID_008
-  usecase "UC-VID-009\nAplicar filtro visual" as UC_VID_009
-  usecase "UC-VID-010\nRedimensionar vídeo" as UC_VID_010
-  usecase "UC-VID-011\nRodar e espelhar vídeo" as UC_VID_011
-  usecase "UC-VID-012\nConverter formato" as UC_VID_012
-  usecase "UC-VID-013\nJuntar vídeos" as UC_VID_013
-  usecase "UC-VID-014\nEncadear operações" as UC_VID_014
-  usecase "UC-VID-015\nProcessar vídeos em lote" as UC_VID_015
+  package "Extensão de vídeo — novos casos de uso" as Video #EAF8FD {
+    package "Ciclo de vida e acesso" as Ciclo #F7FCFE {
+      usecase "UC-VID-000\nCarregar e visualizar vídeo" as UC_VID_000 #55C8EC
+      usecase "UC-VID-006\nDescarregar vídeo" as UC_VID_006 #55C8EC
+      usecase "UC-VID-007\nConsultar informações do vídeo" as UC_VID_007 #55C8EC
+    }
+
+    package "Edição temporal e extração" as EdicaoTemporal #F7FCFE {
+      usecase "UC-VID-001\nRecortar vídeo" as UC_VID_001 #55C8EC
+      usecase "UC-VID-002\nRemover áudio" as UC_VID_002 #55C8EC
+      usecase "UC-VID-003\nAlterar velocidade" as UC_VID_003 #55C8EC
+      usecase "UC-VID-004\nAplicar marca de água" as UC_VID_004 #55C8EC
+      usecase "UC-VID-005\nExtrair fotogramas" as UC_VID_005 #55C8EC
+    }
+
+    package "Edição visual e formato" as EdicaoVisual #F7FCFE {
+      usecase "UC-VID-008\nAjustar propriedades visuais" as UC_VID_008 #55C8EC
+      usecase "UC-VID-009\nAplicar filtro visual" as UC_VID_009 #55C8EC
+      usecase "UC-VID-010\nRedimensionar vídeo" as UC_VID_010 #55C8EC
+      usecase "UC-VID-011\nRodar e espelhar vídeo" as UC_VID_011 #55C8EC
+      usecase "UC-VID-012\nConverter formato" as UC_VID_012 #55C8EC
+    }
+
+    package "Composição e processamento" as Composicao #F7FCFE {
+      usecase "UC-VID-013\nJuntar vídeos" as UC_VID_013 #55C8EC
+      usecase "UC-VID-014\nEncadear operações" as UC_VID_014 #55C8EC
+      usecase "UC-VID-015\nProcessar vídeos em lote" as UC_VID_015 #55C8EC
+    }
+  }
 }
 
-' Casos de uso da baseline
+' Associações dos casos de uso da baseline.
 Anonimo -- UC_Registo
 Anonimo -- UC_Login
 Utilizador -- UC_CarregarImagens
@@ -70,41 +92,51 @@ Utilizador -- UC_FiltroPersonalizado
 Utilizador -- UC_Partilhar
 Premium -- UC_AssistenteIA
 
-' Apenas perfis Registado e Premium acedem aos casos de uso de vídeo.
-UtilizadorVideo -- UC_VID_000
-UtilizadorVideo -- UC_VID_001
-UtilizadorVideo -- UC_VID_002
-UtilizadorVideo -- UC_VID_003
-UtilizadorVideo -- UC_VID_004
-UtilizadorVideo -- UC_VID_005
-UtilizadorVideo -- UC_VID_006
-UtilizadorVideo -- UC_VID_007
-UtilizadorVideo -- UC_VID_008
-UtilizadorVideo -- UC_VID_009
-UtilizadorVideo -- UC_VID_010
-UtilizadorVideo -- UC_VID_011
-UtilizadorVideo -- UC_VID_012
-UtilizadorVideo -- UC_VID_013
-UtilizadorVideo -- UC_VID_014
-UtilizadorVideo -- UC_VID_015
+' Ator repetido por grupo apenas para tornar as associações locais legíveis.
+' Os quatro símbolos representam o mesmo perfil autorizado (Registado/Premium).
+AtorCiclo -- UC_VID_000
+AtorCiclo -- UC_VID_006
+AtorCiclo -- UC_VID_007
+AtorEdicaoTemporal -- UC_VID_001
+AtorEdicaoTemporal -- UC_VID_002
+AtorEdicaoTemporal -- UC_VID_003
+AtorEdicaoTemporal -- UC_VID_004
+AtorEdicaoTemporal -- UC_VID_005
+AtorEdicaoVisual -- UC_VID_008
+AtorEdicaoVisual -- UC_VID_009
+AtorEdicaoVisual -- UC_VID_010
+AtorEdicaoVisual -- UC_VID_011
+AtorEdicaoVisual -- UC_VID_012
+AtorComposicao -- UC_VID_013
+AtorComposicao -- UC_VID_014
+AtorComposicao -- UC_VID_015
 
-' Os fotogramas extraídos passam a ser imagens do projeto.
-UC_VID_005 ..> UC_EncadeamentoImagens : <<extend>>
-
+' Orientações curtas para políticas específicas sem ligações pontilhadas longas.
 note right of UC_VID_000
-  O utilizador autenticado carrega um vídeo
-  para um projeto com permissão de edição.
   Upload e reprodução não consomem quota.
+  A edição requer permissão de edição;
+  consulta e download aceitam leitura.
+end note
+
+note left of AtorCiclo
+  Os símbolos repetidos do ator representam
+  o mesmo perfil autorizado: Registado/Premium.
 end note
 
 note right of UC_VID_014
   Cadeia: até 10 passos; conversão no fim;
-  sem extração de fotogramas.
+  não inclui extração de fotogramas.
 end note
 
 note right of UC_VID_015
-  Lote: 2–10 vídeos (Registado), 2–50 (Premium).
-  Processamento sequencial; sem junção ou extração.
+  Lote sequencial: 2–10 vídeos (Registado),
+  2–50 (Premium); sem junção ou extração.
 end note
+
+legend right
+  |= Cor |= Significado |
+  |<#D9D9D9> Cinzento | Funcionalidades da baseline |
+  |<#55C8EC> Azul | Casos de uso novos de vídeo |
+endlegend
 
 @enduml

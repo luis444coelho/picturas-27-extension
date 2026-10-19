@@ -2,7 +2,7 @@
 skinparam monochrome false
 skinparam shadowing false
 skinparam roundcorner 0
-skinparam linetype ortho
+skinparam linetype polyline
 skinparam classAttributeIconSize 0
 skinparam defaultFontName Arial
 skinparam defaultFontSize 16
@@ -11,8 +11,8 @@ skinparam classBackgroundColor #55C8EC
 skinparam classBorderColor black
 skinparam ArrowColor black
 skinparam ArrowThickness 1.2
-skinparam nodesep 45
-skinparam ranksep 50
+skinparam nodesep 70
+skinparam ranksep 70
 hide circle
 left to right direction
 
@@ -42,33 +42,33 @@ class "Ferramenta de vídeo" as FerramentaVideo
 Gratuito -up-|> Utilizador : é
 Premium -up-|> Utilizador : é
 Anonimo -up-|> Utilizador : é
-Utilizador "0..*" -- "0..*" Utilizador : convida
-Utilizador "1" -- "0..*" Preset : cria
-Utilizador "1..*" -- "0..*" Projeto : gere
-Projeto "0..*" -- "0..*" Ferramenta : usa
-Preset "0..*" -- "1..*" Ferramenta : contém
+Utilizador "0..*" --> "0..*" Utilizador : convida
+Utilizador "1" --> "0..*" Preset : cria
+Utilizador "1..*" --> "0..*" Projeto : gere
+Projeto "0..*" --> "0..*" Ferramenta : usa
+Preset "0..*" --> "1..*" Ferramenta : contém
 Basica -up-|> Ferramenta : é
 Avancada -up-|> Ferramenta : é
 AssistenteIA -left-|> Avancada : é
-Projeto "1" -- "0..*" SugestaoIA : recebe
-AssistenteIA "1" -- "0..*" SugestaoIA : produz
-Utilizador "1" -- "0..*" Recurso : upload
-Projeto "1" -- "0..*" Recurso : contém
+Projeto "1" --> "0..*" SugestaoIA : recebe
+AssistenteIA "1" --> "0..*" SugestaoIA : produz
+Utilizador "1" --> "0..*" Recurso : upload
+Projeto "1" --> "0..*" Recurso : contém
 Recurso <|-- Imagem
 Recurso <|-- Video
-Ferramenta "0..*" -- "0..*" Imagem : altera
-Utilizador "0..*" -- "0..*" Basica : aplica
-Utilizador "0..*" -- "0..*" Avancada : aplica
+Ferramenta "0..*" --> "0..*" Imagem : altera
+Utilizador "0..*" --> "0..*" Basica : aplica
+Utilizador "0..*" --> "0..*" Avancada : aplica
 
 ' Relações novas da extensão de vídeo
 FerramentaVideo -up-|> Ferramenta : é
-FerramentaVideo "0..*" -- "0..*" Video : aplica
-Video "1" -- "0..*" Imagem : origina fotogramas
-Video "1" -- "0..*" Video : origina resultado
-Projeto "1" -- "0..*" Trabalho : regista
-Utilizador "1" -- "0..*" Trabalho : submete
-Trabalho "0..*" -- "1..*" Video : processa
-Trabalho "0..*" -- "0..*" Recurso : produz
-Trabalho "0..*" -- "1..*" FerramentaVideo : executa
+FerramentaVideo "0..*" --> "0..*" Video : aplica
+Video "1" --> "0..*" Imagem : origina fotogramas
+Video "1" --> "0..*" Video : origina resultado
+Projeto "1" --> "0..*" Trabalho : regista
+Utilizador "1" --> "0..*" Trabalho : submete
+Trabalho "0..*" --> "1..*" Video : processa
+Trabalho "0..*" --> "0..*" Recurso : produz
+Trabalho "0..*" --> "1..*" FerramentaVideo : executa
 
 @enduml
