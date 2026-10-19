@@ -2,128 +2,81 @@
 
 = Visão Geral da Extensão de Vídeo
 
-== Funcionalidades de vídeo do MVP
+== Objetivos e funcionalidades do MVP
 
-#orientacao[
-  Listem *todas* as funcionalidades de vídeo tratadas no relatório, cada uma com o respetivo caso de uso.
-  A especificação detalhada está na Parte II, organizada por artefacto (casos de uso, ERS, impacto, …).
-  Não há um número mínimo: valoriza-se a *profundidade, coerência e complexidade adequada* de cada funcionalidade.
-  Operações triviais (e.g., gerar uma miniatura a partir de um único fotograma) não são suficientes.
-  Requisitos partilhados por várias funcionalidades (e.g., submeter vídeo, acompanhar o estado do processamento)
-  devem ser especificados *uma só vez* (e.g., `REQ-VID-SUBMIT-001`, com origem em vários casos de uso).
-]
+A Fase 1 tem como objetivo alargar o espaço de trabalho do PictuRAS, originalmente orientado para imagens, para que um projeto possa integrar imagens e vídeos e suportar operações de vídeo com resultados persistidos no próprio projeto. A extensão cobre o ciclo que vai da entrada e consulta do vídeo à edição, composição, acompanhamento do processamento e obtenção do resultado. Inclui ainda a passagem entre os domínios de vídeo e imagem através da extração de fotogramas. O diagrama de casos de uso representa os 16 objetivos funcionais identificados; os requisitos associados especificam as validações, limites, exceções e comportamento partilhado. No código analisado não foi identificada implementação destas funcionalidades; o estado do incremento é, portanto, especificado, com implementação por realizar.
 
-#tab([Funcionalidades de vídeo do MVP],
+Os casos de uso de consulta e descarregamento são distinguíveis das operações que submetem processamento: consultar informações e descarregar não consomem quota; o carregamento e a reprodução também não. A edição requer permissão de edição no projeto, enquanto a consulta e o descarregamento admitem permissão de leitura. Os perfis Registado e Premium podem executar os casos de uso de vídeo, sujeitos aos limites e à política de quota correspondentes. A tabela resume cada objetivo e as suas dependências funcionais; os prefixos indicam os requisitos específicos, complementados pelos requisitos transversais `COM`, `AUTH`, `TASK`, `QUOTA`, `STORAGE`, `ERROR` e `NFR` quando aplicáveis.
+
+#tab([Objetivos funcionais de vídeo do MVP e respetivos casos de uso],
   tabela(
-    colunas: (1.2fr, 2.1cm, 2.4cm, 1.8cm, 2.3cm, 2.6cm),
-    [Funcionalidade], [Caso de uso], [Prefixo(s) REQ], [Perfis], [Dependências], [Estado de implementação],
-    [Carregamento, ingestão e visualização de vídeo no projeto], [UC-VID-000], [REQ-VID-UPLOAD], [Reg., Prem.], [Nenhuma], [Especificada / Em desenvolvimento],
-    [Recortar um intervalo temporal de um vídeo (_trim_)], [UC-VID-001], [REQ-VID-TRIM], [Reg., Prem.], [UC-VID-000], [Especificada / Em desenvolvimento],
-    [Remover o áudio de um vídeo (_video-only_)], [UC-VID-002], [REQ-VID-AUDIO], [Reg., Prem.], [UC-VID-000], [Especificada / Em desenvolvimento],
-    [Alterar a velocidade de reprodução de um vídeo], [UC-VID-003], [REQ-VID-SPEED], [Reg., Prem.], [UC-VID-000], [Especificada / Em desenvolvimento],
-    [Aplicar marca de água a um vídeo (texto ou imagem)], [UC-VID-004], [REQ-VID-WATERMARK], [Reg., Prem.], [UC-VID-000], [Especificada / Em desenvolvimento],
-    [Extrair fotogramas de um vídeo para o projeto], [UC-VID-005], [REQ-VID-FRAMES], [Reg., Prem.], [UC-VID-000], [Especificada / Em desenvolvimento],
+      colunas: (2fr, 1fr, 1.1fr, 1.6fr),
+      tamanho: 8.5pt,
+      [Caso de uso e objetivo], [Prefixo principal], [Perfis], [Dependência funcional],
+      [UC-VID-000 — Carregar e visualizar um vídeo], [UPLOAD], [Registado, Premium], [Projeto com permissão de edição],
+      [UC-VID-001 — Recortar um intervalo temporal], [TRIM], [Registado, Premium], [Vídeo no projeto; permissão de edição],
+      [UC-VID-002 — Remover a faixa de áudio], [AUDIO], [Registado, Premium], [Vídeo no projeto; permissão de edição],
+      [UC-VID-003 — Alterar a velocidade], [SPEED], [Registado, Premium], [Vídeo no projeto; permissão de edição],
+      [UC-VID-004 — Aplicar marca de água], [WATERMARK], [Registado, Premium], [Vídeo no projeto; permissão de edição],
+      [UC-VID-005 — Extrair fotogramas como imagens], [FRAMES], [Registado, Premium], [Vídeo no projeto; permissão de edição],
+      [UC-VID-006 — Descarregar um vídeo], [DOWNLOAD], [Registado, Premium], [Vídeo no projeto; permissão de leitura],
+      [UC-VID-007 — Consultar informações do vídeo], [INFO], [Registado, Premium], [Vídeo no projeto; permissão de leitura],
+      [UC-VID-008 — Ajustar propriedades visuais], [ADJUST], [Registado, Premium], [Vídeo no projeto; permissão de edição],
+      [UC-VID-009 — Aplicar um filtro visual], [FILTER], [Registado, Premium], [Vídeo no projeto; permissão de edição],
+      [UC-VID-010 — Redimensionar um vídeo], [RESIZE], [Registado, Premium], [Vídeo no projeto; permissão de edição],
+      [UC-VID-011 — Rodar ou espelhar um vídeo], [ORIENT], [Registado, Premium], [Vídeo no projeto; permissão de edição],
+      [UC-VID-012 — Converter o formato], [CONVERT], [Registado, Premium], [Vídeo no projeto; permissão de edição],
+      [UC-VID-013 — Juntar vários vídeos], [CONCAT], [Registado, Premium], [Dois ou mais vídeos compatíveis; edição],
+      [UC-VID-014 — Encadear operações], [CHAIN], [Registado, Premium], [Vídeo(s) no projeto; até 10 passos válidos],
+      [UC-VID-015 — Processar vídeos em lote], [BATCH], [Registado, Premium], [Lote dentro dos limites do perfil],
   ),
 )
 
-*Justificação no contexto do MVP.* A seleção das seis funcionalidades foi estrategicamente delineada para assegurar uma cobertura holística e coerente do ciclo de vida multimédia, exercitando todos os subsistemas arquiteturais sem dispersão excessiva de escopo:
+*Justificação dos objetivos no contexto do MVP.* Os objetivos formam um percurso coerente de utilização e exercitam capacidades com complexidade própria, em vez de se limitarem a operações triviais. `UC-VID-000` estabelece a entrada do recurso e a sua consulta no projeto. `UC-VID-001` a `UC-VID-004` abrangem edição temporal, áudio e composição visual; `UC-VID-005` transforma fotogramas em recursos de imagem do projeto, ligando o novo fluxo ao domínio já existente. `UC-VID-006` e `UC-VID-007` permitem obter o ficheiro e os seus dados sem iniciar uma transformação. `UC-VID-008` a `UC-VID-012` cobrem ajustes, filtros, dimensões, orientação e conversão de formato. Por fim, `UC-VID-013` trata a composição de vários vídeos, `UC-VID-014` organiza operações numa cadeia validada e `UC-VID-015` aplica operações a um conjunto de vídeos. As tarefas assíncronas, estados, validação de parâmetros, quota e tratamento de falhas são preocupações transversais especificadas uma vez nos requisitos comuns, embora sejam acionadas por vários destes casos.
 
-- *UC-VID-000 — Carregamento, ingestão e visualização de vídeo no projeto*: Constitui o alicerce fundacional obrigatório de todo o incremento. Uma vez que o PictuRAS apenas manipulava imagens estáticas, a receção em _streaming_, o armazenamento escalável de ficheiros de grande porte no SeaweedFS com UUIDs únicos, a inspeção de fluxos com FFprobe, a extração de metadados técnicos, a geração de miniaturas JPEG e a reprodução num leitor integrado com controlos HTML5 são pré-requisitos absolutos sem os quais nenhuma transformação seria viável.
-- *UC-VID-001 — Recorte temporal de um vídeo (_trim_)*: Valida a manipulação da dimensão temporal contínua e a precisão ao fotograma (_frame-accurate_) na descodificação e recorte de segmentos sem degradação de sincronismo audiovisual, disponibilizando o mecanismo de edição mais elementar e procurado pelos utilizadores.
-- *UC-VID-002 — Remoção do áudio de um vídeo*: Valida a manipulação estrutural das _streams_ do contentor MP4, exercitando a extração eficiente através de cópia direta de fluxo (_stream copy_) com processamento ultra-rápido sem necessidade de recodificação de vídeo.
-- *UC-VID-003 — Alteração da velocidade de reprodução de um vídeo*: Valida a reamostragem temporal dinâmica de vídeo e o sincronismo com o algoritmo de cadência sonora (filtro `atempo`), testando o comportamento dos _workers_ perante compressão (_timelapse_) e dilatação (_slow motion_) de fotogramas.
-- *UC-VID-004 — Aplicação de marca de água a um vídeo*: Valida a sobreposição gráfica contínua fotograma a fotograma (renderização estática de texto TrueType e imagens PNG com canal alfa), exercitando o processamento computacionalmente intensivo e a transmissão em tempo real de eventos de progresso numérico (0–100%) via WebSocket.
-- *UC-VID-005 — Extração de fotogramas para o projeto*: Representa a ponte vital entre o domínio de vídeo e o domínio pré-existente de imagem estática do PictuRAS. Permite transformar um fluxo contínuo num conjunto de imagens discretas de alta resolução, integrando-as atomicamente na galeria do projeto e viabilizando o encadeamento (_tool chaining_) com todo o catálogo legado de ferramentas de processamento de imagem da plataforma.
-
-== Diagrama de casos de uso (atualizado)
-
-#orientacao[
-  *Ponto crítico a atualizar.* O diagrama de base (Figura abaixo) só contém casos de uso de imagem.
-  O diagrama atualizado deve:
-  - incluir todos os casos de uso UC-VID-nnn (e distinguir visualmente os novos — por exemplo, cor diferente);
-  - indicar que perfil (ator) acede a cada um — coerente com as regras de negócio e com a tabela de perfis.
-  Podem manter os casos de uso de imagem a cinzento, para dar contexto.
-]
+== Diagrama de casos de uso
 
 #figure(
-  image("../images/baseline/diagrama_casos_uso_base.png", width: 85%),
-  caption: [Diagrama de casos de uso da solução de base — *a substituir*],
+  image("../images/diagrama_casos_uso.png", width: 100%),
+  caption: [Diagrama consolidado de casos de uso: funcionalidades da baseline e extensão de vídeo],
 )
 
-#figure(kind: image,
-  figura-pendente[diagrama de casos de uso atualizado com as funcionalidades de vídeo (`images/diagrama_casos_uso.png`)],
-  caption: [Diagrama de casos de uso atualizado (Fase 1 — vídeo)],
-)
+O diagrama mantém em cinzento os casos de uso da baseline e identifica a azul os casos de uso novos `UC-VID-000` a `UC-VID-015`. A herança entre `Utilizador Convidado`, `Premium` e `Utilizador` representa os perfis já existentes. Os quatro símbolos com a designação “Utilizador autenticado (Registado ou Premium)” são repetições gráficas do mesmo ator, agrupadas para reduzir cruzamentos: respetivamente, representam ciclo de vida e acesso (`UC-VID-000`, `006`, `007`), edição temporal e extração (`001`–`005`), edição visual e formato (`008`–`012`) e composição/processamento (`013`–`015`).
 
-*Decisões de Modelação do Diagrama de Casos de Uso:*
-O diagrama de casos de uso foi atualizado para incorporar o novo subsistema de vídeo, estabelecendo uma distinção nítida face às funcionalidades legadas de imagem:
-1. *Atores e Permissões*: Os utilizadores *Registado* e *Premium* são os únicos atores autorizados a executar os casos de uso de vídeo (`UC-VID-000` a `UC-VID-005`). O utilizador *Anónimo* não herda acesso a estas operações, uma vez que o processamento multimédia de vídeo requer alocação de quota transacional e persistência estruturada num projeto autenticado (`DQ-001`).
-2. *Relações de Extensão e Dependência*: O caso de uso `UC-VID-000` (Carregar e visualizar vídeo) atua como o ponto de entrada e pré-condição operacional para todas as manipulações subsequentes (`UC-VID-001` a `005`), estabelecendo uma dependência funcional implícita: qualquer operação de recorte, remoção de áudio, velocidade, marca de água ou extração opera sobre um recurso de vídeo previamente integrado no projeto.
-3. *Integração Transversal com Imagem*: O caso de uso `UC-VID-005` (Extrair fotogramas) interseta o subsistema de imagem, alimentando a coleção do projeto com novos recursos de imagem discretos sobre os quais os casos de uso legados de processamento de imagem voltam a aplicar-se normalmente.
+Esta distribuição é coerente com a tabela e com as permissões descritas nos casos de uso: ambos os perfis autenticados podem iniciar os casos de vídeo, mas cada operação continua sujeita à autorização do projeto. O carregamento e a reprodução não debitam quota; a consulta e o descarregamento são operações de leitura sem custo; as transformações, cadeias e lotes seguem os custos definidos nas regras transversais e nos casos correspondentes. A extração de fotogramas cria imagens no projeto. O diagrama representa o acesso dos atores aos casos de uso; os pormenores de autorização, sequência e custo são especificados nos requisitos e nos casos de uso, não através de relações UML implícitas entre elipses.
 
-== Modelo de domínio (atualizado)
-
-#orientacao[
-  *Ponto crítico a atualizar.* O modelo de base é centrado em `Imagem`. Com vídeo, pensem (pelo menos) em:
-  - Como se relaciona `Vídeo` com `Imagem`? Especialização de um conceito comum (e.g., ficheiro de média),
-    ou conceito independente? Que atributos de domínio são relevantes (duração, resolução, formato, …)?
-  - Um `Projeto` passa a conter vídeos? Imagens e vídeos misturados?
-  - O processamento de vídeo é demorado: há um conceito de *trabalho/pedido de processamento* com estado
-    (em fila, em processamento, concluído, falhado, cancelado)? Qual o seu resultado?
-  - Que `Ferramenta`s se aplicam a vídeo? As ferramentas de imagem aplicam-se a fotogramas?
-  - Como se representam quotas/limites por perfil?
-  O modelo de domínio descreve *conceitos do problema*, não classes, tabelas nem microserviços.
-  Usem os mesmos termos que nos casos de uso e requisitos (se é "biblioteca", não passa a "galeria").
-]
+== Modelo de domínio
 
 #figure(
-  image("../images/baseline/modelo_dominio_base.png", width: 100%),
-  caption: [Modelo de domínio da solução de base — *a substituir*],
+  image("../images/modelo_dominio.png", width: 100%),
+  caption: [Modelo de domínio da baseline atualizado com os conceitos da extensão de vídeo],
 )
 
-#figure(kind: image,
-  figura-pendente[modelo de domínio atualizado (`images/modelo_dominio.png`)],
-  caption: [Modelo de domínio atualizado (Fase 1 — vídeo)],
-)
+O modelo preserva as entidades e relações da baseline e acrescenta apenas os conceitos necessários à extensão: `Recurso multimédia`, `Vídeo`, `Trabalho de processamento` e `Ferramenta de vídeo`. É um diagrama conceptual de entidades e relações. Não apresenta atributos, métodos, estados internos nem componentes tecnológicos; estes detalhes, quando necessários, são definidos nos requisitos e casos de uso.
 
-*Decisões de Modelação do Modelo de Domínio Atualizado:*
-Em resposta direta aos desafios concetuais colocados pelo suporte a vídeo, o modelo de domínio do PictuRAS evoluiu nas seguintes dimensões estruturais:
+*Relação entre Vídeo e Imagem.* `Recurso multimédia` generaliza `Imagem` e `Vídeo`, que são especializações do recurso integrado num projeto. Assim, partilham o contexto de carregamento e pertença ao projeto sem se confundirem: uma imagem é um recurso estático e um vídeo é um recurso audiovisual contínuo. A relação `Vídeo origina fotogramas Imagem` representa a extração prevista em `UC-VID-005`. Os dados técnicos, como duração, resolução, formato, codecs e taxa de fotogramas, são relevantes para validação e consulta, mas não são desenhados como atributos neste modelo.
 
-1. *Relação entre Vídeo e Imagem (`RecursoMultimédia`)*:
-   Em vez de manter `Vídeo` e `Imagem` como entidades isoladas, o modelo introduz o conceito generalizado de *`RecursoMultimédia`* (ou _Media Asset_). Ambos os tipos partilham atributos essenciais como identificador único, nome de ficheiro original, tamanho em bytes, data de carregamento e referência de armazenamento de objetos (`storageRef`).
-   - A *`Imagem`* especializa este conceito com propriedades bidimensionais estáticas (largura, altura, formato gráfico JPEG/PNG).
-   - O *`Vídeo`* especializa o conceito com propriedades espácio-temporais contínuas: duração total em segundos, resolução espacial nativa (largura $times$ altura), taxa de fotogramas por segundo (_framerate_), _bitrate_ global, codec de vídeo (H.264), codec de áudio (AAC, quando presente) e referência à miniatura de representação visual gerada no primeiro segundo (`thumbnailRef`).
-2. *Projetos Mistos com Agregação Polimórfica*:
-   O conceito de *`Projeto`* passa a conter uma coleção mista e polimórfica de `RecursoMultimédia`. Deste modo, um mesmo projeto pode alojar em simultâneo vídeos carregados, vídeos derivados de operações de edição e imagens estáticas (incluindo fotogramas extraídos), mantendo a coesão do espaço de trabalho do utilizador.
-3. *Trabalho de Processamento Assíncrono (`TrabalhoProcessamento`)*:
-   Dada a natureza não instantânea da descodificação e codificação de vídeo, modela-se explicitamente a entidade *`TrabalhoProcessamento`* (ou _VideoTask_). Cada trabalho é instanciado no âmbito de um `Projeto` por um `Utilizador` executor, associado aos parâmetros específicos validados da operação e governado por uma máquina de estados finitos canónica:
-   $ "queued" thin arrow.r thin "processing" thin arrow.r thin brace.l "completed", "failed", "cancelled" $
-   O trabalho mantém ainda a percentagem de progresso em tempo real (0% a 100%) e, quando atinge o estado terminal `completed`, referencia o novo `RecursoMultimédia` gerado no projeto.
-4. *Ferramentas de Vídeo vs. Ferramentas de Imagem e Encadeamento*:
-   O catálogo de capacidades divide-se entre *`FerramentaVídeo`* (recorte, áudio, velocidade, marca de água e extração) e *`FerramentaImagem`* (filtros, rotação, ajustes de cor pré-existentes). A extração de fotogramas produz diretamente entidades do tipo `Imagem` devidamente anotadas com a proveniência (`sourceVideoId` e `timestamp`), permitindo o encadeamento direto (_tool chaining_) com todo o ecossistema de ferramentas de imagem legadas.
-5. *Quotas e Limites por Perfil*:
-   A *`ContaUtilizador`* governa o *`SaldoQuotaDiária`* (5 operações diárias para utilizadores Registados e ilimitado para Premium). O débito efetivo de quota incide exclusivamente sobre a execução bem-sucedida de instâncias de `TrabalhoProcessamento` de manipulação, ficando o carregamento de vídeo e a pré-visualização de amostras explicitamente isentos de débito (`DQ-011`).
+*Projetos mistos.* `Projeto` contém `Recurso multimédia`; por consequência, pode conter imagens e vídeos no mesmo espaço de trabalho, incluindo imagens originadas por extração e vídeos produzidos por operações. A associação `Projeto usa Ferramenta` mantém a relação da baseline, e `Ferramenta de vídeo` especializa `Ferramenta` para identificar as operações aplicáveis ao vídeo. A relação entre ferramenta e vídeo não elimina as ferramentas de imagem: a extração cria entidades `Imagem`, sobre as quais se aplicam as ferramentas existentes.
+
+*Trabalho assíncrono e resultado.* `Trabalho de processamento` é registado num projeto, submetido por um utilizador, processa um ou mais vídeos, executa uma ou mais ferramentas de vídeo e pode produzir recursos multimédia. Esta estrutura cobre operações isoladas, encadeamento e processamento em lote, bem como resultados de vídeo e imagens extraídas. O diagrama não desenha estados do trabalho nem o ciclo de vida temporal. Os estados `queued`, `processing`, `completed`, `failed` e `cancelled`, o progresso, o cancelamento e as condições de persistência são especificados nos requisitos transversais de tarefas e nos casos de uso.
+
+*Ferramentas e quotas.* A especialização `Ferramenta de vídeo` torna explícito o catálogo de operações de vídeo; as ferramentas da baseline continuam associadas à edição de imagens. Cadeias e lotes são formas de composição/submissão de trabalhos descritas nos casos `UC-VID-014` e `UC-VID-015`, não entidades adicionais no diagrama atual. Também não existe neste modelo uma entidade de quota ou conta: os limites por perfil, a reserva e confirmação de créditos e as regras de custo são políticas transversais documentadas abaixo e nos requisitos de quota. Esta distinção evita atribuir ao desenho conceitos que ele não representa.
 
 == Regras de negócio transversais
 
-#orientacao[
-  Regras que se aplicam a *várias* funcionalidades ficam aqui, com ID global `RNG-nn`
-  (e.g., formatos aceites, como o vídeo conta para a quota diária, tempo de retenção de ficheiros).
-  As regras específicas de uma funcionalidade ficam no respetivo caso de uso (RN1, RN2, …) e, nas tabelas
-  partilhadas por todas as funcionalidades (ERS, impacto, rastreabilidade), escrevem-se qualificadas
-  (`UC-VID-001/RN2`). As decisões de qualidade (`DQ-nnn`) estão reunidas no capítulo de Rastreabilidade.
-]
+As regras seguintes reúnem políticas aplicáveis a mais do que um caso de uso. As validações particulares de parâmetros e fluxos alternativos permanecem nos respetivos casos. Os limites por perfil e os formatos são resumidos aqui; os requisitos `REQ-VID-*` e as decisões `DQ-*` constituem a referência detalhada para os critérios e exceções.
 
 #tab([Regras de negócio transversais da extensão de vídeo],
   tabela(
-    colunas: (1.8cm, 1fr, 3.4cm, 3.2cm),
-    [ID], [Regra], [Origem / justificação], [Requisitos],
-    [RNG-01], [O sistema aceita na entrada e produz nos resultados exclusivamente ficheiros de vídeo no contentor MP4 codificados em H.264 (vídeo) e AAC (áudio), admitindo vídeos sem faixa sonora. Outros formatos são rejeitados na camada de API.], [Interoperabilidade nativa com navegadores web modernos via HTML5 sem transcodificação no MVP (DQ-002).], [REQ-VID-UPLOAD-003, REQ-VID-UPLOAD-009, REQ-VID-UPLOAD-010, REQ-VID-NFR-003],
-    [RNG-02], [São aplicados limites contratuais rígidos de duração e dimensão por perfil: Registado limitado a vídeos de duração $<= 5$ min e tamanho $<= 200$ MB (máx. 50 fotogramas na extração); Premium limitado a duração $<= 60$ min e tamanho $<= 2$ GB (máx. 500 fotogramas).], [Proteção contra esgotamento de storage de objetos e saturação dos workers em instâncias de desenvolvimento locais (DQ-005).], [REQ-VID-UPLOAD-004, REQ-VID-UPLOAD-011, REQ-VID-FRAMES-006, REQ-VID-NFR-008],
-    [RNG-03], [Cada tarefa de manipulação de vídeo concluída consome exatamente 1 crédito da quota diária de 5 operações do utilizador Registado. A quota é reservada transitòriamente na admissão (queued), confirmada no término com sucesso (completed) e devolvida integralmente em caso de falha ou cancelamento.], [Modelo de negócio freemium da plataforma e cobrança justa apenas por tarefas entregues (DQ-001, DQ-007).], [REQ-VID-QUOTA-001..004, REQ-VID-COM-002],
-    [RNG-04], [O carregamento de vídeo e a reprodução no leitor integrado não consomem créditos da quota diária de operações, incidindo a contabilização exclusivamente sobre transformações de vídeo.], [Incentivar a adoção do produto e permitir a criação de mediatecas de trabalho nos projetos sem atrito de utilização (DQ-011).], [REQ-VID-UPLOAD-014, REQ-VID-QUOTA-001],
-    [RNG-05], [Todas as operações de transformação de vídeo são executadas de forma 100% assíncrona desacoplada via RabbitMQ, com máquina de estados (queued, processing, completed, failed, cancelled) e concorrência máxima de 1 tarefa ativa por projeto.], [Preservação da responsividade do gateway HTTP e prevenção de condições de corrida em projetos partilhados (DQ-004, DQ-005).], [REQ-VID-TASK-001..005, REQ-VID-NFR-005, REQ-VID-NFR-006, REQ-VID-NFR-008],
-    [RNG-06], [O ficheiro de vídeo original permanece sempre inalterado; qualquer transformação bem-sucedida gera um novo recurso associado ao projeto com referência de proveniência (`sourceVideoId`). Em caso de falha ou cancelamento, nenhum recurso parcial é persistido (tudo-ou-nada).], [Garantia de edição não destrutiva e preservação da integridade transacional dos projetos (DQ-003, DQ-007).], [REQ-VID-COM-002, REQ-VID-COM-003, REQ-VID-STORAGE-002, REQ-VID-FRAMES-011, REQ-VID-FRAMES-013, REQ-VID-NFR-007],
+      colunas: (1.35cm, 1.45fr, 1fr, 1.25fr),
+      tamanho: 8pt,
+      [ID], [Regra], [Fundamento], [Requisitos relacionados],
+      [RNG-01], [A entrada aceita MP4 e MOV com vídeo H.264 e áudio AAC; AVI admite H.264 ou MPEG-4 Part 2 e áudio AAC ou MP3, de acordo com a matriz definida. As operações produzem MP4 (H.264/AAC); a conversão pode produzir os formatos de saída admitidos pela matriz. A extração produz imagens JPEG ou PNG.], [Compatibilidade dos ficheiros e interoperabilidade com o reprodutor; ver DQ-002 e DQ-013.], [REQ-VID-NFR-003, REQ-VID-NFR-004, prefixo REQ-VID-CONVERT],
+      [RNG-02], [Os limites de entrada dependem do perfil: Registado, até 5 minutos e 200 MB; Premium, até 60 minutos e 2 GB. A extração está limitada a 50 fotogramas para Registado e 500 para Premium.], [Controlo de capacidade e coerência entre perfil, carregamento e extração.], [Prefixos REQ-VID-UPLOAD e REQ-VID-FRAMES; REQ-VID-NFR-008],
+      [RNG-03], [A quota aplica-se ao utilizador que submete o trabalho, mesmo num projeto partilhado. Registado dispõe de 5 créditos diários; Premium não tem quota diária. Reserva-se o custo total na aceitação e confirma-se apenas o custo correspondente a trabalho concluído; falhas e cancelamentos devolvem os créditos não consumidos.], [Cobrança previsível e associada ao executor; ver DQ-001, DQ-008 e DQ-014.], [REQ-VID-QUOTA-001 a 008],
+      [RNG-04], [Carregamento, reprodução, consulta de informações e descarregamento não consomem quota. Uma operação isolada ou junção custa 1 crédito; uma cadeia custa um crédito por passo; num lote, o custo é multiplicado pelo número de vídeos concluídos.], [Diferenciação entre acesso ao recurso e processamento; custo transparente antes da submissão.], [Prefixos REQ-VID-UPLOAD, REQ-VID-DOWNLOAD e REQ-VID-INFO; REQ-VID-QUOTA-008],
+      [RNG-05], [As transformações decorrem como tarefas assíncronas com estados `queued`, `processing`, `completed`, `failed` ou `cancelled`. O projeto admite no máximo uma tarefa ativa de vídeo. Cadeias e lotes mantêm um estado agregado e disponibilizam o progresso adequado à sua composição.], [Manter a interação disponível durante trabalhos demorados e limitar concorrência.], [REQ-VID-TASK-001 a 007, REQ-VID-NFR-005 a 009],
+      [RNG-06], [A edição é não destrutiva: o recurso de origem mantém-se e o resultado bem-sucedido é registado como novo recurso no projeto com a sua proveniência. Uma cadeia só publica o resultado final; falha ou cancelamento não publica resultados parciais, e os artefactos temporários são removidos.], [Integridade do projeto, rastreabilidade e recuperação perante falhas.], [REQ-VID-COM-002 a 003, REQ-VID-STORAGE-002 a 004, REQ-VID-TASK-005, REQ-VID-CHAIN-011 a 013, REQ-VID-NFR-007],
   ),
 )
 
@@ -132,13 +85,13 @@ Em resposta direta aos desafios concetuais colocados pelo suporte a vídeo, o mo
 #tabela(
   colunas: (4.2cm, 1fr),
   [Identificador], [Utilização],
-  [UC-VID-nnn], [Caso de uso de vídeo (numeração única no relatório: UC-VID-000 a UC-VID-005)],
-  [REQ-VID-{FUNC}-nnn], [Requisito funcional ou não funcional atómico; {FUNC} identifica a funcionalidade ou área (COM, AUTH, QUOTA, STORAGE, TASK, ERROR, UPLOAD, TRIM, AUDIO, SPEED, WATERMARK, FRAMES, NFR); IDs nunca se reutilizam],
-  [RN#emph[k], A#emph[k], Q#emph[k], FA#emph[k]], [Regra de negócio local, assunção, questão em aberto e fluxo alternativo específicos de um caso de uso (referenciados nas tabelas partilhadas com qualificação, e.g. `UC-VID-001/RN2`)],
-  [RNG-nn], [Regra de negócio transversal à extensão de vídeo (RNG-01 a RNG-06)],
-  [DQ-nnn], [Decisão de qualidade e arquitetura global da Fase 1 (DQ-001 a DQ-011)],
-  [DA-nn], [Decisão arquitetural formal (Capítulo 8 — Arquitetura)],
-  [TST-{FUNC}-nn], [Caso de teste automatizado ou manual com critério Dado... Quando... Então... (Capítulo 10 — Testes)],
-  [T-nn], [Tarefa de manutenção corretiva da solução de base (Capítulo 11)],
-  [UCnn, RFnn, RNFnn], [Elementos da baseline do PictuRAS v27.1 referenciados quando sofreram alteração (ALT)],
+  [UC-VID-nnn], [Caso de uso de vídeo, de `UC-VID-000` a `UC-VID-015`],
+  [REQ-VID-{FUNC}-nnn], [Requisito funcional ou não funcional; `{FUNC}` identifica a área, incluindo `COM`, `AUTH`, `QUOTA`, `STORAGE`, `TASK`, `ERROR`, `UPLOAD`, `TRIM`, `AUDIO`, `SPEED`, `WATERMARK`, `FRAMES`, `DOWNLOAD`, `INFO`, `ADJUST`, `FILTER`, `RESIZE`, `ORIENT`, `CONVERT`, `CONCAT`, `CHAIN`, `BATCH` e `NFR`],
+  [RNn, An, Qn, FAn], [Regra, assunção, questão ou fluxo alternativo local de um caso de uso; em artefactos transversais, referenciar com o caso, por exemplo `UC-VID-001/RN2`],
+  [RNG-nn], [Regra de negócio transversal à extensão de vídeo (`RNG-01` a `RNG-06`)],
+  [DQ-nnn], [Decisão de qualidade ou arquitetura registada para a Fase 1],
+  [DA-nn], [Decisão arquitetural formal, documentada no capítulo de Arquitetura],
+  [TST-{FUNC}-nn], [Caso de teste com critério verificável, documentado no capítulo de Testes],
+  [T-nn], [Tarefa de manutenção corretiva da solução de base],
+  [UCnn, RFnn, RNFnn], [Elementos da baseline do PictuRAS v27.1 referenciados quando são alterados],
 )

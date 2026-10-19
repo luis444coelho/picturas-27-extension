@@ -1,48 +1,44 @@
 @startuml diagrama_casos_uso
 
-' Diagrama consolidado: funcionalidades da baseline + extensão de vídeo.
+' Notação, fronteira do sistema e paleta próximas da baseline.
 left to right direction
 skinparam monochrome false
 skinparam shadowing false
-skinparam linetype ortho
+skinparam linetype polyline
 skinparam packageStyle rectangle
-skinparam roundcorner 8
+skinparam roundcorner 0
 skinparam defaultFontName Arial
-skinparam defaultFontSize 14
+skinparam defaultFontSize 15
 skinparam actorStyle stickman
-skinparam ArrowColor #4B5563
+skinparam ArrowColor black
 skinparam ArrowThickness 1.2
-skinparam usecaseBorderColor #263238
-skinparam usecaseFontColor #17212B
+skinparam usecaseBorderColor black
+skinparam usecaseFontColor black
 skinparam actorBackgroundColor #55C8EC
-skinparam actorBorderColor #263238
-skinparam actorFontColor #17212B
-skinparam packageBorderColor #73808C
-skinparam packageFontColor #263238
-skinparam rectangleBorderColor #263238
-skinparam rectangleFontColor #17212B
-skinparam noteBackgroundColor #FFF4CC
-skinparam noteBorderColor #9A7B20
-skinparam nodesep 38
-skinparam ranksep 45
+skinparam actorBorderColor black
+skinparam actorFontColor black
+skinparam packageBorderColor #333333
+skinparam packageFontColor black
+skinparam rectangleBorderColor black
+skinparam rectangleFontColor black
+skinparam nodesep 35
+skinparam ranksep 35
 
 title Diagrama de Casos de Uso — PictuRAS (Baseline + Vídeo)
 
-' Atores da baseline e perfis autorizados para o novo subsistema.
+' Utilizador representa o perfil autenticado Registado.
+' Premium e Convidado são especializações e herdam as associações do ator base.
+' Anónimo permanece independente: não pode aceder às funcionalidades de vídeo.
 actor "Anónimo" as Anonimo
-actor "Utilizador" as Utilizador
 actor "Utilizador Convidado" as Convidado
+actor "Utilizador\n(Registado)" as Utilizador
 actor "Premium" as Premium
-actor "Utilizador autenticado\n(Registado ou Premium)" as AtorCiclo
-actor "Utilizador autenticado\n(Registado ou Premium)" as AtorEdicaoTemporal
-actor "Utilizador autenticado\n(Registado ou Premium)" as AtorEdicaoVisual
-actor "Utilizador autenticado\n(Registado ou Premium)" as AtorComposicao
 
-Convidado -up-|> Utilizador
+Convidado -right-|> Utilizador
 Premium -down-|> Utilizador
 
-rectangle "Sistema PictuRAS" {
-  package "Funcionalidades existentes — baseline" as Baseline #F1F1F1 {
+rectangle "Sistema" {
+  package "Casos de uso da baseline" as Baseline #F1F1F1 {
     usecase "Registo" as UC_Registo #D9D9D9
     usecase "Login" as UC_Login #D9D9D9
     usecase "Carregar imagens" as UC_CarregarImagens #D9D9D9
@@ -52,14 +48,14 @@ rectangle "Sistema PictuRAS" {
     usecase "Assistente IA na edição" as UC_AssistenteIA #D9D9D9
   }
 
-  package "Extensão de vídeo — novos casos de uso" as Video #EAF8FD {
+  package "Extensão de vídeo" as Video #EAF8FD {
     package "Ciclo de vida e acesso" as Ciclo #F7FCFE {
       usecase "UC-VID-000\nCarregar e visualizar vídeo" as UC_VID_000 #55C8EC
       usecase "UC-VID-006\nDescarregar vídeo" as UC_VID_006 #55C8EC
       usecase "UC-VID-007\nConsultar informações do vídeo" as UC_VID_007 #55C8EC
     }
 
-    package "Edição temporal e extração" as EdicaoTemporal #F7FCFE {
+    package "Edição temporal e extração" as Temporal #F7FCFE {
       usecase "UC-VID-001\nRecortar vídeo" as UC_VID_001 #55C8EC
       usecase "UC-VID-002\nRemover áudio" as UC_VID_002 #55C8EC
       usecase "UC-VID-003\nAlterar velocidade" as UC_VID_003 #55C8EC
@@ -67,7 +63,7 @@ rectangle "Sistema PictuRAS" {
       usecase "UC-VID-005\nExtrair fotogramas" as UC_VID_005 #55C8EC
     }
 
-    package "Edição visual e formato" as EdicaoVisual #F7FCFE {
+    package "Edição visual e formato" as Visual #F7FCFE {
       usecase "UC-VID-008\nAjustar propriedades visuais" as UC_VID_008 #55C8EC
       usecase "UC-VID-009\nAplicar filtro visual" as UC_VID_009 #55C8EC
       usecase "UC-VID-010\nRedimensionar vídeo" as UC_VID_010 #55C8EC
@@ -83,60 +79,45 @@ rectangle "Sistema PictuRAS" {
   }
 }
 
-' Associações dos casos de uso da baseline.
+' Acesso anónimo apenas a registo e autenticação.
 Anonimo -- UC_Registo
 Anonimo -- UC_Login
+
+' Associações da baseline.
 Utilizador -- UC_CarregarImagens
 Utilizador -- UC_EncadeamentoImagens
 Utilizador -- UC_FiltroPersonalizado
 Utilizador -- UC_Partilhar
 Premium -- UC_AssistenteIA
 
-' Ator repetido por grupo apenas para tornar as associações locais legíveis.
-' Os quatro símbolos representam o mesmo perfil autorizado (Registado/Premium).
-AtorCiclo -- UC_VID_000
-AtorCiclo -- UC_VID_006
-AtorCiclo -- UC_VID_007
-AtorEdicaoTemporal -- UC_VID_001
-AtorEdicaoTemporal -- UC_VID_002
-AtorEdicaoTemporal -- UC_VID_003
-AtorEdicaoTemporal -- UC_VID_004
-AtorEdicaoTemporal -- UC_VID_005
-AtorEdicaoVisual -- UC_VID_008
-AtorEdicaoVisual -- UC_VID_009
-AtorEdicaoVisual -- UC_VID_010
-AtorEdicaoVisual -- UC_VID_011
-AtorEdicaoVisual -- UC_VID_012
-AtorComposicao -- UC_VID_013
-AtorComposicao -- UC_VID_014
-AtorComposicao -- UC_VID_015
+' Associações de vídeo no ator base: os perfis especializados herdam-nas.
+Utilizador -- UC_VID_000
+Utilizador -- UC_VID_001
+Utilizador -- UC_VID_002
+Utilizador -- UC_VID_003
+Utilizador -- UC_VID_004
+Utilizador -- UC_VID_005
+Utilizador -- UC_VID_006
+Utilizador -- UC_VID_007
+Utilizador -- UC_VID_008
+Utilizador -- UC_VID_009
+Utilizador -- UC_VID_010
+Utilizador -- UC_VID_011
+Utilizador -- UC_VID_012
+Utilizador -- UC_VID_013
+Utilizador -- UC_VID_014
+Utilizador -- UC_VID_015
 
-' Orientações curtas para políticas específicas sem ligações pontilhadas longas.
-note right of UC_VID_000
-  Upload e reprodução não consomem quota.
-  A edição requer permissão de edição;
-  consulta e download aceitam leitura.
-end note
-
-note left of AtorCiclo
-  Os símbolos repetidos do ator representam
-  o mesmo perfil autorizado: Registado/Premium.
-end note
-
-note right of UC_VID_014
-  Cadeia: até 10 passos; conversão no fim;
-  não inclui extração de fotogramas.
-end note
-
-note right of UC_VID_015
-  Lote sequencial: 2–10 vídeos (Registado),
-  2–50 (Premium); sem junção ou extração.
-end note
-
-legend right
-  |= Cor |= Significado |
-  |<#D9D9D9> Cinzento | Funcionalidades da baseline |
-  |<#55C8EC> Azul | Casos de uso novos de vídeo |
+legend bottom
+  |= Marca |= Perfil e permissões |
+  |<#D9D9D9> Cinzento | Casos de uso da baseline |
+  |<#55C8EC> Azul | Novos casos de uso de vídeo |
+  | Anónimo | Registo/login; sem acesso a vídeo |
+  | Utilizador (Registado) | Autenticado; edição exige permissão de edição no projeto; até 5 min / 200 MB e 5 créditos/dia |
+  | Premium → Utilizador | Herda associações; sem quota diária; até 60 min / 2 GB |
+  | Convidado → Utilizador | Herda após convite; projeto determina leitura/edição; quota debitada à conta executora |
+  | UC-VID-006/007 | Leitura ou superior; todos os restantes casos de vídeo exigem edição |
+  | UC-VID-005 / UC-VID-015 | Limite de 50/500 fotogramas e lote de 10/50 vídeos (Registado/Premium) |
 endlegend
 
 @enduml
