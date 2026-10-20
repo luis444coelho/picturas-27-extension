@@ -11,7 +11,7 @@
 | **Autores** | Equipa PictuRAS-27 |
 | **Data** | 2026-10-19 |
 | **Versão do documento** | v1.0 (primeira versão do ADD) |
-| **Âmbito** | UC-VID-006 a UC-VID-015, requisitos comuns `REQ-VID-COM-006`, `REQ-VID-QUOTA-007/008`, `REQ-VID-STORAGE-002/004`, `REQ-VID-TASK-006/007`, `REQ-VID-UPLOAD-016/017` e não funcionais `REQ-VID-NFR-012` a `016` |
+| **Âmbito** | UC-VID-006 a UC-VID-015, requisitos comuns `REQ-VID-COM-006`, `REQ-VID-QUOTA-007/008`, `REQ-VID-STORAGE-002/004`, `REQ-VID-TASK-006/007`, `REQ-VID-UPLOAD-016/017` e não funcionais `REQ-VID-NFR-012` a `016`, `021`, `025` e `026` |
 | **Unidade Curricular** | Requisitos e Arquiteturas de Software — MEI, Universidade do Minho |
 
 ---
@@ -253,7 +253,8 @@ Esquema proposto para a coleção `videos` (campos usados pelos novos casos de u
 | **Campo** | **Tipo** | **Uso** |
 |---|---|---|
 | `_id`, `project_id`, `owner_id`, `created_by` | ObjectId | Identidade, permissões (STORAGE-003), quota do executor (QUOTA-006). `owner_id` é uma cópia do dono do projeto (`project.user_id`), guardada para chegar ao bucket `user-<id>` sem ler o projeto; `created_by` é quem executou a operação |
-| `original_name` | String | Nome sugerido no descarregamento (DOWNLOAD-005) |
+| `original_name` | String | Nome de ficheiro (STORAGE-001) e nome sugerido no descarregamento (DOWNLOAD-005) |
+| `mime_type` | String | MIME type (STORAGE-001), preenchido na ingestão a partir do contentor: `video/mp4`, `video/quicktime` (MOV) ou `video/x-msvideo` (AVI). Também é o `ResponseContentType` dos URLs de descarregamento (T-08) |
 | `status` | `queued \| processing \| completed \| failed` | Disponibilidade para descarregar e consultar (DOWNLOAD-003, INFO Exceção 3). `queued`, `processing` e `failed` só se aplicam à ingestão: os vídeos resultantes são criados já `completed` quando a tarefa termina, e o estado da operação vive no `VideoTask` (T-03) |
 | `storage.original_key`, `storage.preview_key`, `storage.thumb_key`, `storage.first_frame_key` | String | Ficheiro armazenado, cópia MP4 (DQ-012), miniatura, fotograma 0 para pré-visualizações (T-07) |
 | `meta.container`, `meta.video_codec`, `meta.audio_codec` (ou `null`) | String | Formato (INFO-004, CONVERT-001) |
@@ -432,7 +433,7 @@ stateDiagram-v2
 
 **Formato de trabalho (DQ-013):** todas as operações, exceto a conversão, produzem MP4 (H.264/AAC), mesmo quando a origem é MOV ou AVI (por exemplo, um recorte de um AVI dá um MP4). Só a conversão, sempre como último passo (CONVERT-009), escolhe outro contentor.
 
-O planeamento por stream (vídeo e áudio separadamente) é: **cópia** quando o codec de origem é **igual ao codec de saída** da matriz para o contentor de saída e nenhum passo da cadeia altera essa stream; caso contrário, **recodificação** para o codec de saída. Não basta o codec ser admitido na entrada desse contentor: um MP4 H.264 convertido para AVI recodifica o vídeo para MPEG-4 Part 2 (CONVERT-005). Exemplos: MP4→MOV = cópia das duas streams (REQ-VID-CONVERT-006); AVI (H.264/MP3)→MP4 = cópia do vídeo e recodificação do áudio para AAC; remover áudio de um MP4 H.264 = cópia do vídeo (REQ-VID-AUDIO-005). O mesmo módulo responde a REQ-VID-CONVERT-001/003 ("Cópia direta" ou "Recodificação").
+O planeamento por stream (vídeo e áudio separadamente) é: **cópia** quando o codec de origem é **igual ao codec de saída** da matriz para o contentor de saída e nenhum passo da cadeia altera essa stream; caso contrário, **recodificação** para o codec de saída. Não basta o codec ser admitido na entrada desse contentor: um MP4 H.264 convertido para AVI recodifica o vídeo para MPEG-4 Part 2 (CONVERT-005). Neste caso a ERS contradiz-se: a REQ-VID-CONVERT-006 manda copiar quando o codec de origem é *admitido* no formato de saída (o H.264 é admitido em AVI), e a REQ-VID-CONVERT-005 fixa a saída AVI em MPEG-4 Part 2/MP3. O ADD segue a CONVERT-005, que dá resultados AVI uniformes e reproduzíveis nos leitores de referência (REQ-VID-NFR-026); a decisão fica para a equipa confirmar (Q-ADD-21). Nos restantes casos (MP4 e MOV) as duas regras coincidem. Exemplos: MP4→MOV = cópia das duas streams (REQ-VID-CONVERT-006); AVI (H.264/MP3)→MP4 = cópia do vídeo e recodificação do áudio para AAC; remover áudio de um MP4 H.264 = cópia do vídeo (REQ-VID-AUDIO-005). O mesmo módulo responde a REQ-VID-CONVERT-001/003 ("Cópia direta" ou "Recodificação").
 
 Na conversão com recodificação, o comando não força `-r` nem `scale` e mantém a cadência de origem (`-fps_mode passthrough`), para preservar a duração, a resolução e a taxa de fotogramas (CONVERT-007).
 
@@ -1095,3 +1096,4 @@ Dependências consideradas e **não** propostas: `ffmpeg-python`, PyAV, `fluent-
 | **Q-ADD-18** | O contraste de imagem (`ImageEnhance.Contrast`) usa a média da imagem como pivô; no vídeo propõe-se um pivô fixo (128), como já faz o `applyToolsPreview`. A equipa aceita esta diferença face à DQ-020 ("mesma semântica")? | Baixo | DQ-020, `Tools/contrast/contrast.py` |
 | **Q-ADD-19** | O `aws-sdk` v2 (`imageStorageService`) e o `mongo:4.4` estão em fim de suporte. Pela regra 2.6, o código existente não migra. O módulo de vídeo do T-08 reutiliza o `services/s3Client.js` (v2) por coerência; a migração (`@aws-sdk/client-s3` v3 com `@aws-sdk/s3-request-presigner`) fica para uma fase posterior, de todo o serviço. A equipa concorda? | Baixo | `imageStorageService/package.json`, `docker-compose.yaml` |
 | **Q-ADD-20** | A DQ-012 prevê a cópia de pré-visualização só para MOV e AVI. O ADD propõe gerá-la também para originais e resultados MP4 com perfis H.264 que os navegadores não reproduzem (10 bits, 4:2:2, 4:4:4), recodificados para `yuv420p`. A equipa aceita alargar a DQ-012, ou prefere rejeitar esses perfis na ingestão (REQ-VID-UPLOAD-009)? | Médio | T-06, REQ-VID-UPLOAD-009, DQ-012 |
+| **Q-ADD-21** | Conversão para AVI de uma origem com codecs admitidos em AVI mas diferentes dos de saída (vídeo H.264, áudio AAC): a REQ-VID-CONVERT-006 manda copiar e a REQ-VID-CONVERT-005 manda recodificar para MPEG-4 Part 2/MP3. O ADD segue a CONVERT-005 (T-05). A equipa confirma e corrige a CONVERT-006 na ERS ("quando os codecs de origem são iguais aos codecs de saída da matriz")? | Médio | T-05, REQ-VID-CONVERT-005/006 |
