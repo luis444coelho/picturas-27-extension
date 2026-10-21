@@ -19,14 +19,15 @@ implemented: false
 
 ## Acceptance Criteria
 
-- [ ] Quando configuro uma marca válida e confirmo, então o sistema aplica-a de forma consistente durante o vídeo e gera novo recurso.
-- [ ] Configuração ou imagem fora dos limites aprovados é rejeitada antes de criar tarefa.
-- [ ] A tarefa expõe estado/progresso aplicável e falha/cancelamento não altera o original nem publica resultado parcial.
+- [ ] Quando configuro uma marca de texto ou imagem válida (posição, escala de 5 a 50% e opacidade de 10 a 100%) e confirmo, então o sistema aplica-a na mesma posição em todos os fotogramas e gera um novo recurso, mantendo o áudio.
+- [ ] Conteúdo vazio, imagem inválida ou geometria fora da área visível é rejeitado antes de criar tarefa.
+- [ ] A tarefa emite progresso de 0 a 100% pelo menos uma vez por segundo; falha ou cancelamento não altera o original nem publica resultado parcial.
 
 ## Traceability
 
 - **Use case:** UC-VID-004.
-- **Requirements:** `REQ-VID-WATERMARK-*; REQ-VID-COM-*`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes.
+- **Requirements:** `REQ-VID-WATERMARK-001` a `011`. Consome `REQ-VID-COM-*`, `REQ-VID-NFR-009`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
+- **Decisões do ADD v1.1:** T-02 (`overlay` ou `drawtext`), Q-ADD-12 (implementação de raiz no worker de vídeo), ADD 6 (tipos de letra, só com `drawtext`).
 
 ## Dependencies
 
@@ -36,4 +37,5 @@ implemented: false
 ## Out of Scope
 
 - Alterar o ficheiro original.
-- Funcionalidades ou limites que não constem da ERS v2.3.
+- Alterar código existente (regra 2.6 do ADD: só acrescentar).
+- Funcionalidades ou limites que não constem da ERS v2.4, dos casos de uso v1.5 ou do ADD v1.1.

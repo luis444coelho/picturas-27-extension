@@ -3,18 +3,18 @@ intent: 001-video-processing-support
 phase: inception
 status: in-progress
 created: 2026-10-19T17:31:16Z
-updated: 2026-10-19T17:31:16Z
+updated: 2026-10-21T01:07:50Z
 ---
 
 # Requisitos: Suporte a vídeo no PictuRAS
 
 ## Fonte canónica e âmbito
 
-Este ficheiro é o índice de requisitos da intent SpecsMD. A ERS detalhada e autoritativa da Fase 1 é [`docs/requirements.md`](../../../docs/requirements.md), com texto atómico, prioridade, classificação ALT/NOVO, origem e critérios de aceitação em [`docs/requirements/`](../../../docs/requirements/). Não duplicar nem reinterpretar esses requisitos neste índice.
+Este ficheiro é o índice de requisitos da intent SpecsMD. As decisões de arquitetura e implementação são as do ADD v1.1 ([`docs/add.md`](../../../docs/add.md)), documento mestre. A ERS detalhada e autoritativa da Fase 1 é [`docs/requirements.md`](../../../docs/requirements.md) (v2.4), com texto atómico, prioridade, classificação ALT/NOVO, origem e critérios de aceitação em [`docs/requirements/`](../../../docs/requirements/). Não duplicar nem reinterpretar esses requisitos neste índice.
 
 O âmbito atual é a extensão de vídeo descrita pelos 16 casos em [`docs/use-cases/`](../../../docs/use-cases/UC-VID-000.md): ingestão e visualização, operações de vídeo, exportação de fotogramas, acesso, junção, cadeias e lotes. O rascunho inicial de cinco operações foi preservado em [`requirements-initial-proposal.md`](requirements-initial-proposal.md) apenas como histórico; não é base para implementação.
 
-## Inventário ERS v2.3
+## Inventário ERS v2.4
 
 | Grupo de requisitos | Prefixo / ficheiro canónico | Quantidade |
 |---|---|---:|
@@ -42,7 +42,7 @@ O âmbito atual é a extensão de vídeo descrita pelos 16 casos em [`docs/use-c
 
 - Preservar o original e associar resultados concluídos ao projeto, conforme os critérios da ERS.
 - Impor autenticação, permissão de leitura ou edição conforme o caso de uso e contabilizar quota à identidade que submete processamento.
-- Manter upload, reprodução, pré-visualização, consulta e download fora do débito de quota; aplicar os custos definidos para operações, cadeias e lotes.
+- Manter upload, reprodução, pré-visualização, consulta e download fora do débito de quota; aplicar os custos definidos para operações, cadeias e lotes, com a reserva a tornar-se definitiva na conclusão, sem passo de confirmação (Q-ADD-03).
 - Executar processamento assíncrono com estados e limites de concorrência; respeitar atomicidade de cadeias e independência de resultados em lotes.
 - Manter as ferramentas da baseline tipadas para imagem; fotogramas extraídos são recursos de imagem normais do projeto.
 
@@ -50,7 +50,7 @@ Cada requisito tem o seu critério de aceitação na ERS. A especificação enco
 
 ## Restrições e decisões vigentes
 
-Os valores normativos (formatos/codecs, limites por perfil, estados, quotas, limites de junção/cadeia/lote, outputs e política de falhas) são os documentados em `docs/requirements.md`, nos requisitos individuais e nas decisões `DQ-001` a `DQ-025`. As regras transversais estão resumidas em `docs/inception/artefactos-finais.md` e no capítulo 3 do relatório. Em conflito, aplicar a ERS v2.3 e os casos de uso atuais; não usar os valores da proposta histórica.
+Os valores normativos (formatos/codecs, limites por perfil, estados, quotas, limites de junção/cadeia/lote, outputs e política de falhas) são os documentados em `docs/requirements.md`, nos requisitos individuais e nas decisões `DQ-001` a `DQ-025`; o desenho é o do ADD v1.1 (T-00 a T-10, secções 4.1 a 4.10, regra 2.6 "só acrescentar") e as Q-ADD-01 a 25 são dadas como aceites com a decisão que o ADD propõe. As regras transversais estão resumidas em `docs/inception/artefactos-finais.md`. Em conflito, aplica-se o ADD v1.1, depois a ERS v2.4 e os casos de uso v1.5; não usar os valores da proposta histórica. As dúvidas que as fontes não resolvem estão em [`docs/specsDuvidas.md`](../../../docs/specsDuvidas.md).
 
 ## Rastreabilidade de origem
 

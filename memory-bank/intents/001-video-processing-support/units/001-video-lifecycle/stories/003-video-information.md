@@ -19,14 +19,16 @@ implemented: false
 
 ## Acceptance Criteria
 
-- [ ] Com acesso de leitura a um recurso de vídeo, quando consulto as informações, então vejo os metadados definidos para o recurso.
-- [ ] Quando não tenho acesso ao projeto ou recurso, então o sistema recusa a consulta sem expor metadados.
-- [ ] A consulta é apenas de leitura, não cria tarefa e não consome quota.
+- [ ] Com permissão de leitura, edição ou de proprietário, quando abro as informações de um vídeo, então vejo a duração `hh:mm:ss.mmm`, a resolução de apresentação, o formato (contentor e codecs, ou sem áudio), o tamanho (1 MB = 1024² bytes, 1 GB = 1024³ bytes) e a taxa de fotogramas, lidos dos metadados persistidos.
+- [ ] Para um vídeo resultante, vejo a proveniência e os passos aplicados; uma origem que já não exista aparece como "Vídeo removido".
+- [ ] Um metadado em falta aparece como "Indisponível" e é registado `METADATA_UNAVAILABLE` com o `correlationId`.
+- [ ] Sem acesso ao projeto, ou como anónimo, a consulta é recusada sem expor metadados; a consulta não cria tarefa nem consome quota.
 
 ## Traceability
 
 - **Use case:** UC-VID-007.
-- **Requirements:** `REQ-VID-INFO-*; REQ-VID-AUTH-*`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes.
+- **Requirements:** `REQ-VID-INFO-001` a `009`. Consome `REQ-VID-AUTH-*`, `REQ-VID-QUOTA-008`, `REQ-VID-STORAGE-002`, `004`, `REQ-VID-NFR-017`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
+- **Decisões do ADD v1.1:** 4.2, Q-ADD-13 (resolução de apresentação).
 
 ## Dependencies
 
@@ -36,4 +38,5 @@ implemented: false
 ## Out of Scope
 
 - Alterar o ficheiro original.
-- Funcionalidades ou limites que não constem da ERS v2.3.
+- Alterar código existente (regra 2.6 do ADD: só acrescentar).
+- Funcionalidades ou limites que não constem da ERS v2.4, dos casos de uso v1.5 ou do ADD v1.1.

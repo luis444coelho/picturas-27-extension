@@ -19,14 +19,17 @@ implemented: false
 
 ## Acceptance Criteria
 
-- [ ] Quando seleciono a quantidade permitida de vídeos elegíveis e confirmo, então o sistema valida compatibilidade e produz um novo vídeo concatenado.
-- [ ] Entradas fora de quantidade, perfil ou compatibilidade são rejeitadas antes da tarefa.
-- [ ] Falha não publica um resultado parcial nem altera os vídeos de origem.
+- [ ] Quando seleciono de 2 a 10 (Registado) ou 50 (Premium) clips, incluindo repetições, e confirmo, então o sistema produz um único MP4 com os clips pela ordem da linha temporal, com corte seco, e regista `sourceVideoIds` pela ordem.
+- [ ] O resultado adota a resolução e a taxa de fotogramas do primeiro clip à saída da sua sub-cadeia, em dimensões de apresentação, com barras pretas quando a proporção difere.
+- [ ] Os clips sem áudio recebem silêncio quando pelo menos um clip tem áudio; se nenhum tiver, o resultado não tem áudio.
+- [ ] Menos de 2 clips, clips ou duração total acima do limite (contando cada ocorrência repetida) ou formato não suportado são rejeitados antes da tarefa; a junção custa 1 crédito.
+- [ ] Falha ou cancelamento não publica resultado parcial, devolve o crédito e não altera os vídeos de origem.
 
 ## Traceability
 
 - **Use case:** UC-VID-013.
-- **Requirements:** `REQ-VID-CONCAT-*; REQ-VID-NFR-003,018,022,024`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes.
+- **Requirements:** `REQ-VID-CONCAT-001` a `013`; `REQ-VID-NFR-022`, `024`. Consome `REQ-VID-COM-*`, `REQ-VID-STORAGE-002`, `004`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
+- **Decisões do ADD v1.1:** 4.8, T-01 (`parameters.clips`), Q-ADD-13, Q-ADD-25.
 
 ## Dependencies
 
@@ -36,4 +39,5 @@ implemented: false
 ## Out of Scope
 
 - Alterar o ficheiro original.
-- Funcionalidades ou limites que não constem da ERS v2.3.
+- Alterar código existente (regra 2.6 do ADD: só acrescentar).
+- Funcionalidades ou limites que não constem da ERS v2.4, dos casos de uso v1.5 ou do ADD v1.1.

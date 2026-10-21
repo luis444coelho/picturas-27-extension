@@ -19,14 +19,17 @@ implemented: false
 
 ## Acceptance Criteria
 
-- [ ] Com acesso de leitura a um vídeo concluído, quando peço o descarregamento, então recebo acesso temporário ao objeto autorizado.
-- [ ] Quando não tenho acesso ou o vídeo não está concluído, então o pedido é recusado e não é emitido URL.
-- [ ] Quando retomo uma transferência interrompida, então o storage serve o intervalo solicitado e não há débito de quota.
+- [ ] Com permissão de leitura, edição ou de proprietário sobre um vídeo concluído, quando confirmo o descarregamento, então recebo `{url, fileName, expiresAt}` com um URL assinado de 15 minutos e o nome sugerido; o ficheiro é entregue no formato armazenado, nunca a cópia de pré-visualização.
+- [ ] Quando não tenho acesso ao projeto, sou utilizador anónimo, o vídeo não está `completed` ou o objeto não existe, então o pedido é recusado (403, 409 `RESOURCE_NOT_READY` ou 404 `RESOURCE_UNAVAILABLE`) e não é emitido URL.
+- [ ] O URL é portador: depois de expirar, o storage responde 403; repetir o pedido gera um URL novo.
+- [ ] Quando retomo uma transferência interrompida com `Range`, o storage responde 206; os dados não passam pelo API Gateway e não há débito de quota.
+- [ ] Cada emissão de URL fica registada nos logs com `correlationId`, utilizador e recurso, sem a assinatura do URL.
 
 ## Traceability
 
 - **Use case:** UC-VID-006.
-- **Requirements:** `REQ-VID-DOWNLOAD-*; REQ-VID-NFR-001,016,025`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes.
+- **Requirements:** `REQ-VID-DOWNLOAD-001` a `009`; `REQ-VID-NFR-016`, `025`. Consome `REQ-VID-AUTH-*`, `REQ-VID-QUOTA-008`, `REQ-VID-NFR-001`, `017`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
+- **Decisões do ADD v1.1:** 4.1, T-08 (`videoUrls`, `/s3-video/`), T-10 (registo e `log_format` sem *query string*), Q-ADD-05 (URL portador), Q-ADD-08 (sufixo do nome, pendente no ADD).
 
 ## Dependencies
 
@@ -36,4 +39,5 @@ implemented: false
 ## Out of Scope
 
 - Alterar o ficheiro original.
-- Funcionalidades ou limites que não constem da ERS v2.3.
+- Alterar código existente (regra 2.6 do ADD: só acrescentar).
+- Funcionalidades ou limites que não constem da ERS v2.4, dos casos de uso v1.5 ou do ADD v1.1.

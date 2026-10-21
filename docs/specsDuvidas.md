@@ -1,0 +1,85 @@
+# Dúvidas da revisão dos artefactos specsmd (Inception)
+
+| Campo  | Valor                                                                                                                              |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Data   | 2026-10-21                                                                                                                         |
+| Fontes | docs/add.md (ADD v1.1), docs/requirements.md (v2.4), docs/use-cases.md (v1.5), docs/inception/artefactos-finais.md, docs/diagrams/ |
+
+## D-01 — Escala de complexidade dos bolts
+
+- **Onde:** `memory-bank/bolts/001-video-lifecycle/bolt.md` a `memory-bank/bolts/009-video-batch/bolt.md`, campo `complexity` (`avg_complexity`, `avg_uncertainty`, `max_dependencies`, `testing_scope`).
+- **Dúvida:** Que valores de 1 a 3 se atribuem aos quatro campos de complexidade de cada bolt?
+- **O que as fontes dizem:** o ADD v1.1 dá um esforço S/M/L por caso de uso (secções 4.1 a 4.10, "Esforço estimado", e tabela-resumo da secção 5: T-00 L; UC-VID-006, 007, 010 e 011 S; UC-VID-008, 009 e 012 M; UC-VID-013, 014 e 015 L). `docs/inception/artefactos-finais.md` §4 dá a complexidade por Unit (Unit 001 L, Unit 002 XL, Unit 003 XL). Nenhuma fonte dá valores para os UC-VID-000 a 005 isolados, nem para a incerteza, as dependências ou o âmbito de testes, nem uma conversão de S/M/L para a escala 1–3.
+- **Opções:** (a) converter o esforço do ADD (S=1, M=2, L=3) em `avg_complexity` e deixar os outros três campos por preencher; (b) a equipa atribui os quatro valores por bolt; (c) deixar o bloco por preencher até à Construção.
+- **Resposta:** **(a), com o máximo do esforço do ADD por bolt.** Converte S=1, M=2, L=3 em `avg_complexity`, usando o maior esforço dos UC (ou do T-00) de cada bolt: B001 = 3 (T-00 L), B002 = 1 (UC-006 e 007 S), B005 = 2 (UC-008 e 009 M), B007 = 2 (UC-012 M), B008 = 3 e B009 = 3 (UC-013, 014 e 015 L). Na B003, B004 e B006 não há esforço no ADD, por isso o campo fica `null`. Os campos `avg_uncertainty`, `max_dependencies` e `testing_scope` ficam todos `null` e são preenchidos no início de cada bolt na Construção.
+
+## D-02 — Componentes de fundação usados pela B001 e pela B002 mas atribuídos à B003
+
+- **Onde:** `memory-bank/bolts/001-video-lifecycle/bolt.md`, `002-video-access/bolt.md` e `003-video-task-foundation/bolt.md` (campos `requires_bolts`, `enables_bolts`, "Saídas esperadas"); `units/001-video-lifecycle/unit-brief.md`; `traceability.md` (propriedade de `REQ-VID-AUTH-*`).
+- **Dúvida:** Em que bolt são construídos o router de vídeo com o `videoAuth`, o worker `Tools/video/` com FFprobe/FFmpeg, o módulo `projects/video/formats.js` e os URLs de escrita, que a ingestão (B001) e o acesso (B002) já precisam, quando a tabela põe a B001 e a B002 antes da B003?
+- **O que as fontes dizem:** ADD T-00 inclui na fundação mínima as rotas de vídeo com o `videoAuth`, o worker de vídeo (T-02) e a ingestão com FFprobe, miniatura, fotograma 0 e cópia MP4 (T-06: "é responsabilidade da fundação T-00"); T-05 faz do `formats.js` a única fonte da matriz; T-08 tem os URLs de escrita para o worker; a Q-ADD-01 manda construir "T-00 e T-02 primeiro". `artefactos-finais.md` §5: B001 = UC-VID-000 (sem dependências), B002 e B003 dependem de B001, e a B003 tem "registo de operações, worker de vídeo único e executor de cadeias". `traceability.md` atual atribui os `REQ-VID-AUTH-*` à B003.
+- **Opções:** (a) a B001 constrói uma versão mínima do router, do `videoAuth`, do worker (só ingestão) e do `formats.js`, que a B003 estende; (b) a B003 passa a ser requerida pela B001 e pela B002 (alterando a tabela); (c) estes componentes passam para a B001 e a B003 fica com tarefas, quota, cancelamento, registo de operações e executor.
+- **Resposta:** **(c).** A tabela de Bolts não muda (B001 sem dependências; B002 e B003 dependem da B001). A B001 constrói a parte do T-00 de que a ingestão precisa: a coleção `videos`, o `videoStages.js` e os URLs de escrita (T-08), o `formats.js` (T-05), os routers de vídeo com o `videoAuth`, as filas `video_operations_queue`, `video_project_queue` e `video_ws_queue`, o módulo `wsGateway/video.js` e o worker `Tools/video/` com a ingestão (FFprobe, miniatura, fotograma 0 e cópia MP4, T-06). A B003 fica com o `VideoTask`, o `video_project_locks`, a exchange `video_control`, a quota (T-04), o cancelamento e o progresso (T-03), o registo de operações (T-01) e o executor de cadeias (T-02). Os `REQ-VID-AUTH-*` passam para a B001.
+
+## D-03 — Propriedade dos requisitos realizados pelo executor de cadeias da B003
+
+- **Onde:** `traceability.md` (linhas `REQ-VID-NFR-010`, `REQ-VID-NFR-013` e `REQ-VID-NFR-018`); stories `units/002-video-transformations/stories/001-video-trim.md` e `units/003-video-composition/stories/002-video-chain.md`; bolts `003-video-task-foundation`, `004-video-basic-edits` e `008-video-concat-chain`.
+- **Dúvida:** Os requisitos NFR-010 (FFmpeg em Docker), NFR-013 (uma recodificação por cadeia) e NFR-018 (saída MP4 H.264/AAC) continuam a pertencer às stories ST-VID-001 (B004) e ST-VID-014 (B008), ou passam para a ST-VID-COM-001 (B003), que agora constrói o worker e o executor?
+- **O que as fontes dizem:** ADD T-02: o worker único `Tools/video/` e o executor com um único `-filter_complex` cumprem a NFR-010 e a NFR-013; a codificação de saída por omissão é `libx264` + `aac` (T-02) e o formato de trabalho é MP4 (T-05, DQ-013). `artefactos-finais.md` §5: o worker e o executor de cadeias estão na B003; a B008 fica com a junção e a validação de estrutura. A `traceability.md` atual atribui a NFR-010 e a NFR-018 à ST-VID-001 e a NFR-013 à ST-VID-014.
+- **Opções:** (a) manter a propriedade atual (a B003 fornece o componente e a B004/B008 verificam os requisitos); (b) passar os três NFR para a ST-VID-COM-001 e a B003; (c) passar só a NFR-010 e a NFR-013 para a B003 e manter a NFR-018 na B004.
+- **Resposta:** **Opção nova: cada requisito vai para o bolt que constrói o componente.** A NFR-010 (FFmpeg em Docker) passa para a B001, que cria o worker (ver D-02). A NFR-013 (uma recodificação por cadeia) e a NFR-018 (saída MP4 H.264/AAC por omissão) passam para a ST-VID-COM-001 e a B003, que constroem o executor e a codificação por omissão (T-02). A B004 e a B008 continuam a verificar estes três NFR nos seus critérios de aceitação, mas não são donas deles.
+
+## D-04 — Bolt da rotina periódica de recuperação e limpeza (Q-ADD-14)
+
+- **Onde:** `memory-bank/bolts/003-video-task-foundation/bolt.md` e `memory-bank/bolts/009-video-batch/bolt.md` ("Saídas esperadas"); `units/001-video-lifecycle/unit-brief.md`.
+- **Dúvida:** Em que bolt(s) se constrói a rotina periódica do serviço de projetos da Q-ADD-14?
+- **O que as fontes dizem:** ADD Q-ADD-14 (aceite): a rotina retoma ou fecha tarefas e lotes parados, liberta lugares de tarefa ativa sem dono, passa a `failed` os ZIP sem progresso e remove os recursos de vídeo de projetos apagados; é citada em T-00 (limpeza de projetos apagados), T-03 (lugares sem dono), T-09 (lotes parados) e 4.10 (ZIP). `artefactos-finais.md` §5 não a atribui a nenhum bolt.
+- **Opções:** (a) toda na B003; (b) a parte de tarefas, lugares e projetos apagados na B003 e a parte de lotes e ZIP na B009; (c) um bolt próprio, depois da B009.
+- **Resposta:** **(a), só com a parte que não depende de lotes.** A B003 cria a rotina periódica para as tarefas paradas, os lugares de tarefa ativa sem dono e a remoção dos recursos de vídeo de projetos apagados. A parte dos lotes parados e dos ZIP fica fora desta construção, porque a B009 não é implementada (ver D-06).
+
+## D-05 — Desenho da extração de fotogramas (UC-VID-005)
+
+- **Onde:** `memory-bank/bolts/006-video-frame-export/bolt.md` ("Objetivo", "Saídas esperadas"); story `units/002-video-transformations/stories/005-video-frame-export.md`.
+- **Dúvida:** A extração de fotogramas é um módulo do registo de operações e do worker único (T-01, T-02), e onde ficam guardadas as imagens extraídas (estágios de imagem existentes ou estágios de vídeo novos)?
+- **O que as fontes dizem:** o âmbito do ADD é UC-VID-006 a 015 (secção 1.2); a 2.5 diz só que a extração "tem de ser construída (T-00)". O ADD exclui a extração das cadeias e dos lotes (4.9, 4.10), e a tabela de composição do T-02 não a inclui. `artefactos-finais.md` §5: B006 é DDD, depende da B003 e de "integração imagem". A UC-VID-005 e a REQ-VID-FRAMES dizem que as imagens são recursos de imagem normais do projeto, mas não indicam o componente nem o estágio.
+- **Opções:** (a) módulo do worker único, com resposta pelo módulo AMQP de vídeo e imagens gravadas nos estágios de imagem existentes; (b) módulo do worker único com estágios próprios; (c) a equipa desenha a extração num complemento ao ADD antes da B006.
+- **Resposta:** **Não se aplica nesta construção.** A B006 não é implementada (ver D-06), por isso o desenho da extração fica por fazer. Se a B006 for retomada, a equipa escreve antes um complemento ao ADD, porque o ADD v1.1 não decide onde a extração corre nem onde ficam as imagens.
+
+## D-06 — Bolts B006 e B009 fora desta construção (decisão da equipa)
+
+- **Onde:** `memory-bank/bolts/006-video-frame-export/bolt.md`, `memory-bank/bolts/009-video-batch/bolt.md`, as stories `units/002-video-transformations/stories/005-video-frame-export.md` e `units/003-video-composition/stories/003-video-batch.md`, `units.md`, `unit-brief.md` das Units 002 e 003, `traceability.md`, `story-index.md` e as saídas esperadas da B001 e da B003.
+- **Dúvida:** A equipa decidiu não implementar a extração de fotogramas (UC-VID-005, B006) nem o processamento em lote (UC-VID-015, B009). Como ficam os artefactos?
+- **O que as fontes dizem:** na tabela de `artefactos-finais.md` §5, nenhum bolt depende da B006 nem da B009 (são folhas do grafo), por isso as B001 a B005, B007 e B008 não são afetadas. O ADD põe na fundação peças que só os lotes usam: o modelo `VideoBatch` (T-00, T-09), o estágio `video_zip` (T-08), o campo `batch_id` na coleção `videos`, o endpoint `POST …/videos/batch`, os itens `kind: "batch_item"` (T-03), a devolução por item (T-04) e a dependência `archiver` (secção 6). Os documentos `docs/` continuam a incluir o UC-VID-005 e o UC-VID-015 no MVP.
+- **Opções:** (a) apagar os dois bolts; (b) manter os bolts e as stories com `status: blocked` e o motivo; (c) manter como `planned`.
+- **Resposta:** **(b).**
+  - Os dois bolts e as duas stories ficam no memory-bank com `status: blocked` e o motivo "Fora do âmbito desta construção por decisão da equipa (specsDuvidas D-06)". Os bolts não são apagados, para a rastreabilidade não se perder.
+  - A B001 e a B003 **não** constroem o `VideoBatch`, o estágio `video_zip`, o endpoint de lote, os itens `batch_item`, a devolução por item, a rotina de lotes e ZIP, nem o `archiver`. O campo `batch_id` também não é criado.
+  - A extração de fotogramas também não entra no worker.
+  - Na `traceability.md`, os requisitos `REQ-VID-FRAMES-*`, `REQ-VID-BATCH-*`, `REQ-VID-TASK-007` e `REQ-VID-QUOTA-007` (só a parte de lotes) ficam marcados como "não cobertos nesta construção (D-06)".
+  - Nas Units 002 e 003, `units.md` e `unit-brief.md` registam que essa parte do âmbito fica de fora.
+  - A predefinição de cadeia (UC-VID-014 FA3) continua a poder ser guardada e usada numa nova cadeia; só deixa de poder ser carregada num lote.
+  - Os documentos em `docs/` não são alterados nesta interação.
+
+## D-07 — NFR usados só pela extração de fotogramas e pelos lotes
+
+- **Onde:** `memory-bank/intents/001-video-processing-support/traceability.md` (linhas `REQ-VID-NFR-004`, `019`, `020` e `014`); `memory-bank/bolts/006-video-frame-export/bolt.md` e `009-video-batch/bolt.md` ("Requisitos rastreados"); stories `units/002-video-transformations/stories/005-video-frame-export.md` e `units/003-video-composition/stories/003-video-batch.md`; `unit-brief.md` das Units 002 e 003.
+- **Dúvida:** A D-06 manda marcar como "não cobertos nesta construção" os `REQ-VID-FRAMES-*`, os `REQ-VID-BATCH-*`, a `REQ-VID-TASK-007` e a parte de lotes da `REQ-VID-QUOTA-007`, mas não diz nada sobre a NFR-004, a NFR-019 e a NFR-020 (donas: ST-VID-005, B006) nem sobre a NFR-014 (dona: ST-VID-015, B009). Também ficam marcadas como não cobertas?
+- **O que as fontes dizem:** ERS v2.4 (`docs/requirements/REQ-VID-NFR.md`): a NFR-004 (fotogramas em JPEG ou PNG), a NFR-019 (resolução das imagens extraídas) e a NFR-020 (limite de fotogramas por extração) têm origem só no UC-VID-005; a NFR-014 (limite de vídeos por lote) é sobre lotes, embora a origem cite também o UC-VID-013 e o UC-VID-014. Na `traceability.md`, as quatro pertencem a bolts agora `blocked`. Até à resposta, ficam com o estado "Especificado; implementação pendente".
+- **Opções:** (a) marcar as quatro como "não cobertas nesta construção (D-06)"; (b) marcar só a NFR-004, a NFR-019 e a NFR-020 e manter a NFR-014; (c) manter as quatro como estão.
+- **Resposta:**
+
+## D-08 — Componentes de fundação que a D-02 não distribui
+
+- **Onde:** `memory-bank/bolts/001-video-lifecycle/bolt.md` ("Notas"), `002-video-access/bolt.md` ("Decisões do ADD v1.1", T-08) e `003-video-task-foundation/bolt.md` ("Decisões do ADD v1.1", T-03 e T-08, e "Saídas esperadas"); `units/001-video-lifecycle/unit-brief.md`.
+- **Dúvida:** A resposta à D-02 põe na B001 as filas, os URLs de escrita e o worker com a ingestão, e na B003 o `VideoTask`, os locks, o `video_control`, a quota, o cancelamento, o progresso, o registo de operações e o executor. Em que bolt se constroem estes componentes, que não aparecem em nenhuma das duas listas: (1) o módulo `projects/video/amqp.js`; (2) os URLs internos de leitura (GET) e a criação do `route/video.js` e do `services/videoUrls.js` do `imageStorageService`; (3) o volume `video_tmp`; (4) os argumentos da `video_operations_queue` (*quorum*, `x-delivery-limit: 1`, `x-consumer-timeout`, *dead-letter*)?
+- **O que as fontes dizem:** ADD T-03: o `amqp.js` publica em `video_operations_queue` e consome `video_project_queue` com confirmação manual, e é a única via de vídeo entre o serviço de projetos e o worker. A ingestão com o worker (B001) já troca mensagens por estas filas. ADD T-08: o worker pede ao módulo de vídeo do storage os URLs de leitura quando começa a tarefa e os de escrita quando o FFmpeg termina; o `services/videoUrls.js` gera os dois tipos de URL, e o `route/video.js` é montado com `app.use("/video", …)`. A B002 descreve a montagem do `route/video.js` e o URL de leitura com 900 s. ADD T-02: os temporários do worker ficam em `/tmp/video/<taskId>/`, no volume `video_tmp`. ADD T-03: os argumentos fazem parte da declaração da `video_operations_queue` em `rabbitMQ/definitions.json`, que a D-02 põe na B001. Pela regra 2.6, uma fila declarada não se altera depois.
+- **Opções:** (a) os quatro componentes vão para a B001, na medida em que a ingestão os usa, e a B002 e a B003 acrescentam o que lhes falta (URL de descarregamento de 900 s, tratamento das respostas de tarefa); (b) só o `amqp.js` e os argumentos da fila vão para a B001, e os URLs de leitura, o `route/video.js` e o `video_tmp` ficam onde estão; (c) a equipa distribui cada componente.
+- **Resposta:**
+
+## D-09 — Propriedade da NFR-011 depois da D-02
+
+- **Onde:** `memory-bank/intents/001-video-processing-support/traceability.md` (linha `REQ-VID-NFR-011`); `memory-bank/bolts/003-video-task-foundation/bolt.md` ("Requisitos rastreados"); story `units/001-video-lifecycle/stories/004-video-task-quota-foundation.md`.
+- **Dúvida:** A NFR-011 (módulo de vídeo desacoplado por AMQP, com a fila independente `video_operations_queue`, sem alterar as ferramentas de imagem) continua a pertencer à ST-VID-COM-001 e à B003, ou passa para a ST-VID-000 e para a B001, que agora constrói as filas e o worker?
+- **O que as fontes dizem:** ADD T-00: as filas de vídeo e o worker cumprem a NFR-011. A D-02 põe as filas e o worker na B001, e a D-03 adota a regra "cada requisito vai para o bolt que constrói o componente", mas só para a NFR-010, a NFR-013 e a NFR-018. A `traceability.md` atribui a NFR-011 à ST-VID-COM-001 (B003), com as decisões T-00 e T-02. Até à resposta, a atribuição mantém-se.
+- **Opções:** (a) passar a NFR-011 para a ST-VID-000 e a B001; (b) manter na ST-VID-COM-001 e na B003, com a B001 a verificá-la.
+- **Resposta:**

@@ -19,14 +19,15 @@ implemented: false
 
 ## Acceptance Criteria
 
-- [ ] Com vídeo que contém áudio, quando submeto a operação, então o resultado concluído contém a componente visual e não contém streams de áudio.
-- [ ] Quando o vídeo não tem áudio ou os parâmetros/recurso não são elegíveis, então recebo o resultado de validação especificado e não é publicado resultado inválido.
-- [ ] A operação é assíncrona, não destrutiva e segue a política comum de quota e falhas.
+- [ ] Com um vídeo que contém áudio, quando confirmo a operação, então o resultado concluído contém a componente visual sem streams de áudio; de um MP4 H.264, o vídeo é copiado sem recodificação.
+- [ ] Quando o vídeo não tem áudio, ou o recurso não é elegível, recebo o erro de validação especificado antes de criar tarefa.
+- [ ] A operação é assíncrona, com progresso pelo menos uma vez por segundo, não destrutiva e segue a política comum de quota e falhas.
 
 ## Traceability
 
 - **Use case:** UC-VID-002.
-- **Requirements:** `REQ-VID-AUDIO-*; REQ-VID-COM-*`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes.
+- **Requirements:** `REQ-VID-AUDIO-001` a `006`. Consome `REQ-VID-COM-*`, `REQ-VID-NFR-009`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
+- **Decisões do ADD v1.1:** T-02 (`-an`), T-05 (cópia do vídeo).
 
 ## Dependencies
 
@@ -36,4 +37,5 @@ implemented: false
 ## Out of Scope
 
 - Alterar o ficheiro original.
-- Funcionalidades ou limites que não constem da ERS v2.3.
+- Alterar código existente (regra 2.6 do ADD: só acrescentar).
+- Funcionalidades ou limites que não constem da ERS v2.4, dos casos de uso v1.5 ou do ADD v1.1.

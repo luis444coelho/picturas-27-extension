@@ -19,14 +19,16 @@ implemented: false
 
 ## Acceptance Criteria
 
-- [ ] Quando escolho uma combinação de contentor e codecs da matriz, então o sistema converte e publica um novo vídeo descodificável.
-- [ ] Combinação não suportada é rejeitada antes de criar tarefa.
-- [ ] A conversão respeita os leitores/formato definidos e preserva o original.
+- [ ] Quando escolho MP4, MOV ou AVI diferente do formato atual, então vejo os codecs de saída e se a conversão é por cópia direta ou recodificação, e o sistema publica um novo vídeo com os codecs da matriz (H.264/AAC em MP4 e MOV; MPEG-4 Part 2/MP3 em AVI).
+- [ ] As streams só são copiadas quando o codec de origem é igual ao de saída da matriz (um MP4 H.264/AAC para AVI é recodificado).
+- [ ] Formato igual ao atual dá `SAME_FORMAT` e formato fora da matriz dá `UNSUPPORTED_TARGET_FORMAT`, antes de criar tarefa.
+- [ ] O resultado preserva a duração, a resolução (salvo o corte de 1 px numa dimensão ímpar recodificada) e a taxa de fotogramas, é descodificável e reproduzível nos leitores de referência e, se for MOV, AVI ou MP4 com perfil não reproduzível, tem cópia de pré-visualização MP4; o original é preservado.
 
 ## Traceability
 
 - **Use case:** UC-VID-012.
-- **Requirements:** `REQ-VID-CONVERT-*; REQ-VID-NFR-003,012,018,026`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes.
+- **Requirements:** `REQ-VID-CONVERT-001` a `010`; `REQ-VID-NFR-012`, `026`. Consome `REQ-VID-COM-*`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
+- **Decisões do ADD v1.1:** 4.7, T-05 e Q-ADD-21 (cópia só com codec igual), T-06 e Q-ADD-20 (cópia de pré-visualização), Q-ADD-11 (qualidade, pendente no ADD), Q-ADD-25.
 
 ## Dependencies
 
@@ -36,4 +38,5 @@ implemented: false
 ## Out of Scope
 
 - Alterar o ficheiro original.
-- Funcionalidades ou limites que não constem da ERS v2.3.
+- Alterar código existente (regra 2.6 do ADD: só acrescentar).
+- Funcionalidades ou limites que não constem da ERS v2.4, dos casos de uso v1.5 ou do ADD v1.1.

@@ -19,14 +19,15 @@ implemented: false
 
 ## Acceptance Criteria
 
-- [ ] Com um fator válido, quando confirmo a operação, então o sistema calcula a duração prevista e gera um novo vídeo conforme o fator.
+- [ ] Com um fator entre 0.25× e 4.0×, quando confirmo a operação, então o sistema mostra a duração prevista e gera um novo MP4 com vídeo e áudio ajustados de forma sincronizada.
 - [ ] Fator nulo, não positivo ou fora dos limites é rejeitado antes da tarefa.
-- [ ] Falha/cancelamento preserva o vídeo original e não disponibiliza saída parcial.
+- [ ] Falha ou cancelamento preserva o original, não disponibiliza saída parcial e devolve o crédito reservado.
 
 ## Traceability
 
 - **Use case:** UC-VID-003.
-- **Requirements:** `REQ-VID-SPEED-*; REQ-VID-COM-*`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes.
+- **Requirements:** `REQ-VID-SPEED-001` a `008`. Consome `REQ-VID-COM-*`, `REQ-VID-NFR-009`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
+- **Decisões do ADD v1.1:** T-02 (`setpts` e `atempo`, encadeado só abaixo de 0.5×).
 
 ## Dependencies
 
@@ -36,4 +37,5 @@ implemented: false
 ## Out of Scope
 
 - Alterar o ficheiro original.
-- Funcionalidades ou limites que não constem da ERS v2.3.
+- Alterar código existente (regra 2.6 do ADD: só acrescentar).
+- Funcionalidades ou limites que não constem da ERS v2.4, dos casos de uso v1.5 ou do ADD v1.1.

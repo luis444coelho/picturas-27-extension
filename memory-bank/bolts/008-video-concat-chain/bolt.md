@@ -14,43 +14,89 @@ requires_bolts: [004-video-basic-edits, 005-video-visual-edits, 007-video-format
 enables_bolts: [009-video-batch]
 requires_units: [001-video-lifecycle, 002-video-transformations]
 blocks: true
-complexity: {avg_complexity: 3, avg_uncertainty: 2, max_dependencies: 3, testing_scope: 3}
+# avg_complexity: maior esforço do ADD no bolt (S=1, M=2, L=3); os outros campos são preenchidos no início do bolt na Construção (specsDuvidas D-01)
+complexity: {avg_complexity: 3, avg_uncertainty: null, max_dependencies: null, testing_scope: null}
 ---
 
 # Bolt: 008-video-concat-chain
 
+## Visão geral
+
+Junção de vídeos e validação de estrutura das cadeias (UC-VID-013 e 014). O executor de cadeias vem da B003; este bolt acrescenta a operação `concat`, a validação de estrutura e as predefinições de vídeo (ADD v1.1, 4.8 e 4.9).
+
 ## Objetivo
 
-Implementar UC-VID-013/014: junção de entradas compatíveis e editor/validador de cadeia até 10 passos, composição com operações elegíveis, semântica atómica e custo por passo. Extração de fotogramas não é elegível; conversão só na posição definida pela ERS.
+Implementar a operação `concat` com sub-cadeias por clip, a validação em três fases das cadeias, o editor de cadeia e a linha temporal no frontend, e as predefinições de cadeias de vídeo do utilizador.
 
 ## Stories incluídas
 
 - **ST-VID-013 — Juntar vídeos**: [Juntar vídeos](../../intents/001-video-processing-support/units/003-video-composition/stories/001-video-concat.md) (must).
 - **ST-VID-014 — Encadear operações**: [Encadear operações](../../intents/001-video-processing-support/units/003-video-composition/stories/002-video-chain.md) (must).
 
+## Tipo de bolt
+
+**Tipo**: DDD Construction Bolt
+**Definição**: `.specsmd/aidlc/templates/construction/bolt-types/ddd-construction-bolt.md`
+
+## Etapas
+
+- [ ] **1. Domain Model**: Pending → `ddd-01-domain-model.md`
+- [ ] **2. Technical Design**: Pending → `ddd-02-technical-design.md`
+- [ ] **3. ADR Analysis** (opcional): Pending → `adr-{n}-{slug}.md`
+- [ ] **4. Implement**: Pending → código nos componentes indicados em "Saídas esperadas"
+- [ ] **5. Test**: Pending → `ddd-03-test-report.md`
+
 ## Requisitos rastreados
 
-REQ-VID-CONCAT-*; REQ-VID-CHAIN-*; REQ-VID-NFR-013,022,023,024. Os contratos transversais são propriedade da Unit 001; B001 e B003 realizam os contratos de recurso e tarefa respetivamente, consumidos pelas Units dependentes conforme a matriz.
+REQ-VID-CONCAT-001 a 013; REQ-VID-CHAIN-001 a 018; REQ-VID-NFR-022 a 024.
+
+Verifica nos critérios de aceitação a NFR-010 (dona: B001), a NFR-013 e a NFR-018 (donas: B003), sem ser dono delas (specsDuvidas D-03).
+
+Os critérios de aceitação autoritativos são os dos ficheiros `docs/requirements/REQ-VID-*.md`; a propriedade de cada requisito está em `intents/001-video-processing-support/traceability.md`.
+
+## Decisões do ADD v1.1
+
+- **4.8 (junção):** `VideoTask` com `kind: "concat"`, tratada como cadeia de um passo `concat`; `validate` com `INSUFFICIENT_INPUTS`, `TOO_MANY_INPUTS` (10/50, `{limit}`), `LIMIT_EXCEEDED` (`{total, limit}`) e `UNSUPPORTED_FORMAT` por clip, contando cada ocorrência repetida; resolução e fps do primeiro clip à saída da sua sub-cadeia, em dimensões de apresentação (Q-ADD-13); `scale`+`pad`+`fps`+`setsar`+`format=yuv420p` por clip; `anullsrc` só quando pelo menos um clip tem áudio, senão `concat … a=0`; clip repetido descarregado uma vez e passado como várias entradas `-i`; `POST …/videos/operations` sem `:video`; custo 1 crédito.
+- **4.9 (cadeia):** validação em três fases (por passo com `estimate` e `INVALID_STEP_PARAMS`; estrutura com `INVALID_CHAIN` `{rule}` e `CHAIN_TOO_LONG`; limites do perfil com `LIMIT_EXCEEDED`); custo igual ao número total de passos; `VideoTask` com `kind: "chain"`; passo corrente aproximado (Q-ADD-16) e erro indicado pela fase.
+- **4.9 (predefinições):** `users/models/videoPreset.js` e `users/routes/videoPresets.js` (recusa do `anonymous`); `apiGateway/routes/videoPresets.js` montado em `/users` antes do router existente, com `videoAuth`; `{owner_id, name, steps}`, nome único por dono, sem partilha e sem cadeias com junção. A predefinição continua a poder ser guardada e usada numa nova cadeia (UC-VID-014 FA3); não pode ser carregada num lote, que fica fora desta construção (specsDuvidas D-06).
+- **T-01:** os clips da junção ficam em `parameters.clips: [{videoId, steps}]`; o executor e o compilador de cadeias (`Tools/video/compiler.py`) vêm da B003 (`artefactos-finais.md` §5).
+- **Q-ADD-25:** o W×H do primeiro clip é arredondado para par antes da normalização.
 
 ## Saídas esperadas
 
-- Modelo/contrato de domínio e desenho técnico conforme o tipo de Bolt.
-- Implementação da capacidade, incluindo interface, APIs/workers/storage que lhe pertencem.
-- Testes de aceitação ligados aos AC das Stories e aos critérios nos ficheiros `docs/requirements/`.
-- Evidência de estados de sucesso, falha e cancelamento quando aplicável.
+- `projects/video/operations/concat.js` e `Tools/video/ops/concat.py` (sub-grafo da junção).
+- Validador de estrutura e agregação de custo no serviço de projetos.
+- Predefinições de vídeo: modelo e rotas no serviço de utilizadores e router novo no gateway.
+- Frontend: linha temporal da junção e editor de cadeia novos (dnd-kit, sub-cadeias por clip, contador de créditos, duração estimada, guardar e carregar predefinições).
+- Testes ligados aos critérios de `REQ-VID-CONCAT-*`, `REQ-VID-CHAIN-*`, NFR rastreados e verificação da NFR-010, da NFR-013 e da NFR-018 (specsDuvidas D-03).
 
 ## Critérios de passagem
 
-- [ ] Stories e AC atribuídos cumpridos.
-- [ ] Requisitos rastreados verificados sem alterar os originais nem expor recursos sem autorização.
-- [ ] Testes automatizados e relatório do Bolt registados; nenhum resultado de teste é presumido nesta fase.
+- [ ] Stories incluídas implementadas e respetivos critérios de aceitação cumpridos.
+- [ ] Critérios de aceitação dos requisitos rastreados (ficheiros `docs/requirements/REQ-VID-*.md`) verificados por testes.
+- [ ] Nenhuma linha de código existente alterada (regra 2.6 do ADD); o fluxo de imagem continua a funcionar como antes.
+- [ ] Testes automatizados e relatório do bolt registados; nenhum resultado de teste é presumido nesta fase.
+- [ ] Código revisto.
+- [ ] Uma cadeia com junção executa numa única tarefa com uma única recodificação de vídeo e, em falha ou cancelamento, não grava resultado e devolve todos os créditos.
 
 ## Dependências
 
-- **Bolts requeridos:** 004-video-basic-edits, 005-video-visual-edits, 007-video-format-conversion.
-- **Units requeridas:** 001-video-lifecycle, 002-video-transformations.
-- **Desbloqueia:** 009-video-batch.
+### Requer
+
+- **Bolts:** 004-video-basic-edits, 005-video-visual-edits, 007-video-format-conversion (operações elegíveis como passo).
+- **Units:** 001-video-lifecycle, 002-video-transformations.
+
+### Desbloqueia
+
+- 009-video-batch, que está `blocked` (specsDuvidas D-06).
 
 ## Limites
 
-Junção/cadeia respeitam limites e compatibilidade; cadeia falhada/cancelada não publica resultado parcial; custo reflete os passos e o sucesso produz resultado único.
+- **Regra 2.6 do ADD ("só acrescentar"):** o código existente não é alterado. Só se acrescentam ficheiros novos e pontos de ligação novos (uma linha `app.use` ou `require`, uma fila, exchange ou *binding* em `rabbitMQ/definitions.json`, um serviço ou volume no `docker-compose.yaml`, um `location` ou `log_format` no `nginx/nginx.conf`, componentes novos no frontend), sem tocar nas linhas existentes nem mudar o comportamento do fluxo de imagem.
+- O `applied-tools-list.tsx`, o `sortable-tool-item.tsx`, o `users/models/preset.js`, o `users/routes/presets.js` e o `apiGateway/routes/users.js` não mudam; o diálogo de predefinições de imagem nunca recebe cadeias de vídeo.
+- Transições entre clips ficam fora do MVP (Q-ERS-006).
+
+## Notas
+
+- Esforço no ADD: UC-VID-013 = L, UC-VID-014 = L. `avg_complexity` = 3 (maior esforço do ADD no bolt, com S=1, M=2, L=3); `avg_uncertainty`, `max_dependencies` e `testing_scope` são preenchidos no início do bolt na Construção (specsDuvidas D-01).
+- Para o Registado, cadeias acima de 5 passos falham sempre por quota (DQ-025); a interface deve avisar antes (ADD 4.9, riscos).
