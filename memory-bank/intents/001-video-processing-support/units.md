@@ -2,7 +2,7 @@
 intent: 001-video-processing-support
 phase: inception
 status: units-decomposed
-updated: 2026-10-21T11:19:15Z
+updated: 2026-10-21T11:23:25Z
 ---
 
 # Suporte a vídeo — Units

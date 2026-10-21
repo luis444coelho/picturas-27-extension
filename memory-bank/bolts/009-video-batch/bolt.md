@@ -50,9 +50,9 @@ Implementar o modelo `VideoBatch`, a pré-validação, a orquestração sequenci
 
 ## Requisitos rastreados
 
-REQ-VID-BATCH-001 a 019; REQ-VID-NFR-014.
+REQ-VID-BATCH-001 a 019; parte de lotes da REQ-VID-NFR-014.
 
-Os `REQ-VID-BATCH-*` não são cobertos nesta construção (specsDuvidas D-06). A NFR-014 fica não coberta só na parte de lotes (UC-VID-015 RN2) e continua coberta na parte da junção e da cadeia (UC-VID-013 RN2-RN3, UC-VID-014 RN5) (specsDuvidas D-07). O bolt que constrói essa parte, já que este está `blocked`, está em dúvida (ver specsDuvidas.md, D-10).
+Os `REQ-VID-BATCH-*` não são cobertos nesta construção (specsDuvidas D-06). A NFR-014 fica não coberta só na parte de lotes (UC-VID-015 RN2) e continua coberta na parte da junção e da cadeia (UC-VID-013 RN2-RN3, UC-VID-014 RN5) (specsDuvidas D-07). A NFR-014 passou a pertencer à ST-VID-013 e à B008, que constroem a parte da junção e da cadeia; a parte de lotes fica neste bolt, "parcialmente não coberta (D-06)" (specsDuvidas D-10).
 
 Os critérios de aceitação autoritativos são os dos ficheiros `docs/requirements/REQ-VID-*.md`; a propriedade de cada requisito está em `intents/001-video-processing-support/traceability.md`.
 
@@ -72,7 +72,7 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 - Rota interna do ZIP no módulo de vídeo do `imageStorageService` e `archiver` no `imageStorageService/package.json`.
 - Evento `video-batch-update` no `wsGateway/video.js`.
 - Frontend: seleção múltipla, configuração única (painéis ou predefinição), lista de pré-validação com exclusão, resumo de custo, progresso agregado e "Descarregar Lote".
-- Testes ligados aos critérios de `REQ-VID-BATCH-*` e NFR-014.
+- Testes ligados aos critérios de `REQ-VID-BATCH-*` e da parte de lotes da NFR-014.
 
 ## Critérios de passagem
 

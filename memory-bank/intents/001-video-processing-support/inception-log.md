@@ -1,7 +1,7 @@
 ---
 intent: 001-video-processing-support
 created: 2026-10-09T16:57:05Z
-updated: 2026-10-21T11:19:15Z
+updated: 2026-10-21T11:23:25Z
 completed: null
 status: in-progress
 ---
@@ -83,6 +83,18 @@ Em 2026-10-19, foram alinhados os briefs, Stories e Bolts com a ERS v2.3 e com o
 
 **Dúvida nova:** 1, acrescentada a `docs/specsDuvidas.md` sem resposta: D-10 (que bolt e story constroem a parte coberta da NFR-014, já que a sua dona é a ST-VID-015, na B009 `blocked`). Até à resposta, mantém-se a atribuição atual.
 
+## Aplicação da resposta D-10 (2026-10-21T11:23:25Z)
+
+**Fontes:** a resposta à D-10 em `docs/specsDuvidas.md`, com o `docs/add.md` (ADD v1.1) como documento mestre; o `docs/merge.md` não foi usado. Em `docs/` só se preencheu a resposta da D-10 e se acrescentou a nota confirmada à D-08; o código não foi alterado.
+
+**O que mudou:**
+
+- **D-10:** a NFR-014 passa da ST-VID-015/B009 para a ST-VID-013/B008, na parte da junção e da cadeia; a ST-VID-014 verifica-a; a parte de lotes continua "parcialmente não coberta (D-06)" na ST-VID-015 e na B009. A contagem de NFR por Unit mantém-se (16 + 6 + 4), porque a B008 e a B009 são da mesma Unit 003.
+- **D-08 (nota):** a equipa confirmou que o `route/video.js` e o `videoUrls.js` são criados pela B001 e que o URL de descarregamento de 900 s continua no âmbito da B002, que usa esse módulo por acréscimo; registado como nota na D-08, sem dúvida nova.
+- Ficheiros alterados: `bolt.md` da B008 e da B009; stories ST-VID-013, 014 e 015; `unit-brief.md` da Unit 003; `units.md`, `traceability.md`, `decisions.md` e este registo.
+
+**Dúvidas novas:** nenhuma.
+
 ## Estado de prontidão
 
 - [x] Requisitos atuais indexados, com texto canónico na ERS e rastreabilidade completa
@@ -94,7 +106,7 @@ Em 2026-10-19, foram alinhados os briefs, Stories e Bolts com a ERS v2.3 e com o
 - [x] Artefactos revistos contra o ADD v1.1, a ERS v2.4 e os UC v1.5
 - [x] Dúvidas D-01 a D-06 de `docs/specsDuvidas.md` respondidas e aplicadas
 - [x] Dúvidas D-07 a D-09 de `docs/specsDuvidas.md` respondidas e aplicadas
-- [ ] Dúvida nova D-10 de `docs/specsDuvidas.md` respondida e aplicada
+- [x] Dúvida D-10 de `docs/specsDuvidas.md` respondida e aplicada
 - [ ] Revisão humana destes artefactos concluída
 - [ ] Inception marcada completa
 
@@ -102,4 +114,4 @@ O estado mantém-se `in-progress` até à revisão/aceitação humana dos artefa
 
 ## Próximo passo
 
-Responder à dúvida D-10 de `docs/specsDuvidas.md` e aplicá-las aos bolts, stories e rastreabilidade; depois, rever o mapa de Units, Stories e sequência dos 9 Bolts (7 a construir; B006 e B009 `blocked`). Só após essa aprovação a Construção pode iniciar, pela ordem da Q-ADD-01 (fundação T-00 e worker T-02 primeiro).
+Todas as dúvidas de `docs/specsDuvidas.md` (D-01 a D-10) estão respondidas e aplicadas. Falta rever o mapa de Units, Stories e sequência dos 9 Bolts (7 a construir; B006 e B009 `blocked`). Só após essa aprovação a Construção pode iniciar, pela ordem da Q-ADD-01 (fundação T-00 e worker T-02 primeiro).

@@ -3,12 +3,12 @@ intent: 001-video-processing-support
 phase: inception
 status: superseded
 created: 2026-10-09T16:57:05Z
-updated: 2026-10-21T11:19:15Z
+updated: 2026-10-21T11:23:25Z
 ---
 
 # Decisions: Video Processing Support
 
-> **Decisões históricas da primeira proposta; supersedidas.** As decisões atuais são as do ADD v1.1 (`docs/add.md`: regra 2.6, T-00 a T-10, secções 4.1 a 4.10 e Q-ADD-01 a 25, dadas como aceites) e as DQ-001 a DQ-025 da ERS v2.4 (`docs/requirements.md`), resumidas em `docs/inception/artefactos-finais.md`. As decisões da equipa sobre o planeamento da Construção (D-01 a D-09) estão resumidas abaixo e registadas em `docs/specsDuvidas.md`, com as dúvidas ainda por resolver.
+> **Decisões históricas da primeira proposta; supersedidas.** As decisões atuais são as do ADD v1.1 (`docs/add.md`: regra 2.6, T-00 a T-10, secções 4.1 a 4.10 e Q-ADD-01 a 25, dadas como aceites) e as DQ-001 a DQ-025 da ERS v2.4 (`docs/requirements.md`), resumidas em `docs/inception/artefactos-finais.md`. As decisões da equipa sobre o planeamento da Construção (D-01 a D-10) estão resumidas abaixo e registadas em `docs/specsDuvidas.md`, com as dúvidas ainda por resolver.
 >
 > Diferenças mais visíveis face às decisões abaixo: a entrada aceita MP4, MOV e AVI (DQ-002), e não só MP4 (D-VID-002); o progresso é emitido pelo menos 1×/s em todas as operações (REQ-VID-NFR-009, ADD T-02), e não só na marca de água e na extração (D-VID-004); a quota é reservada na aceitação e a reserva torna-se definitiva na conclusão, sem passo de confirmação (ADD T-04, Q-ADD-03); o cancelamento em `queued` marca a tarefa como `cancelled` e o worker descarta-a quando a consome (ADD T-03); cadeias, junção e lotes fazem parte do MVP (DQ-014 a DQ-019); a Q-REM-01 está resolvida pelo `atempo` (UC-VID-003 Q2), a Q-REM-02 pela rejeição da configuração (REQ-VID-WATERMARK-008), e quanto à Q-REM-03 a ERS só prevê notificações por WebSocket (REQ-VID-TASK-003; eventos de vídeo no ADD T-03).
 
@@ -25,8 +25,9 @@ Respostas às dúvidas da revisão dos artefactos specsmd. Princípio da equipa:
 | D-05 | Não se aplica nesta construção. Se a B006 for retomada, a equipa escreve antes um complemento ao ADD sobre onde corre a extração e onde ficam as imagens (specsDuvidas D-05). |
 | D-06 | A B006 (UC-VID-005) e a B009 (UC-VID-015) ficam fora desta construção: bolts e stories com `status: blocked` e o motivo; a B001 e a B003 não constroem as peças só usadas pelos lotes nem a extração; `REQ-VID-FRAMES-*`, `REQ-VID-BATCH-*`, `REQ-VID-TASK-007` e a parte de lotes da `REQ-VID-QUOTA-007` ficam não cobertos; a predefinição de cadeia só deixa de poder ser carregada num lote (specsDuvidas D-06). |
 | D-07 | A NFR-004, a NFR-019 e a NFR-020 só servem a extração e ficam não cobertas nesta construção. A NFR-014 continua coberta na parte da junção e da cadeia (UC-VID-013 RN2-RN3, UC-VID-014 RN5) e fica parcialmente não coberta só na parte de lotes (UC-VID-015 RN2), como a QUOTA-007 (specsDuvidas D-07). |
-| D-08 | Vão para a B001, porque a ingestão precisa deles: o `projects/video/amqp.js`; os URLs internos de leitura e o `route/video.js` com o `videoUrls.js` do `imageStorageService` (T-08); o volume `video_tmp`; e a declaração completa da `video_operations_queue` com todos os argumentos do T-03 (*quorum*, `x-delivery-limit`, `x-consumer-timeout`, *dead-letter*), que pela regra 2.6 não podem ser acrescentados depois. A B003 estende-os por acréscimo, sem os alterar (specsDuvidas D-08). |
+| D-08 | Vão para a B001, porque a ingestão precisa deles: o `projects/video/amqp.js`; os URLs internos de leitura e o `route/video.js` com o `videoUrls.js` do `imageStorageService` (T-08); o volume `video_tmp`; e a declaração completa da `video_operations_queue` com todos os argumentos do T-03 (*quorum*, `x-delivery-limit`, `x-consumer-timeout`, *dead-letter*), que pela regra 2.6 não podem ser acrescentados depois. A B003 estende-os por acréscimo, sem os alterar. Nota confirmada: o URL de descarregamento de 900 s continua no âmbito da B002, que usa o módulo da B001 por acréscimo (specsDuvidas D-08). |
 | D-09 | Pela regra da D-03, a NFR-011 passa para a B001, que cria as filas e o worker; a B003 continua a verificá-la nos critérios de passagem (specsDuvidas D-09). |
+| D-10 | A NFR-014 passa a pertencer à ST-VID-013 e à B008, na parte da junção e da cadeia (UC-VID-013 RN2-RN3, UC-VID-014 RN5); a ST-VID-014 verifica-a; a parte de lotes (UC-VID-015 RN2) continua "parcialmente não coberta (D-06)" na ST-VID-015 e na B009 (specsDuvidas D-10). |
 
 ## Decisões históricas da primeira proposta
 

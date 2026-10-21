@@ -31,7 +31,7 @@ implemented: false
 ## Traceability
 
 - **Use case:** UC-VID-015.
-- **Requirements:** `REQ-VID-BATCH-001` a `019`; `REQ-VID-NFR-014`. Consome `REQ-VID-COM-*`, `REQ-VID-TASK-007`, `REQ-VID-QUOTA-007`, `008`, `REQ-VID-NFR-021`. Os `REQ-VID-BATCH-*`, a `REQ-VID-TASK-007` e a parte de lotes da `REQ-VID-QUOTA-007` não são cobertos nesta construção (specsDuvidas D-06); a NFR-014 fica não coberta só na parte de lotes e continua coberta na parte da junção e da cadeia (specsDuvidas D-07); o bolt dessa parte está em dúvida (ver specsDuvidas.md, D-10). Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
+- **Requirements:** `REQ-VID-BATCH-001` a `019`; parte de lotes da `REQ-VID-NFR-014` (UC-VID-015 RN2). Consome `REQ-VID-COM-*`, `REQ-VID-TASK-007`, `REQ-VID-QUOTA-007`, `008`, `REQ-VID-NFR-021`. Os `REQ-VID-BATCH-*`, a `REQ-VID-TASK-007` e a parte de lotes da `REQ-VID-QUOTA-007` não são cobertos nesta construção (specsDuvidas D-06); a NFR-014 fica "parcialmente não coberta (D-06)" só na parte de lotes; a parte da junção e da cadeia pertence à ST-VID-013 e à B008 (specsDuvidas D-07, D-10). Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
 - **Decisões do ADD v1.1:** 4.10, T-09, ADD 6 (`archiver`), Q-ADD-09 (retenção do ZIP, pendente no ADD), Q-ADD-14 na parte de lotes parados e ZIP, fora desta construção (specsDuvidas D-04).
 
 ## Dependencies

@@ -28,7 +28,7 @@ implemented: false
 ## Traceability
 
 - **Use case:** UC-VID-013.
-- **Requirements:** `REQ-VID-CONCAT-001` a `013`; `REQ-VID-NFR-022`, `024`. Consome `REQ-VID-COM-*`, `REQ-VID-STORAGE-002`, `004`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
+- **Requirements:** `REQ-VID-CONCAT-001` a `013`; `REQ-VID-NFR-014` na parte da junção e da cadeia (specsDuvidas D-10), `022`, `024`. Consome `REQ-VID-COM-*`, `REQ-VID-STORAGE-002`, `004`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
 - **Decisões do ADD v1.1:** 4.8, T-01 (`parameters.clips`), Q-ADD-13, Q-ADD-25.
 
 ## Dependencies

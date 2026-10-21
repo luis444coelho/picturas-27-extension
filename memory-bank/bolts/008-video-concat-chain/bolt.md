@@ -48,7 +48,9 @@ Implementar a operação `concat` com sub-cadeias por clip, a validação em tr�
 
 ## Requisitos rastreados
 
-REQ-VID-CONCAT-001 a 013; REQ-VID-CHAIN-001 a 018; REQ-VID-NFR-022 a 024.
+REQ-VID-CONCAT-001 a 013; REQ-VID-CHAIN-001 a 018; REQ-VID-NFR-014, 022 a 024.
+
+A NFR-014 passa para este bolt (dona: ST-VID-013) na parte da junção e da cadeia (UC-VID-013 RN2-RN3, UC-VID-014 RN5); a ST-VID-014 verifica-a; a parte de lotes (UC-VID-015 RN2) continua não coberta, na ST-VID-015 e na B009 (specsDuvidas D-07, D-10).
 
 Verifica nos critérios de aceitação a NFR-010 (dona: B001), a NFR-013 e a NFR-018 (donas: B003), sem ser dono delas (specsDuvidas D-03).
 

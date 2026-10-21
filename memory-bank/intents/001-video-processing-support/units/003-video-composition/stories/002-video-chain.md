@@ -28,7 +28,7 @@ implemented: false
 ## Traceability
 
 - **Use case:** UC-VID-014.
-- **Requirements:** `REQ-VID-CHAIN-001` a `018`; `REQ-VID-NFR-023`. Verifica a `REQ-VID-NFR-010`, a `013` e a `018`, sem ser dona delas (specsDuvidas D-03). Consome `REQ-VID-COM-*`, `REQ-VID-TASK-006`, `008`, `REQ-VID-QUOTA-007`, `008`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
+- **Requirements:** `REQ-VID-CHAIN-001` a `018`; `REQ-VID-NFR-023`. Verifica a `REQ-VID-NFR-010`, a `013` e a `018`, sem ser dona delas (specsDuvidas D-03), e a `REQ-VID-NFR-014` na parte da cadeia (UC-VID-014 RN5), cuja dona é a ST-VID-013 (specsDuvidas D-10). Consome `REQ-VID-COM-*`, `REQ-VID-TASK-006`, `008`, `REQ-VID-QUOTA-007`, `008`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
 - **Decisões do ADD v1.1:** 4.9 (validação em três fases e predefinições de vídeo), T-01, T-02, Q-ADD-16 (passo aproximado), Q-ADD-03.
 
 ## Dependencies
