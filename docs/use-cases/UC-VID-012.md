@@ -30,7 +30,7 @@
 | 3 | O utilizador confirma a operação. | O sistema valida que o formato de saída pertence à matriz suportada e é diferente do atual, verifica a quota disponível (se Registado) e cria a tarefa assíncrona. |
 | 4 | — | O sistema reserva 1 operação da quota diária (se Registado), coloca a tarefa na fila com estado `queued` e notifica o utilizador da aceitação. |
 | 5 | — | O worker inicia o processamento (estado `processing`) e gera o novo contentor, copiando as streams sem recodificação quando os codecs de origem são iguais aos codecs de saída da matriz (ADD v1.1, Q-ADD-21), ou recodificando-as para os codecs da matriz caso contrário; emite progresso percentual (0–100%) via WebSocket. |
-| 6 | — | O sistema armazena o novo vídeo, preservando a duração, a resolução e a taxa de fotogramas; se o formato de saída for MOV ou AVI, gera a cópia de pré-visualização MP4; associa o resultado ao projeto como novo recurso (referenciando o vídeo de origem), transita a tarefa para `completed` (a reserva da quota torna-se definitiva, ADD v1.1, Q-ADD-03) e notifica o utilizador. |
+| 6 | — | O sistema armazena o novo vídeo, preservando a duração, a resolução e a taxa de fotogramas; se o resultado for MOV ou AVI, ou MP4 com um perfil H.264 que os navegadores não reproduzem (10 bits, 4:2:2, 4:4:4), gera a cópia de pré-visualização MP4 (ADD v1.1, Q-ADD-20); associa o resultado ao projeto como novo recurso (referenciando o vídeo de origem), transita a tarefa para `completed` (a reserva da quota torna-se definitiva, ADD v1.1, Q-ADD-03) e notifica o utilizador. |
 | 7 | O utilizador consulta o projeto. | O sistema apresenta o novo vídeo convertido na lista de recursos, disponível para reprodução e descarregamento (UC-VID-006); o vídeo original permanece inalterado. |
 
 ---
@@ -64,7 +64,7 @@
 
 | **Tipo** | **Resultado** |
 |----------|---------------|
-| **Garantia de Sucesso** | Um novo vídeo no formato de saída escolhido, conforme à matriz de codecs, é persistido e associado ao projeto (com referência ao vídeo de origem e, se MOV/AVI, com cópia de pré-visualização MP4). O vídeo original permanece inalterado. A quota diária é consumida em 1 operação (apenas Registado). A tarefa transita para `completed`. |
+| **Garantia de Sucesso** | Um novo vídeo no formato de saída escolhido, conforme à matriz de codecs, é persistido e associado ao projeto (com referência ao vídeo de origem e, se MOV/AVI ou MP4 com perfil H.264 não reproduzível nos navegadores, com cópia de pré-visualização MP4). O vídeo original permanece inalterado. A quota diária é consumida em 1 operação (apenas Registado). A tarefa transita para `completed`. |
 | **Garantia Mínima** | Em caso de erro ou cancelamento, nenhum novo recurso é associado ao projeto, os ficheiros temporários são purgados, a quota reservada é devolvida e a tarefa transita para `failed` ou `cancelled`. O vídeo original permanece inalterado. |
 
 ---

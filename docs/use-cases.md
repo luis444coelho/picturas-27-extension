@@ -51,7 +51,7 @@ As dez funcionalidades acrescentadas na v1.4 ([UC-VID-006](use-cases/UC-VID-006.
 Para assegurar uma leitura modular e permitir a integração direta com o template do relatório (e.g. Typst `#include "casos-uso/UC-VID-xxx.typ"`), cada caso de uso encontra-se integralmente especificado no seu próprio ficheiro:
 
 ### 📹 [UC-VID-000: Carregar e visualizar um vídeo no projeto](use-cases/UC-VID-000.md)
-- **Objetivo**: Permitir a transferência de ficheiros MP4, MOV ou AVI (matriz de codecs da DQ-002, com cópia de pré-visualização MP4 para MOV/AVI), validação de contentores e codecs com FFprobe, gravação no storage SeaweedFS/S3 com UUID, extração de metadados técnicos, geração de miniatura JPEG e visualização no reprodutor integrado com atalhos para as ferramentas de edição.
+- **Objetivo**: Permitir a transferência de ficheiros MP4, MOV ou AVI (matriz de codecs da DQ-002, com cópia de pré-visualização MP4 para MOV/AVI e para MP4 não reproduzíveis nos navegadores), validação de contentores e codecs com FFprobe, gravação no storage SeaweedFS/S3 com UUID, extração de metadados técnicos, geração de miniatura JPEG e visualização no reprodutor integrado com atalhos para as ferramentas de edição.
 - **Atores**: Utilizador Registado e Premium (autenticados).
 - **Especificação completa**: [Ver UC-VID-000.md](use-cases/UC-VID-000.md)
 
@@ -135,7 +135,7 @@ Para assegurar uma leitura modular e permitir a integração direta com o templa
 ---
 
 ### 🔁 [UC-VID-012: Converter o formato de um vídeo](use-cases/UC-VID-012.md)
-- **Objetivo**: Converter entre MP4, MOV e AVI com codecs fixos por formato, cópia direta de streams quando possível e cópia de pré-visualização MP4 para os resultados MOV/AVI.
+- **Objetivo**: Converter entre MP4, MOV e AVI com codecs fixos por formato, cópia direta de streams quando possível e cópia de pré-visualização MP4 para os resultados MOV/AVI e para os MP4 não reproduzíveis nos navegadores.
 - **Atores**: Utilizador Registado e Premium.
 - **Especificação completa**: [Ver UC-VID-012.md](use-cases/UC-VID-012.md)
 
