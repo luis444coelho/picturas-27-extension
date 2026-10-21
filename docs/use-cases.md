@@ -9,8 +9,8 @@
 |-----------|-----------|
 | **Grupo / Equipa** | Grupo 27 |
 | **Autores** | Equipa PictuRAS-27 |
-| **Data** | 2026-10-18 |
-| **Versão do documento** | v1.4 (Novos casos de uso UC-VID-006 a UC-VID-015) |
+| **Data** | 2026-10-21 |
+| **Versão do documento** | v1.5 (Alinhamento com o ADD v1.1); v1.4 (Novos casos de uso UC-VID-006 a UC-VID-015) |
 | **Unidade Curricular** | Requisitos e Arquiteturas de Software — MEI, Universidade do Minho |
 
 ---
@@ -168,13 +168,13 @@ Para assegurar uma leitura modular e permitir a integração direta com o templa
 |------------------------|--------------------|--------------------------------------|
 | **ChatGPT / Copilot** | Apoio na revisão da linguagem e na normalização dos casos de uso, com foco na consistência terminológica, na redução de ambiguidades e na deteção de lacunas entre fluxos, exceções e regras de negócio. | A equipa verificou que todas as descrições respeitam o modelo de requisitos do PictuRAS, mantêm a origem documental, incorporam as decisões D-VID-001 a D-VID-010 e evitam decisões de implementação não aprovadas. |
 | **Antigravity (AI-DLC Inception Agent)** | Consolidação, decomposição atómica e modularização dos casos de uso e requisitos em ficheiros individuais dedicados, assegurando rastreabilidade bidirecional com a ERS e conformidade com o template Typst da Fase 1. | A equipa verificou a rastreabilidade entre casos de uso, decisões e requisitos e confirmou que os valores quantitativos correspondem às decisões contratuais do MVP. |
-| **Claude Code (specsmd Inception Agent)** | Especificação dos novos requisitos RF1 a RF10 (`docs/novo.md`): casos de uso UC-VID-006 a UC-VID-015, ficheiros de requisitos por área, requisitos comuns e não funcionais derivados, decisões DQ-012 a DQ-025, questões Q-ERS-004 a Q-ERS-009, alinhamento dos UC-VID-001 a UC-VID-005 com a matriz de formatos e atualização dos índices e da matriz de rastreabilidade. | A equipa aprovou previamente o plano de alterações (âmbito do MVP, matriz de formatos, política de quota e suposições); a revisão final dos artefactos gerados é da responsabilidade da equipa. |
+| **Claude Code (specsmd Inception Agent)** | Especificação dos novos requisitos RF1 a RF10 (as dez funcionalidades novas pedidas no enunciado da Fase 1): casos de uso UC-VID-006 a UC-VID-015, ficheiros de requisitos por área, requisitos comuns e não funcionais derivados, decisões DQ-012 a DQ-025, questões Q-ERS-004 a Q-ERS-009, alinhamento dos UC-VID-001 a UC-VID-005 com a matriz de formatos e atualização dos índices e da matriz de rastreabilidade. | A equipa aprovou previamente o plano de alterações (âmbito do MVP, matriz de formatos, política de quota e suposições); a revisão final dos artefactos gerados é da responsabilidade da equipa. |
 
 ---
 
 ## ✅ Lista de Verificação
 
-- [x] Secção 0 preenchida com identificação correta do grupo e versão v1.3.
+- [x] Secção 0 preenchida com identificação correta do grupo e versão v1.5.
 - [x] Secção 1 com tabela das dezasseis funcionalidades (UC-VID-000 a UC-VID-015), perfis e justificação no contexto do MVP.
 - [x] Casos de uso modularizados em ficheiros individuais na diretoria `docs/use-cases/`.
 - [x] Cada caso de uso com cabeçalho, fluxo principal, fluxos alternativos, exceções específicas de vídeo, pós-condições, regras de negócio e assunções.

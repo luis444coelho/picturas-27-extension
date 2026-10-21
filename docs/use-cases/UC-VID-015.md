@@ -9,9 +9,9 @@
 |------------|--------------|
 | **ID do Caso de Uso** | UC-VID-015 |
 | **Nome** | Processar vários vídeos em lote |
-| **Versão** | v1.0 |
+| **Versão** | v1.1 (Alinhamento com o ADD v1.1) |
 | **Autor** | Equipa PictuRAS-27 |
-| **Data** | 2026-10-18 |
+| **Data** | 2026-10-21 |
 | **Objetivo** | Permitir ao utilizador aplicar a mesma operação ou o mesmo conjunto de operações (cadeia) a vários vídeos do projeto, sem configurar cada vídeo individualmente, obtendo um novo vídeo por cada vídeo processado, sem alterar os originais. |
 | **Âmbito** | Módulo de processamento de vídeo e gestão de recursos do PictuRAS |
 | **Ator Principal** | Utilizador **Registado** ou **Premium** com sessão iniciada e acesso ao projeto |
@@ -30,9 +30,9 @@
 | 3 | — | O sistema pré-valida a configuração face a cada vídeo (e.g. instante final de recorte superior à duração, remoção de áudio num vídeo sem áudio), assinala os vídeos incompatíveis com o motivo e apresenta o custo total em créditos (custo da operação ou cadeia × número de vídeos elegíveis). |
 | 4 | O utilizador confirma o lote. | O sistema verifica que a quota disponível cobre o custo total (se Registado), cria um lote com identificador próprio (`batchId`) e uma subtarefa por vídeo elegível, e aceita-o como 1 tarefa ativa do projeto. |
 | 5 | — | O sistema reserva a totalidade dos créditos do lote (se Registado), coloca o lote na fila com estado `queued` e notifica o utilizador da aceitação. |
-| 6 | — | O worker processa os vídeos sequencialmente (estado do lote `processing`), emitindo via WebSocket o estado de cada vídeo e o progresso agregado (vídeos concluídos / total e percentagem global). |
-| 7 | — | Por cada vídeo concluído, o sistema associa o novo vídeo ao projeto (referenciando o vídeo de origem) e confirma os créditos desse vídeo; por cada vídeo falhado, devolve os respetivos créditos e regista o motivo, prosseguindo com os restantes. |
-| 8 | — | No fim, o sistema transita o lote para `completed` (se pelo menos um vídeo foi concluído) ou `failed` (se todos falharam) e notifica o utilizador com o resumo (concluídos, falhados e créditos debitados). |
+| 6 | — | O worker processa os vídeos sequencialmente (estado do lote `processing`), emitindo via WebSocket o estado de cada vídeo e o progresso agregado (vídeos terminados, concluídos ou falhados, / total e percentagem global) (ADD v1.1, T-09). |
+| 7 | — | Por cada vídeo concluído, o sistema associa o novo vídeo ao projeto (referenciando o vídeo de origem) e a reserva dos créditos desse vídeo torna-se definitiva (ADD v1.1, Q-ADD-03); por cada vídeo falhado, devolve os respetivos créditos e regista o motivo, prosseguindo com os restantes. |
+| 8 | — | No fim, o sistema transita o lote para `completed` (se pelo menos um vídeo foi concluído) ou `failed` (se todos falharam), salvo se o lote foi cancelado (FA4), e notifica o utilizador com o resumo (concluídos, falhados e créditos debitados). |
 | 9 | O utilizador consulta o projeto. | O sistema apresenta os novos vídeos na lista de recursos; os vídeos de origem permanecem inalterados. |
 
 ---
@@ -41,7 +41,7 @@
 
 | **Fluxo** | **Descrição** |
 |-----------|---------------|
-| **FA1 – Descarregar os resultados do lote em ZIP** | No passo 9, o utilizador escolhe "Descarregar Lote" → O sistema gera um arquivo ZIP com os vídeos concluídos do lote, disponível por URL assinado temporário (UC-VID-006), sem consumo de quota. |
+| **FA1 – Descarregar os resultados do lote em ZIP** | No passo 9, o utilizador escolhe "Descarregar Lote" → O sistema gera em segundo plano um arquivo ZIP com os vídeos concluídos do lote e avisa o utilizador quando está pronto; o ZIP fica disponível por URL assinado temporário (UC-VID-006), sem consumo de quota. O pedido só é aceite com o lote em `completed`, ou em `cancelled` com pelo menos um vídeo concluído (ADD v1.1, 4.10). |
 | **FA2 – Exclusão dos vídeos incompatíveis** | No passo 3, o utilizador retira do lote os vídeos assinalados como incompatíveis → O sistema recalcula o custo total; se restar menos de dois vídeos, a confirmação fica bloqueada. |
 | **FA3 – Carregar uma cadeia predefinida** | No passo 2, o utilizador carrega uma cadeia guardada como predefinição (UC-VID-014, FA3) → O sistema preenche a configuração e o fluxo continua no passo 3. |
 | **FA4 – Cancelamento do lote** | No passo 5 ou 6, o utilizador cancela o lote → O sistema interrompe o vídeo em curso e os pendentes, purga os temporários, devolve os créditos dos vídeos não concluídos (se Registado), mantém os vídeos já concluídos e transita o lote para `cancelled`. |
@@ -59,7 +59,7 @@
 | **Nenhum vídeo compatível com a configuração.** | No passo 3, o sistema bloqueia a confirmação (`NO_ELIGIBLE_INPUTS`). |
 | **Quota disponível inferior ao custo total do lote (utilizador Registado).** | No passo 4, o sistema informa o custo total e o saldo disponível (`QUOTA_EXCEEDED`). O lote não é criado e nenhum crédito é reservado. |
 | **Falha no processamento de um vídeo.** | No passo 7, o sistema marca a subtarefa como `failed`, elimina os respetivos temporários, devolve os créditos desse vídeo (se Registado) e prossegue com os restantes. |
-| **Falha geral do worker.** | No passo 6, os vídeos já concluídos mantêm-se; os restantes são marcados como `failed`, os seus créditos são devolvidos e o utilizador é notificado. |
+| **Falha geral do worker.** | No passo 6, a mensagem do vídeo em curso é reentregue e o processamento desse vídeo recomeça do zero; ao fim de duas entregas falhadas, só esse vídeo é marcado como `failed`, com devolução dos seus créditos (se Registado), e o lote prossegue com os vídeos seguintes. Os vídeos já concluídos mantêm-se (ADD v1.1, T-03, T-09). |
 
 ---
 
@@ -93,7 +93,7 @@
 | **ID** | **Assunção** |
 |--------|--------------|
 | **A1** | A pré-validação por vídeo usa apenas os metadados persistidos, sem processar os ficheiros. |
-| **A2** | O mecanismo de descarregamento em ZIP existente para imagens pode ser estendido a vídeos. |
+| **A2** | O descarregamento em ZIP dos vídeos usa um ZIP novo gerado com `archiver` em *streaming*, porque o `jszip` usado nas imagens não suporta ZIP64 (ADD v1.1, 4.10). |
 | **A3** | A quota diária é reposta diariamente às 00:00 UTC. |
 
 ---

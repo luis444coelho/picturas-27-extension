@@ -9,9 +9,9 @@
 |------------|--------------|
 | **ID do Caso de Uso** | UC-VID-009 |
 | **Nome** | Aplicar um filtro visual a um vídeo |
-| **Versão** | v1.0 |
+| **Versão** | v1.1 (Alinhamento com o ADD v1.1) |
 | **Autor** | Equipa PictuRAS-27 |
-| **Data** | 2026-10-18 |
+| **Data** | 2026-10-21 |
 | **Objetivo** | Permitir ao utilizador aplicar um filtro visual predefinido a um vídeo do projeto, obtendo um novo vídeo com o filtro aplicado a todos os fotogramas, sem alterar o original. |
 | **Âmbito** | Módulo de processamento de vídeo e gestão de recursos do PictuRAS |
 | **Ator Principal** | Utilizador **Registado** ou **Premium** com sessão iniciada e acesso ao projeto |
@@ -25,12 +25,12 @@
 
 | **Passo** | **Ação do Ator** | **Resposta do Sistema** |
 |-----------|------------------|-------------------------|
-| 1 | O utilizador acede ao projeto, seleciona um vídeo e escolhe a operação "Aplicar Filtro". | O sistema apresenta o vídeo e o catálogo de filtros predefinidos (Preto e Branco, Sépia, Negativo, Vintage, Frio e Quente), cada um com uma miniatura de exemplo sobre o primeiro fotograma. |
+| 1 | O utilizador acede ao projeto, seleciona um vídeo e escolhe a operação "Aplicar Filtro". | O sistema apresenta o vídeo e o catálogo de filtros predefinidos (Preto e Branco, Sépia, Negativo, Vintage, Frio e Quente), cada um com uma miniatura de exemplo aplicada ao fotograma 0 reduzido, guardado na ingestão (ADD v1.1, 4.4, Q-ADD-06). |
 | 2 | O utilizador seleciona um filtro do catálogo. | O sistema apresenta, em ≤ 1 s, uma pré-visualização estática do primeiro fotograma com o filtro aplicado. |
 | 3 | O utilizador confirma a operação. | O sistema valida que foi selecionado exatamente um filtro existente no catálogo, verifica a quota disponível (se Registado) e cria a tarefa assíncrona. |
 | 4 | — | O sistema reserva 1 operação da quota diária (se Registado), coloca a tarefa na fila com estado `queued` e notifica o utilizador da aceitação. |
 | 5 | — | O worker inicia o processamento (estado `processing`), aplica o filtro de forma uniforme a todos os fotogramas e emite progresso percentual (0–100%) via WebSocket. |
-| 6 | — | O worker gera o novo vídeo em MP4 (H.264/AAC), preservando a duração, a resolução, a taxa de fotogramas e o áudio; o sistema associa-o ao projeto como novo recurso (referenciando o vídeo de origem), transita a tarefa para `completed`, confirma o consumo da quota e notifica o utilizador. |
+| 6 | — | O worker gera o novo vídeo em MP4 (H.264/AAC), preservando a duração, a resolução, a taxa de fotogramas e o áudio; o sistema associa-o ao projeto como novo recurso (referenciando o vídeo de origem), transita a tarefa para `completed` (a reserva da quota torna-se definitiva, ADD v1.1, Q-ADD-03) e notifica o utilizador. |
 | 7 | O utilizador consulta o projeto. | O sistema apresenta o novo vídeo filtrado na lista de recursos; o vídeo original permanece inalterado. |
 
 ---
@@ -40,7 +40,7 @@
 | **Fluxo** | **Descrição** |
 |-----------|---------------|
 | **FA1 – Troca de filtro após pré-visualização** | No passo 2, o utilizador seleciona outro filtro → O sistema substitui a seleção anterior e atualiza a pré-visualização. |
-| **FA2 – Cancelamento antes do início do processamento** | No passo 4, com a tarefa no estado `queued`, o utilizador solicita o cancelamento → O sistema remove a tarefa da fila, devolve a quota reservada (se Registado), transita a tarefa para `cancelled` e notifica o utilizador. |
+| **FA2 – Cancelamento antes do início do processamento** | No passo 4, com a tarefa no estado `queued`, o utilizador solicita o cancelamento → O sistema marca a tarefa como `cancelled` (o worker descarta-a quando a consome, ADD v1.1, T-03), devolve a quota reservada (se Registado) e notifica o utilizador. |
 | **FA3 – Cancelamento durante o processamento** | No passo 5, com a tarefa no estado `processing`, o utilizador solicita o cancelamento → O sistema interrompe o worker, elimina os ficheiros temporários, devolve a quota reservada (se Registado), transita a tarefa para `cancelled` e notifica o utilizador. |
 | **FA4 – Utilizador com perfil Premium** | No passo 3, o utilizador tem perfil Premium → O sistema não verifica nem debita quota diária e aplica os limites alargados. |
 | **FA5 – Utilização como passo de cadeia ou lote** | A operação é configurada como passo de uma cadeia (UC-VID-014) ou aplicada em lote (UC-VID-015) → As mesmas regras de validação aplicam-se e a execução segue o caso de uso respetivo. |
@@ -76,7 +76,7 @@
 | **RN2** | O catálogo de filtros do MVP é fechado: Preto e Branco, Sépia, Negativo, Vintage, Frio e Quente (DQ-021). |
 | **RN3** | Cada operação aplica exatamente um filtro, sem controlo de intensidade. |
 | **RN4** | O filtro é aplicado de forma uniforme a todos os fotogramas do vídeo. |
-| **RN5** | O resultado é gerado em MP4 (H.264/AAC), preservando a duração, a resolução, a taxa de fotogramas e o áudio do original (DQ-013). |
+| **RN5** | O resultado é gerado em MP4 (H.264/AAC), preservando a duração, a resolução, a taxa de fotogramas e o áudio do original (DQ-013). Exceção: quando um vídeo com uma dimensão ímpar é recodificado, corta-se 1 px para o par abaixo (ADD v1.1, Q-ADD-25). |
 | **RN6** | Cada operação concluída consome exatamente 1 crédito da quota diária do utilizador Registado (limite de 5 operações/dia). Utilizadores Premium têm quota ilimitada. |
 | **RN7** | Em caso de cancelamento ou falha técnica, o crédito reservado é integralmente devolvido ao utilizador Registado. |
 | **RN8** | A operação é assíncrona; o progresso numérico (0–100%) é emitido via WebSocket. |
@@ -90,7 +90,7 @@
 
 | **ID** | **Assunção** |
 |--------|--------------|
-| **A1** | Cada filtro do catálogo é implementável com filtros FFmpeg standard (e.g. `hue`, `colorchannelmixer`, `negate`, `curves`). |
+| **A1** | Cada filtro do catálogo é implementável como matriz de cor 3×3 com `colorchannelmixer` ou como inversão com `lutrgb`, aplicados da mesma forma pelo sharp na pré-visualização; as matrizes de Vintage, Frio e Quente ficam por definir (ADD v1.1, T-07, Q-ADD-07). |
 | **A2** | A quota diária é reposta diariamente às 00:00 UTC. |
 
 ---

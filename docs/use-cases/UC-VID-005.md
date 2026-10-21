@@ -9,9 +9,9 @@
 |------------|--------------|
 | **ID do Caso de Uso** | UC-VID-005 |
 | **Nome** | Extrair fotogramas de um vídeo para o projeto |
-| **Versão** | v1.3 |
+| **Versão** | v1.4 (Alinhamento com o ADD v1.1) |
 | **Autor** | Equipa PictuRAS-27 |
-| **Data** | 2026-10-18 |
+| **Data** | 2026-10-21 |
 | **Objetivo** | Permitir ao utilizador extrair um conjunto de fotogramas discretos de um vídeo do projeto segundo um intervalo temporal e passo regular, convertendo-os em imagens normais associadas ao projeto, sem alterar o vídeo original. |
 | **Âmbito** | Módulo de processamento de vídeo e integração com a galeria de imagens do PictuRAS |
 | **Ator Principal** | Utilizador **Registado** ou **Premium** com sessão iniciada e acesso ao projeto |
@@ -31,7 +31,7 @@
 | 4 | — | O sistema reserva 1 operação da quota diária (se Registado), coloca a tarefa na fila com estado `queued` e notifica o utilizador da aceitação. |
 | 5 | — | O worker inicia o processamento (estado `processing`), extrai para cada instante o fotograma codificado mais próximo, converte-o para o formato selecionado (JPEG/PNG) e emite progresso contínuo (0–100%) via WebSocket com base no número de fotogramas já extraídos. |
 | 6 | — | O worker armazena os fotogramas no armazenamento de objetos e regista-os na base de dados como imagens normais associadas ao projeto (referenciando o vídeo de origem e o timestamp). |
-| 7 | — | O sistema transita a tarefa para `completed`, confirma o consumo da quota e notifica o utilizador via WebSocket. |
+| 7 | — | O sistema transita a tarefa para `completed` (a reserva da quota torna-se definitiva, ADD v1.1, Q-ADD-03) e notifica o utilizador via WebSocket. |
 | 8 | O utilizador consulta o projeto. | O sistema apresenta os novos recursos de imagem na galeria do projeto, disponíveis para utilização com qualquer ferramenta de imagem existente; o vídeo original permanece inalterado. |
 
 ---

@@ -9,9 +9,9 @@
 |------------|--------------|
 | **ID do Caso de Uso** | UC-VID-004 |
 | **Nome** | Aplicar marca de água a um vídeo |
-| **Versão** | v1.3 |
+| **Versão** | v1.4 (Alinhamento com o ADD v1.1) |
 | **Autor** | Equipa PictuRAS-27 |
-| **Data** | 2026-10-18 |
+| **Data** | 2026-10-21 |
 | **Objetivo** | Permitir ao utilizador aplicar uma marca de água (texto ou imagem) com posição, tamanho e opacidade configuráveis sobre todos os fotogramas de um vídeo do projeto, gerando um novo vídeo protegido, sem alterar o original. |
 | **Âmbito** | Módulo de processamento de vídeo e gestão de recursos do PictuRAS |
 | **Ator Principal** | Utilizador **Registado** ou **Premium** com sessão iniciada e acesso ao projeto |
@@ -32,7 +32,7 @@
 | 5 | — | O sistema reserva 1 operação da quota diária (se Registado), coloca a tarefa na fila com estado `queued` e notifica o utilizador da aceitação. |
 | 6 | — | O worker inicia o processamento (estado `processing`), sobrepõe a marca fotograma a fotograma (filtro FFmpeg `drawtext` para texto ou `overlay` para imagem), mantendo a posição fixa, e emite eventos de progresso percentual (0–100%) via WebSocket. |
 | 7 | — | O worker recompõe o vídeo no contentor MP4 com o codec H.264, remuxa a stream de áudio original sem recodificação quando esta é AAC (recodificando-a para AAC quando é MP3, em AVI) e armazena o ficheiro resultante. |
-| 8 | — | O sistema associa o novo vídeo ao projeto como novo recurso (referenciando o vídeo de origem), transita a tarefa para `completed`, confirma o consumo da quota e notifica o utilizador via WebSocket. |
+| 8 | — | O sistema associa o novo vídeo ao projeto como novo recurso (referenciando o vídeo de origem), transita a tarefa para `completed` (a reserva da quota torna-se definitiva, ADD v1.1, Q-ADD-03) e notifica o utilizador via WebSocket. |
 | 9 | O utilizador consulta o projeto. | O sistema apresenta o novo vídeo com marca de água na lista de recursos; o vídeo original permanece inalterado. |
 
 ---
@@ -43,7 +43,7 @@
 |-----------|---------------|
 | **FA1 – Marca de água como imagem** | No passo 2, o utilizador escolhe imagem → O sistema permite selecionar uma imagem da galeria do projeto ou carregar um ficheiro PNG/JPEG local. O fluxo continua no passo 3. |
 | **FA2 – Alteração de parâmetros após pré-visualização** | No passo 3, após ver a pré-visualização estática, o utilizador ajusta a posição, opacidade ou dimensão → O sistema re-renderiza a pré-visualização estática imediatamente. O fluxo continua no passo 4. |
-| **FA3 – Cancelamento antes do início do processamento** | No passo 5, com a tarefa no estado `queued`, o utilizador solicita o cancelamento → O sistema remove a tarefa da fila, devolve a operação reservada à quota (se Registado), transita a tarefa para `cancelled` e notifica o utilizador. Nenhum novo vídeo é gerado. |
+| **FA3 – Cancelamento antes do início do processamento** | No passo 5, com a tarefa no estado `queued`, o utilizador solicita o cancelamento → O sistema marca a tarefa como `cancelled` (o worker descarta-a quando a consome, ADD v1.1, T-03), devolve a operação reservada à quota (se Registado) e notifica o utilizador. Nenhum novo vídeo é gerado. |
 | **FA4 – Cancelamento durante o processamento** | No passo 6, com a tarefa no estado `processing`, o utilizador solicita o cancelamento → O sistema interrompe o worker, elimina os ficheiros temporários, devolve a quota reservada (se Registado), transita a tarefa para `cancelled` e notifica o utilizador. |
 | **FA5 – Utilizador com perfil Premium** | No passo 4, o utilizador tem perfil Premium → O sistema não debita nem verifica quota diária (quota ilimitada) e aplica os limites de duração alargados (até 60 min). |
 
@@ -102,6 +102,6 @@
 
 | **ID** | **Questão** | **Resolução / Decisão** |
 |--------|-------------|-------------------------|
-| **Q1** | Como é medido o progresso durante a marca de água? | O worker emite o progresso percentual (0–100%) baseado no índice do fotograma corrente a ser processado dividido pelo número total de fotogramas do vídeo. |
+| **Q1** | Como é medido o progresso durante a marca de água? | O worker emite o progresso percentual (0–100%), pelo menos uma vez por segundo, calculado como o tempo já processado (`out_time_us`, lido de `-progress pipe:1` do FFmpeg) dividido pela duração do vídeo (ADD v1.1, T-02). |
 | **Q2** | A marca de água pode mover-se ao longo do vídeo ou ter intervalo temporal de visibilidade restrito? | Não para o MVP. A posição é estática e contínua do primeiro ao último fotograma. Posições dinâmicas ficam para a Fase 2. |
 

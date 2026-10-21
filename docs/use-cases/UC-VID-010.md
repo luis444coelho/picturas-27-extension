@@ -9,9 +9,9 @@
 |------------|--------------|
 | **ID do Caso de Uso** | UC-VID-010 |
 | **Nome** | Redimensionar um vídeo |
-| **Versão** | v1.0 |
+| **Versão** | v1.1 (Alinhamento com o ADD v1.1) |
 | **Autor** | Equipa PictuRAS-27 |
-| **Data** | 2026-10-18 |
+| **Data** | 2026-10-21 |
 | **Objetivo** | Permitir ao utilizador alterar a resolução de um vídeo do projeto, selecionando as dimensões de saída pretendidas, e obter um novo vídeo com essas dimensões, sem alterar o original. |
 | **Âmbito** | Módulo de processamento de vídeo e gestão de recursos do PictuRAS |
 | **Ator Principal** | Utilizador **Registado** ou **Premium** com sessão iniciada e acesso ao projeto |
@@ -25,12 +25,12 @@
 
 | **Passo** | **Ação do Ator** | **Resposta do Sistema** |
 |-----------|------------------|-------------------------|
-| 1 | O utilizador acede ao projeto, seleciona um vídeo e escolhe a operação "Redimensionar". | O sistema apresenta a resolução atual, os campos de largura e altura preenchidos com os valores atuais, o bloqueio de proporção ativo e as predefinições 1080p, 720p, 480p e 360p. |
+| 1 | O utilizador acede ao projeto, seleciona um vídeo e escolhe a operação "Redimensionar". | O sistema apresenta a resolução atual em dimensões de apresentação (com a etiqueta de rotação aplicada), os campos de largura e altura preenchidos com esses valores (ADD v1.1, 4.5, Q-ADD-13), o bloqueio de proporção ativo e as predefinições 1080p, 720p, 480p e 360p. |
 | 2 | O utilizador escolhe uma predefinição ou introduz a largura (ou a altura) pretendida. | Com a proporção bloqueada, o sistema recalcula a outra dimensão, arredondando-a para o número par mais próximo, e apresenta as dimensões finais. |
 | 3 | O utilizador confirma a operação. | O sistema valida que as dimensões são pares, ≥ 128 px, dentro do limite do perfil e diferentes das atuais, verifica a quota disponível (se Registado) e cria a tarefa assíncrona. |
 | 4 | — | O sistema reserva 1 operação da quota diária (se Registado), coloca a tarefa na fila com estado `queued` e notifica o utilizador da aceitação. |
 | 5 | — | O worker inicia o processamento (estado `processing`), reamostra todos os fotogramas para as dimensões pretendidas e emite progresso percentual (0–100%) via WebSocket. |
-| 6 | — | O worker gera o novo vídeo em MP4 (H.264/AAC) com as dimensões exatas, preservando a duração, a taxa de fotogramas e o áudio; o sistema associa-o ao projeto como novo recurso (referenciando o vídeo de origem), transita a tarefa para `completed`, confirma o consumo da quota e notifica o utilizador. |
+| 6 | — | O worker gera o novo vídeo em MP4 (H.264/AAC) com as dimensões exatas e rotação 0, preservando a duração, a taxa de fotogramas e o áudio; o sistema associa-o ao projeto como novo recurso (referenciando o vídeo de origem), transita a tarefa para `completed` (a reserva da quota torna-se definitiva, ADD v1.1, Q-ADD-03) e notifica o utilizador. |
 | 7 | O utilizador consulta o projeto. | O sistema apresenta o novo vídeo redimensionado na lista de recursos; o vídeo original permanece inalterado. |
 
 ---
@@ -41,7 +41,7 @@
 |-----------|---------------|
 | **FA1 – Desbloqueio da proporção** | No passo 2, o utilizador desativa o bloqueio de proporção e define largura e altura de forma independente → O sistema apresenta um aviso de que a imagem ficará distorcida. O fluxo continua no passo 3. |
 | **FA2 – Ampliação acima da resolução original** | No passo 2, as dimensões pretendidas são superiores às originais → O sistema apresenta um aviso de que a ampliação não acrescenta detalhe. O fluxo continua no passo 3. |
-| **FA3 – Cancelamento antes do início do processamento** | No passo 4, com a tarefa no estado `queued`, o utilizador solicita o cancelamento → O sistema remove a tarefa da fila, devolve a quota reservada (se Registado), transita a tarefa para `cancelled` e notifica o utilizador. |
+| **FA3 – Cancelamento antes do início do processamento** | No passo 4, com a tarefa no estado `queued`, o utilizador solicita o cancelamento → O sistema marca a tarefa como `cancelled` (o worker descarta-a quando a consome, ADD v1.1, T-03), devolve a quota reservada (se Registado) e notifica o utilizador. |
 | **FA4 – Cancelamento durante o processamento** | No passo 5, com a tarefa no estado `processing`, o utilizador solicita o cancelamento → O sistema interrompe o worker, elimina os ficheiros temporários, devolve a quota reservada (se Registado), transita a tarefa para `cancelled` e notifica o utilizador. |
 | **FA5 – Utilizador com perfil Premium** | No passo 3, o utilizador tem perfil Premium → O sistema não verifica nem debita quota diária e aplica o limite de resolução alargado (3840×2160). |
 | **FA6 – Utilização como passo de cadeia ou lote** | A operação é configurada como passo de uma cadeia (UC-VID-014) ou aplicada em lote (UC-VID-015) → As mesmas regras de validação aplicam-se e a execução segue o caso de uso respetivo. |
@@ -53,7 +53,7 @@
 | **Condição** | **Comportamento do Sistema** |
 |--------------|------------------------------|
 | **Dimensões ímpares, inferiores a 128 px ou acima do limite do perfil.** | No passo 3, o sistema rejeita a operação (`INVALID_RESIZE_PARAMS`), indicando a dimensão incorreta e o limite aplicável. A tarefa não é criada e a quota não é afetada. |
-| **Dimensões iguais às do vídeo original.** | No passo 3, o sistema bloqueia a confirmação (`NO_CHANGES`). |
+| **Dimensões iguais às dimensões de apresentação do vídeo original.** | No passo 3, o sistema bloqueia a confirmação (`NO_CHANGES`) (ADD v1.1, Q-ADD-13). |
 | **Formato ou codec de vídeo não suportado.** | No passo 3, o sistema rejeita a operação (`UNSUPPORTED_FORMAT`). A tarefa não é criada e a quota não é afetada. |
 | **Duração ou tamanho superior ao limite do perfil.** | No passo 3, o sistema rejeita a operação (`LIMIT_EXCEEDED`). A tarefa não é criada e a quota não é afetada. |
 | **Quota diária esgotada (utilizador Registado).** | No passo 3, o sistema informa que o limite diário de 5 operações foi atingido (`QUOTA_EXCEEDED`). A tarefa não é criada. |
@@ -75,7 +75,7 @@
 | **ID** | **Regra** |
 |--------|-----------|
 | **RN1** | Apenas utilizadores Registados e Premium com sessão iniciada e permissão de edição no projeto podem executar a operação. |
-| **RN2** | A largura e a altura de saída são números inteiros pares, com mínimo de 128 px (requisito de compatibilidade do codec H.264). |
+| **RN2** | A largura e a altura de saída são números inteiros pares, com mínimo de 128 px (requisito de compatibilidade do codec H.264), e referem-se às dimensões de apresentação do vídeo; o resultado fica com rotação 0 (ADD v1.1, 4.5, Q-ADD-13). |
 | **RN3** | Limites de resolução de saída por perfil (maior dimensão × menor dimensão): Registado — até 1920×1080; Premium — até 3840×2160 (DQ-022). |
 | **RN4** | Por omissão, a proporção original é mantida; o desbloqueio da proporção é permitido mediante aviso de distorção. |
 | **RN5** | A ampliação acima da resolução original é permitida, mediante aviso. |

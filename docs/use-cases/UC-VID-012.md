@@ -9,9 +9,9 @@
 |------------|--------------|
 | **ID do Caso de Uso** | UC-VID-012 |
 | **Nome** | Converter o formato de um vídeo |
-| **Versão** | v1.0 |
+| **Versão** | v1.1 (Alinhamento com o ADD v1.1) |
 | **Autor** | Equipa PictuRAS-27 |
-| **Data** | 2026-10-18 |
+| **Data** | 2026-10-21 |
 | **Objetivo** | Permitir ao utilizador converter um vídeo do projeto entre os formatos suportados (MP4, MOV e AVI), selecionando o formato de saída pretendido, e obter um novo vídeo nesse formato sem alterar o original. |
 | **Âmbito** | Módulo de processamento de vídeo e gestão de recursos do PictuRAS |
 | **Ator Principal** | Utilizador **Registado** ou **Premium** com sessão iniciada e acesso ao projeto |
@@ -29,8 +29,8 @@
 | 2 | O utilizador seleciona o formato de saída. | O sistema apresenta os codecs que serão utilizados no formato escolhido e indica se a conversão será feita por cópia direta de streams (*remux*) ou por recodificação. |
 | 3 | O utilizador confirma a operação. | O sistema valida que o formato de saída pertence à matriz suportada e é diferente do atual, verifica a quota disponível (se Registado) e cria a tarefa assíncrona. |
 | 4 | — | O sistema reserva 1 operação da quota diária (se Registado), coloca a tarefa na fila com estado `queued` e notifica o utilizador da aceitação. |
-| 5 | — | O worker inicia o processamento (estado `processing`) e gera o novo contentor, copiando as streams sem recodificação quando os codecs de origem são admitidos no formato de saída, ou recodificando-as para os codecs da matriz caso contrário; emite progresso percentual (0–100%) via WebSocket. |
-| 6 | — | O sistema armazena o novo vídeo, preservando a duração, a resolução e a taxa de fotogramas; se o formato de saída for MOV ou AVI, gera a cópia de pré-visualização MP4; associa o resultado ao projeto como novo recurso (referenciando o vídeo de origem), transita a tarefa para `completed`, confirma o consumo da quota e notifica o utilizador. |
+| 5 | — | O worker inicia o processamento (estado `processing`) e gera o novo contentor, copiando as streams sem recodificação quando os codecs de origem são iguais aos codecs de saída da matriz (ADD v1.1, Q-ADD-21), ou recodificando-as para os codecs da matriz caso contrário; emite progresso percentual (0–100%) via WebSocket. |
+| 6 | — | O sistema armazena o novo vídeo, preservando a duração, a resolução e a taxa de fotogramas; se o formato de saída for MOV ou AVI, gera a cópia de pré-visualização MP4; associa o resultado ao projeto como novo recurso (referenciando o vídeo de origem), transita a tarefa para `completed` (a reserva da quota torna-se definitiva, ADD v1.1, Q-ADD-03) e notifica o utilizador. |
 | 7 | O utilizador consulta o projeto. | O sistema apresenta o novo vídeo convertido na lista de recursos, disponível para reprodução e descarregamento (UC-VID-006); o vídeo original permanece inalterado. |
 
 ---
@@ -39,8 +39,8 @@
 
 | **Fluxo** | **Descrição** |
 |-----------|---------------|
-| **FA1 – Conversão por cópia direta de streams** | No passo 5, se os codecs de origem forem admitidos no formato de saída (e.g. MP4 H.264/AAC → MOV) → O worker reacondiciona as streams no novo contentor sem recodificação, sem perda de qualidade. |
-| **FA2 – Cancelamento antes do início do processamento** | No passo 4, com a tarefa no estado `queued`, o utilizador solicita o cancelamento → O sistema remove a tarefa da fila, devolve a quota reservada (se Registado), transita a tarefa para `cancelled` e notifica o utilizador. |
+| **FA1 – Conversão por cópia direta de streams** | No passo 5, se os codecs de origem forem iguais aos codecs de saída da matriz (e.g. MP4 H.264/AAC → MOV; um MP4 H.264/AAC → AVI é recodificado para MPEG-4 Part 2/MP3) → O worker reacondiciona as streams no novo contentor sem recodificação, sem perda de qualidade. |
+| **FA2 – Cancelamento antes do início do processamento** | No passo 4, com a tarefa no estado `queued`, o utilizador solicita o cancelamento → O sistema marca a tarefa como `cancelled` (o worker descarta-a quando a consome, ADD v1.1, T-03), devolve a quota reservada (se Registado) e notifica o utilizador. |
 | **FA3 – Cancelamento durante o processamento** | No passo 5, com a tarefa no estado `processing`, o utilizador solicita o cancelamento → O sistema interrompe o worker, elimina os ficheiros temporários, devolve a quota reservada (se Registado), transita a tarefa para `cancelled` e notifica o utilizador. |
 | **FA4 – Utilizador com perfil Premium** | No passo 3, o utilizador tem perfil Premium → O sistema não verifica nem debita quota diária e aplica os limites alargados. |
 | **FA5 – Utilização como passo de cadeia ou lote** | A conversão é configurada como último passo de uma cadeia (UC-VID-014) ou aplicada em lote (UC-VID-015) → As mesmas regras de validação aplicam-se e a execução segue o caso de uso respetivo. |
@@ -77,9 +77,9 @@
 | **RN2** | Os formatos de origem e de saída admitidos são MP4, MOV e AVI (DQ-002). |
 | **RN3** | Codecs de saída por formato: MP4 e MOV — H.264 (vídeo) e AAC (áudio); AVI — MPEG-4 Part 2 (vídeo) e MP3 (áudio). |
 | **RN4** | O formato de saída tem de ser diferente do formato de origem. |
-| **RN5** | Quando os codecs de origem são admitidos no formato de saída, as streams são copiadas sem recodificação; caso contrário, são recodificadas para os codecs da RN3. |
-| **RN6** | A conversão preserva a duração, a resolução e a taxa de fotogramas do original. |
-| **RN7** | Os resultados em MOV ou AVI recebem uma cópia de pré-visualização MP4 para reprodução no leitor integrado (DQ-012). |
+| **RN5** | Quando os codecs de origem são iguais aos codecs de saída da matriz para o formato de saída (ADD v1.1, Q-ADD-21), as streams são copiadas sem recodificação; caso contrário, são recodificadas para os codecs da RN3. |
+| **RN6** | A conversão preserva a duração, a resolução e a taxa de fotogramas do original. Exceção: quando um vídeo com uma dimensão ímpar é recodificado, corta-se 1 px para o par abaixo (ADD v1.1, Q-ADD-25). |
+| **RN7** | Os resultados em MOV ou AVI, e os resultados MP4 com perfis H.264 que os navegadores não reproduzem (10 bits, 4:2:2, 4:4:4), recebem uma cópia de pré-visualização MP4 para reprodução no leitor integrado (DQ-012; ADD v1.1, Q-ADD-20). |
 | **RN8** | Cada operação concluída consome exatamente 1 crédito da quota diária do utilizador Registado (limite de 5 operações/dia). Utilizadores Premium têm quota ilimitada. |
 | **RN9** | Em caso de cancelamento ou falha técnica, o crédito reservado é integralmente devolvido ao utilizador Registado. |
 | **RN10** | A operação é assíncrona; o progresso numérico (0–100%) é emitido via WebSocket. |
@@ -102,5 +102,5 @@
 
 | **ID** | **Questão** | **Resolução / Decisão** |
 |--------|-------------|-------------------------|
-| **Q1** | Deve o utilizador poder escolher o codec ou a qualidade (bitrate) de saída? | Não no MVP. Os codecs são fixos por formato (RN3) e a qualidade usa os valores por omissão da equipa. |
+| **Q1** | Deve o utilizador poder escolher o codec ou a qualidade (bitrate) de saída? | Não no MVP. Os codecs são fixos por formato (RN3) e a qualidade usa os valores por omissão da equipa, que ficam por definir (CRF e *preset* do `libx264`, `-q:v` do `mpeg4`, bitrate do áudio; ADD v1.1, Q-ADD-11). |
 | **Q2** | Devem ser suportados outros formatos de saída (WebM, MKV, GIF)? | Não no MVP; ficam para o Alvo de Produção da REQ-VID-NFR-003. |

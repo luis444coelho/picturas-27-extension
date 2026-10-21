@@ -9,9 +9,9 @@
 |------------|--------------|
 | **ID do Caso de Uso** | UC-VID-001 |
 | **Nome** | Recortar temporalmente um vídeo |
-| **Versão** | v1.3 |
+| **Versão** | v1.4 (Alinhamento com o ADD v1.1) |
 | **Autor** | Equipa PictuRAS-27 |
-| **Data** | 2026-10-18 |
+| **Data** | 2026-10-21 |
 | **Objetivo** | Permitir ao utilizador selecionar um intervalo temporal válido de um vídeo do seu projeto e obter um novo vídeo que preserve apenas esse intervalo, sem alterar o original. |
 | **Âmbito** | Módulo de processamento de vídeo e gestão de recursos do PictuRAS |
 | **Ator Principal** | Utilizador **Registado** ou **Premium** com sessão iniciada e acesso ao projeto |
@@ -29,8 +29,8 @@
 | 2 | O utilizador define o instante inicial e o instante final do intervalo a conservar. | O sistema valida preliminarmente os valores na interface e apresenta a duração estimada do segmento resultante. |
 | 3 | O utilizador confirma a operação de recorte. | O sistema valida os limites temporais em relação à duração do vídeo, verifica que o instante inicial é estritamente menor que o final, verifica a quota disponível do utilizador (se Registado) e cria a tarefa de processamento assíncrono. |
 | 4 | — | O sistema reserva 1 operação da quota diária do utilizador (se Registado), coloca a tarefa na fila com estado `queued` e notifica o utilizador de que a operação foi aceite. |
-| 5 | — | O worker inicia o processamento (estado `processing`), extrai o segmento especificado e gera um novo ficheiro MP4 (H.264/AAC) com a mesma resolução e taxa de fotogramas do original, copiando as streams sem recodificação quando a origem já é H.264/AAC e recodificando-as caso contrário (DQ-013). |
-| 6 | — | O sistema armazena o novo vídeo, associa-o ao projeto como novo recurso (referenciando o vídeo de origem), transita a tarefa para `completed`, confirma o consumo da quota e notifica o utilizador através de WebSocket. |
+| 5 | — | O worker inicia o processamento (estado `processing`), extrai o segmento especificado e gera um novo ficheiro MP4 (H.264/AAC) com a mesma resolução e taxa de fotogramas do original, recodificando a stream de vídeo para garantir a precisão ao milissegundo; a stream de vídeo só é copiada quando o instante inicial coincide com um *keyframe*, e a de áudio pode ser copiada (DQ-013; ADD v1.1, T-02). |
+| 6 | — | O sistema armazena o novo vídeo, associa-o ao projeto como novo recurso (referenciando o vídeo de origem), transita a tarefa para `completed` (a reserva da quota torna-se definitiva, ADD v1.1, Q-ADD-03) e notifica o utilizador através de WebSocket. |
 | 7 | O utilizador consulta o projeto. | O sistema apresenta o novo vídeo recortado na lista de recursos do projeto; o vídeo original permanece inalterado. |
 
 ---
@@ -40,7 +40,7 @@
 | **Fluxo** | **Descrição** |
 |-----------|---------------|
 | **FA1 – Alteração do intervalo antes de confirmar** | No passo 2, o utilizador ajusta repetidamente os instantes inicial e final (inclusive com recurso a pré-visualização em repetição / *loop preview*) → O sistema atualiza dinamicamente a duração prevista a cada alteração. O fluxo continua no passo 3. |
-| **FA2 – Cancelamento antes do início do processamento** | No passo 4, enquanto a tarefa está no estado `queued`, o utilizador solicita o cancelamento → O sistema remove a tarefa da fila, devolve a operação reservada à quota do utilizador (se Registado), transita a tarefa para `cancelled` e notifica o utilizador. Nenhum novo vídeo é gerado. |
+| **FA2 – Cancelamento antes do início do processamento** | No passo 4, enquanto a tarefa está no estado `queued`, o utilizador solicita o cancelamento → O sistema marca a tarefa como `cancelled` (o worker descarta-a quando a consome, ADD v1.1, T-03), devolve a operação reservada à quota do utilizador (se Registado) e notifica o utilizador. Nenhum novo vídeo é gerado. |
 | **FA3 – Cancelamento durante o processamento** | No passo 5, com a tarefa no estado `processing`, o utilizador solicita o cancelamento → O sistema envia sinal de cancelamento ao worker, elimina ficheiros temporários gerados, devolve a quota reservada (se Registado), transita a tarefa para `cancelled` e notifica o utilizador. Nenhum novo recurso é criado no projeto. |
 | **FA4 – Utilizador com perfil Premium** | No passo 3, o utilizador tem perfil Premium → O sistema não verifica nem debita quota diária de operações (quota ilimitada) e aplica os limites de duração alargados (até 60 min). |
 
@@ -89,7 +89,7 @@
 | **ID** | **Assunção** |
 |--------|--------------|
 | **A1** | O utilizador tem acesso prévio a um projeto existente que já contém pelo menos um vídeo elegível carregado. |
-| **A2** | O worker dispõe de FFmpeg com capacidade de corte preciso (*frame-accurate*) com recodificação mínima apenas nos limites de GOP (*Group of Pictures*), caso necessário. |
+| **A2** | O worker dispõe de FFmpeg com capacidade de corte preciso (*frame-accurate*), recodificando a stream de vídeo para garantir a precisão ao milissegundo e copiando-a apenas quando o instante inicial coincide com um *keyframe* (ADD v1.1, T-02). |
 | **A3** | A quota diária é redefinida automaticamente às 00:00 UTC para todos os utilizadores Registados. |
 
 ---
@@ -98,6 +98,6 @@
 
 | **ID** | **Questão** | **Resolução / Decisão** |
 |--------|-------------|-------------------------|
-| **Q1** | Como é medido o progresso durante o recorte de vídeo? | No MVP, o progresso do recorte não emite percentagem intermédia: reporta os estados `queued`, `processing` e `completed`. O cancelamento é suportado em `queued` e `processing`. |
+| **Q1** | Como é medido o progresso durante o recorte de vídeo? | No MVP, o recorte reporta os estados `queued`, `processing` e `completed` e, durante o processamento, o progresso percentual (0–100%) pelo menos uma vez por segundo (REQ-VID-NFR-009; ADD v1.1, T-02). O cancelamento é suportado em `queued` e `processing`. |
 | **Q2** | O recorte deve ser exacto ao fotograma (*frame-accurate*) ou ao fotograma-chave (*keyframe/I-frame*)? | No MVP, deve priorizar precisão ao fotograma (*frame-accurate*), preservando a coerência visual entre os pontos selecionados na interface e o ficheiro resultante. |
 

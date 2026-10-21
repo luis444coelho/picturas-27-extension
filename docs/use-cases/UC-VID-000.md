@@ -9,9 +9,9 @@
 |------------|--------------|
 | **ID do Caso de Uso** | UC-VID-000 |
 | **Nome** | Carregar e visualizar um vídeo no projeto |
-| **Versão** | v1.3 |
+| **Versão** | v1.4 (Alinhamento com o ADD v1.1) |
 | **Autor** | Equipa PictuRAS-27 |
-| **Data** | 2026-10-18 |
+| **Data** | 2026-10-21 |
 | **Objetivo** | Permitir ao utilizador autenticado carregar um ficheiro de vídeo digital para o seu projeto, validando o contentor, codecs e limites do perfil, persistindo os respetivos metadados técnicos e disponibilizando-o na galeria e no reprodutor integrado para visualização e posterior manipulação. |
 | **Âmbito** | Módulo de gestão de projetos, armazenamento multimédia e visualização do PictuRAS |
 | **Ator Principal** | Utilizador **Registado** ou **Premium** com sessão iniciada e permissão de edição no projeto |
@@ -29,8 +29,8 @@
 | 2 | O utilizador seleciona o ficheiro de vídeo do sistema de ficheiros local (ou arrasta-o para a zona de largada). | O sistema valida no cliente a extensão (.mp4, .mov ou .avi) e o tipo MIME (video/mp4, video/quicktime ou video/x-msvideo) e apresenta o nome e tamanho do ficheiro selecionado. |
 | 3 | O utilizador confirma o carregamento do ficheiro. | O sistema inicia a transferência do ficheiro em streaming para o servidor, apresentando uma barra de progresso percentual (0% a 100%). |
 | 4 | — | O sistema recebe o ficheiro, valida que o tamanho não excede o teto do perfil (≤ 200 MB Registado, ≤ 2 GB Premium) e armazena o objeto no SeaweedFS/S3 com identificador UUID único. |
-| 5 | — | O sistema inspeciona os fluxos do contentor, valida que os codecs são admitidos para o contentor (H.264/AAC em MP4 e MOV; H.264 ou MPEG-4 Part 2 / AAC ou MP3 em AVI), verifica que a duração respeita o perfil (≤ 5 min Registado, ≤ 60 min Premium) e extrai metadados técnicos (duração, resolução espacial, taxa de fotogramas, bitrate e streams). |
-| 6 | — | O sistema gera automaticamente uma miniatura (thumbnail) do instante 00:00:01 do vídeo em formato JPEG e regista o novo recurso de vídeo na base de dados (MongoDB) associado ao projeto, sem debitar quota diária. |
+| 5 | — | O sistema inspeciona os fluxos do contentor, valida que os codecs são admitidos para o contentor (H.264/AAC em MP4 e MOV; H.264 ou MPEG-4 Part 2 / AAC ou MP3 em AVI), verifica que a duração respeita o perfil (≤ 5 min Registado, ≤ 60 min Premium) e extrai metadados técnicos (duração, resolução espacial, etiqueta de rotação, dimensões de apresentação, taxa de fotogramas, bitrate e streams) (ADD v1.1, Q-ADD-13). |
+| 6 | — | O sistema gera automaticamente uma miniatura (thumbnail) do instante 00:00:01 do vídeo (ou do fotograma 0, se o vídeo tiver menos de 1 s) em formato JPEG, guarda o fotograma 0, rodado e reduzido a no máximo 1280 px de largura, para as pré-visualizações (ADD v1.1, Q-ADD-06, Q-ADD-22) e regista o novo recurso de vídeo na base de dados (MongoDB) associado ao projeto, sem debitar quota diária. |
 | 7 | — | O sistema conclui o carregamento e apresenta o novo vídeo na galeria de recursos do projeto com a miniatura gerada, nome do ficheiro e duração formatada. |
 | 8 | O utilizador seleciona o vídeo na galeria do projeto. | O sistema abre o reprodutor multimédia integrado (*player*), permitindo a reprodução com controlos (play, pausa, seek, volume, ecrã inteiro) e disponibiliza as operações de manipulação aplicáveis (recortar, remover áudio, alterar velocidade, marca de água, extrair fotogramas, ajustar propriedades visuais, aplicar filtro, redimensionar, rodar/espelhar, converter formato, juntar vídeos, encadear operações e processar em lote), bem como descarregar o vídeo e consultar as suas informações. |
 
@@ -44,7 +44,7 @@
 | **FA2 – Cancelamento antes da conclusão da transferência** | Durante o passo 3, o utilizador clica em "Cancelar Upload" → O sistema interrompe a transferência HTTP, purga os dados parciais temporários e mantém o projeto inalterado. |
 | **FA3 – Utilizador com perfil Premium** | Nos passos 4 e 5, o sistema aplica os limites alargados de subscrição Premium: ficheiros até 2 GB e duração até 60 minutos. |
 | **FA4 – Carregar vídeo sem stream de áudio** | No passo 5, o sistema deteta que o MP4 contém apenas stream H.264 (vídeo silencioso de origem) → O sistema aceita o ficheiro, regista a ausência de áudio nos metadados e conclui o upload normalmente. |
-| **FA5 – Carregar vídeo em MOV ou AVI** | No passo 5, o sistema deteta um contentor MOV ou AVI com codecs admitidos → O sistema aceita o ficheiro, preserva-o no formato original e, no passo 6, gera adicionalmente uma cópia de pré-visualização em MP4 (H.264/AAC), usada exclusivamente pelo reprodutor integrado. |
+| **FA5 – Carregar vídeo em MOV ou AVI** | No passo 5, o sistema deteta um contentor MOV ou AVI com codecs admitidos → O sistema aceita o ficheiro, preserva-o no formato original e, no passo 6, gera adicionalmente uma cópia de pré-visualização em MP4 (H.264/AAC), usada exclusivamente pelo reprodutor integrado. O mesmo acontece com um MP4 cujo perfil H.264 os navegadores não reproduzem (10 bits, 4:2:2, 4:4:4): a cópia é recodificada para H.264 `yuv420p` (ADD v1.1, Q-ADD-20). |
 
 ---
 
@@ -78,10 +78,10 @@
 | **RN2** | O carregamento de vídeo não consome créditos da quota diária de operações (a quota de 5 ops/dia para Registado aplica-se exclusivamente a tarefas de manipulação/processamento). |
 | **RN3** | O ficheiro de entrada deve estar num dos contentores MP4, MOV ou AVI, com os codecs admitidos para o contentor: H.264 (vídeo) e AAC (áudio) em MP4 e MOV; H.264 ou MPEG-4 Part 2 (vídeo) e AAC ou MP3 (áudio) em AVI; o áudio é opcional. Outros contentores e codecs são rejeitados (DQ-002). |
 | **RN4** | Limites de upload por perfil: Registado — tamanho ≤ 200 MB e duração ≤ 5 minutos; Premium — tamanho ≤ 2 GB e duração ≤ 60 minutos. |
-| **RN5** | O sistema gera automaticamente uma imagem de miniatura em JPEG a partir do instante 00:00:01 do vídeo para representação no projeto. |
+| **RN5** | O sistema gera automaticamente uma imagem de miniatura em JPEG a partir do instante 00:00:01 do vídeo (ou do fotograma 0, se o vídeo tiver menos de 1 s) para representação no projeto, e guarda o fotograma 0, rodado e reduzido a no máximo 1280 px de largura, para as pré-visualizações estáticas (ADD v1.1, Q-ADD-06, Q-ADD-22). |
 | **RN6** | O reprodutor de vídeo integrado deve fornecer controlos de reprodução, pausa, navegação temporal (*seek*), ajuste de volume e modo de ecrã inteiro. |
 | **RN7** | O ficheiro original carregado é estritamente imutável: as operações subsequentes de transformação geram sempre novos recursos sem alterar o original. |
-| **RN8** | Os vídeos originais em MOV ou AVI recebem uma cópia de pré-visualização em MP4 (H.264/AAC), usada exclusivamente pelo reprodutor integrado; as operações e o descarregamento usam sempre o ficheiro original (DQ-012). |
+| **RN8** | Os vídeos originais em MOV ou AVI, e os MP4 com perfis H.264 que os navegadores não reproduzem (10 bits, 4:2:2, 4:4:4), recebem uma cópia de pré-visualização em MP4 (H.264 `yuv420p`/AAC), usada exclusivamente pelo reprodutor integrado; as operações e o descarregamento usam sempre o ficheiro original (DQ-012; ADD v1.1, Q-ADD-20). |
 
 ---
 
@@ -90,7 +90,7 @@
 | **ID** | **Assunção** |
 |--------|--------------|
 | **A1** | O serviço de armazenamento de objetos (SeaweedFS/S3) dispõe de capacidade suficiente para alojar ficheiros de vídeo de até 2 GB. |
-| **A2** | A extração de metadados e a geração da miniatura são realizadas através de ferramentas especializadas (FFprobe/FFmpeg) no backend Node.js / Python de forma rápida durante a ingestão. |
+| **A2** | A extração de metadados e a geração da miniatura são realizadas através de ferramentas especializadas (FFprobe/FFmpeg) no worker de vídeo Python (`Tools/video/`) de forma rápida durante a ingestão (ADD v1.1, T-00, T-02). |
 | **A3** | O navegador do utilizador possui capacidade nativa de descodificação e reprodução de vídeo MP4 (H.264/AAC) através da tag HTML5 `<video>`. |
 
 ---

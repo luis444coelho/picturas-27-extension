@@ -9,9 +9,9 @@
 |------------|--------------|
 | **ID do Caso de Uso** | UC-VID-014 |
 | **Nome** | Encadear operações de edição num vídeo |
-| **Versão** | v1.0 |
+| **Versão** | v1.1 (Alinhamento com o ADD v1.1) |
 | **Autor** | Equipa PictuRAS-27 |
-| **Data** | 2026-10-18 |
+| **Data** | 2026-10-21 |
 | **Objetivo** | Permitir ao utilizador aplicar várias operações sequenciais a um vídeo — ou, com um passo de junção, a vários clips com operações próprias seguidas de operações sobre o resultado da junção — produzindo um único vídeo final numa única tarefa, sem alterar os originais. |
 | **Âmbito** | Módulo de processamento de vídeo e gestão de recursos do PictuRAS |
 | **Ator Principal** | Utilizador **Registado** ou **Premium** com sessão iniciada e acesso ao projeto |
@@ -30,8 +30,8 @@
 | 3 | O utilizador repete o passo 2 até concluir a sequência. | O sistema apresenta a cadeia completa, o número total de passos (máx. 10), o custo total em créditos e a duração estimada do resultado. |
 | 4 | O utilizador confirma a cadeia. | O sistema revalida todos os passos e a estrutura da cadeia (conversão apenas no último passo, no máximo uma junção, sem extração de fotogramas), verifica os limites do perfil e que a quota disponível cobre o custo total (se Registado) e cria uma única tarefa assíncrona. |
 | 5 | — | O sistema reserva a totalidade dos créditos da cadeia (se Registado), coloca a tarefa na fila com estado `queued` e notifica o utilizador da aceitação. |
-| 6 | — | O worker inicia o processamento (estado `processing`) e executa os passos pela ordem definida, com no máximo uma recodificação de vídeo, emitindo via WebSocket o passo corrente (k de N) e o progresso percentual global (0–100%). |
-| 7 | — | O sistema armazena apenas o vídeo final (sem guardar resultados intermédios no projeto), associa-o ao projeto como novo recurso com os vídeos de origem e a descrição ordenada dos passos aplicados, transita a tarefa para `completed`, confirma o consumo dos créditos e notifica o utilizador. |
+| 6 | — | O worker inicia o processamento (estado `processing`) e executa os passos pela ordem definida, com no máximo uma recodificação de vídeo, emitindo via WebSocket o passo corrente (k de N), aproximado porque os passos correm num único grafo sem fronteiras observáveis entre eles, e o progresso percentual global (0–100%) (ADD v1.1, 4.9, Q-ADD-16). |
+| 7 | — | O sistema armazena apenas o vídeo final (sem guardar resultados intermédios no projeto), associa-o ao projeto como novo recurso com os vídeos de origem e a descrição ordenada dos passos aplicados, transita a tarefa para `completed` (a reserva dos créditos torna-se definitiva, ADD v1.1, Q-ADD-03) e notifica o utilizador. |
 | 8 | O utilizador consulta o projeto. | O sistema apresenta o vídeo final na lista de recursos; os vídeos de origem permanecem inalterados. |
 
 ---
@@ -42,8 +42,8 @@
 |-----------|---------------|
 | **FA1 – Cadeia com junção de vários clips (composição)** | No passo 2, o utilizador adiciona um passo de junção → O sistema permite acrescentar outros vídeos do projeto como clips e definir, para cada clip, uma sub-cadeia própria (possivelmente vazia); os passos adicionados depois da junção aplicam-se ao resultado da junção. Exemplo: (V1 + filtro de cor) + (V2 + remover áudio) + (V3 + acelerar) → juntar → + marca de água = 1 vídeo final. Toda a composição é executada numa única tarefa. |
 | **FA2 – Reordenar ou remover passos** | No passo 3, o utilizador reordena ou remove um passo → O sistema revalida os passos seguintes face às novas propriedades estimadas e atualiza o custo total. |
-| **FA3 – Guardar e reutilizar a cadeia como predefinição** | No passo 3, o utilizador guarda a cadeia (sem a junção) com um nome → O sistema regista a predefinição na conta do utilizador, podendo ser carregada numa nova cadeia ou num lote (UC-VID-015). |
-| **FA4 – Cancelamento antes do início do processamento** | No passo 5, com a tarefa no estado `queued`, o utilizador solicita o cancelamento → O sistema remove a tarefa da fila, devolve todos os créditos reservados (se Registado), transita a tarefa para `cancelled` e notifica o utilizador. |
+| **FA3 – Guardar e reutilizar a cadeia como predefinição** | No passo 3, se a cadeia não tiver junção, o utilizador guarda-a com um nome → O sistema regista a predefinição na conta do utilizador, podendo ser carregada numa nova cadeia ou num lote (UC-VID-015). Cadeias com junção não podem ser guardadas; as predefinições pertencem ao utilizador e não são partilhadas (ADD v1.1, 4.9). |
+| **FA4 – Cancelamento antes do início do processamento** | No passo 5, com a tarefa no estado `queued`, o utilizador solicita o cancelamento → O sistema marca a tarefa como `cancelled` (o worker descarta-a quando a consome, ADD v1.1, T-03), devolve todos os créditos reservados (se Registado) e notifica o utilizador. |
 | **FA5 – Cancelamento durante o processamento** | No passo 6, com a tarefa no estado `processing`, o utilizador solicita o cancelamento → O sistema interrompe o worker, elimina todos os ficheiros temporários, devolve todos os créditos reservados (se Registado), transita a tarefa para `cancelled` e notifica o utilizador. |
 | **FA6 – Utilizador com perfil Premium** | No passo 4, o utilizador tem perfil Premium → O sistema não verifica nem debita quota diária; o limite de 10 passos mantém-se. |
 | **FA7 – Utilizador abandona a sessão durante o processamento** | No passo 6, o utilizador fecha o browser → O worker continua o processamento em background e o resultado fica disponível na próxima sessão. |
@@ -60,7 +60,7 @@
 | **Quota disponível inferior ao custo total da cadeia (utilizador Registado).** | No passo 4, o sistema informa o custo total e o saldo disponível (`QUOTA_EXCEEDED`). A tarefa não é criada e nenhum crédito é reservado. |
 | **Duração ou tamanho de algum clip, ou duração estimada do resultado, acima do limite do perfil.** | No passo 4, o sistema rejeita a cadeia (`LIMIT_EXCEEDED`). A tarefa não é criada. |
 | **Formato ou codec de algum vídeo não suportado.** | No passo 4, o sistema rejeita a cadeia (`UNSUPPORTED_FORMAT`), identificando o vídeo. A tarefa não é criada. |
-| **Falha num qualquer passo durante a execução.** | No passo 6, o sistema interrompe a cadeia, transita a tarefa para `failed`, elimina todos os ficheiros temporários, estorna todos os créditos reservados (se Registado) e notifica o utilizador indicando o passo que falhou. Nenhum resultado (nem intermédio) é gravado no projeto. |
+| **Falha num qualquer passo durante a execução.** | No passo 6, o sistema interrompe a cadeia, transita a tarefa para `failed`, elimina todos os ficheiros temporários, estorna todos os créditos reservados (se Registado) e notifica o utilizador indicando a fase em que a falha ocorreu (descarregamento, codificação ou *upload*), em vez do passo, porque os passos correm num único grafo (ADD v1.1, Q-ADD-16). Nenhum resultado (nem intermédio) é gravado no projeto. |
 
 ---
 
@@ -84,7 +84,7 @@
 | **RN5** | Uma cadeia tem no máximo 10 passos no total, contando os passos das sub-cadeias, a junção e os passos finais (DQ-015). |
 | **RN6** | Cada passo é validado com as mesmas regras da operação isolada, face às propriedades estimadas à saída do passo anterior. |
 | **RN7** | O custo de uma cadeia é de N créditos, sendo N o número total de passos (a junção conta 1) (DQ-014). Para o utilizador Registado, a quota diária de 5 operações limita, na prática, a cadeia a 5 passos por dia (DQ-025). Utilizadores Premium têm quota ilimitada. |
-| **RN8** | A totalidade dos créditos é verificada e reservada antes da aceitação da tarefa, confirmada na conclusão e devolvida integralmente em caso de falha ou cancelamento. |
+| **RN8** | A totalidade dos créditos é verificada e reservada antes da aceitação da tarefa; a reserva torna-se definitiva na conclusão, sem passo de confirmação, e é devolvida integralmente em caso de falha ou cancelamento (ADD v1.1, Q-ADD-03). |
 | **RN9** | A cadeia completa é executada como uma única tarefa assíncrona, que conta como 1 tarefa ativa no projeto (DQ-016). |
 | **RN10** | Apenas o vídeo final é gravado no projeto; os resultados intermédios são temporários e purgados no fim da tarefa. |
 | **RN11** | A execução é atómica: a falha de qualquer passo invalida a cadeia inteira (DQ-018). |
@@ -98,7 +98,7 @@
 
 | **ID** | **Assunção** |
 |--------|--------------|
-| **A1** | As operações de vídeo podem ser compostas num único *filtergraph* FFmpeg (ou numa sequência com intermédios sem perdas), de modo a recodificar o vídeo uma única vez. |
+| **A1** | As operações de vídeo podem ser compostas num único *filtergraph* FFmpeg, de modo a recodificar o vídeo uma única vez. |
 | **A2** | As propriedades estimadas à saída de cada passo (duração, resolução, presença de áudio) são calculáveis sem processar o vídeo. |
 | **A3** | A quota diária é reposta diariamente às 00:00 UTC. |
 

@@ -9,9 +9,9 @@
 |------------|--------------|
 | **ID do Caso de Uso** | UC-VID-006 |
 | **Nome** | Descarregar um vídeo do projeto |
-| **Versão** | v1.0 |
+| **Versão** | v1.1 (Alinhamento com o ADD v1.1) |
 | **Autor** | Equipa PictuRAS-27 |
-| **Data** | 2026-10-18 |
+| **Data** | 2026-10-21 |
 | **Objetivo** | Permitir ao utilizador descarregar para o seu dispositivo um vídeo do projeto — em particular o vídeo resultante de uma operação —, no formato em que se encontra armazenado, sem consumir quota e sem alterar o recurso. |
 | **Âmbito** | Módulo de gestão de projetos e armazenamento multimédia do PictuRAS |
 | **Ator Principal** | Utilizador **Registado** ou **Premium** com sessão iniciada e permissão de leitura (ou superior) no projeto |
@@ -26,7 +26,7 @@
 | **Passo** | **Ação do Ator** | **Resposta do Sistema** |
 |-----------|------------------|-------------------------|
 | 1 | O utilizador seleciona um vídeo na galeria do projeto e escolhe a opção "Descarregar". | O sistema verifica a permissão de leitura do utilizador sobre o projeto e o estado do recurso, e apresenta o nome de ficheiro sugerido, o formato e o tamanho do ficheiro. |
-| 2 | O utilizador confirma o descarregamento. | O sistema gera um URL assinado temporário (válido durante 15 minutos), associado ao utilizador e ao recurso, sem debitar quota. |
+| 2 | O utilizador confirma o descarregamento. | O sistema gera um URL assinado temporário para o recurso (válido durante 15 minutos), sem debitar quota. O URL é portador: o controlo de acesso é a validade de 15 minutos (ADD v1.1, Q-ADD-05). |
 | 3 | — | O navegador inicia a transferência diretamente a partir do armazenamento de objetos (SeaweedFS/S3), com o nome de ficheiro sugerido no formato `<nome-original>_<operação>.<extensão>`. |
 | 4 | O utilizador obtém o ficheiro no seu dispositivo. | O sistema regista o evento de descarregamento nos logs com o `correlationId`; o recurso permanece inalterado no projeto. |
 
@@ -49,7 +49,7 @@
 |--------------|------------------------------|
 | **O recurso ainda não está concluído (`queued` ou `processing`).** | No passo 1, a opção "Descarregar" está desativada e o sistema informa que o recurso ainda não está disponível (`RESOURCE_NOT_READY`). |
 | **O utilizador não tem permissão sobre o projeto.** | No passo 1, o sistema rejeita o pedido com HTTP 403 Forbidden e não gera URL. |
-| **O URL é utilizado por outro utilizador ou após expirar.** | No passo 3, o armazenamento recusa o pedido com HTTP 403 Forbidden. |
+| **O URL é utilizado após expirar.** | No passo 3, o armazenamento recusa o pedido com HTTP 403 Forbidden (ADD v1.1, Q-ADD-05). |
 | **O objeto não existe no armazenamento.** | No passo 2, o sistema informa que o ficheiro não está disponível (`RESOURCE_UNAVAILABLE`) e regista a falha nos logs com o `correlationId`. |
 
 ---
@@ -70,8 +70,8 @@
 | **RN1** | O descarregamento está disponível para utilizadores Registados e Premium com permissão de leitura, edição ou de proprietário no projeto. Utilizadores Anónimos não têm acesso. |
 | **RN2** | O descarregamento não consome créditos da quota diária de operações. |
 | **RN3** | Apenas recursos de vídeo no estado `completed` podem ser descarregados. |
-| **RN4** | O URL de transferência é assinado, associado ao utilizador e ao recurso, e expira ao fim de 15 minutos. |
-| **RN5** | O nome de ficheiro sugerido é composto pelo nome original, um sufixo com a(s) operação(ões) aplicada(s) e a extensão do formato armazenado. |
+| **RN4** | O URL de transferência é assinado para o recurso e expira ao fim de 15 minutos; é um URL portador e o controlo de acesso é a sua validade (ADD v1.1, Q-ADD-05). |
+| **RN5** | O nome de ficheiro sugerido é composto pelo nome original, um sufixo com a(s) operação(ões) aplicada(s) e a extensão do formato armazenado. O sufixo para resultados de cadeias, junções e lotes, e o nome base de uma junção com várias origens, continuam em aberto (ADD v1.1, Q-ADD-08). |
 | **RN6** | O descarregamento não altera, move nem elimina o recurso no projeto. |
 | **RN7** | Qualquer recurso de vídeo do projeto pode ser descarregado (original ou resultante), sempre no formato armazenado e nunca na cópia de pré-visualização. |
 

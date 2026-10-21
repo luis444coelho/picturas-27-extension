@@ -9,9 +9,9 @@
 |------------|--------------|
 | **ID do Caso de Uso** | UC-VID-002 |
 | **Nome** | Remover o áudio de um vídeo |
-| **Versão** | v1.3 |
+| **Versão** | v1.4 (Alinhamento com o ADD v1.1) |
 | **Autor** | Equipa PictuRAS-27 |
-| **Data** | 2026-10-18 |
+| **Data** | 2026-10-21 |
 | **Objetivo** | Permitir ao utilizador remover todas as faixas de áudio de um vídeo do projeto, obtendo um novo vídeo silencioso (*video-only*), preservando o original. |
 | **Âmbito** | Módulo de processamento de vídeo e gestão de recursos do PictuRAS |
 | **Ator Principal** | Utilizador **Registado** ou **Premium** com sessão iniciada e acesso ao projeto |
@@ -29,7 +29,7 @@
 | 2 | O utilizador confirma a operação. | O sistema valida a quota disponível do utilizador (se Registado) e cria a tarefa de processamento assíncrono. |
 | 3 | — | O sistema reserva 1 operação da quota diária do utilizador (se Registado), coloca a tarefa na fila com estado `queued` e notifica o utilizador da aceitação. |
 | 4 | — | O worker inicia o processamento (estado `processing`), remove as streams de áudio, copia a stream de vídeo sem recodificação quando esta é H.264 (*stream copy*), recodificando-a para H.264 apenas quando a origem é MPEG-4 Part 2 (AVI), e produz um novo ficheiro MP4 sem som. |
-| 5 | — | O sistema armazena o novo vídeo, associa-o ao projeto como novo recurso (referenciando o vídeo de origem), transita a tarefa para `completed`, confirma o consumo da quota e notifica o utilizador via WebSocket. |
+| 5 | — | O sistema armazena o novo vídeo, associa-o ao projeto como novo recurso (referenciando o vídeo de origem), transita a tarefa para `completed` (a reserva da quota torna-se definitiva, ADD v1.1, Q-ADD-03) e notifica o utilizador via WebSocket. |
 | 6 | O utilizador consulta o projeto. | O sistema apresenta o novo vídeo silencioso na lista de recursos; o vídeo original com áudio permanece inalterado. |
 
 ---
@@ -38,7 +38,7 @@
 
 | **Fluxo** | **Descrição** |
 |-----------|---------------|
-| **FA1 – Cancelamento antes do início do processamento** | No passo 3, com a tarefa no estado `queued`, o utilizador solicita o cancelamento → O sistema remove a tarefa da fila, devolve a operação reservada à quota (se Registado), transita a tarefa para `cancelled` e notifica o utilizador. Nenhum novo vídeo é gerado. |
+| **FA1 – Cancelamento antes do início do processamento** | No passo 3, com a tarefa no estado `queued`, o utilizador solicita o cancelamento → O sistema marca a tarefa como `cancelled` (o worker descarta-a quando a consome, ADD v1.1, T-03), devolve a operação reservada à quota (se Registado) e notifica o utilizador. Nenhum novo vídeo é gerado. |
 | **FA2 – Cancelamento durante o processamento** | No passo 4, com a tarefa no estado `processing`, o utilizador solicita o cancelamento → O sistema interrompe o worker, elimina os ficheiros temporários, devolve a quota reservada (se Registado), transita a tarefa para `cancelled` e notifica o utilizador. |
 | **FA3 – Utilizador com perfil Premium** | No passo 2, o utilizador tem perfil Premium → O sistema não verifica nem debita quota diária (quota ilimitada) e aplica os limites de duração alargados (até 60 min). |
 
@@ -95,6 +95,6 @@
 
 | **ID** | **Questão** | **Resolução / Decisão** |
 |--------|-------------|-------------------------|
-| **Q1** | Como é medido o progresso durante a remoção de áudio? | No MVP, dada a rapidez da cópia de streams, reportam-se os estados `queued`, `processing` e `completed` sem percentagem intermédia contínua. |
+| **Q1** | Como é medido o progresso durante a remoção de áudio? | No MVP, reportam-se os estados `queued`, `processing` e `completed` e, durante o processamento, o progresso percentual (0–100%) pelo menos uma vez por segundo (REQ-VID-NFR-009; ADD v1.1, T-02). |
 | **Q2** | Em vídeos com múltiplas faixas de áudio, é possível escolher qual remover? | No MVP, a operação remove todas as faixas de áudio globalmente. A seleção granular de faixas fica como melhoria pós-MVP. |
 

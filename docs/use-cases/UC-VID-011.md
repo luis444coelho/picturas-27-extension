@@ -9,9 +9,9 @@
 |------------|--------------|
 | **ID do Caso de Uso** | UC-VID-011 |
 | **Nome** | Rodar e espelhar um vídeo |
-| **Versão** | v1.0 |
+| **Versão** | v1.1 (Alinhamento com o ADD v1.1) |
 | **Autor** | Equipa PictuRAS-27 |
-| **Data** | 2026-10-18 |
+| **Data** | 2026-10-21 |
 | **Objetivo** | Permitir ao utilizador rodar um vídeo do projeto num ângulo de 90°, 180° ou 270° e/ou espelhá-lo na horizontal ou na vertical, de modo a corrigir ou alterar a orientação, obtendo um novo vídeo sem alterar o original. |
 | **Âmbito** | Módulo de processamento de vídeo e gestão de recursos do PictuRAS |
 | **Ator Principal** | Utilizador **Registado** ou **Premium** com sessão iniciada e acesso ao projeto |
@@ -27,10 +27,10 @@
 |-----------|------------------|-------------------------|
 | 1 | O utilizador acede ao projeto, seleciona um vídeo e escolhe a operação "Rodar / Espelhar". | O sistema apresenta o vídeo, os botões de rotação no sentido horário (90°, 180°, 270°) e as opções de espelho horizontal e vertical, todos desativados. |
 | 2 | O utilizador escolhe um ângulo de rotação e/ou uma ou ambas as opções de espelho. | O sistema apresenta, em ≤ 1 s, uma pré-visualização estática do primeiro fotograma com a transformação combinada (rotação aplicada primeiro, espelho depois) e as dimensões resultantes. |
-| 3 | O utilizador confirma a operação. | O sistema valida que o ângulo pertence ao conjunto permitido e que foi definida pelo menos uma transformação, verifica a quota disponível (se Registado) e cria a tarefa assíncrona. |
+| 3 | O utilizador confirma a operação. | O sistema valida que o ângulo pertence ao conjunto permitido e que foi definida pelo menos uma transformação diferente da identidade, verifica a quota disponível (se Registado) e cria a tarefa assíncrona. |
 | 4 | — | O sistema reserva 1 operação da quota diária (se Registado), coloca a tarefa na fila com estado `queued` e notifica o utilizador da aceitação. |
 | 5 | — | O worker inicia o processamento (estado `processing`), aplica a transformação a todos os fotogramas e emite progresso percentual (0–100%) via WebSocket. |
-| 6 | — | O worker gera o novo vídeo em MP4 (H.264/AAC), com largura e altura trocadas nas rotações de 90° e 270°, preservando a duração, a taxa de fotogramas e o áudio; o sistema associa-o ao projeto como novo recurso (referenciando o vídeo de origem), transita a tarefa para `completed`, confirma o consumo da quota e notifica o utilizador. |
+| 6 | — | O worker gera o novo vídeo em MP4 (H.264/AAC), com largura e altura trocadas nas rotações de 90° e 270°, preservando a duração, a taxa de fotogramas e o áudio; o sistema associa-o ao projeto como novo recurso (referenciando o vídeo de origem), transita a tarefa para `completed` (a reserva da quota torna-se definitiva, ADD v1.1, Q-ADD-03) e notifica o utilizador. |
 | 7 | O utilizador consulta o projeto. | O sistema apresenta o novo vídeo transformado na lista de recursos; o vídeo original permanece inalterado. |
 
 ---
@@ -40,7 +40,7 @@
 | **Fluxo** | **Descrição** |
 |-----------|---------------|
 | **FA1 – Alteração da transformação após pré-visualização** | No passo 2, o utilizador altera o ângulo ou as opções de espelho → O sistema atualiza a pré-visualização e as dimensões resultantes. |
-| **FA2 – Cancelamento antes do início do processamento** | No passo 4, com a tarefa no estado `queued`, o utilizador solicita o cancelamento → O sistema remove a tarefa da fila, devolve a quota reservada (se Registado), transita a tarefa para `cancelled` e notifica o utilizador. |
+| **FA2 – Cancelamento antes do início do processamento** | No passo 4, com a tarefa no estado `queued`, o utilizador solicita o cancelamento → O sistema marca a tarefa como `cancelled` (o worker descarta-a quando a consome, ADD v1.1, T-03), devolve a quota reservada (se Registado) e notifica o utilizador. |
 | **FA3 – Cancelamento durante o processamento** | No passo 5, com a tarefa no estado `processing`, o utilizador solicita o cancelamento → O sistema interrompe o worker, elimina os ficheiros temporários, devolve a quota reservada (se Registado), transita a tarefa para `cancelled` e notifica o utilizador. |
 | **FA4 – Utilizador com perfil Premium** | No passo 3, o utilizador tem perfil Premium → O sistema não verifica nem debita quota diária e aplica os limites alargados. |
 | **FA5 – Utilização como passo de cadeia ou lote** | A operação é configurada como passo de uma cadeia (UC-VID-014) ou aplicada em lote (UC-VID-015) → As mesmas regras de validação aplicam-se e a execução segue o caso de uso respetivo. |
@@ -51,8 +51,8 @@
 
 | **Condição** | **Comportamento do Sistema** |
 |--------------|------------------------------|
-| **Ângulo de rotação fora do conjunto {90°, 180°, 270°}.** | No passo 3, o sistema rejeita a operação (`INVALID_ORIENT_PARAMS`). A tarefa não é criada e a quota não é afetada. |
-| **Nenhuma transformação definida (sem rotação e sem espelho).** | No passo 3, o sistema bloqueia a confirmação (`NO_CHANGES`). |
+| **Ângulo de rotação fora do conjunto {0 (sem rotação), 90°, 180°, 270°}.** | No passo 3, o sistema rejeita a operação (`INVALID_ORIENT_PARAMS`). A tarefa não é criada e a quota não é afetada. |
+| **Nenhuma transformação definida (sem rotação e sem espelho), ou transformação combinada igual à identidade (180° com os dois espelhos).** | No passo 3, o sistema bloqueia a confirmação (`NO_CHANGES`) (ADD v1.1, Q-ADD-24). |
 | **Formato ou codec de vídeo não suportado.** | No passo 3, o sistema rejeita a operação (`UNSUPPORTED_FORMAT`). A tarefa não é criada e a quota não é afetada. |
 | **Duração ou tamanho superior ao limite do perfil.** | No passo 3, o sistema rejeita a operação (`LIMIT_EXCEEDED`). A tarefa não é criada e a quota não é afetada. |
 | **Quota diária esgotada (utilizador Registado).** | No passo 3, o sistema informa que o limite diário de 5 operações foi atingido (`QUOTA_EXCEEDED`). A tarefa não é criada. |
@@ -74,10 +74,10 @@
 | **ID** | **Regra** |
 |--------|-----------|
 | **RN1** | Apenas utilizadores Registados e Premium com sessão iniciada e permissão de edição no projeto podem executar a operação. |
-| **RN2** | A rotação é feita no sentido horário e apenas nos ângulos 90°, 180° e 270°. |
+| **RN2** | A rotação é feita no sentido horário e apenas nos ângulos 90°, 180° e 270°; um pedido só com espelho tem rotação 0 (sem rotação) (ADD v1.1, 4.6). |
 | **RN3** | O espelho pode ser horizontal, vertical ou ambos, e pode ser combinado com a rotação numa única operação; a rotação é aplicada antes do espelho. |
-| **RN4** | Pelo menos uma transformação (rotação ou espelho) deve estar definida. |
-| **RN5** | Nas rotações de 90° e 270°, a largura e a altura do vídeo resultante são trocadas, sem recorte nem barras. |
+| **RN4** | Pelo menos uma transformação (rotação ou espelho) deve estar definida, e a transformação combinada não pode ser a identidade (180° com os dois espelhos devolve o vídeo original) (ADD v1.1, Q-ADD-24). |
+| **RN5** | Nas rotações de 90° e 270°, a largura e a altura do vídeo resultante são trocadas, sem recorte nem barras. Exceção: quando um vídeo com uma dimensão ímpar é recodificado, corta-se 1 px para o par abaixo (ADD v1.1, Q-ADD-25). |
 | **RN6** | O resultado é gerado em MP4 (H.264/AAC), preservando a duração, a taxa de fotogramas e o áudio do original (DQ-013). |
 | **RN7** | Cada operação concluída consome exatamente 1 crédito da quota diária do utilizador Registado (limite de 5 operações/dia). Utilizadores Premium têm quota ilimitada. |
 | **RN8** | Em caso de cancelamento ou falha técnica, o crédito reservado é integralmente devolvido ao utilizador Registado. |

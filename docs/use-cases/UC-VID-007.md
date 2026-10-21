@@ -9,9 +9,9 @@
 |------------|--------------|
 | **ID do Caso de Uso** | UC-VID-007 |
 | **Nome** | Consultar as informações de um vídeo |
-| **Versão** | v1.0 |
+| **Versão** | v1.1 (Alinhamento com o ADD v1.1) |
 | **Autor** | Equipa PictuRAS-27 |
-| **Data** | 2026-10-18 |
+| **Data** | 2026-10-21 |
 | **Objetivo** | Permitir ao utilizador consultar as informações técnicas de um vídeo do projeto — duração, resolução, formato, tamanho do ficheiro e taxa de fotogramas — sem criar tarefas de processamento nem consumir quota. |
 | **Âmbito** | Módulo de gestão de projetos e visualização do PictuRAS |
 | **Ator Principal** | Utilizador **Registado** ou **Premium** com sessão iniciada e permissão de leitura (ou superior) no projeto |
@@ -26,7 +26,7 @@
 | **Passo** | **Ação do Ator** | **Resposta do Sistema** |
 |-----------|------------------|-------------------------|
 | 1 | O utilizador seleciona um vídeo na galeria do projeto e escolhe a opção "Informações". | O sistema verifica a permissão de leitura e obtém os metadados técnicos persistidos do recurso, sem criar tarefa e sem debitar quota. |
-| 2 | — | O sistema apresenta um painel com a duração (`hh:mm:ss.mmm`), a resolução (largura × altura em px), o formato (contentor e codecs de vídeo e de áudio), o tamanho do ficheiro (MB ou GB, com 2 casas decimais) e a taxa de fotogramas (fps, com 2 casas decimais). |
+| 2 | — | O sistema apresenta um painel com a duração (`hh:mm:ss.mmm`), a resolução de apresentação, já com a etiqueta de rotação aplicada (largura × altura em px), o formato (contentor e codecs de vídeo e de áudio), o tamanho do ficheiro (MB ou GB, com 2 casas decimais, sendo 1 MB = 1024² bytes e 1 GB = 1024³ bytes) e a taxa de fotogramas (fps, com 2 casas decimais) (ADD v1.1, 4.2, Q-ADD-13). |
 | 3 | O utilizador fecha o painel. | O sistema regressa à vista anterior; o recurso permanece inalterado. |
 
 ---
@@ -35,7 +35,7 @@
 
 | **Fluxo** | **Descrição** |
 |-----------|---------------|
-| **FA1 – Consulta de um vídeo resultante** | No passo 2, se o vídeo resultar de uma operação, cadeia ou junção → O sistema apresenta adicionalmente a proveniência (vídeo(s) de origem) e a descrição da(s) operação(ões) aplicada(s). |
+| **FA1 – Consulta de um vídeo resultante** | No passo 2, se o vídeo resultar de uma operação, cadeia ou junção → O sistema apresenta adicionalmente a proveniência (vídeo(s) de origem) e a descrição da(s) operação(ões) aplicada(s); uma origem que já não exista aparece como "Vídeo removido" (ADD v1.1, 4.2). |
 | **FA2 – Consulta de um original em MOV ou AVI** | No passo 2, o sistema apresenta o formato e os codecs do ficheiro original e não os da cópia de pré-visualização MP4. |
 | **FA3 – Consulta a partir do reprodutor integrado** | No passo 1, o utilizador abre o painel nos controlos do reprodutor → O fluxo continua no passo 2. |
 
@@ -67,7 +67,7 @@
 | **RN1** | A consulta está disponível para utilizadores Registados e Premium com permissão de leitura, edição ou de proprietário no projeto. |
 | **RN2** | A consulta não cria tarefas de processamento e não consome créditos da quota diária. |
 | **RN3** | As informações são obtidas dos metadados persistidos na ingestão (UC-VID-000) ou na criação do recurso resultante, sem nova análise do ficheiro. |
-| **RN4** | Unidades de apresentação: duração em `hh:mm:ss.mmm`; resolução em px; tamanho em MB (< 1 GB) ou GB; taxa de fotogramas em fps com 2 casas decimais. |
+| **RN4** | Unidades de apresentação: duração em `hh:mm:ss.mmm`; resolução de apresentação (com a etiqueta de rotação aplicada) em px; tamanho em MB (< 1 GB) ou GB, sendo 1 MB = 1024² bytes e 1 GB = 1024³ bytes; taxa de fotogramas em fps com 2 casas decimais (ADD v1.1, 4.2, Q-ADD-13). |
 | **RN5** | A consulta é exclusivamente de leitura. |
 
 ---

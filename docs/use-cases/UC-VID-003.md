@@ -9,9 +9,9 @@
 |------------|--------------|
 | **ID do Caso de Uso** | UC-VID-003 |
 | **Nome** | Alterar a velocidade de reprodução de um vídeo |
-| **Versão** | v1.3 |
+| **Versão** | v1.4 (Alinhamento com o ADD v1.1) |
 | **Autor** | Equipa PictuRAS-27 |
-| **Data** | 2026-10-18 |
+| **Data** | 2026-10-21 |
 | **Objetivo** | Permitir ao utilizador acelerar (*speed up*) ou desacelerar (*slow down*) a reprodução de um vídeo do projeto segundo um fator multiplicador definido, produzindo um novo vídeo com duração ajustada e sincronismo preservado, sem alterar o original. |
 | **Âmbito** | Módulo de processamento de vídeo e gestão de recursos do PictuRAS |
 | **Ator Principal** | Utilizador **Registado** ou **Premium** com sessão iniciada e acesso ao projeto |
@@ -30,7 +30,7 @@
 | 3 | O utilizador confirma a alteração da velocidade. | O sistema valida que o fator se encontra no intervalo permitido (0.25× a 4.0×), verifica a quota diária disponível (se Registado) e cria a tarefa assíncrona. |
 | 4 | — | O sistema reserva 1 operação da quota diária (se Registado), coloca a tarefa na fila com estado `queued` e notifica o utilizador da aceitação. |
 | 5 | — | O worker inicia o processamento (estado `processing`), ajusta os fotogramas de vídeo (filtro `setpts`) e, caso exista áudio, aplica o filtro de cadência sonora (`atempo`), gerando um novo MP4 (H.264/AAC) com duração ajustada (DQ-013). |
-| 6 | — | O sistema armazena o novo vídeo, associa-o ao projeto como novo recurso (referenciando o vídeo de origem), transita a tarefa para `completed`, confirma o consumo da quota e notifica o utilizador via WebSocket. |
+| 6 | — | O sistema armazena o novo vídeo, associa-o ao projeto como novo recurso (referenciando o vídeo de origem), transita a tarefa para `completed` (a reserva da quota torna-se definitiva, ADD v1.1, Q-ADD-03) e notifica o utilizador via WebSocket. |
 | 7 | O utilizador consulta o projeto. | O sistema apresenta o novo vídeo com a velocidade alterada na lista de recursos; o vídeo original permanece inalterado. |
 
 ---
@@ -40,7 +40,7 @@
 | **Fluxo** | **Descrição** |
 |-----------|---------------|
 | **FA1 – Alteração do fator antes de confirmar** | No passo 2, o utilizador experimenta diferentes fatores → O sistema atualiza dinamicamente a duração prevista a cada alteração. O fluxo continua no passo 3. |
-| **FA2 – Cancelamento antes do início do processamento** | No passo 4, com a tarefa no estado `queued`, o utilizador solicita o cancelamento → O sistema remove a tarefa da fila, devolve a operação reservada à quota (se Registado), transita a tarefa para `cancelled` e notifica o utilizador. Nenhum novo vídeo é gerado. |
+| **FA2 – Cancelamento antes do início do processamento** | No passo 4, com a tarefa no estado `queued`, o utilizador solicita o cancelamento → O sistema marca a tarefa como `cancelled` (o worker descarta-a quando a consome, ADD v1.1, T-03), devolve a operação reservada à quota (se Registado) e notifica o utilizador. Nenhum novo vídeo é gerado. |
 | **FA3 – Cancelamento durante o processamento** | No passo 5, com a tarefa no estado `processing`, o utilizador solicita o cancelamento → O sistema interrompe o worker, elimina os ficheiros temporários, devolve a quota reservada (se Registado), transita a tarefa para `cancelled` e notifica o utilizador. |
 | **FA4 – Utilizador com perfil Premium** | No passo 3, o utilizador tem perfil Premium → O sistema não debita nem verifica quota diária (quota ilimitada) e aplica os limites de duração alargados (até 60 min). |
 
@@ -91,7 +91,7 @@
 | **ID** | **Assunção** |
 |--------|--------------|
 | **A1** | O utilizador tem acesso a um projeto com pelo menos um vídeo elegível (MP4, MOV ou AVI) carregado. |
-| **A2** | O FFmpeg suporta a alteração de velocidade de vídeo via filtro `setpts` e de áudio via filtro `atempo` (encadeado se $v > 2.0$ ou $v < 0.5$). |
+| **A2** | O FFmpeg suporta a alteração de velocidade de vídeo via filtro `setpts` e de áudio via filtro `atempo`, que aceita fatores de 0.5 a 100 no FFmpeg 5.x e só é encadeado abaixo de 0.5× (e.g. `atempo=0.5,atempo=0.5` para 0.25×) (ADD v1.1, T-02). |
 | **A3** | A quota diária é redefinida diariamente às 00:00 UTC. |
 
 ---
@@ -100,6 +100,6 @@
 
 | **ID** | **Questão** | **Resolução / Decisão** |
 |--------|-------------|-------------------------|
-| **Q1** | Como é medido o progresso durante a alteração de velocidade? | No MVP, dada a simplicidade do pipeline, reportam-se os estados `queued`, `processing` e `completed`. O cancelamento é suportado em `queued` e `processing`. |
+| **Q1** | Como é medido o progresso durante a alteração de velocidade? | No MVP, reportam-se os estados `queued`, `processing` e `completed` e, durante o processamento, o progresso percentual (0–100%) pelo menos uma vez por segundo (REQ-VID-NFR-009; ADD v1.1, T-02). O cancelamento é suportado em `queued` e `processing`. |
 | **Q2** | Deve ser aplicado algoritmo de preservação de timbre no áudio (*pitch correction*)? | No MVP, utiliza-se o filtro padrão `atempo` do FFmpeg que preserva o timbre de forma aceitável no intervalo 0.25× a 4.0×. Ajustes avançados ficam para a Fase 2. |
 

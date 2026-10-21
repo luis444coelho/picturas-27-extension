@@ -9,9 +9,9 @@
 |------------|--------------|
 | **ID do Caso de Uso** | UC-VID-008 |
 | **Nome** | Ajustar as propriedades visuais de um vídeo |
-| **Versão** | v1.0 |
+| **Versão** | v1.1 (Alinhamento com o ADD v1.1) |
 | **Autor** | Equipa PictuRAS-27 |
-| **Data** | 2026-10-18 |
+| **Data** | 2026-10-21 |
 | **Objetivo** | Permitir ao utilizador ajustar o brilho, o contraste e a saturação de um vídeo do projeto, obtendo um novo vídeo com os ajustes aplicados de forma uniforme a todos os fotogramas, sem alterar o original. |
 | **Âmbito** | Módulo de processamento de vídeo e gestão de recursos do PictuRAS |
 | **Ator Principal** | Utilizador **Registado** ou **Premium** com sessão iniciada e acesso ao projeto |
@@ -30,7 +30,7 @@
 | 3 | O utilizador confirma a operação. | O sistema valida que os valores estão no intervalo permitido e que pelo menos um difere do neutro, verifica a quota disponível (se Registado) e cria a tarefa assíncrona. |
 | 4 | — | O sistema reserva 1 operação da quota diária (se Registado), coloca a tarefa na fila com estado `queued` e notifica o utilizador da aceitação. |
 | 5 | — | O worker inicia o processamento (estado `processing`), aplica os ajustes de forma uniforme a todos os fotogramas e emite progresso percentual (0–100%) via WebSocket. |
-| 6 | — | O worker gera o novo vídeo em MP4 (H.264/AAC), preservando a duração, a resolução, a taxa de fotogramas e o áudio; o sistema associa-o ao projeto como novo recurso (referenciando o vídeo de origem), transita a tarefa para `completed`, confirma o consumo da quota e notifica o utilizador. |
+| 6 | — | O worker gera o novo vídeo em MP4 (H.264/AAC), preservando a duração, a resolução, a taxa de fotogramas e o áudio; o sistema associa-o ao projeto como novo recurso (referenciando o vídeo de origem), transita a tarefa para `completed` (a reserva da quota torna-se definitiva, ADD v1.1, Q-ADD-03) e notifica o utilizador. |
 | 7 | O utilizador consulta o projeto. | O sistema apresenta o novo vídeo ajustado na lista de recursos; o vídeo original permanece inalterado. |
 
 ---
@@ -40,7 +40,7 @@
 | **Fluxo** | **Descrição** |
 |-----------|---------------|
 | **FA1 – Repor valores neutros** | No passo 2, o utilizador clica em "Repor" → O sistema repõe os três controlos em 1.0 e atualiza a pré-visualização. |
-| **FA2 – Cancelamento antes do início do processamento** | No passo 4, com a tarefa no estado `queued`, o utilizador solicita o cancelamento → O sistema remove a tarefa da fila, devolve a quota reservada (se Registado), transita a tarefa para `cancelled` e notifica o utilizador. |
+| **FA2 – Cancelamento antes do início do processamento** | No passo 4, com a tarefa no estado `queued`, o utilizador solicita o cancelamento → O sistema marca a tarefa como `cancelled` (o worker descarta-a quando a consome, ADD v1.1, T-03), devolve a quota reservada (se Registado) e notifica o utilizador. |
 | **FA3 – Cancelamento durante o processamento** | No passo 5, com a tarefa no estado `processing`, o utilizador solicita o cancelamento → O sistema interrompe o worker, elimina os ficheiros temporários, devolve a quota reservada (se Registado), transita a tarefa para `cancelled` e notifica o utilizador. |
 | **FA4 – Utilizador com perfil Premium** | No passo 3, o utilizador tem perfil Premium → O sistema não verifica nem debita quota diária e aplica os limites alargados. |
 | **FA5 – Utilização como passo de cadeia ou lote** | A operação é configurada como passo de uma cadeia (UC-VID-014) ou aplicada em lote (UC-VID-015) → As mesmas regras de validação aplicam-se e a execução segue o caso de uso respetivo. |
@@ -74,10 +74,10 @@
 | **ID** | **Regra** |
 |--------|-----------|
 | **RN1** | Apenas utilizadores Registados e Premium com sessão iniciada e permissão de edição no projeto podem executar a operação. |
-| **RN2** | Cada propriedade (brilho, contraste, saturação) é um fator multiplicativo no intervalo [0.0, 2.0], com passo de 0.05 e valor neutro 1.0, à semelhança das ferramentas de imagem existentes (DQ-020). |
+| **RN2** | Cada propriedade (brilho, contraste, saturação) é um fator multiplicativo no intervalo [0.0, 2.0], com passo de 0.05 e valor neutro 1.0, à semelhança das ferramentas de imagem existentes (DQ-020). O contraste usa um pivô fixo (128), ao contrário do `ImageEnhance.Contrast` das imagens, que usa a média da imagem; o resultado pode diferir ligeiramente da ferramenta de imagem (ADD v1.1, Q-ADD-18). |
 | **RN3** | Pelo menos uma propriedade deve ter valor diferente do neutro. |
 | **RN4** | Os ajustes são aplicados de forma uniforme a todos os fotogramas do vídeo. |
-| **RN5** | O resultado é gerado em MP4 (H.264/AAC), preservando a duração, a resolução, a taxa de fotogramas e o áudio do original (DQ-013). |
+| **RN5** | O resultado é gerado em MP4 (H.264/AAC), preservando a duração, a resolução, a taxa de fotogramas e o áudio do original (DQ-013). Exceção: quando um vídeo com uma dimensão ímpar é recodificado, corta-se 1 px para o par abaixo (ADD v1.1, Q-ADD-25). |
 | **RN6** | Cada operação concluída consome exatamente 1 crédito da quota diária do utilizador Registado (limite de 5 operações/dia). Utilizadores Premium têm quota ilimitada. |
 | **RN7** | Em caso de cancelamento ou falha técnica, o crédito reservado é integralmente devolvido ao utilizador Registado. |
 | **RN8** | A operação é assíncrona; o progresso numérico (0–100%) é emitido via WebSocket. |
@@ -91,7 +91,7 @@
 
 | **ID** | **Assunção** |
 |--------|--------------|
-| **A1** | O FFmpeg (filtro `eq`) permite aplicar brilho, contraste e saturação com semântica equivalente à dos fatores da biblioteca de imagem utilizada nas ferramentas existentes. |
+| **A1** | O FFmpeg permite aplicar o brilho com `colorchannelmixer` (fator multiplicativo) e o contraste e a saturação com `eq`, com semântica equivalente à dos fatores da biblioteca de imagem utilizada nas ferramentas existentes; o `eq=brightness` não serve para o brilho, porque é aditivo (ADD v1.1, 4.3, Q-ADD-23). |
 | **A2** | A quota diária é reposta diariamente às 00:00 UTC. |
 
 ---
