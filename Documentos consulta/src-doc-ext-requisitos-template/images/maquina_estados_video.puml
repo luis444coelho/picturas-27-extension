@@ -1,0 +1,59 @@
+@startuml maquina_estados_video
+skinparam monochrome false
+skinparam shadowing false
+skinparam roundcorner 0
+skinparam linetype polyline
+skinparam defaultFontName Arial
+skinparam defaultFontSize 16
+skinparam stateFontSize 17
+skinparam stateBackgroundColor #55C8EC
+skinparam stateBorderColor black
+skinparam stateArrowColor black
+skinparam ArrowColor black
+skinparam ArrowThickness 1.2
+skinparam noteBackgroundColor #F7FCFE
+skinparam noteBorderColor black
+skinparam nodesep 55
+skinparam ranksep 60
+top to bottom direction
+
+title Máquina de Estados — Trabalho de Processamento de Vídeo\nModelo proposto: operação isolada, junção ou cadeia
+
+state "queued" as Queued
+state "processing" as Processing
+state "completed" as Completed
+state "failed" as Failed
+state "cancelled" as Cancelled
+
+Queued : VideoTask persistida
+Queued : Lugar adquirido; reserva se aplicável
+Processing : Passo aproximado e progresso global
+Completed : Novo vídeo publicado com proveniência
+Completed : Reserva definitiva; libertar lugar
+Failed : Devolver reserva e libertar lugar
+Failed : Limpar temporários e objetos parciais
+Cancelled : Devolver reserva e libertar lugar
+Cancelled : Sinalizar worker; limpar saídas tardias
+
+[*] --> Queued : Pedido admitido
+Queued --> Processing : started
+Queued --> Failed : Erro antes de executar\nou na publicação
+Queued --> Cancelled : Cancelamento autorizado
+Processing --> Processing : Queda / reentrega\nRecomeço do zero\nAté duas entregas
+Processing --> Completed : Resultado válido\nRecurso e estado persistidos
+Processing --> Failed : Erro / entregas esgotadas
+Processing --> Cancelled : Cancelamento autorizado
+Completed --> [*]
+Failed --> [*]
+Cancelled --> [*]
+
+note top of Queued
+  Rejeições anteriores à admissão não criam tarefa.
+  Premium não reserva nem debita créditos.
+end note
+note bottom of Cancelled
+  cancelled é uma transição lógica.
+  A limpeza física pode terminar depois.
+  Respostas tardias não reativam a tarefa.
+end note
+@enduml

@@ -1,0 +1,62 @@
+@startuml arquitetura_componentes
+skinparam monochrome false
+skinparam shadowing false
+skinparam roundcorner 0
+skinparam linetype polyline
+skinparam defaultFontName Arial
+skinparam defaultFontSize 16
+skinparam componentFontSize 17
+skinparam componentStyle rectangle
+skinparam componentBackgroundColor #55C8EC
+skinparam componentBorderColor black
+skinparam databaseBackgroundColor #D9D9D9
+skinparam databaseBorderColor black
+skinparam packageBackgroundColor #F7FCFE
+skinparam packageBorderColor black
+skinparam ArrowColor black
+skinparam ArrowThickness 1.2
+skinparam nodesep 40
+skinparam ranksep 55
+top to bottom direction
+
+title Arquitetura de Componentes — PictuRAS (Baseline + Vídeo)\nDesenho proposto para o MVP
+
+component "Frontend\nInterface de vídeo" as UI
+component "Nginx\nHTTPS / proxy" as Nginx #D9D9D9
+component "API Gateway\nRotas de vídeo / videoAuth" as API
+component "Projetos\nOrquestração / validação\nTarefas / recuperação" as Projects
+component "Utilizadores\nQuota existente\nPredefinições de vídeo" as Users
+package "RabbitMQ existente" {
+  component "Filas de vídeo\nPedidos / respostas / progresso\nControlo video_control" as MQ
+}
+component "Novo worker de vídeo\nFFmpeg / FFprobe" as Worker
+component "imageStorageService\nURLs e estágios de vídeo" as Storage
+component "WS Gateway\nMódulo de vídeo" as WS
+database "MongoDB\nBases próprias por serviço" as DB
+component "SeaweedFS / S3\nOriginais e resultados\nPré-visualizações" as S3 #D9D9D9
+
+UI -down-> Nginx : HTTPS / WebSocket
+Nginx -down-> API : HTTP
+Nginx --> WS : WebSocket
+Nginx --> S3 : /s3-video/ / Range
+API -down-> Projects : Identidade / correlationId
+API --> Users : Predefinições
+Projects -right-> Users : Perfil / reserva / devolução
+Projects --> DB : Recursos / tarefas / locks
+Users --> DB : Contas / configurações
+Projects <--> MQ : Pedidos / respostas\nCancelamento / estados
+MQ <--> Worker : Pedido / resposta\nProgresso / cancelamento
+MQ --> WS : Eventos
+Projects --> Storage : Gerir objetos e URLs
+Worker -right-> Storage : URLs internos
+Worker --> S3 : Binários por blocos
+Storage --> S3 : Assinar / gerir objetos
+
+legend bottom
+  |= Cor |= Significado |
+  |<#D9D9D9> Cinzento | Serviço ou infraestrutura da baseline reutilizado |
+  |<#55C8EC> Azul | Módulos de vídeo nos serviços indicados; worker novo |
+  | MongoDB | Agrega as instâncias existentes; cada serviço mantém a sua base |
+  | Transferências | Worker e navegador usam o S3; os binários de saída não atravessam o API Gateway |
+endlegend
+@enduml
