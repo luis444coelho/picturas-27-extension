@@ -2,7 +2,7 @@
 unit: 001-video-lifecycle
 intent: 001-video-processing-support
 created: 2026-10-21T16:12:26Z
-last_updated: 2026-10-21T23:38:33Z
+last_updated: 2026-10-21T23:46:03Z
 ---
 
 # Construction Log: 001-video-lifecycle
@@ -38,6 +38,7 @@ last_updated: 2026-10-21T23:38:33Z
 | 2026-10-21T16:12:26Z | 001-video-lifecycle | started | Stage 1: Domain Model |
 | 2026-10-21T16:19:54Z | 001-video-lifecycle | stage-complete | Domain Model → Technical Design |
 | 2026-10-21T23:38:33Z | 001-video-lifecycle | stage-complete | Technical Design → ADR Analysis |
+| 2026-10-21T23:46:03Z | 001-video-lifecycle | stage-complete | ADR Analysis → Implement (ADR-001, ADR-002) |
 
 ## Execution Summary
 
