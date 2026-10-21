@@ -2,7 +2,7 @@
 
 = Casos de Uso
 
-Este capítulo especifica as funcionalidades de vídeo através dos casos UC-VID-000–015, mantendo uma estrutura uniforme: cabeçalho, fluxo principal com ações do ator e respostas do sistema, fluxos alternativos, exceções, pós-condições de sucesso e mínima, regras locais, assunções e questões em aberto com a respetiva decisão. A especificação parte dos casos detalhados em `docs/use-cases/` e conserva a rastreabilidade para os requisitos funcionais em `docs/requirements/`. As regras locais explicitam a aplicação de políticas comuns em cada cenário; a formulação transversal dessas políticas, nomeadamente autorização, quota e ciclo de vida assíncrono, está consolidada no Capítulo 3.
+Este capítulo especifica as funcionalidades de vídeo através dos casos UC-VID-000 a UC-VID-013, mantendo uma estrutura uniforme: cabeçalho, fluxo principal com ações do ator e respostas do sistema, fluxos alternativos, exceções, pós-condições de sucesso e mínima, regras locais, assunções e questões em aberto com a respetiva decisão. A especificação adapta os documentos de apoio ao âmbito revisto; os identificadores desta versão do relatório são os usados nos Capítulos 3 a 7. As regras locais explicitam a aplicação de políticas comuns em cada cenário; a formulação transversal dessas políticas, nomeadamente autorização, quota e ciclo de vida assíncrono, está consolidada no Capítulo 3.
 
 #include "../casos-uso/UC-VID-000.typ"
 #include "../casos-uso/UC-VID-001.typ"
@@ -18,5 +18,3 @@ Este capítulo especifica as funcionalidades de vídeo através dos casos UC-VID
 #include "../casos-uso/UC-VID-011.typ"
 #include "../casos-uso/UC-VID-012.typ"
 #include "../casos-uso/UC-VID-013.typ"
-#include "../casos-uso/UC-VID-014.typ"
-#include "../casos-uso/UC-VID-015.typ"

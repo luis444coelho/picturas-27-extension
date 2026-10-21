@@ -1,0 +1,76 @@
+@startuml modelo_dominio
+skinparam monochrome false
+skinparam shadowing false
+skinparam roundcorner 0
+skinparam linetype polyline
+skinparam classAttributeIconSize 0
+skinparam defaultFontName Arial
+skinparam defaultFontSize 16
+skinparam classFontSize 17
+skinparam classBackgroundColor #55C8EC
+skinparam classBorderColor black
+skinparam ArrowColor black
+skinparam ArrowThickness 1.2
+skinparam nodesep 70
+skinparam ranksep 70
+hide circle
+left to right direction
+
+title Modelo de Domínio — PictuRAS (Baseline + Vídeo)
+
+' Entidades existentes na baseline
+class "Gratuito" as Gratuito
+class "Premium" as Premium
+class "Anónimo" as Anonimo
+class "Utilizador" as Utilizador
+class "Preset" as Preset
+class "Projeto" as Projeto
+class "Ferramenta" as Ferramenta
+class "Básica" as Basica
+class "Avançada" as Avancada
+class "Sugestão IA" as SugestaoIA
+class "Assistente IA" as AssistenteIA
+
+' Entidades acrescentadas para a fase de vídeo
+class "Trabalho de processamento" as Trabalho
+abstract class "Recurso multimédia" as Recurso
+class "Imagem" as Imagem
+class "Vídeo" as Video
+class "Ferramenta de vídeo" as FerramentaVideo
+class "Predefinição de vídeo" as PredefinicaoVideo
+
+' Perfis, projetos, presets e ferramentas — relações da baseline
+Gratuito -up-|> Utilizador : é
+Premium -up-|> Utilizador : é
+Anonimo -up-|> Utilizador : é
+Utilizador "0..*" --> "0..*" Utilizador : convida
+Utilizador "1" --> "0..*" Preset : cria
+Utilizador "1..*" --> "0..*" Projeto : gere
+Projeto "0..*" --> "0..*" Ferramenta : usa
+Preset "0..*" --> "1..*" Ferramenta : contém
+Basica -up-|> Ferramenta : é
+Avancada -up-|> Ferramenta : é
+AssistenteIA -left-|> Avancada : é
+Projeto "1" --> "0..*" SugestaoIA : recebe
+AssistenteIA "1" --> "0..*" SugestaoIA : produz
+Utilizador "1" --> "0..*" Recurso : upload
+Projeto "1" --> "0..*" Recurso : contém
+Recurso <|-- Imagem
+Recurso <|-- Video
+Ferramenta "0..*" --> "0..*" Imagem : altera
+Utilizador "0..*" --> "0..*" Basica : aplica
+Utilizador "0..*" --> "0..*" Avancada : aplica
+
+' Relações novas da extensão de vídeo
+FerramentaVideo -up-|> Ferramenta : é
+FerramentaVideo "0..*" --> "0..*" Video : aplica
+Video "1..*" --> "0..*" Video : origina resultado
+Projeto "1" --> "0..*" Trabalho : regista
+Utilizador "1" --> "0..*" Trabalho : submete
+Trabalho "0..*" --> "1..*" Video : processa
+Trabalho "0..*" --> "0..*" Video : produz
+Trabalho "0..*" --> "1..*" FerramentaVideo : executa
+Utilizador "1" --> "0..*" PredefinicaoVideo : cria
+PredefinicaoVideo "0..*" --> "1..*" FerramentaVideo : contém
+
+@enduml
