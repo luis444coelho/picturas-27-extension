@@ -4,7 +4,7 @@ intent: 001-video-processing-support
 phase: inception
 status: ready
 created: 2026-10-18T18:00:00Z
-updated: 2026-10-21T11:10:16Z
+updated: 2026-10-21T11:19:15Z
 default_bolt_type: ddd-construction-bolt
 ---
 
@@ -20,7 +20,7 @@ Implementar operações isoladas não destrutivas de vídeo, incluindo a exporta
 
 - **93 FR (propriedade exclusiva):** `REQ-VID-TRIM-*` (10), `AUDIO-*` (6), `SPEED-*` (8), `WATERMARK-*` (11), `FRAMES-*` (13), `ADJUST-*` (10), `FILTER-*` (7), `RESIZE-*` (9), `ORIENT-*` (9), `CONVERT-*` (10).
 - **NFR (6):** `REQ-VID-NFR-004`, `012`, `015`, `019`, `020`, `026`. A NFR-010 e a NFR-018 passaram para a Unit 001 (B001 e B003); a B004 continua a verificá-las nos critérios de aceitação (specsDuvidas D-03).
-- **Fora desta construção (specsDuvidas D-06):** a extração de fotogramas (UC-VID-005, ST-VID-005, B006); os `REQ-VID-FRAMES-*` (13) ficam não cobertos. A situação da NFR-004, 019 e 020 está em specsDuvidas.md, D-07.
+- **Fora desta construção (specsDuvidas D-06):** a extração de fotogramas (UC-VID-005, ST-VID-005, B006); os `REQ-VID-FRAMES-*` (13) ficam não cobertos. A NFR-004, a NFR-019 e a NFR-020, que só servem a extração, também ficam não cobertas (specsDuvidas D-07).
 - Usa sem assumir propriedade dos contratos comuns de autorização, tarefa, quota e storage da Unit 001.
 
 ## Conceitos, interfaces e limites

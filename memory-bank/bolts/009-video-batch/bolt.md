@@ -52,7 +52,7 @@ Implementar o modelo `VideoBatch`, a pré-validação, a orquestração sequenci
 
 REQ-VID-BATCH-001 a 019; REQ-VID-NFR-014.
 
-Os `REQ-VID-BATCH-*` não são cobertos nesta construção (specsDuvidas D-06). A D-06 não diz se a NFR-014, que só os lotes usam, também fica marcada como não coberta (ver specsDuvidas.md, D-07).
+Os `REQ-VID-BATCH-*` não são cobertos nesta construção (specsDuvidas D-06). A NFR-014 fica não coberta só na parte de lotes (UC-VID-015 RN2) e continua coberta na parte da junção e da cadeia (UC-VID-013 RN2-RN3, UC-VID-014 RN5) (specsDuvidas D-07). O bolt que constrói essa parte, já que este está `blocked`, está em dúvida (ver specsDuvidas.md, D-10).
 
 Os critérios de aceitação autoritativos são os dos ficheiros `docs/requirements/REQ-VID-*.md`; a propriedade de cada requisito está em `intents/001-video-processing-support/traceability.md`.
 

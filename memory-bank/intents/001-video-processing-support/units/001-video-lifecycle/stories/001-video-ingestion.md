@@ -29,8 +29,8 @@ implemented: false
 ## Traceability
 
 - **Use case:** UC-VID-000.
-- **Requirements:** `REQ-VID-AUTH-001` a `003` (specsDuvidas D-02); `REQ-VID-UPLOAD-001` a `020`; `REQ-VID-STORAGE-001` a `005`; `REQ-VID-NFR-001`, `003`, `008`, `010` (specsDuvidas D-03), `017`. Consome `REQ-VID-COM-*`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
-- **Decisões do ADD v1.1:** T-00 (coleção `videos`, ingestão, estágios), T-06 e Q-ADD-20 (cópia MP4), T-07 e Q-ADD-06 (fotograma 0), T-08 (estágios de vídeo, `location` de carregamento), Q-ADD-13 (dimensões de apresentação), Q-ADD-22 (miniatura de vídeos curtos), Q-ADD-04 (estratégia de carregamento, pendente no ADD); T-00 e T-02 na parte de que a ingestão precisa: `formats.js`, routers com o `videoAuth`, filas, `wsGateway/video.js`, URLs de escrita e worker com a ingestão (specsDuvidas D-02). Sem `video_zip` nem `batch_id` (specsDuvidas D-06).
+- **Requirements:** `REQ-VID-AUTH-001` a `003` (specsDuvidas D-02); `REQ-VID-UPLOAD-001` a `020`; `REQ-VID-STORAGE-001` a `005`; `REQ-VID-NFR-001`, `003`, `008`, `010` (specsDuvidas D-03), `011` (specsDuvidas D-09), `017`. Consome `REQ-VID-COM-*`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
+- **Decisões do ADD v1.1:** T-00 (coleção `videos`, ingestão, estágios), T-06 e Q-ADD-20 (cópia MP4), T-07 e Q-ADD-06 (fotograma 0), T-08 (estágios de vídeo, `location` de carregamento), Q-ADD-13 (dimensões de apresentação), Q-ADD-22 (miniatura de vídeos curtos), Q-ADD-04 (estratégia de carregamento, pendente no ADD); T-00 e T-02 na parte de que a ingestão precisa: `formats.js`, routers com o `videoAuth`, filas, `wsGateway/video.js`, URLs de escrita e worker com a ingestão (specsDuvidas D-02); `amqp.js`, URLs internos de leitura com o `route/video.js` e o `videoUrls.js`, volume `video_tmp` e declaração completa da `video_operations_queue` (specsDuvidas D-08). Sem `video_zip` nem `batch_id` (specsDuvidas D-06).
 
 ## Dependencies
 

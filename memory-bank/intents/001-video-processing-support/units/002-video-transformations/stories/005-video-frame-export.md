@@ -29,7 +29,7 @@ implemented: false
 ## Traceability
 
 - **Use case:** UC-VID-005.
-- **Requirements:** `REQ-VID-FRAMES-001` a `013`; `REQ-VID-NFR-004`, `019`, `020`. Consome `REQ-VID-COM-*`. Os `REQ-VID-FRAMES-*` não são cobertos nesta construção (specsDuvidas D-06); a NFR-004, 019 e 020 em specsDuvidas.md, D-07. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
+- **Requirements:** `REQ-VID-FRAMES-001` a `013`; `REQ-VID-NFR-004`, `019`, `020`. Consome `REQ-VID-COM-*`. Os `REQ-VID-FRAMES-*` não são cobertos nesta construção (specsDuvidas D-06); a NFR-004, a 019 e a 020, que só servem a extração, também não são cobertas (specsDuvidas D-07). Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
 - **Decisões do ADD v1.1:** o ADD não desenha a extração; se a B006 for retomada, a equipa escreve antes um complemento ao ADD (specsDuvidas D-05); exclusão de cadeias e lotes em 4.9 e 4.10.
 
 ## Dependencies

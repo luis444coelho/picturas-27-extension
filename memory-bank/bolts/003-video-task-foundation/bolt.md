@@ -47,11 +47,11 @@ Construir uma só vez o que todas as operações usam: no ADD, uma operação is
 
 ## Requisitos rastreados
 
-REQ-VID-COM-001 a 006; REQ-VID-ERROR-001 a 003; REQ-VID-QUOTA-001 a 008; REQ-VID-TASK-001 a 006 e 008; REQ-VID-NFR-002, 005 a 007, 009, 011, 013, 018, 021.
+REQ-VID-COM-001 a 006; REQ-VID-ERROR-001 a 003; REQ-VID-QUOTA-001 a 008; REQ-VID-TASK-001 a 006 e 008; REQ-VID-NFR-002, 005 a 007, 009, 013, 018, 021.
 
 Os `REQ-VID-AUTH-*` passaram para a B001, que constrói os routers com o `videoAuth`; este bolt consome-os (specsDuvidas D-02). A NFR-013 (uma recodificação por cadeia) e a NFR-018 (saída MP4 H.264/AAC por omissão) passam para este bolt, que constrói o executor e a codificação por omissão (T-02); a NFR-010 passa para a B001 (specsDuvidas D-03).
 
-Não cobertos nesta construção (specsDuvidas D-06): `REQ-VID-TASK-007` (lotes) e a parte de lotes da `REQ-VID-QUOTA-007`. A propriedade da NFR-011, cujas filas e worker passaram para a B001, está em dúvida (ver specsDuvidas.md, D-09).
+Não cobertos nesta construção (specsDuvidas D-06): `REQ-VID-TASK-007` (lotes) e a parte de lotes da `REQ-VID-QUOTA-007`. A NFR-011 passou para a B001, que cria as filas e o worker; este bolt continua a verificá-la nos critérios de passagem (specsDuvidas D-09).
 
 Os critérios de aceitação autoritativos são os dos ficheiros `docs/requirements/REQ-VID-*.md`; a propriedade de cada requisito está em `intents/001-video-processing-support/traceability.md`.
 
@@ -59,18 +59,18 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 
 - **T-01:** contrato `{operation, version, parameters}` (`version` começa em 1; a junção usa `parameters.clips: [{videoId, steps}]`); registo de operações `projects/video/operations/<op>.js` com `validate`, `estimate`, `cost` e `copyable`; plano de execução calculado no serviço de projetos; endpoint `POST /projects/:user/:project/videos/validate` com *debounce* e `inputProps` lidos de `videos.meta`. **Q-ADD-15 (pendente no ADD):** orçamento de latência da validação.
 - **T-02:** executor de cadeias no worker `Tools/video/` criado pela B001 (specsDuvidas D-02): `ops/` e execução do plano recebido num único `-filter_complex`; progresso de `-progress pipe:1` (`out_time_us`) pelo menos 1×/s; temporários em `/tmp/video/<taskId>/` no volume `video_tmp`; descarregamento e envio por blocos com `Content-Length` no PUT; codificação por omissão `libx264` + `aac`, `yuv420p`, `+faststart`; corte de 1 px nas dimensões ímpares (Q-ADD-25); FFprobe, miniatura e fotograma 0 de cada resultado. **Q-ADD-10 e Q-ADD-11 (pendentes no ADD):** réplicas do worker e parâmetros de qualidade (CRF, *preset*, `-q:v`, bitrate).
-- **T-03:** modelo `projects/models/videoTask.js`; aceitação em 11 passos (`videoAuth`, permissão de edição, recusa do `anonymous`, vídeos `completed`, formato e limites, `validate`, plano, lugar de tarefa ativa, reserva, `VideoTask queued`, 202); coleção `video_project_locks` com índice único em `project_id`; `GET` e `DELETE …/videos/tasks/:taskId` (403 para quem não submeteu, 409 fora de `queued`/`processing`); módulo `projects/video/amqp.js` com confirmação manual (bolt em dúvida, ver specsDuvidas.md, D-08); argumentos da `video_operations_queue` (*quorum*, `x-delivery-limit: 1`, `x-consumer-timeout`, *dead-letter* para `video_project_queue`), fila criada pela B001 (bolt dos argumentos em dúvida, ver specsDuvidas.md, D-08); exchange *fanout* `video_control`; evento `video-task-update` no `wsGateway/video.js` da B001, para a sala do utilizador e `project:<id>`; ciclo de uma só *thread* com `process_data_events`. **Q-ADD-02 (pendente no ADD):** se o processamento de imagens conta como tarefa ativa.
+- **T-03:** modelo `projects/models/videoTask.js`; aceitação em 11 passos (`videoAuth`, permissão de edição, recusa do `anonymous`, vídeos `completed`, formato e limites, `validate`, plano, lugar de tarefa ativa, reserva, `VideoTask queued`, 202); coleção `video_project_locks` com índice único em `project_id`; `GET` e `DELETE …/videos/tasks/:taskId` (403 para quem não submeteu, 409 fora de `queued`/`processing`); extensão por acréscimo do `projects/video/amqp.js` da B001 (publicação das tarefas e dos cancelamentos e tratamento das respostas do worker), sem o alterar; `video_operations_queue` declarada pela B001 já com os argumentos do T-03 (*quorum*, `x-delivery-limit: 1`, `x-consumer-timeout`, *dead-letter* para `video_project_queue`) (specsDuvidas D-08); exchange *fanout* `video_control`; evento `video-task-update` no `wsGateway/video.js` da B001, para a sala do utilizador e `project:<id>`; ciclo de uma só *thread* com `process_data_events`. **Q-ADD-02 (pendente no ADD):** se o processamento de imagens conta como tarefa ativa.
 - **T-03 (sem lotes):** não há itens `kind: "batch_item"` nem `holder_kind: "batch"` (specsDuvidas D-06).
 - **T-04 / Q-ADD-03:** reserva com `GET users:/:user/process/:n` (a reserva é o débito; não há passo de confirmação) e devolução com `POST users:/:user/process/refund/:k`; o Premium não chama a reserva; 701 traduzido em `QUOTA_EXCEEDED` com `{cost, remaining}`; reservas serializadas por `runner_id`; limitações aceites da Q-ADD-03. Sem devolução por item de lote (specsDuvidas D-06).
 - **T-05 / Q-ADD-21:** o executor usa o `projects/video/formats.js` criado pela B001 (specsDuvidas D-02); cópia de uma stream só quando o codec de origem é igual ao de saída e nenhum passo a altera; `-map 0:V:0 -map 0:a:0? -sn -dn` e `+genpts` para AVI copiado.
-- **T-08:** os URLs de escrita (PUT) são da B001 (specsDuvidas D-02); o bolt dos URLs internos de leitura está em dúvida (ver specsDuvidas.md, D-08). O worker pede-os quando são precisos.
+- **T-08:** os URLs internos de leitura e de escrita, o `route/video.js` e o `videoUrls.js` são da B001 (specsDuvidas D-02, D-08); o executor usa-os, sem os alterar. O worker pede-os quando são precisos.
 - **T-10:** *middleware* no router de vídeo do gateway que gera o `X-Correlation-Id`; `correlationId` no corpo das mensagens de vídeo (não nas propriedades AMQP) e nas respostas de erro `{error: {code, message, details}, correlationId}`; logs JSON em `stdout`.
 - **Q-ADD-14:** rotina periódica do serviço de projetos para as tarefas paradas, os lugares de tarefa ativa sem dono e a remoção dos recursos de vídeo de projetos apagados; a parte dos lotes parados e dos ZIP fica fora desta construção (specsDuvidas D-04, D-06). **Q-ADD-17 (pendente no ADD):** pipeline de CI e testes automáticos.
 
 ## Saídas esperadas
 
 - Registo de operações, plano de execução e endpoint de validação (T-01).
-- Executor de um único `-filter_complex` no worker `Tools/video/` da B001, com a codificação por omissão (T-02; specsDuvidas D-02, D-03). O volume `video_tmp` está em dúvida (ver specsDuvidas.md, D-08).
+- Executor de um único `-filter_complex` no worker `Tools/video/` da B001, com a codificação por omissão (T-02; specsDuvidas D-02, D-03). O volume `video_tmp` é da B001 (specsDuvidas D-08).
 - `VideoTask`, `video_project_locks`, endpoints de tarefa, cancelamento e progresso, exchange `video_control` em `rabbitMQ/definitions.json` e evento `video-task-update` (T-03).
 - Integração com a reserva e a devolução de quota existentes (T-04).
 - Rotina periódica da Q-ADD-14 para tarefas paradas, lugares sem dono e recursos de vídeo de projetos apagados (specsDuvidas D-04).
@@ -88,13 +88,14 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 - [ ] Uma operação de um passo percorre `queued → processing → completed | failed | cancelled`, com progresso pelo menos 1×/s e no máximo uma tarefa ativa por projeto.
 - [ ] A reserva debita os créditos na aceitação, a conclusão não faz chamada de confirmação, e falha, cancelamento ou *dead-letter* devolvem os créditos (Premium sem chamadas).
 - [ ] O cancelamento termina o FFmpeg em curso, limpa `/tmp/video/<taskId>/` e apaga um resultado já enviado.
+- [ ] As tarefas de vídeo circulam só pelas filas de vídeo da B001, sem alterar as ferramentas de imagem nem as filas existentes (verificação da NFR-011, specsDuvidas D-09).
 - [ ] A rotina periódica retoma ou fecha as tarefas paradas, liberta os lugares de tarefa ativa sem dono e remove os recursos de vídeo de projetos apagados.
 
 ## Dependências
 
 ### Requer
 
-- **Bolts:** 001-video-lifecycle (coleção `videos`, estágios, URLs de escrita, `formats.js`, routers com o `videoAuth`, filas, `wsGateway/video.js` e worker; specsDuvidas D-02).
+- **Bolts:** 001-video-lifecycle (coleção `videos`, estágios, URLs de leitura e de escrita, `formats.js`, routers com o `videoAuth`, filas, `amqp.js`, `wsGateway/video.js`, worker e `video_tmp`; specsDuvidas D-02, D-08). Este bolt estende estes componentes por acréscimo, sem os alterar.
 - **Units:** Nenhuma além da própria Unit 001.
 
 ### Desbloqueia

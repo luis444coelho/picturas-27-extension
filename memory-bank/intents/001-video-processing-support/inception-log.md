@@ -1,7 +1,7 @@
 ---
 intent: 001-video-processing-support
 created: 2026-10-09T16:57:05Z
-updated: 2026-10-21T11:10:16Z
+updated: 2026-10-21T11:19:15Z
 completed: null
 status: in-progress
 ---
@@ -70,6 +70,19 @@ Em 2026-10-19, foram alinhados os briefs, Stories e Bolts com a ERS v2.3 e com o
 
 **Dúvidas novas:** 3, acrescentadas a `docs/specsDuvidas.md` sem resposta: D-07 (se a NFR-004, a 019, a 020 e a 014 também ficam não cobertas); D-08 (bolt do `amqp.js`, dos URLs internos de leitura, do `route/video.js`/`videoUrls.js`, do volume `video_tmp` e dos argumentos da `video_operations_queue`); D-09 (propriedade da NFR-011). Até às respostas, mantém-se a atribuição atual.
 
+## Aplicação das respostas D-07 a D-09 (2026-10-21T11:19:15Z)
+
+**Fontes:** as respostas em `docs/specsDuvidas.md` (D-07 a D-09), com o `docs/add.md` (ADD v1.1) como documento mestre e o princípio da equipa: só ficam de fora o UC-VID-005 (B006) e o UC-VID-015 (B009), e tudo o resto é implementado. O `docs/merge.md` não foi usado. Em `docs/` só se preencheram as respostas e se acrescentou a dúvida nova ao `specsDuvidas.md`; o código não foi alterado.
+
+**O que mudou:**
+
+- **D-07:** a NFR-004, a NFR-019 e a NFR-020 ficam "Não coberto nesta construção (D-06)"; a NFR-014 fica parcialmente não coberta, só na parte de lotes.
+- **D-08:** a B001 passa a construir o `projects/video/amqp.js`, os URLs internos de leitura com o `route/video.js` e o `videoUrls.js`, o volume `video_tmp` e a declaração completa da `video_operations_queue` com os argumentos do T-03; a B003 estende-os por acréscimo. A B002 deixa de montar o `route/video.js` e usa o módulo da B001 para o URL de descarregamento.
+- **D-09:** a NFR-011 passa da ST-VID-COM-001/B003 para a ST-VID-000/B001 (a contagem por Unit mantém-se em 16 + 6 + 4); a B003 verifica-a num critério de passagem novo.
+- Ficheiros alterados: `bolt.md` da B001, B002, B003, B006 e B009; stories ST-VID-000, COM-001, 005 e 015; `units.md`, os 3 `unit-brief.md`, `traceability.md`, `decisions.md` e este registo.
+
+**Dúvida nova:** 1, acrescentada a `docs/specsDuvidas.md` sem resposta: D-10 (que bolt e story constroem a parte coberta da NFR-014, já que a sua dona é a ST-VID-015, na B009 `blocked`). Até à resposta, mantém-se a atribuição atual.
+
 ## Estado de prontidão
 
 - [x] Requisitos atuais indexados, com texto canónico na ERS e rastreabilidade completa
@@ -80,7 +93,8 @@ Em 2026-10-19, foram alinhados os briefs, Stories e Bolts com a ERS v2.3 e com o
 - [x] Bolts com histórias, requisitos, dependências e critérios de passagem
 - [x] Artefactos revistos contra o ADD v1.1, a ERS v2.4 e os UC v1.5
 - [x] Dúvidas D-01 a D-06 de `docs/specsDuvidas.md` respondidas e aplicadas
-- [ ] Dúvidas novas D-07 a D-09 de `docs/specsDuvidas.md` respondidas e aplicadas
+- [x] Dúvidas D-07 a D-09 de `docs/specsDuvidas.md` respondidas e aplicadas
+- [ ] Dúvida nova D-10 de `docs/specsDuvidas.md` respondida e aplicada
 - [ ] Revisão humana destes artefactos concluída
 - [ ] Inception marcada completa
 
@@ -88,4 +102,4 @@ O estado mantém-se `in-progress` até à revisão/aceitação humana dos artefa
 
 ## Próximo passo
 
-Responder às dúvidas D-07 a D-09 de `docs/specsDuvidas.md` e aplicá-las aos bolts, stories e rastreabilidade; depois, rever o mapa de Units, Stories e sequência dos 9 Bolts (7 a construir; B006 e B009 `blocked`). Só após essa aprovação a Construção pode iniciar, pela ordem da Q-ADD-01 (fundação T-00 e worker T-02 primeiro).
+Responder à dúvida D-10 de `docs/specsDuvidas.md` e aplicá-las aos bolts, stories e rastreabilidade; depois, rever o mapa de Units, Stories e sequência dos 9 Bolts (7 a construir; B006 e B009 `blocked`). Só após essa aprovação a Construção pode iniciar, pela ordem da Q-ADD-01 (fundação T-00 e worker T-02 primeiro).

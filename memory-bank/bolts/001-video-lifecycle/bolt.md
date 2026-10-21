@@ -22,7 +22,7 @@ complexity: {avg_complexity: 3, avg_uncertainty: null, max_dependencies: null, t
 
 ## Visão geral
 
-Fundação de vídeo do UC-VID-000: carregamento, ingestão, persistência e visualização de vídeos no projeto, segundo o T-00 do ADD v1.1. Constrói a parte do T-00 de que a ingestão precisa: coleção, estágios, URLs de escrita, `formats.js`, routers com o `videoAuth`, filas, `wsGateway/video.js` e o worker de vídeo com a ingestão (specsDuvidas D-02).
+Fundação de vídeo do UC-VID-000: carregamento, ingestão, persistência e visualização de vídeos no projeto, segundo o T-00 do ADD v1.1. Constrói a parte do T-00 de que a ingestão precisa: coleção, estágios, URLs de escrita, `formats.js`, routers com o `videoAuth`, filas, `wsGateway/video.js` e o worker de vídeo com a ingestão (specsDuvidas D-02), e ainda o `projects/video/amqp.js`, os URLs internos de leitura com o `route/video.js` e o `videoUrls.js` do storage, o volume `video_tmp` e a declaração completa da `video_operations_queue` (specsDuvidas D-08).
 
 ## Objetivo
 
@@ -47,9 +47,9 @@ Implementar o UC-VID-000 sobre a fundação mínima do ADD (T-00): coleção `vi
 
 ## Requisitos rastreados
 
-REQ-VID-AUTH-001 a 003; REQ-VID-UPLOAD-001 a 020; REQ-VID-STORAGE-001 a 005; REQ-VID-NFR-001, 003, 008, 010, 017.
+REQ-VID-AUTH-001 a 003; REQ-VID-UPLOAD-001 a 020; REQ-VID-STORAGE-001 a 005; REQ-VID-NFR-001, 003, 008, 010, 011, 017.
 
-Os `REQ-VID-AUTH-*` passam para este bolt, que constrói os routers de vídeo com o `videoAuth` (specsDuvidas D-02). A NFR-010 (FFmpeg em Docker) passa para este bolt, que cria o worker (specsDuvidas D-03).
+Os `REQ-VID-AUTH-*` passam para este bolt, que constrói os routers de vídeo com o `videoAuth` (specsDuvidas D-02). A NFR-010 (FFmpeg em Docker) passa para este bolt, que cria o worker (specsDuvidas D-03). A NFR-011 (filas AMQP de vídeo independentes) passa para este bolt, que cria as filas e o worker; a B003 continua a verificá-la (specsDuvidas D-09).
 
 Os critérios de aceitação autoritativos são os dos ficheiros `docs/requirements/REQ-VID-*.md`; a propriedade de cada requisito está em `intents/001-video-processing-support/traceability.md`.
 
@@ -62,19 +62,22 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 - **Q-ADD-04 (pendente no ADD):** a estratégia de carregamento de ficheiros até 2 GB (*streaming* pelos serviços ou PUT pré-assinado) não está decidida; em qualquer caso, a rota escolhida tem um `location` novo no nginx com `client_max_body_size 2g` e `proxy_request_buffering off` (T-08).
 - **Q-ADD-19:** o módulo de vídeo reutiliza o `services/s3Client.js` (`aws-sdk` v2) existente, sem migração.
 - **T-00 (rotas) / T-08 (URLs de escrita):** routers novos `apiGateway/routes/videos.js` e `projects/routes/videos.js`, cada um montado com uma linha `app.use` nova antes do router existente; *middleware* `apiGateway/auth/videoAuth.js` (401 sem JWT válido, 403 se o utilizador do token não for o `:user`); no serviço de projetos, reutilização de `checkSharePermission`, `requireEditPermission` e `enforcePresenceLimit`, sem `requireProjectVersion`. URL de escrita (`putObject`) só para a rede interna, pedido pelo worker quando o FFmpeg termina (specsDuvidas D-02).
-- **T-00 (filas e WebSocket):** entradas novas em `rabbitMQ/definitions.json` para `video_operations_queue`, `video_project_queue` e `video_ws_queue`, com os *bindings* na exchange `picturas`; módulo `wsGateway/video.js`, carregado por uma linha nova no fim de `wsGateway/index.js`, que consome `video_ws_queue` (specsDuvidas D-02). A exchange `video_control` é da B003.
-- **T-02 (worker) / T-05:** worker `Tools/video/` (`video.py`, subclasse de `Rabbit_MQ`, `video_msg.py`, configuração própria com `VIDEO_STORAGE_URL`) sobre `python:3.11-slim` com `apt-get install ffmpeg`, que reutiliza `Tools/utils/rabbit_mq.py` e `env.py` sem os alterar e não usa `tool_msg.py`, com a ingestão (FFprobe, miniatura, fotograma 0 e cópia MP4, T-06); `projects/video/formats.js` como única fonte da matriz (specsDuvidas D-02). O executor de cadeias é da B003.
+- **T-08 (módulo de vídeo do storage):** `route/video.js`, montado com uma linha nova `app.use("/video", videoRoutes)` no `server.js` do `imageStorageService`, que valida os estágios contra `videoStages.js` e reutiliza `createBucket.js`, `deleteFile.js` e `copyFile.js`; `services/videoUrls.js`, com o `services/s3Client.js` existente, que gera os URLs internos de leitura (GET dos originais, pedidos pelo worker quando começa a tarefa) e os de escrita (specsDuvidas D-08). A B003 estende-o por acréscimo, sem o alterar (specsDuvidas D-08); o URL de descarregamento de 900 s continua a ser da B002 (4.1).
+- **T-03 (módulo AMQP):** `projects/video/amqp.js`, com uma ligação persistente ao RabbitMQ, que publica em `video_operations_queue` e consome `video_project_queue` com confirmação manual (só faz `ack` depois de gravar o efeito no MongoDB), sem reutilizar `projects/utils/rabbit_mq.js` (specsDuvidas D-08). A B003 estende-o por acréscimo, sem o alterar.
+- **T-00 (filas e WebSocket):** entradas novas em `rabbitMQ/definitions.json` para `video_operations_queue`, `video_project_queue` e `video_ws_queue`, com os *bindings* na exchange `picturas`; a `video_operations_queue` é declarada já com todos os argumentos do T-03 (*quorum*, `x-delivery-limit: 1`, `x-consumer-timeout` e *dead-letter* para `video_project_queue`), porque pela regra 2.6 não podem ser acrescentados depois (specsDuvidas D-08); módulo `wsGateway/video.js`, carregado por uma linha nova no fim de `wsGateway/index.js`, que consome `video_ws_queue` (specsDuvidas D-02). A exchange `video_control` é da B003.
+- **T-02 (worker) / T-05:** worker `Tools/video/` (`video.py`, subclasse de `Rabbit_MQ`, `video_msg.py`, configuração própria com `VIDEO_STORAGE_URL`) sobre `python:3.11-slim` com `apt-get install ffmpeg`, que reutiliza `Tools/utils/rabbit_mq.py` e `env.py` sem os alterar e não usa `tool_msg.py`, com a ingestão (FFprobe, miniatura, fotograma 0 e cópia MP4, T-06), e temporários em `/tmp/video/<taskId>/` no volume próprio `video_tmp` montado em `/tmp/video` (specsDuvidas D-08); `projects/video/formats.js` como única fonte da matriz (specsDuvidas D-02). O executor de cadeias é da B003.
 
 ## Saídas esperadas
 
 - Modelo `projects/models/video.js` e acesso à coleção `videos`.
-- `imageStorageService/utils/videoStages.js` sem `video_zip`, e a parte do módulo de vídeo do storage necessária à ingestão, incluindo os URLs de escrita (T-08) (specsDuvidas D-02, D-06).
+- `imageStorageService/utils/videoStages.js` sem `video_zip`; `route/video.js` montado no `server.js` e `services/videoUrls.js` com os URLs internos de leitura e de escrita (T-08) (specsDuvidas D-02, D-06, D-08).
+- `projects/video/amqp.js` (T-03) (specsDuvidas D-08).
 - Pipeline de ingestão: validação de contentor/codecs e limites por perfil, metadados (incluindo rotação e dimensões de apresentação), miniatura, fotograma 0 e cópia MP4 (T-00, T-06, T-07).
 - Frontend: componentes novos de carregamento (seleção e arrastamento, progresso, cancelamento) e leitor integrado que usa `preview_key` quando existe.
 - `projects/video/formats.js` (T-05).
 - Routers `apiGateway/routes/videos.js` e `projects/routes/videos.js` e *middleware* `apiGateway/auth/videoAuth.js` (T-00).
-- Filas `video_operations_queue`, `video_project_queue` e `video_ws_queue` em `rabbitMQ/definitions.json` e módulo `wsGateway/video.js` (T-00).
-- Worker `Tools/video/` com a ingestão (FFprobe, miniatura, fotograma 0 e cópia MP4) e o respetivo serviço no `docker-compose.yaml` (T-02, T-06).
+- Filas `video_operations_queue` (declaração completa com os argumentos do T-03), `video_project_queue` e `video_ws_queue` em `rabbitMQ/definitions.json` e módulo `wsGateway/video.js` (T-00; specsDuvidas D-08).
+- Worker `Tools/video/` com a ingestão (FFprobe, miniatura, fotograma 0 e cópia MP4), o respetivo serviço e o volume `video_tmp` no `docker-compose.yaml` (T-02, T-06; specsDuvidas D-08).
 - Não constrói o `VideoBatch`, o estágio `video_zip`, o campo `batch_id`, o endpoint de lote nem a dependência `archiver` (specsDuvidas D-06), nem a extração de fotogramas no worker (specsDuvidas D-05, D-06).
 - Testes de aceitação ligados aos critérios de `REQ-VID-AUTH-*`, `REQ-VID-UPLOAD-*`, `REQ-VID-STORAGE-*` e NFR rastreados.
 
@@ -88,6 +91,7 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 - [ ] Um vídeo válido fica em `videos` com `status: completed`, metadados, miniatura, fotograma 0 e, quando aplicável, cópia MP4; o carregamento não debita quota.
 - [ ] Falha ou cancelamento do carregamento não deixa objeto no storage nem registo em `videos`.
 - [ ] As rotas de vídeo respondem 401 sem JWT válido e 403 ao utilizador `anonymous` e a quem não tem a permissão exigida; o worker de vídeo arranca com `docker compose up` sem binários instalados no *host*.
+- [ ] A ingestão usa só as filas de vídeo novas e o `amqp.js`, sem alterar as ferramentas de imagem nem as filas existentes (NFR-011).
 
 ## Dependências
 
@@ -110,4 +114,4 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 
 - Esforço da fundação no ADD (tabela-resumo, secção 5): T-00 = L. `avg_complexity` = 3 (maior esforço do ADD no bolt, com S=1, M=2, L=3); `avg_uncertainty`, `max_dependencies` e `testing_scope` são preenchidos no início do bolt na Construção (specsDuvidas D-01).
 - Ordem de construção: a Q-ADD-01 manda construir primeiro a fundação T-00 e o worker T-02. A tabela de bolts não muda: este bolt não tem dependências e constrói a parte do T-00 de que a ingestão precisa; a B003 fica com o resto (specsDuvidas D-02).
-- O módulo AMQP do serviço de projetos (`projects/video/amqp.js`), os URLs internos de leitura e a criação do `route/video.js` e do `services/videoUrls.js` do storage, e o volume `video_tmp` não estão distribuídos pela D-02 (ver specsDuvidas.md, D-08).
+- O `amqp.js`, os URLs internos de leitura com o `route/video.js` e o `videoUrls.js`, o volume `video_tmp` e a declaração completa da `video_operations_queue` ficam neste bolt, porque a ingestão precisa deles; a B003 estende-os por acréscimo, sem os alterar (specsDuvidas D-08).

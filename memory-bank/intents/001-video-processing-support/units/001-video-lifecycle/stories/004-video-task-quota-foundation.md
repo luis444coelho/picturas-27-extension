@@ -30,7 +30,7 @@ implemented: false
 ## Traceability
 
 - **Use case:** UC-VID-000 a UC-VID-015 (regras transversais).
-- **Requirements:** `REQ-VID-COM-001` a `006`; `REQ-VID-QUOTA-001` a `008`; `REQ-VID-TASK-001` a `006` e `008`; `REQ-VID-ERROR-001` a `003`; `REQ-VID-NFR-002`, `005`, `006`, `007`, `009`, `011` (ver specsDuvidas.md, D-09), `013`, `018` (specsDuvidas D-03), `021`. Consome `REQ-VID-AUTH-*` (ST-VID-000, specsDuvidas D-02). Não cobertos nesta construção (specsDuvidas D-06): `REQ-VID-TASK-007` e a parte de lotes da `REQ-VID-QUOTA-007`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
+- **Requirements:** `REQ-VID-COM-001` a `006`; `REQ-VID-QUOTA-001` a `008`; `REQ-VID-TASK-001` a `006` e `008`; `REQ-VID-ERROR-001` a `003`; `REQ-VID-NFR-002`, `005`, `006`, `007`, `009`, `013`, `018` (specsDuvidas D-03), `021`. Consome `REQ-VID-AUTH-*` (ST-VID-000, specsDuvidas D-02). Verifica a `REQ-VID-NFR-011` (dona: ST-VID-000), sem ser dona dela (specsDuvidas D-09). Não cobertos nesta construção (specsDuvidas D-06): `REQ-VID-TASK-007` e a parte de lotes da `REQ-VID-QUOTA-007`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
 - **Decisões do ADD v1.1:** T-01, T-02 (executor e codificação por omissão), T-03, T-04 e Q-ADD-03, T-05 e Q-ADD-21, T-08, T-10, Q-ADD-14 sem a parte de lotes e ZIP (specsDuvidas D-04), Q-ADD-02 (pendente no ADD). A NFR-013 e a NFR-018 são desta story; a NFR-010 é da ST-VID-000 (specsDuvidas D-03).
 
 ## Dependencies

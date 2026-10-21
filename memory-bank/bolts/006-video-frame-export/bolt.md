@@ -52,7 +52,7 @@ Implementar o UC-VID-005 sobre os contratos de tarefa, quota e cancelamento da B
 
 REQ-VID-FRAMES-001 a 013; REQ-VID-NFR-004, 019, 020.
 
-Os `REQ-VID-FRAMES-*` não são cobertos nesta construção (specsDuvidas D-06). A D-06 não diz se a NFR-004, a NFR-019 e a NFR-020, que só a extração usa, também ficam marcadas como não cobertas (ver specsDuvidas.md, D-07).
+Os `REQ-VID-FRAMES-*` não são cobertos nesta construção (specsDuvidas D-06). A NFR-004, a NFR-019 e a NFR-020 só servem a extração e também não são cobertas (specsDuvidas D-07).
 
 Os critérios de aceitação autoritativos são os dos ficheiros `docs/requirements/REQ-VID-*.md`; a propriedade de cada requisito está em `intents/001-video-processing-support/traceability.md`.
 

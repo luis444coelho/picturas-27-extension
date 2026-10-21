@@ -4,7 +4,7 @@ intent: 001-video-processing-support
 phase: inception
 status: ready
 created: 2026-10-18T18:00:00Z
-updated: 2026-10-21T11:10:16Z
+updated: 2026-10-21T11:19:15Z
 default_bolt_type: ddd-construction-bolt
 ---
 
@@ -20,7 +20,7 @@ Compor vídeos e operações já suportadas em junções, cadeias e lotes, prese
 
 - **50 FR (propriedade exclusiva):** `REQ-VID-CONCAT-*` (13), `CHAIN-*` (18), `BATCH-*` (19).
 - **NFR (4):** `REQ-VID-NFR-014`, `022`, `023`, `024`. A NFR-013 passou para a Unit 001 (B003); a B008 continua a verificá-la nos critérios de aceitação, com a NFR-010 e a NFR-018 (specsDuvidas D-03).
-- **Fora desta construção (specsDuvidas D-06):** o processamento em lote (UC-VID-015, ST-VID-015, B009); os `REQ-VID-BATCH-*` (19) ficam não cobertos. A situação da NFR-014 está em specsDuvidas.md, D-07. A predefinição de cadeia continua a poder ser guardada e usada numa nova cadeia (UC-VID-014 FA3); só deixa de poder ser carregada num lote.
+- **Fora desta construção (specsDuvidas D-06):** o processamento em lote (UC-VID-015, ST-VID-015, B009); os `REQ-VID-BATCH-*` (19) ficam não cobertos. A NFR-014 fica não coberta só na parte de lotes (UC-VID-015 RN2) e continua coberta na parte da junção e da cadeia (UC-VID-013 RN2-RN3, UC-VID-014 RN5) (specsDuvidas D-07); como a sua dona é a ST-VID-015 (B009, `blocked`), o bolt que constrói a parte coberta está em dúvida (ver specsDuvidas.md, D-10). A predefinição de cadeia continua a poder ser guardada e usada numa nova cadeia (UC-VID-014 FA3); só deixa de poder ser carregada num lote.
 - Usa os contratos comuns da Unit 001 e as operações elegíveis da Unit 002; estes requisitos funcionais mantêm a propriedade das respetivas Units.
 
 ## Conceitos, interfaces e limites

@@ -4,7 +4,7 @@ intent: 001-video-processing-support
 phase: inception
 status: ready
 created: 2026-10-18T18:00:00Z
-updated: 2026-10-21T11:10:16Z
+updated: 2026-10-21T11:19:15Z
 default_bolt_type: ddd-construction-bolt
 ---
 
@@ -19,7 +19,7 @@ Disponibilizar recursos de vídeo autorizados em projetos e definir os contratos
 ## Requisitos atribuídos
 
 - **71 FR (propriedade exclusiva):** `REQ-VID-COM-*` (33, incluindo AUTH, QUOTA, STORAGE, TASK e ERROR), `REQ-VID-UPLOAD-*` (20), `REQ-VID-DOWNLOAD-*` (9), `REQ-VID-INFO-*` (9).
-- **NFR (16):** `REQ-VID-NFR-001`, `002`, `003`, `005` a `011`, `013`, `016`, `017`, `018`, `021`, `025`. A NFR-010 passa para a B001 e a NFR-013 e a NFR-018 para a B003, que constroem o worker e o executor (specsDuvidas D-03).
+- **NFR (16):** `REQ-VID-NFR-001`, `002`, `003`, `005` a `011`, `013`, `016`, `017`, `018`, `021`, `025`. A NFR-010 passa para a B001 e a NFR-013 e a NFR-018 para a B003, que constroem o worker e o executor (specsDuvidas D-03); a NFR-011 passa da B003 para a B001, que cria as filas e o worker (specsDuvidas D-09).
 - Não cobertos nesta construção (specsDuvidas D-06): `REQ-VID-TASK-007` e a parte de lotes da `REQ-VID-QUOTA-007`.
 - Outras Units consomem contratos comuns, mas não voltam a ser donas desses FR.
 
@@ -39,6 +39,6 @@ Disponibilizar recursos de vídeo autorizados em projetos e definir os contratos
 
 ## Bolts
 
-- B001 `001-video-lifecycle` (DDD): UC-VID-000 e a parte do T-00 de que a ingestão precisa: coleção `videos`, `videoStages.js` e URLs de escrita (T-08), `formats.js` (T-05), routers de vídeo com o `videoAuth`, filas `video_operations_queue`, `video_project_queue` e `video_ws_queue`, `wsGateway/video.js` e worker `Tools/video/` com a ingestão (T-06); dona dos `REQ-VID-AUTH-*` e da NFR-010 (specsDuvidas D-02, D-03). O bolt do `amqp.js`, dos URLs internos de leitura, do `route/video.js`, do volume `video_tmp` e dos argumentos da `video_operations_queue` está em specsDuvidas.md, D-08.
+- B001 `001-video-lifecycle` (DDD): UC-VID-000 e a parte do T-00 de que a ingestão precisa: coleção `videos`, `videoStages.js` e URLs de escrita (T-08), `formats.js` (T-05), routers de vídeo com o `videoAuth`, filas `video_operations_queue`, `video_project_queue` e `video_ws_queue`, `wsGateway/video.js` e worker `Tools/video/` com a ingestão (T-06); e ainda o `amqp.js`, os URLs internos de leitura com o `route/video.js` e o `videoUrls.js`, o volume `video_tmp` e a declaração completa da `video_operations_queue` com os argumentos do T-03 (specsDuvidas D-08); dona dos `REQ-VID-AUTH-*`, da NFR-010 e da NFR-011 (specsDuvidas D-02, D-03, D-09).
 - B002 `002-video-access` (Simple): UC-VID-006/007 (ADD 4.1, 4.2); depende de B001.
-- B003 `003-video-task-foundation` (DDD): `VideoTask`, `video_project_locks`, exchange `video_control`, quota (T-04), cancelamento e progresso (T-03), registo de operações (T-01), executor de cadeias e codificação por omissão (T-02), erros e correlação (T-10); rotina da Q-ADD-14 sem a parte de lotes (specsDuvidas D-02, D-04); dona da NFR-013 e da NFR-018 (specsDuvidas D-03); depende de B001 e desbloqueia B004 a B007 (a B006 está `blocked`, specsDuvidas D-06).
+- B003 `003-video-task-foundation` (DDD): `VideoTask`, `video_project_locks`, exchange `video_control`, quota (T-04), cancelamento e progresso (T-03), registo de operações (T-01), executor de cadeias e codificação por omissão (T-02), erros e correlação (T-10); rotina da Q-ADD-14 sem a parte de lotes (specsDuvidas D-02, D-04); estende por acréscimo, sem os alterar, os componentes da B001 (specsDuvidas D-08); dona da NFR-013 e da NFR-018 (specsDuvidas D-03) e verifica a NFR-011 (specsDuvidas D-09); depende de B001 e desbloqueia B004 a B007 (a B006 está `blocked`, specsDuvidas D-06).
