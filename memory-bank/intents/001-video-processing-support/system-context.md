@@ -2,14 +2,14 @@
 intent: 001-video-processing-support
 phase: inception
 status: context-defined
-updated: 2026-10-19T17:31:16Z
+updated: 2026-10-21T01:07:50Z
 ---
 
 # Suporte a vídeo — Contexto do sistema
 
 ## Visão geral
 
-A intent estende o PictuRAS v27.1, aplicação web de edição de imagens, para armazenar, consultar, reproduzir e processar vídeos dentro de projetos. A extensão reutiliza os mecanismos de autenticação e partilha, projetos, armazenamento, filas, tarefas, WebSockets e imagens existentes. Acrescenta o domínio de vídeo e os workers de processamento descritos na ERS; não altera as ferramentas de imagem para receberem vídeos.
+A intent estende o PictuRAS v27.1, aplicação web de edição de imagens, para armazenar, consultar, reproduzir e processar vídeos dentro de projetos. A extensão reutiliza os mecanismos de autenticação e partilha, projetos, armazenamento, filas, tarefas, WebSockets e imagens existentes. Acrescenta o domínio de vídeo e o worker de processamento descritos no ADD v1.1 e na ERS v2.4, seguindo a regra 2.6 do ADD ("só acrescentar"): o código existente não é alterado e o vídeo liga-se por ficheiros e pontos de ligação novos.
 
 O limite do sistema neste artefacto é o PictuRAS completo, incluindo a extensão especificada. A implementação de vídeo ainda não existe no código analisado; as relações abaixo representam contexto e integrações requeridas, não componentes de vídeo já implementados.
 
@@ -35,7 +35,7 @@ C4Context
     System_Ext(db, "MongoDB", "Metadados de projeto, vídeo, tarefas e resultados")
     System_Ext(storage, "SeaweedFS / S3", "Objetos, temporários, URLs assinados e transferências Range")
     System_Ext(queue, "RabbitMQ", "Fila assíncrona e mensagens de tarefas")
-    System_Ext(worker, "Workers de vídeo", "Processamento FFmpeg/Python conforme ERS")
+    System_Ext(worker, "Worker de vídeo (Tools/video/)", "Worker Python único com FFmpeg/FFprobe e um único -filter_complex por cadeia")
     System_Ext(ws, "Gateway WebSocket", "Estado e progresso de tarefas")
     System_Ext(images, "Biblioteca e pipeline de imagem", "Recursos Imagem e ferramentas existentes para fotogramas exportados")
 
@@ -49,7 +49,7 @@ C4Context
     Rel(picturas, queue, "Publica tarefas e recebe eventos")
     Rel(queue, worker, "Entrega operações assíncronas")
     Rel(worker, storage, "Lê originais e grava resultados/temporários")
-    Rel(worker, db, "Atualiza estados e associa resultados")
+    Rel(worker, queue, "Responde em video_project_queue e publica progresso em video_ws_queue")
     Rel(picturas, ws, "Notifica progresso e estados")
     Rel(picturas, images, "Regista imagens extraídas para uso no pipeline existente")
 ```
@@ -58,13 +58,13 @@ C4Context
 
 | Sistema / componente existente ou requerido | Direção e dados | Papel no contexto |
 |---|---|---|
-| Autenticação JWT e partilha | Entrada: identidade, perfil e permissão read/edit; saída: pedidos autorizados | Distingue acesso autenticado, perfil e permissão do projeto. |
-| API e serviço de projetos | Ambos: pedidos, IDs de recursos, metadados e resultados | Valida projeto e associa recursos e tarefas ao projeto. |
-| MongoDB | Ambos: metadados, estados, resultados e proveniência | Persiste o catálogo lógico; não armazena os binários de vídeo. |
-| SeaweedFS/S3 | Ambos: binários, temporários, URLs assinados e intervalos Range | Guarda ficheiros e serve transferências diretas autorizadas. |
-| RabbitMQ | Saída/entrada assíncrona: pedido, progresso e resultado da tarefa | Desacopla API e processamento; fila de vídeo independente da fila de imagem. |
-| Workers de vídeo (FFmpeg/Python) | Entrada: tarefa e referência ao recurso; saída: estado, erro e recursos gerados | Executa validação/processamento segundo operações e restrições da ERS. |
-| Gateway WebSocket | Saída para cliente: estados e progresso aplicável | Mantém o utilizador informado sem bloquear a navegação. |
+| Autenticação JWT e partilha | Entrada: identidade, perfil e permissão read/edit; saída: pedidos autorizados | `videoAuth` novo no router de vídeo do gateway (401 sem JWT válido, 403 se o utilizador do token não for o do caminho); `checkSharePermission`, `requireEditPermission` e `enforcePresenceLimit` reutilizados tal como estão; `anonymous` recusado com 403 (ADD T-00, T-03). |
+| API e serviço de projetos | Ambos: pedidos, IDs de recursos, metadados e resultados | Routers novos `apiGateway/routes/videos.js` e `projects/routes/videos.js` (rotas `/projects/:user/:project/videos/…`), registo de operações, plano de execução, módulo AMQP de vídeo e rotina da Q-ADD-14 (ADD T-00, T-01, T-03). |
+| MongoDB | Ambos: metadados, estados, resultados e proveniência | Coleções novas `videos`, `VideoTask`, `VideoBatch` e `video_project_locks` no serviço de projetos e predefinições de vídeo no serviço de utilizadores; o modelo `Process` não muda (ADD T-00, T-03, T-09, 4.9). |
+| SeaweedFS/S3 e `imageStorageService` | Ambos: binários, URLs assinados e intervalos Range | Módulo de vídeo novo (`videoStages.js`, `videoUrls.js`, `route/video.js`): URL de leitura de 15 min, URL de escrita interno para o worker e ZIP de lote com `archiver`; servido pelo `location /s3-video/` novo do nginx (ADD T-08, 4.10). |
+| RabbitMQ | Saída/entrada assíncrona: pedido, progresso, cancelamento e resultado da tarefa | Filas novas `video_operations_queue` (*quorum*, limite de entregas e *dead-letter*), `video_project_queue` e `video_ws_queue`, e exchange *fanout* `video_control`; o vídeo não usa `project_queue` nem `ws_queue` (ADD T-00, T-03). |
+| Worker de vídeo `Tools/video/` | Entrada: tarefa com o plano de execução e as chaves dos objetos; saída: estado, progresso, erro e metadados do resultado | Executa o plano calculado no serviço de projetos num único `-filter_complex`, sem validar regras de negócio (ADD T-01, T-02). |
+| Gateway WebSocket | Saída para cliente: estados e progresso | Módulo novo `wsGateway/video.js` com `video-task-update` e `video-batch-update` para a sala do utilizador e `project:<id>` (ADD T-03). |
 | Biblioteca e ferramentas de imagem | Ambos: imagens extraídas, metadados e referência de proveniência | Fotogramas passam a ser recursos de imagem normais; as ferramentas de imagem não processam vídeo. |
 
 ## Fluxos de dados
@@ -73,13 +73,13 @@ C4Context
 
 1. O utilizador envia um pedido autenticado com identificador de projeto, recurso(s) e parâmetros da operação; uploads trazem um ficheiro binário local.
 2. O PictuRAS valida JWT, permissão de projeto, perfil, matriz de contentor/codec, limites e parâmetros antes de admitir a tarefa.
-3. Para uma operação assíncrona, a API reserva quota quando aplicável, regista a tarefa e coloca uma mensagem com correlação na fila de vídeo.
-4. O worker lê o original do storage e executa o trabalho de acordo com as regras de operação, cadeia ou lote.
+3. Para uma operação assíncrona, o serviço de projetos calcula o plano de execução, adquire o lugar de tarefa ativa, reserva a quota (exceto Premium), cria a `VideoTask` e publica na `video_operations_queue` uma mensagem com o `correlationId` no corpo (ADD T-03, T-04, T-10).
+4. O worker pede os URLs internos, descarrega o original e executa o plano de acordo com as regras de operação, cadeia ou lote.
 
 ### Saída
 
 1. Uploads válidos produzem recurso de vídeo e metadados no projeto; reprodução usa o recurso/preview permitido.
-2. O worker reporta estados, progresso e falhas pelos mecanismos definidos. Em sucesso, regista recurso derivado ou imagens extraídas; em falha/cancelamento, não altera o original e remove resultados temporários não publicados.
+2. O worker publica o progresso pelo menos 1×/s em `video_ws_queue` e responde em `video_project_queue`; o serviço de projetos grava o estado e, em sucesso, cria o recurso derivado (a reserva de quota torna-se definitiva, Q-ADD-03); em falha ou cancelamento, devolve os créditos, não altera o original e remove os temporários e resultados não publicados.
 3. O cliente consulta estado e metadados, ou descarrega um vídeo concluído através de URL temporário do storage, sem encaminhar o binário pelo API Gateway.
 4. Em lote, os resultados concluídos são independentes; em cadeia, apenas o resultado final é publicado.
 
@@ -87,7 +87,8 @@ C4Context
 
 - Usar a baseline PictuRAS v27.1 e preservar o comportamento das ferramentas/filas de imagem.
 - Só utilizadores Registados, Premium e convidados autenticados com permissão adequada podem aceder; leitura é suficiente apenas para consulta e download.
-- A matriz de formatos/codecs, limites por perfil, custos de quota e exceções são os da ERS v2.3 e das decisões DQ correspondentes; não redefinir no código.
+- A matriz de formatos/codecs, limites por perfil, custos de quota e exceções são os da ERS v2.4 e das decisões DQ correspondentes, e o desenho é o do ADD v1.1; não redefinir no código.
+- Regra 2.6 do ADD: não alterar linhas existentes nem o comportamento do fluxo de imagem; só ficheiros e pontos de ligação novos.
 - Uma tarefa ativa de vídeo por projeto; processamento assíncrono; cadeia atómica; lote sequencial com resultados independentes.
 - Não modificar o original nem publicar resultados parciais; ligar recursos derivados à origem e ao projeto.
 - Upload, reprodução, pré-visualização, consulta e download não consomem créditos de processamento.
@@ -97,12 +98,13 @@ C4Context
 - A API confirma a aceitação de uma tarefa em até 1 segundo; o processamento ocorre fora do pedido síncrono.
 - Autorização JWT e de projeto é verificada antes da emissão de URLs ou acesso aos recursos.
 - Binários grandes são servidos diretamente pelo storage com URLs assinados temporários e retoma Range quando requerida.
-- Eventos propagam `correlationId`; progresso WebSocket respeita a cadência definida para cada operação.
+- O `correlationId` é gerado no router de vídeo do gateway e viaja no cabeçalho `X-Correlation-Id`, no corpo das mensagens de vídeo e nas respostas de erro; o progresso WebSocket é emitido pelo menos 1×/s em todas as operações.
 - Critérios quantificados e exceções completos permanecem nos requisitos `REQ-VID-NFR-*`; este resumo não os substitui.
 
 ## Referências de origem
 
-- ERS: `docs/requirements.md` e `docs/requirements/`.
-- Casos de uso: `docs/use-cases/UC-VID-000.md` a `UC-VID-015.md`.
+- Arquitetura: `docs/add.md` (ADD v1.1, documento mestre).
+- ERS: `docs/requirements.md` (v2.4) e `docs/requirements/`.
+- Casos de uso: `docs/use-cases/UC-VID-000.md` a `UC-VID-015.md` (índice v1.5).
 - Decisões e contexto do domínio: `docs/inception/artefactos-finais.md` e capítulos 2–3 do relatório.
 - Impacto nos componentes existentes: capítulo 6; rastreabilidade ERS e baseline: capítulo 7.

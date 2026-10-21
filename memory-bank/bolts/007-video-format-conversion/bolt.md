@@ -11,45 +11,84 @@ completed: null
 current_stage: null
 stages_completed: []
 requires_bolts: [003-video-task-foundation]
-enables_bolts: [008-video-concat-chain, 009-video-batch]
+enables_bolts: [008-video-concat-chain]
 requires_units: [001-video-lifecycle]
 blocks: true
-complexity: {avg_complexity: 2, avg_uncertainty: 2, max_dependencies: 2, testing_scope: 3}
+# avg_complexity: maior esforço do ADD no bolt (S=1, M=2, L=3); os outros campos são preenchidos no início do bolt na Construção (specsDuvidas D-01)
+complexity: {avg_complexity: 2, avg_uncertainty: null, max_dependencies: null, testing_scope: null}
 ---
 
 # Bolt: 007-video-format-conversion
 
+## Visão geral
+
+Conversão entre MP4, MOV e AVI (UC-VID-012) definida pela matriz do T-05, com cópia de pré-visualização MP4 (T-06) (ADD v1.1, 4.7).
+
 ## Objetivo
 
-Implementar UC-VID-012: seleção, validação e conversão para as combinações de formato/codecs permitidas, incluindo interface e consulta do resultado.
+Acrescentar a operação `convert` `{target: "mp4"|"mov"|"avi"}` ao registo de operações e ao worker, com o plano de cópia ou recodificação por stream da matriz e a cópia de pré-visualização dos resultados, e o painel de conversão no frontend.
 
 ## Stories incluídas
 
 - **ST-VID-012 — Converter formato**: [Converter formato](../../intents/001-video-processing-support/units/002-video-transformations/stories/010-video-convert.md) (must).
 
+## Tipo de bolt
+
+**Tipo**: Simple Construction Bolt
+**Definição**: `.specsmd/aidlc/templates/construction/bolt-types/simple-construction-bolt.md`
+
+## Etapas
+
+- [ ] **1. Plan**: Pending → `implementation-plan.md`
+- [ ] **2. Implement**: Pending → código + `implementation-walkthrough.md`
+- [ ] **3. Test**: Pending → `test-walkthrough.md`
+
 ## Requisitos rastreados
 
-REQ-VID-CONVERT-*; REQ-VID-NFR-012,026. Estes critérios de descodificação e reprodução aplicam-se também aos resultados das demais operações de vídeo, cujos Bolts os consomem. Os contratos transversais são propriedade da Unit 001; B001 e B003 realizam os contratos de recurso e tarefa respetivamente, consumidos pelas Units dependentes conforme a matriz.
+REQ-VID-CONVERT-001 a 010; REQ-VID-NFR-012, 026.
+
+Os critérios de aceitação autoritativos são os dos ficheiros `docs/requirements/REQ-VID-*.md`; a propriedade de cada requisito está em `intents/001-video-processing-support/traceability.md`.
+
+## Decisões do ADD v1.1
+
+- **4.7:** `validate` dá `SAME_FORMAT` ou `UNSUPPORTED_TARGET_FORMAT`; `estimate` muda o contentor e os codecs; o painel mostra "Cópia direta" ou "Recodificação" a partir do endpoint de validação (CONVERT-003); como passo de cadeia, só no fim (CONVERT-009, verificado na validação de estrutura da 4.9).
+- **T-05 / Q-ADD-21:** cópia de uma stream só quando o codec de origem é igual ao de saída da matriz (um MP4 H.264/AAC para AVI recodifica para MPEG-4 Part 2/MP3); saída AVI com `mpeg4` + `libmp3lame` em taxa constante; `-fps_mode passthrough` na recodificação; `+genpts` para AVI com vídeo copiado.
+- **T-06 / Q-ADD-20:** resultado MOV com *remux* para a cópia MP4 numa segunda invocação; resultado AVI com `split`/`asplit` na mesma invocação; cópia também para resultados MP4 com perfis H.264 que os navegadores não reproduzem; guardada em `storage.preview_key`.
+- **Q-ADD-11 (pendente no ADD):** bitrate do MP3 e restantes parâmetros de qualidade.
+- **Q-ADD-25:** corte de 1 px nas dimensões ímpares quando há recodificação (CONVERT-007).
 
 ## Saídas esperadas
 
-- Modelo/contrato de domínio e desenho técnico conforme o tipo de Bolt.
-- Implementação da capacidade, incluindo interface, APIs/workers/storage que lhe pertencem.
-- Testes de aceitação ligados aos AC das Stories e aos critérios nos ficheiros `docs/requirements/`.
-- Evidência de estados de sucesso, falha e cancelamento quando aplicável.
+- `projects/video/operations/convert.js` (usa o `formats.js` da B003).
+- `Tools/video/ops/convert.py` com saída dupla (T-06).
+- Frontend: painel de conversão (formato atual, destinos sem o atual, indicação de cópia ou recodificação); o leitor usa `preview_key` para resultados MOV e AVI.
+- Testes de descodificação com FFprobe (NFR-012) e de reprodução em VLC e no leitor integrado (NFR-026) para cada caminho da matriz.
 
 ## Critérios de passagem
 
-- [ ] Stories e AC atribuídos cumpridos.
-- [ ] Requisitos rastreados verificados sem alterar os originais nem expor recursos sem autorização.
-- [ ] Testes automatizados e relatório do Bolt registados; nenhum resultado de teste é presumido nesta fase.
+- [ ] Stories incluídas implementadas e respetivos critérios de aceitação cumpridos.
+- [ ] Critérios de aceitação dos requisitos rastreados (ficheiros `docs/requirements/REQ-VID-*.md`) verificados por testes.
+- [ ] Nenhuma linha de código existente alterada (regra 2.6 do ADD); o fluxo de imagem continua a funcionar como antes.
+- [ ] Testes automatizados e relatório do bolt registados; nenhum resultado de teste é presumido nesta fase.
+- [ ] Código revisto.
+- [ ] Cada caminho da matriz produz o contentor e os codecs da CONVERT-005, com cópia só nos casos da CONVERT-006, e o resultado é descodificável e reproduzível.
 
 ## Dependências
 
-- **Bolts requeridos:** 003-video-task-foundation.
-- **Units requeridas:** 001-video-lifecycle.
-- **Desbloqueia:** 008-video-concat-chain, 009-video-batch.
+### Requer
+
+- **Bolts:** 003-video-task-foundation (registo de operações, `formats.js`, worker e executor).
+- **Units:** 001-video-lifecycle.
+
+### Desbloqueia
+
+- 008-video-concat-chain.
 
 ## Limites
 
-Combinações fora da matriz são rejeitadas antes da tarefa; resultado é descodificável/reproduzível e o original permanece intacto.
+- **Regra 2.6 do ADD ("só acrescentar"):** o código existente não é alterado. Só se acrescentam ficheiros novos e pontos de ligação novos (uma linha `app.use` ou `require`, uma fila, exchange ou *binding* em `rabbitMQ/definitions.json`, um serviço ou volume no `docker-compose.yaml`, um `location` ou `log_format` no `nginx/nginx.conf`, componentes novos no frontend), sem tocar nas linhas existentes nem mudar o comportamento do fluxo de imagem.
+- O utilizador não escolhe codec nem qualidade (UC-VID-012 Q1).
+
+## Notas
+
+- Esforço no ADD: UC-VID-012 = M. `avg_complexity` = 2 (maior esforço do ADD no bolt, com S=1, M=2, L=3); `avg_uncertainty`, `max_dependencies` e `testing_scope` são preenchidos no início do bolt na Construção (specsDuvidas D-01).

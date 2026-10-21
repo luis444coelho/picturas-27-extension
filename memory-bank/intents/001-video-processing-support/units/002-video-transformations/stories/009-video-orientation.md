@@ -19,14 +19,15 @@ implemented: false
 
 ## Acceptance Criteria
 
-- [ ] Quando seleciono uma orientação suportada, então a pré-visualização corresponde à transformação e posso confirmá-la.
-- [ ] Opção inválida é recusada antes de iniciar tarefa.
-- [ ] O resultado é um novo recurso e o original mantém-se inalterado.
+- [ ] Quando escolho uma rotação de 0, 90°, 180° ou 270° e/ou espelho horizontal ou vertical, então a pré-visualização mostra a transformação (rotação antes do espelho) e as dimensões resultantes em ≤ 1 s, e posso confirmar.
+- [ ] Ângulo fora do conjunto dá `INVALID_ORIENT_PARAMS`; sem transformação, ou com 180° e os dois espelhos (identidade), dá `NO_CHANGES`; nos dois casos não é criada tarefa.
+- [ ] O resultado é um novo recurso com largura e altura trocadas a 90°/270°, sem barras (salvo o corte de 1 px numa dimensão ímpar); o original mantém-se inalterado.
 
 ## Traceability
 
 - **Use case:** UC-VID-011.
-- **Requirements:** `REQ-VID-ORIENT-*; REQ-VID-NFR-015,018,026`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes.
+- **Requirements:** `REQ-VID-ORIENT-001` a `009`. Consome `REQ-VID-COM-*`, `REQ-VID-NFR-015`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
+- **Decisões do ADD v1.1:** 4.6, T-07, Q-ADD-24 (identidade), Q-ADD-25.
 
 ## Dependencies
 
@@ -36,4 +37,5 @@ implemented: false
 ## Out of Scope
 
 - Alterar o ficheiro original.
-- Funcionalidades ou limites que não constem da ERS v2.3.
+- Alterar código existente (regra 2.6 do ADD: só acrescentar).
+- Funcionalidades ou limites que não constem da ERS v2.4, dos casos de uso v1.5 ou do ADD v1.1.

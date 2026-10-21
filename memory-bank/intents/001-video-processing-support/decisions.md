@@ -3,12 +3,33 @@ intent: 001-video-processing-support
 phase: inception
 status: superseded
 created: 2026-10-09T16:57:05Z
-updated: 2026-10-13T11:26:00Z
+updated: 2026-10-21T11:23:25Z
 ---
 
 # Decisions: Video Processing Support
 
-> **Decisões históricas da primeira proposta; supersedidas.** As regras e decisões atuais são DQ-001 a DQ-025 em `docs/requirements.md`, `docs/inception/artefactos-finais.md` e nos capítulos 3, 5 e 6 do relatório.
+> **Decisões históricas da primeira proposta; supersedidas.** As decisões atuais são as do ADD v1.1 (`docs/add.md`: regra 2.6, T-00 a T-10, secções 4.1 a 4.10 e Q-ADD-01 a 25, dadas como aceites) e as DQ-001 a DQ-025 da ERS v2.4 (`docs/requirements.md`), resumidas em `docs/inception/artefactos-finais.md`. As decisões da equipa sobre o planeamento da Construção (D-01 a D-10) estão resumidas abaixo e registadas em `docs/specsDuvidas.md`, com as dúvidas ainda por resolver.
+>
+> Diferenças mais visíveis face às decisões abaixo: a entrada aceita MP4, MOV e AVI (DQ-002), e não só MP4 (D-VID-002); o progresso é emitido pelo menos 1×/s em todas as operações (REQ-VID-NFR-009, ADD T-02), e não só na marca de água e na extração (D-VID-004); a quota é reservada na aceitação e a reserva torna-se definitiva na conclusão, sem passo de confirmação (ADD T-04, Q-ADD-03); o cancelamento em `queued` marca a tarefa como `cancelled` e o worker descarta-a quando a consome (ADD T-03); cadeias, junção e lotes fazem parte do MVP (DQ-014 a DQ-019); a Q-REM-01 está resolvida pelo `atempo` (UC-VID-003 Q2), a Q-REM-02 pela rejeição da configuração (REQ-VID-WATERMARK-008), e quanto à Q-REM-03 a ERS só prevê notificações por WebSocket (REQ-VID-TASK-003; eventos de vídeo no ADD T-03).
+
+## Decisões da equipa sobre o planeamento da Construção (2026-10-21)
+
+Respostas às dúvidas da revisão dos artefactos specsmd. Princípio da equipa: só ficam de fora o UC-VID-005 (B006) e o UC-VID-015 (B009); tudo o resto é implementado. Estas decisões são atuais e aplicam-se aos bolts, stories e rastreabilidade deste intent.
+
+| ID | Decisão |
+|---|---|
+| D-01 | `avg_complexity` de cada bolt = maior esforço do ADD nos seus UC (S=1, M=2, L=3): B001 = 3, B002 = 1, B005 = 2, B007 = 2, B008 = 3, B009 = 3; B003, B004 e B006 = `null` (sem esforço no ADD). `avg_uncertainty`, `max_dependencies` e `testing_scope` ficam `null` e são preenchidos no início de cada bolt na Construção (specsDuvidas D-01). |
+| D-02 | A tabela de Bolts não muda. A B001 constrói a parte do T-00 de que a ingestão precisa (coleção `videos`, `videoStages.js` e URLs de escrita, `formats.js`, routers com o `videoAuth`, filas `video_operations_queue`, `video_project_queue` e `video_ws_queue`, `wsGateway/video.js` e o worker `Tools/video/` com a ingestão); a B003 fica com o `VideoTask`, o `video_project_locks`, a exchange `video_control`, a quota, o cancelamento e o progresso, o registo de operações e o executor de cadeias. Os `REQ-VID-AUTH-*` passam para a B001 (specsDuvidas D-02). |
+| D-03 | Cada requisito vai para o bolt que constrói o componente: NFR-010 na B001; NFR-013 e NFR-018 na ST-VID-COM-001 e na B003. A B004 e a B008 verificam os três nos critérios de aceitação, sem serem donas (specsDuvidas D-03). |
+| D-04 | A B003 cria a rotina periódica da Q-ADD-14 para as tarefas paradas, os lugares de tarefa ativa sem dono e a remoção dos recursos de vídeo de projetos apagados; a parte dos lotes e dos ZIP fica fora desta construção (specsDuvidas D-04). |
+| D-05 | Não se aplica nesta construção. Se a B006 for retomada, a equipa escreve antes um complemento ao ADD sobre onde corre a extração e onde ficam as imagens (specsDuvidas D-05). |
+| D-06 | A B006 (UC-VID-005) e a B009 (UC-VID-015) ficam fora desta construção: bolts e stories com `status: blocked` e o motivo; a B001 e a B003 não constroem as peças só usadas pelos lotes nem a extração; `REQ-VID-FRAMES-*`, `REQ-VID-BATCH-*`, `REQ-VID-TASK-007` e a parte de lotes da `REQ-VID-QUOTA-007` ficam não cobertos; a predefinição de cadeia só deixa de poder ser carregada num lote (specsDuvidas D-06). |
+| D-07 | A NFR-004, a NFR-019 e a NFR-020 só servem a extração e ficam não cobertas nesta construção. A NFR-014 continua coberta na parte da junção e da cadeia (UC-VID-013 RN2-RN3, UC-VID-014 RN5) e fica parcialmente não coberta só na parte de lotes (UC-VID-015 RN2), como a QUOTA-007 (specsDuvidas D-07). |
+| D-08 | Vão para a B001, porque a ingestão precisa deles: o `projects/video/amqp.js`; os URLs internos de leitura e o `route/video.js` com o `videoUrls.js` do `imageStorageService` (T-08); o volume `video_tmp`; e a declaração completa da `video_operations_queue` com todos os argumentos do T-03 (*quorum*, `x-delivery-limit`, `x-consumer-timeout`, *dead-letter*), que pela regra 2.6 não podem ser acrescentados depois. A B003 estende-os por acréscimo, sem os alterar. Nota confirmada: o URL de descarregamento de 900 s continua no âmbito da B002, que usa o módulo da B001 por acréscimo (specsDuvidas D-08). |
+| D-09 | Pela regra da D-03, a NFR-011 passa para a B001, que cria as filas e o worker; a B003 continua a verificá-la nos critérios de passagem (specsDuvidas D-09). |
+| D-10 | A NFR-014 passa a pertencer à ST-VID-013 e à B008, na parte da junção e da cadeia (UC-VID-013 RN2-RN3, UC-VID-014 RN5); a ST-VID-014 verifica-a; a parte de lotes (UC-VID-015 RN2) continua "parcialmente não coberta (D-06)" na ST-VID-015 e na B009 (specsDuvidas D-10). |
+
+## Decisões históricas da primeira proposta
 
 Todas as decisões abaixo foram **aprovadas** em 2026-10-13 para efeitos do MVP.
 

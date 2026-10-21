@@ -19,14 +19,15 @@ implemented: false
 
 ## Acceptance Criteria
 
-- [ ] Quando seleciono um filtro suportado, então o sistema apresenta a pré-visualização prevista e permite confirmar a operação.
-- [ ] Filtro fora do catálogo suportado é rejeitado sem criar tarefa.
-- [ ] O resultado é novo e o original permanece inalterado.
+- [ ] Quando abro o painel, vejo os seis filtros do catálogo com miniaturas sobre o fotograma 0; ao selecionar um, vejo em ≤ 1 s a pré-visualização e posso confirmar.
+- [ ] Filtro em falta ou fora do catálogo dá `INVALID_FILTER` sem criar tarefa.
+- [ ] O resultado é um novo MP4 com o filtro em todos os fotogramas e as restantes propriedades preservadas (salvo o corte de 1 px numa dimensão ímpar); o original não é alterado.
 
 ## Traceability
 
 - **Use case:** UC-VID-009.
-- **Requirements:** `REQ-VID-FILTER-*; REQ-VID-NFR-015,018,026`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes.
+- **Requirements:** `REQ-VID-FILTER-001` a `007`. Consome `REQ-VID-COM-*`, `REQ-VID-NFR-015`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
+- **Decisões do ADD v1.1:** 4.4 (`filters.json` com matrizes 3×3 e inversão), T-07, Q-ADD-07 (matrizes de Vintage, Frio e Quente, pendente no ADD), Q-ADD-25.
 
 ## Dependencies
 
@@ -36,4 +37,5 @@ implemented: false
 ## Out of Scope
 
 - Alterar o ficheiro original.
-- Funcionalidades ou limites que não constem da ERS v2.3.
+- Alterar código existente (regra 2.6 do ADD: só acrescentar).
+- Funcionalidades ou limites que não constem da ERS v2.4, dos casos de uso v1.5 ou do ADD v1.1.
