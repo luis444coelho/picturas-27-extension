@@ -54,15 +54,35 @@ As associações do diagrama indicam os perfis que podem iniciar os casos de uso
   caption: [Modelo de domínio da baseline atualizado com os conceitos da extensão de vídeo],
 )
 
-O modelo preserva as entidades e relações da baseline e acrescenta apenas os conceitos necessários à extensão: `Recurso multimédia`, `Vídeo`, `Trabalho de processamento` e `Ferramenta de vídeo`. É um diagrama conceptual de entidades e relações. Não apresenta atributos, métodos, estados internos nem componentes tecnológicos; estes detalhes, quando necessários, são definidos nos requisitos e casos de uso.
+O modelo de domínio alarga a baseline, centrada na edição de imagens, para integrar recursos e operações de vídeo. Mantém as entidades existentes, incluindo os perfis de utilizador, `Projeto`, `Imagem`, `Preset`, a hierarquia de ferramentas e os conceitos de assistência por IA. Acrescenta seis conceitos: `Recurso multimédia`, `Vídeo`, `Ferramenta de vídeo`, `Trabalho de processamento`, `Lote` e `Predefinição de vídeo`. A extensão generaliza as associações de carregamento e pertença ao projeto e introduz relações para representar a execução das operações, a proveniência dos resultados e a reutilização de configurações. O diagrama é conceptual, apresenta entidades e relações, enquanto atributos, estados e regras de execução são especificados nos requisitos e casos de uso.
 
-*Relação entre Vídeo e Imagem.* `Recurso multimédia` generaliza `Imagem` e `Vídeo`, que são especializações do recurso integrado num projeto. Assim, partilham o contexto de carregamento e pertença ao projeto sem se confundirem: uma imagem é um recurso estático e um vídeo é um recurso audiovisual contínuo. A relação `Vídeo origina fotogramas Imagem` representa a extração prevista em `UC-VID-005`. Os dados técnicos, como duração, resolução, formato, codecs e taxa de fotogramas, são relevantes para validação e consulta, mas não são desenhados como atributos neste modelo.
+*Recursos multimédia e projetos mistos* 
 
-*Projetos mistos.* `Projeto` contém `Recurso multimédia`; por consequência, pode conter imagens e vídeos no mesmo espaço de trabalho, incluindo imagens originadas por extração e vídeos produzidos por operações. A associação `Projeto usa Ferramenta` mantém a relação da baseline, e `Ferramenta de vídeo` especializa `Ferramenta` para identificar as operações aplicáveis ao vídeo. A relação entre ferramenta e vídeo não elimina as ferramentas de imagem: a extração cria entidades `Imagem`, sobre as quais se aplicam as ferramentas existentes.
+Na baseline, o utilizador carregava a `Imagem` e o `Projeto` continha imagens. Estas associações passam a incidir sobre `Recurso multimédia`, uma entidade abstrata especializada em `Imagem` e `Vídeo`. A generalização permite que ambos partilhem o contexto de carregamento e pertença ao projeto, preservando as suas características próprias. A introdução de `Vídeo` representa o recurso temporal sobre o qual incidem as novas operações. Assim, um projeto pode reunir imagens, vídeos carregados, vídeos resultantes de processamento e fotogramas extraídos. Duração, resolução, formato, codecs e taxa de fotogramas são dados relevantes para validação e consulta, mas não são apresentados como atributos no diagrama.
 
-*Trabalho assíncrono e resultado.* `Trabalho de processamento` é registado num projeto, submetido por um utilizador, processa um ou mais vídeos, executa uma ou mais ferramentas de vídeo e pode produzir recursos multimédia. Esta estrutura cobre operações isoladas, encadeamento e processamento em lote, bem como resultados de vídeo e imagens extraídas. O diagrama não desenha estados do trabalho nem o ciclo de vida temporal. Os estados `queued`, `processing`, `completed`, `failed` e `cancelled`, o progresso, o cancelamento e as condições de persistência são especificados nos requisitos transversais de tarefas e nos casos de uso.
+*Ferramentas de vídeo e ligação à edição de imagens* 
 
-*Ferramentas e quotas.* A especialização `Ferramenta de vídeo` torna explícito o catálogo de operações de vídeo; as ferramentas da baseline continuam associadas à edição de imagens. Cadeias e lotes são formas de composição/submissão de trabalhos descritas nos casos `UC-VID-014` e `UC-VID-015`, não entidades adicionais no diagrama atual. Também não existe neste modelo uma entidade de quota ou conta: os limites por perfil, a reserva e confirmação de créditos e as regras de custo são políticas transversais documentadas abaixo e nos requisitos de quota. Esta distinção evita atribuir ao desenho conceitos que ele não representa.
+A `Ferramenta de vídeo` especializa `Ferramenta` e associa-se a `Vídeo`, integrando o novo catálogo de operações na estrutura existente. Mantêm-se a associação `Projeto usa Ferramenta` e a relação `Ferramenta altera Imagem`. A relação `Vídeo origina fotogramas Imagem` concretiza a extração prevista em `UC-VID-005`: os fotogramas tornam-se imagens do projeto, utilizáveis pelas ferramentas de imagem da baseline. Esta ligação permite aproveitar as capacidades existentes sobre os resultados da extração.
+
+*Proveniência dos vídeos resultantes.* 
+
+A nova relação `Vídeo origina resultado Vídeo` distingue os vídeos de entrada dos vídeos produzidos pelas operações. Cada vídeo resultante pode ter uma ou mais origens: uma edição simples parte de um vídeo, enquanto a junção pode combinar vários. Um vídeo de origem pode, por sua vez, dar origem a vários resultados. Esta relação permite conservar a proveniência das novas versões, em coerência com a regra de preservação dos originais.
+
+*Trabalho de processamento e cadeias.* 
+
+O `Trabalho de processamento` é introduzido para representar a execução assíncrona de um pedido, distinguindo-a dos recursos utilizados e das ferramentas executadas. Cada trabalho é registado num projeto, submetido por um utilizador, processa um ou mais vídeos, executa uma ou mais ferramentas de vídeo e pode produzir recursos multimédia. Estas relações abrangem operações isoladas, junções, extração de fotogramas e cadeias. Em `UC-VID-014`, uma cadeia corresponde a um único trabalho atómico que aplica uma sequência de operações e publica apenas o resultado final; não constitui uma entidade autónoma no diagrama. Os estados `queued`, `processing`, `completed`, `failed` e `cancelled`, o progresso e o cancelamento são definidos nos requisitos transversais de tarefas.
+
+*Processamento em lote.* 
+
+O `Lote` é uma entidade própria, registada num projeto, que agrupa dois ou mais trabalhos de processamento, um por vídeo. A sua introdução responde a `UC-VID-015` e permite identificar e acompanhar uma submissão conjunta, preservando o estado e o resultado de cada trabalho. Ao contrário de uma cadeia atómica, os resultados dos vídeos de um lote são independentes: uma falha não invalida os resultados já concluídos. Os requisitos `REQ-VID-TASK-007` e `REQ-VID-BATCH-*` especificam o estado agregado, o cancelamento e a execução sequencial, contando o lote como uma única tarefa ativa no projeto.
+
+*Predefinições de vídeo.* 
+
+A `Predefinição de vídeo` é criada por um utilizador e contém uma ou mais ferramentas de vídeo. Representa uma configuração reutilizável, permitindo guardar uma cadeia com os respetivos parâmetros e aplicá-la posteriormente em novas cadeias ou lotes. A entidade é separada do `Preset` da baseline para distinguir as configurações de vídeo das predefinições de imagem e impedir a sua aplicação no contexto errado. Estas predefinições pertencem ao utilizador, não são partilhadas e só podem guardar cadeias sem junção.
+
+*Limites e quotas.* 
+
+O modelo mantém os perfis da baseline, mas não acrescenta entidades de conta ou quota. Os limites por perfil, o custo das operações e as regras de reserva, consumo e devolução de créditos são políticas transversais descritas nos requisitos `REQ-VID-QUOTA-*` e nas regras de negócio seguintes. Estas políticas condicionam a submissão e execução dos trabalhos sem serem representadas como entidades adicionais no diagrama.
 
 == Regras de negócio transversais
 
