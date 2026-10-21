@@ -8,11 +8,14 @@ stories: [ST-VID-000]
 created: 2026-10-19T17:31:16Z
 started: 2026-10-21T16:12:26Z
 completed: null
-current_stage: design
+current_stage: adr
 stages_completed:
   - name: model
     completed: 2026-10-21T16:19:54Z
     artifact: ddd-01-domain-model.md
+  - name: design
+    completed: 2026-10-21T23:38:33Z
+    artifact: ddd-02-technical-design.md
 requires_bolts: []
 enables_bolts: [002-video-access, 003-video-task-foundation]
 requires_units: []
@@ -43,8 +46,8 @@ Implementar o UC-VID-000 sobre a fundação mínima do ADD (T-00): coleção `vi
 ## Etapas
 
 - [x] **1. Domain Model**: Concluído → `ddd-01-domain-model.md`
-- ⏳ **2. Technical Design**: Em curso → `ddd-02-technical-design.md`
-- [ ] **3. ADR Analysis** (opcional): Pending → `adr-{n}-{slug}.md`
+- [x] **2. Technical Design**: Concluído → `ddd-02-technical-design.md`
+- ⏳ **3. ADR Analysis** (opcional): Em curso → `adr-{n}-{slug}.md`
 - [ ] **4. Implement**: Pending → código nos componentes indicados em "Saídas esperadas"
 - [ ] **5. Test**: Pending → `ddd-03-test-report.md`
 

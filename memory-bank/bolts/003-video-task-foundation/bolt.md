@@ -73,7 +73,7 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 - Executor de um único `-filter_complex` no worker `Tools/video/` da B001, com a codificação por omissão (T-02; specsDuvidas D-02, D-03). O volume `video_tmp` é da B001 (specsDuvidas D-08).
 - `VideoTask`, `video_project_locks`, endpoints de tarefa, cancelamento e progresso, exchange `video_control` em `rabbitMQ/definitions.json` e evento `video-task-update` (T-03).
 - Integração com a reserva e a devolução de quota existentes (T-04).
-- Rotina periódica da Q-ADD-14 para tarefas paradas, lugares sem dono e recursos de vídeo de projetos apagados (specsDuvidas D-04).
+- Rotina periódica da Q-ADD-14 para tarefas paradas, lugares sem dono e recursos de vídeo de projetos apagados (specsDuvidas D-04), e para os carregamentos abandonados da B001: vídeos em `queued` há mais de 900 s + margem, de que se apagam o objeto em `video_src` e o registo (specsDuvidas D-15).
 - Não constrói o `VideoBatch`, o endpoint de lote, os itens `batch_item`, a devolução por item, a rotina de lotes e ZIP nem o `archiver` (specsDuvidas D-06).
 - Correlação, logs e formato de erro das rotas de vídeo (T-10).
 - Testes de aceitação ligados aos critérios de `REQ-VID-COM-*` (QUOTA, TASK, ERROR) e NFR rastreados.
@@ -89,7 +89,7 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 - [ ] A reserva debita os créditos na aceitação, a conclusão não faz chamada de confirmação, e falha, cancelamento ou *dead-letter* devolvem os créditos (Premium sem chamadas).
 - [ ] O cancelamento termina o FFmpeg em curso, limpa `/tmp/video/<taskId>/` e apaga um resultado já enviado.
 - [ ] As tarefas de vídeo circulam só pelas filas de vídeo da B001, sem alterar as ferramentas de imagem nem as filas existentes (verificação da NFR-011, specsDuvidas D-09).
-- [ ] A rotina periódica retoma ou fecha as tarefas paradas, liberta os lugares de tarefa ativa sem dono e remove os recursos de vídeo de projetos apagados.
+- [ ] A rotina periódica retoma ou fecha as tarefas paradas, liberta os lugares de tarefa ativa sem dono, remove os recursos de vídeo de projetos apagados e apaga os carregamentos abandonados (D-15).
 
 ## Dependências
 

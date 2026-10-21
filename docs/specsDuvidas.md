@@ -123,3 +123,67 @@
 - **O que as fontes dizem:** REQ-VID-UPLOAD-012 e a exceção de rede do UC-VID-000 não dão código. ADD T-03 define só `video-task-update` e `video-batch-update`.
 - **Opções:** (a) `CORRUPTED_FILE`, `UPLOAD_ABORTED` e `video-ingest-update`; (b) outros nomes.
 - **Resposta:** **(a).** Aceitam-se `CORRUPTED_FILE` e `UPLOAD_ABORTED`. O evento WebSocket da ingestão chama-se `video-ingest-update`, ao lado do `video-task-update` do T-03.
+
+## D-15 — Estado do vídeo entre o pedido do URL e a confirmação; carregamentos abandonados
+
+- **Onde:** `memory-bank/bolts/001-video-lifecycle/ddd-02-technical-design.md` (API Design, rotas `uploads`, `upload/complete` e `DELETE …/upload`; Data Persistence).
+- **Dúvida:** Com o PUT pré-assinado (D-11), há um intervalo entre a emissão do URL e a confirmação. Onde fica o estado do carregamento nesse intervalo, e quem limpa um carregamento abandonado (URL pedido e ficheiro enviado, ou não, mas nunca confirmado nem cancelado, por exemplo porque o separador foi fechado)?
+- **O que as fontes dizem:** ADD T-00: `status` `queued | processing | completed | failed`, em que `queued`, `processing` e `failed` só se aplicam à ingestão. UC-VID-000 Garantia Mínima e ST-VID-000 AC4: em falha ou cancelamento não fica objeto nem registo. A rotina periódica da Q-ADD-14 é da B003 (D-04) e não prevê carregamentos abandonados. Nenhuma fonte trata o intervalo entre o URL e a confirmação.
+- **Opções:** (a) o registo é criado em `videos` ao emitir o URL, com `status: queued` (= à espera do envio), e a chave é derivada do `videoId`; a confirmação passa-o a `processing`; o cancelamento (`DELETE …/upload`) apaga o objeto e o registo; os `queued` com mais de 900 s + margem são apagados (objeto e registo) pela rotina da Q-ADD-14, o que acrescenta este caso ao âmbito da B003; (b) não há registo até à confirmação: o pedido do URL devolve um *token* assinado com a chave, o nome e o tamanho, e a rotina da B003 apaga os objetos de `video_src` sem registo; (c) como (a), mas com uma rotina própria na B001.
+- **Resposta:** **(a), aceite.** O registo é criado em `videos` com `status: queued` ao emitir o URL, com a chave derivada do `videoId`; a confirmação passa-o a `processing` e o cancelamento (`DELETE …/upload`) apaga o objeto e o registo. Esse registo `queued` nunca aparece na galeria, que só lista vídeos `completed` (COM-002). A limpeza dos carregamentos abandonados (`queued` com mais de 900 s + margem: objeto e registo) fica explicitamente no âmbito da B003, na rotina periódica da Q-ADD-14.
+
+## D-16 — Ponto de montagem do UI de vídeo no frontend
+
+- **Onde:** `ddd-02-technical-design.md` (Componentes e ficheiros, ponto de ligação 8).
+- **Dúvida:** Onde aparecem o carregamento, a galeria e o leitor de vídeo no frontend, e como se ligam ao ecrã do projeto sem alterar linhas existentes?
+- **O que as fontes dizem:** ADD 2.6: são permitidos "componentes novos no frontend" e pontos de ligação novos sem tocar nas linhas existentes; ADD 2.1: o editor de projetos está em `frontend/app/dashboard/[pid]/page.tsx`. UC-VID-000 passo 7: o vídeo aparece "na galeria de recursos do projeto". Nenhuma fonte diz onde se monta o UI de vídeo.
+- **Opções:** (a) acrescentar ao `app/dashboard/[pid]/page.tsx` uma linha `import` e um elemento `<VideoSection />`, como ponto de ligação; (b) uma página nova `app/dashboard/[pid]/videos/page.tsx`, sem tocar em ficheiros existentes, a que se chega por URL (sem ligação no ecrã do projeto, salvo com a opção (a) para o link); (c) outra.
+- **Resposta:** **(a), aceite.** Acrescenta-se ao `app/dashboard/[pid]/page.tsx` uma linha `import` e um elemento `<VideoSection />`, como ponto de ligação permitido pela regra 2.6.
+
+## D-17 — Rotas de galeria e de reprodução
+
+- **Onde:** `ddd-02-technical-design.md` (API Design: `GET …/videos` e `GET …/videos/:video/playback`).
+- **Dúvida:** Que rotas servem a galeria (passo 7 do UC-VID-000) e o leitor (passo 8), e com que URL o leitor reproduz o vídeo?
+- **O que as fontes dizem:** ADD 4.1 e 4.2 definem só `GET …/videos/:video` (informações) e `GET …/videos/:video/download` (B002). ADD T-06: o leitor usa `preview_key` quando existe e `original_key` nos restantes casos. NFR-017: URLs temporários assinados por 15 min. Nenhuma fonte define a listagem nem o URL de reprodução.
+- **Opções:** (a) `GET …/videos` (só `completed`, com URL assinado da miniatura) e `GET …/videos/:video/playback` (URL GET *inline* de 900 s pelo `/s3-video/`), ambas com permissão de leitura e recusa de `anonymous`, na B001; (b) a galeria usa o `GET …/videos/:video` da B002, e a B001 fica só com a listagem.
+- **Resposta:** **(a), aceite.** A B001 constrói `GET …/videos` (só `completed`, com URL assinado da miniatura) e `GET …/videos/:video/playback` (URL GET *inline* de 900 s pelo `/s3-video/`), com permissão de leitura e recusa de `anonymous`.
+
+## D-18 — Réplicas do worker e `x-consumer-timeout` (Q-ADD-10)
+
+- **Onde:** `ddd-02-technical-design.md` (Data Persistence, filas; NFR Implementation, Desempenho); `docker-compose.yaml` (serviço `video`).
+- **Dúvida:** Quantas réplicas do worker de vídeo se lançam, e que valor tem o `x-consumer-timeout` da `video_operations_queue`, que não pode ser alterado depois (regra 2.6, D-08)?
+- **O que as fontes dizem:** ADD Q-ADD-10 (em aberto): com uma só réplica, uma tarefa Premium de 60 min bloqueia os outros projetos. ADD T-03: `x-consumer-timeout` "por exemplo 3 h = 10 800 000 ms".
+- **Opções:** (a) 1 réplica e 10 800 000 ms; (b) N réplicas (indicar N) e 10 800 000 ms; (c) outros valores.
+- **Resposta:** **(a), aceite.** 1 réplica por agora e `x-consumer-timeout` de 10 800 000 ms. O número de réplicas pode subir mais tarde no `docker-compose.yaml` sem mexer na fila (Q-ADD-10).
+
+## D-19 — Parâmetros de codificação da cópia de pré-visualização MP4 (Q-ADD-11)
+
+- **Onde:** `ddd-02-technical-design.md` (NFR Implementation, Cópia MP4).
+- **Dúvida:** Que CRF e *preset* do `libx264` e que bitrate de AAC se usam quando a cópia de pré-visualização é recodificada na ingestão?
+- **O que as fontes dizem:** ADD T-02: `libx264` + `aac`, `-pix_fmt yuv420p`, `-movflags +faststart`; "o CRF e o *preset* ficam por definir (questão Q-ADD-11)". Nenhuma fonte dá o bitrate do áudio.
+- **Opções:** (a) `-preset veryfast -crf 23` e AAC a 128 kb/s (qualidade de pré-visualização, codificação rápida); (b) `-preset medium -crf 20` e AAC a 160 kb/s; (c) outros valores.
+- **Resposta:** **(a), aceite.** `-preset veryfast -crf 23` e AAC a 128 kb/s na cópia de pré-visualização. Os valores das operações (B003+) continuam na Q-ADD-11.
+
+## D-20 — Dimensão e qualidade da miniatura
+
+- **Onde:** `ddd-02-technical-design.md` (NFR Implementation, Miniatura e fotograma 0).
+- **Dúvida:** Com que dimensão e qualidade JPEG se guarda a miniatura?
+- **O que as fontes dizem:** REQ-VID-UPLOAD-014 e RN5 do UC-VID-000: JPEG a 00:00:01 (ou fotograma 0), sem dimensão. ADD T-07 fixa ≤ 1280 px só para o fotograma 0.
+- **Opções:** (a) rotação aplicada, largura ≤ 320 px, `-q:v 4`; (b) o mesmo limite do fotograma 0 (≤ 1280 px); (c) resolução de apresentação completa.
+- **Resposta:** **(a), aceite.** Miniatura com a rotação aplicada, largura ≤ 320 px e `-q:v 4`.
+
+## D-21 — Códigos de erro das rotas de vídeo não fixados nas fontes
+
+- **Onde:** `ddd-02-technical-design.md` (Error Handling).
+- **Dúvida:** Que `code` levam as respostas 401, 403, 404, os 409 de estado inválido na confirmação e no cancelamento, as falhas internas de processamento e as falhas de infraestrutura, no formato `{error: {code, message, details}, correlationId}`?
+- **O que as fontes dizem:** ADD T-10 fixa o formato e dá exemplos de códigos de domínio (`LIMIT_EXCEEDED`, `QUOTA_EXCEEDED`, …); ADD T-03 dá `RESOURCE_NOT_READY` (409) e `UNSUPPORTED_FORMAT`; D-14 dá `CORRUPTED_FILE` e `UPLOAD_ABORTED`. REQ-VID-AUTH-001/002 e COM-001 dão só os códigos HTTP.
+- **Opções:** (a) `UNAUTHENTICATED` (401), `FORBIDDEN` (403), `NOT_FOUND` (404), `INVALID_STATE` (409), `PROCESSING_ERROR` (falha do FFmpeg ou *dead-letter*) e `INTERNAL_ERROR` (500/502); (b) outros nomes.
+- **Resposta:** **(a), aceite.** `UNAUTHENTICATED` (401), `FORBIDDEN` (403), `NOT_FOUND` (404), `INVALID_STATE` (409), `PROCESSING_ERROR` (falha do FFmpeg ou *dead-letter*) e `INTERNAL_ERROR` (500/502). A B003 reutiliza os mesmos códigos.
+
+## D-22 — Unidade dos limites de tamanho por perfil
+
+- **Onde:** `ddd-02-technical-design.md` (NFR Implementation, NFR-008); `projects/video/profiles.js`.
+- **Dúvida:** Os limites "200 MB" e "2 GB" (RN4, NFR-008, UPLOAD-004) contam-se em base 1024 (200 × 1024² e 2 × 1024³ bytes) ou em base 1000?
+- **O que as fontes dizem:** REQ-VID-INFO-005 define, para a apresentação do tamanho, 1 MB = 1024² bytes e 1 GB = 1024³ bytes. O `client_max_body_size 2g` do nginx (T-08) é 2 × 1024³ bytes. As regras de limite não dizem a base.
+- **Opções:** (a) base 1024, coerente com a INFO-005 e com o nginx; (b) base 1000.
+- **Resposta:** **(a), aceite.** Base 1024: 200 MB = 200 × 1024² bytes e 2 GB = 2 × 1024³ bytes, coerente com a INFO-005 e com o `client_max_body_size 2g` do nginx.
