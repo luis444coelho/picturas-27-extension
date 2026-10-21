@@ -8,13 +8,13 @@ Este documento fecha os artefactos de planeamento da Inception. Os diagramas sã
 
 ## 1. Modelo de domínio atualizado — leitura textual
 
-O modelo visual encontra-se em [`modelo_dominio.puml`](../diagrams/modelo_dominio.puml). A decisão é representar imagens e vídeos como especializações de `RecursoMultimédia`, pois partilham identidade, nome, tamanho, data de carregamento e referência de armazenamento. `Imagem` acrescenta dimensões, formato e, quando extraída de vídeo, timestamp de origem. `Vídeo` acrescenta duração, resolução, taxa de fotogramas, bitrate, codecs e referência de miniatura. Os resultados são novos recursos e mantêm a ligação ao vídeo de origem (`sourceVideoId`).
+O modelo visual encontra-se em [`modelo_dominio.puml`](../diagrams/modelo_dominio.puml). A decisão é representar imagens e vídeos como especializações de `RecursoMultimédia`, pois partilham identidade, nome, tamanho, data de carregamento e referência de armazenamento. `Imagem` acrescenta dimensões, formato e, quando extraída de vídeo, timestamp de origem. `Vídeo` acrescenta duração, resolução, taxa de fotogramas, bitrate, codecs e referência de miniatura. Os resultados são novos recursos e mantêm a ligação ao vídeo de origem (`sourceVideoId`) ou, na junção, aos vários vídeos de origem por ordem (`sourceVideoIds`); por isso, no modelo, um vídeo resultante pode ter uma ou mais origens.
 
 Um `Projeto` contém recursos multimédia de ambos os tipos, incluindo vídeos originais, vídeos derivados e imagens extraídas. A coleção mista não torna os tipos intercambiáveis: operações de vídeo recebem vídeos; ferramentas de imagem recebem imagens, incluindo fotogramas extraídos.
 
-Cada pedido demorado é representado por `TrabalhoProcessamento`, associado ao projeto, ao utilizador que o submeteu, ao recurso de entrada e à ferramenta/parâmetros validados. O ciclo de vida é `queued → processing → completed | failed | cancelled`. O trabalho comunica progresso quando aplicável, conserva o erro terminal e referencia os recursos produzidos. Um lote é um trabalho agregador com subtarefas por vídeo e resultados independentes; uma cadeia é um único trabalho atómico com um único resultado final.
+Cada pedido demorado é representado por `TrabalhoProcessamento`, associado ao projeto, ao utilizador que o submeteu, ao recurso de entrada e à ferramenta/parâmetros validados. O ciclo de vida é `queued → processing → completed | failed | cancelled`. O trabalho comunica progresso quando aplicável, conserva o erro terminal e referencia os recursos produzidos. O `Lote` é uma entidade própria, registada no projeto, que agrupa dois ou mais trabalhos de processamento (um por vídeo) com estado agregado e resultados independentes; uma cadeia é um único trabalho atómico com um único resultado final (ADD v1.1, T-09).
 
-`FerramentaVídeo` cobre ingestão/consulta e transformação de vídeo: recorte, áudio, velocidade, marca de água, extração, ajustes, filtros, redimensionamento, orientação, conversão, junção, cadeias e lotes. `FerramentaImagem` continua a operar sobre `Imagem`; a extração transforma instantes do vídeo em imagens normais do projeto, preservando a proveniência. A política da conta define limites e quota: Registado tem 5 créditos diários e limites de vídeo até 5 min/200 MB e 50 fotogramas por extração; Premium não tem quota diária e tem limites até 60 min/2 GB e 500 fotogramas. Ambos têm no máximo uma tarefa ativa por projeto.
+`FerramentaVídeo` cobre ingestão/consulta e transformação de vídeo: recorte, áudio, velocidade, marca de água, extração, ajustes, filtros, redimensionamento, orientação, conversão, junção, cadeias e lotes. `FerramentaImagem` continua a operar sobre `Imagem`; a extração transforma instantes do vídeo em imagens normais do projeto, preservando a proveniência. A `Predefinição de vídeo` guarda uma cadeia de ferramentas de vídeo sem junção, criada pelo utilizador e sem partilha; é uma entidade separada do `Preset` de imagem, para que as predefinições de imagem nunca recebam cadeias de vídeo (ADD v1.1, 4.9). A política da conta define limites e quota: Registado tem 5 créditos diários e limites de vídeo até 5 min/200 MB e 50 fotogramas por extração; Premium não tem quota diária e tem limites até 60 min/2 GB e 500 fotogramas. Ambos têm no máximo uma tarefa ativa por projeto.
 
 ### Respostas às quatro perguntas críticas
 
@@ -54,12 +54,12 @@ Todos os casos de vídeo exigem utilizador autenticado Registado ou Premium. UC-
 |---|---|---|
 | RNG-01 | Só utilizadores Registados e Premium autenticados podem usar as funcionalidades de vídeo. Consultar informações e descarregar requer permissão de leitura ou superior; carregar e alterar recursos requer permissão de edição ou propriedade. A quota é debitada à identidade autenticada que submete o trabalho. | `REQ-VID-AUTH-*`; UC-VID-000 a 015 |
 | RNG-02 | Entrada: MP4/MOV com H.264 e AAC (faixa áudio opcional); AVI com H.264 ou MPEG-4 Part 2 e AAC ou MP3. Formatos/codecs fora da matriz são rejeitados. Operações produzem MP4 H.264/AAC; UC-VID-012 pode produzir MP4, MOV ou AVI conforme a matriz aprovada. | `REQ-VID-UPLOAD-*`, `REQ-VID-CONVERT-*`, `REQ-VID-NFR-003`; DQ-002, DQ-013 |
-| RNG-03 | Limites: Registado ≤5 min, ≤200 MB, até 50 fotogramas por extração; Premium ≤60 min, ≤2 GB, até 500 fotogramas. Restrições adicionais de resolução, número de entradas e passos aplicam-se conforme UC-VID-010 e UC-VID-013 a 015. | `REQ-VID-UPLOAD-*`, `REQ-VID-FRAMES-*`, `REQ-VID-NFR-008`, `REQ-VID-NFR-014`; DQ-005, DQ-015 |
-| RNG-04 | No máximo uma tarefa de vídeo ativa por projeto. Submissão de edição é assíncrona e segue `queued → processing → completed`, `failed` ou `cancelled`; trabalhos concluídos associam resultados ao projeto. | `REQ-VID-TASK-*`, `REQ-VID-NFR-005`, `006`, `008`; DQ-004, DQ-016 |
-| RNG-05 | Registado dispõe de 5 créditos de edição por dia; Premium é ilimitado. Operação isolada custa 1 crédito; cadeia custa um crédito por passo (junção conta como passo); lote custa o custo por vídeo concluído. A quota necessária é verificada/reservada antes da admissão e só é debitada pelo trabalho entregue; falha/cancelamento devolve créditos não consumidos. | `REQ-VID-QUOTA-*`, `REQ-VID-CHAIN-*`, `REQ-VID-BATCH-*`; DQ-001, DQ-014, DQ-025 |
+| RNG-03 | Limites: Registado ≤5 min, ≤200 MB, até 50 fotogramas por extração; Premium ≤60 min, ≤2 GB, até 500 fotogramas. Restrições adicionais de resolução, número de entradas e passos aplicam-se conforme UC-VID-010 e UC-VID-013 a 015. | `REQ-VID-UPLOAD-*`, `REQ-VID-FRAMES-*`, `REQ-VID-NFR-008`, `REQ-VID-NFR-014`, `020`, `022` a `024`; DQ-005, DQ-015 |
+| RNG-04 | No máximo uma tarefa de vídeo ativa por projeto. Submissão de edição é assíncrona e segue `queued → processing → completed`, `failed` ou `cancelled`; trabalhos concluídos associam resultados ao projeto. | `REQ-VID-TASK-*`, `REQ-VID-NFR-005`, `006`, `021`; DQ-004, DQ-016 |
+| RNG-05 | Registado dispõe de 5 créditos de edição por dia; Premium é ilimitado. Operação isolada custa 1 crédito; cadeia custa um crédito por passo (junção conta como passo); lote custa o custo por vídeo concluído. A quota necessária é verificada e reservada (debitada) antes da admissão; a reserva torna-se definitiva quando o trabalho é entregue, sem passo de confirmação, e falha/cancelamento devolve os créditos não consumidos (ADD v1.1, Q-ADD-03). | `REQ-VID-QUOTA-*`, `REQ-VID-CHAIN-*`, `REQ-VID-BATCH-*`; DQ-001, DQ-014, DQ-025 |
 | RNG-06 | Upload, reprodução, pré-visualização estática, consulta de informações e descarregamento não consomem quota. | `REQ-VID-UPLOAD-014`, `REQ-VID-DOWNLOAD-*`, `REQ-VID-INFO-*`; DQ-011, DQ-023 |
 | RNG-07 | O vídeo original nunca é modificado nem eliminado por edição. Um sucesso produz novo recurso com proveniência; falha/cancelamento não publica resultados parciais. Cadeias são atómicas; lotes preservam resultados individuais já concluídos. | `REQ-VID-COM-*`, `REQ-VID-STORAGE-*`, `REQ-VID-CHAIN-*`, `REQ-VID-BATCH-*`; DQ-003, DQ-007, DQ-018 |
-| RNG-08 | Cadeias têm até 10 passos, no máximo uma junção, sem extração de fotogramas; conversão só pode ser o último passo. Lotes incluem 2–10 vídeos (Registado) ou 2–50 (Premium), não incluem junção nem extração e processam sequencialmente como uma tarefa. | `REQ-VID-CHAIN-*`, `REQ-VID-BATCH-*`, `REQ-VID-NFR-014`; DQ-015 a DQ-018 |
+| RNG-08 | Cadeias têm até 10 passos, no máximo uma junção, sem extração de fotogramas; conversão só pode ser o último passo. Lotes incluem 2–10 vídeos (Registado) ou 2–50 (Premium), não incluem junção nem extração e processam sequencialmente como uma tarefa. | `REQ-VID-CHAIN-*`, `REQ-VID-BATCH-*`, `REQ-VID-NFR-014`, `022`, `023`; DQ-015 a DQ-018 |
 | RNG-09 | Fotogramas extraídos são imagens JPEG ou PNG do projeto, conservam a resolução do vídeo e incluem instante/proveniência. Podem usar as ferramentas de imagem; não são passo de cadeia de vídeo nem operação de lote de vídeo. | `REQ-VID-FRAMES-*`, `REQ-VID-NFR-004`; DQ-017 |
 | RNG-10 | Acesso a originais e resultados requer autorização de projeto. URLs de storage são temporários; descarregamentos usam o storage diretamente e suportam retoma. | `REQ-VID-NFR-001`, `REQ-VID-NFR-016`; UC-VID-006 |
 
@@ -104,31 +104,31 @@ Unit 001 — Ciclo de vida e recursos
 
 ## 5. Planeamento dos Bolts
 
-Estimativas relativas para ordenação do trabalho, não compromissos de calendário. Cada Bolt é uma fatia vertical com critérios de aceitação rastreados aos requisitos. Tipos propostos: **DDD** para domínio/estado/quota; **Simple** para ferramentas isoladas sobre contratos estabelecidos.
+Estimativas relativas para ordenação do trabalho, não compromissos de calendário. No ADD v1.1, uma operação isolada é uma cadeia com um passo (T-01, T-02): por isso, o registo de operações, o worker de vídeo único e o executor de cadeias fazem parte da fundação (B003), e cada operação é depois um módulo desse registo. A ordem de construção segue a Q-ADD-01: primeiro a fundação de vídeo (T-00) e o worker com o executor de cadeias (T-02). Cada Bolt é uma fatia vertical com critérios de aceitação rastreados aos requisitos. Tipos propostos: **DDD** para domínio/estado/quota; **Simple** para ferramentas isoladas sobre contratos estabelecidos.
 
 | Ordem / ID | Unit | Âmbito (Stories/UC) | Tipo | Dependências | Objetivo de saída |
 |---|---|---|---|---|---|
 | B001 `001-video-lifecycle` | 001 | UC-VID-000; sessão, ingestão, validação, metadados, thumbnail, projeto | DDD | — | Recurso de vídeo válido e visualizável com persistência íntegra |
 | B002 `002-video-access` | 001 | UC-VID-006, UC-VID-007 | Simple | B001 | Consulta e download autorizado, sem quota |
-| B003 `003-video-task-foundation` | 001 | contratos comuns: estados, fila, cancelamento, quota, erro e storage temporário | DDD | B001 | Contrato partilhado de trabalho pronto para ferramentas |
+| B003 `003-video-task-foundation` | 001 | contratos comuns: estados, fila, cancelamento, quota, erro e storage temporário; registo de operações, worker de vídeo único (`Tools/video/`) e executor de cadeias com um único *filtergraph* (ADD v1.1, T-01 a T-03) | DDD | B001 | Contrato partilhado de trabalho e executor de cadeias prontos para as operações |
 | B004 `004-video-basic-edits` | 002 | UC-VID-001, 002, 003 | DDD | B003 | Recorte, remoção de áudio e velocidade como tarefas não destrutivas |
 | B005 `005-video-visual-edits` | 002 | UC-VID-004, 008, 009, 010, 011 | Simple | B003 | Transformações visuais e pré-visualização validadas |
 | B006 `006-video-frame-export` | 002 | UC-VID-005 | DDD | B003; integração imagem | Extração atómica de imagens com instante e proveniência |
 | B007 `007-video-format-conversion` | 002 | UC-VID-012 | Simple | B003 | Conversão dentro da matriz de formatos e codecs |
-| B008 `008-video-concat-chain` | 003 | UC-VID-013, 014 | DDD | B004, B005, B007 | Junção e cadeia validadas, atómicas, com custo por passo |
+| B008 `008-video-concat-chain` | 003 | UC-VID-013, 014: operação de junção e validação de estrutura da cadeia (o executor de cadeias já vem da B003) | DDD | B004, B005, B007 | Junção e cadeia validadas, atómicas, com custo por passo |
 | B009 `009-video-batch` | 003 | UC-VID-015 | DDD | B002, B004, B005, B008 | Lote sequencial, resultado independente por vídeo e quota ajustada ao concluído |
 
 ### Sequência e critérios de passagem
 
-1. **Fundação:** B001 → B002 e B003. B003 desbloqueia processamento, B002 fecha leitura e entrega de recursos.
+1. **Fundação:** B001 → B002 e B003, pela ordem da Q-ADD-01 (fundação T-00 e worker T-02 primeiro). B003 entrega o registo de operações, o worker único e o executor de cadeias e desbloqueia as B004 a B007; B002 fecha leitura e entrega de recursos.
 2. **Operações:** B004, B005, B006 e B007 podem avançar em paralelo após o contrato de tarefas; B006 também requer alinhamento com o domínio de imagens.
-3. **Composição:** B008 após as operações elegíveis; B009 após cadeia e operações-base.
+3. **Composição:** B008 (junção e validação de estrutura) após as operações elegíveis; B009 após cadeia e operações-base.
 4. **Pronto para Construção:** cada Bolt deve conservar rastreabilidade requisito→UC→critério de aceitação, cobrir estados de sucesso/falha/cancelamento e não alterar os ficheiros originais.
 
 ### Riscos e decisões a manter visíveis
 
 - Validar a matriz de contentores/codecs num ponto comum para evitar diferenças entre upload, transformação e conversão.
-- Tratar reserva, confirmação e estorno de créditos de forma consistente, sobretudo em lote parcialmente concluído.
+- Tratar reserva e estorno de créditos (a confirmação é não devolver) de forma consistente, sobretudo em lote parcialmente concluído.
 - Garantir idempotência/limpeza de objetos temporários e não publicar resultados antes do estado concluído.
 - A cadeia deve respeitar limite de recodificação e compatibilidade de cada passo; o lote não pode aceitar junção nem extração.
 
