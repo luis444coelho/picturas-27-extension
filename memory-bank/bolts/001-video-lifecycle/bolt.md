@@ -3,13 +3,16 @@ id: 001-video-lifecycle
 unit: 001-video-lifecycle
 intent: 001-video-processing-support
 type: ddd-construction-bolt
-status: planned
+status: in-progress
 stories: [ST-VID-000]
 created: 2026-10-19T17:31:16Z
-started: null
+started: 2026-10-21T16:12:26Z
 completed: null
-current_stage: null
-stages_completed: []
+current_stage: design
+stages_completed:
+  - name: model
+    completed: 2026-10-21T16:19:54Z
+    artifact: ddd-01-domain-model.md
 requires_bolts: []
 enables_bolts: [002-video-access, 003-video-task-foundation]
 requires_units: []
@@ -39,8 +42,8 @@ Implementar o UC-VID-000 sobre a fundação mínima do ADD (T-00): coleção `vi
 
 ## Etapas
 
-- [ ] **1. Domain Model**: Pending → `ddd-01-domain-model.md`
-- [ ] **2. Technical Design**: Pending → `ddd-02-technical-design.md`
+- [x] **1. Domain Model**: Concluído → `ddd-01-domain-model.md`
+- ⏳ **2. Technical Design**: Em curso → `ddd-02-technical-design.md`
 - [ ] **3. ADR Analysis** (opcional): Pending → `adr-{n}-{slug}.md`
 - [ ] **4. Implement**: Pending → código nos componentes indicados em "Saídas esperadas"
 - [ ] **5. Test**: Pending → `ddd-03-test-report.md`

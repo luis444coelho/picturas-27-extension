@@ -91,3 +91,35 @@
 - **O que as fontes dizem:** ERS v2.4 (`docs/requirements/REQ-VID-NFR.md`): a NFR-014 diz "limites por perfil ao número de vídeos por lote" (2–10 Registado, 2–50 Premium), com origem no UC-VID-013 (RN2-RN3), no UC-VID-014 (RN5), no UC-VID-015 (RN2) e na DQ-015. A NFR-022 (limite de vídeos por junção), a NFR-023 (passos por cadeia) e a NFR-024 (duração da junção) têm a mesma origem e pertencem à ST-VID-013/014 e à B008. A `traceability.md` atribui a NFR-014 à ST-VID-015 e à B009, com as decisões T-09 e 4.10. Até à resposta, a atribuição mantém-se, e a linha fica com a parte de lotes marcada como não coberta.
 - **Opções:** (a) a NFR-014 passa para a ST-VID-013 ou a ST-VID-014 e para a B008, que constrói a parte da junção e da cadeia; (b) a dona continua a ser a ST-VID-015 (B009), e a B008 verifica a parte coberta sem ser dona; (c) a equipa revê a D-07 para esta NFR.
 - **Resposta:** **(a).** A NFR-014 passa a pertencer à ST-VID-013 (junção) e à B008, para a parte da junção e da cadeia (UC-VID-013 RN2-RN3, UC-VID-014 RN5). A ST-VID-014 verifica-a nos seus critérios. A parte de lotes (UC-VID-015 RN2) continua "parcialmente não coberta (D-06)" na ST-VID-015 e na B009.
+
+## D-11 — Estratégia de carregamento até 2 GB (Q-ADD-04)
+
+- **Onde:** `memory-bank/bolts/001-video-lifecycle/bolt.md` ("Decisões do ADD v1.1", Q-ADD-04); `ddd-01-domain-model.md` (agregado Carregamento, porta ArmazenamentoVideo).
+- **Dúvida:** O carregamento de vídeos até 2 GB faz-se por *streaming* pelo API Gateway e pelo serviço de projetos, ou por upload direto com URL pré-assinado PUT?
+- **O que as fontes dizem:** ADD Q-ADD-04 (pendente): o `multer.memoryStorage()` das rotas de imagem carrega o ficheiro inteiro em memória; em qualquer caso, a rota escolhida tem um `location` novo no nginx com `client_max_body_size 2g` e `proxy_request_buffering off` (T-08). O T-08 descreve o URL de escrita só para a rede interna (worker).
+- **Opções:** (a) *streaming* pelos serviços; (b) PUT pré-assinado direto.
+- **Resposta:** **(b).** O cliente pede ao router de vídeo um URL de escrita, com o tamanho declarado validado face ao perfil (≤ 200 MB Registado, ≤ 2 GB Premium); envia o ficheiro por PUT através do `location /s3-video/` do nginx (com `client_max_body_size 2g` e `proxy_request_buffering off`, T-08); depois confirma o fim do envio numa rota do router de vídeo, que verifica o objeto com `headObject` e só então inicia a ingestão. Motivo: o `multer.memoryStorage()` não serve para 2 GB, o tráfego não passa pelo API Gateway (NFR-016) e nada do código existente muda (regra 2.6). Esta decisão alarga o URL de escrita do T-08, previsto só para a rede interna, ao carregamento pelo cliente.
+
+## D-12 — Estado `failed` da ingestão e Garantia Mínima
+
+- **Onde:** `ddd-01-domain-model.md` (EstadoIngestao, invariante I7); ADD T-00 (esquema da coleção `videos`); ST-VID-000 AC4.
+- **Dúvida:** O T-00 prevê `status: failed` para a ingestão, mas o AC4 e a Garantia Mínima do UC-VID-000 pedem que não fique registo em `videos`. Como se conciliam?
+- **O que as fontes dizem:** ADD T-00: `queued`, `processing` e `failed` só se aplicam à ingestão. UC-VID-000, Garantia Mínima: nenhum registo órfão é gravado no MongoDB. ST-VID-000 AC4: não fica objeto no storage nem registo em `videos`.
+- **Opções:** (a) `failed` como estado interno curto, seguido de limpeza; (b) manter registos `failed` visíveis.
+- **Resposta:** **(a).** O `failed` é um estado interno curto: a limpeza apaga o registo e os ficheiros logo depois de o cliente ser notificado, o que cumpre a Garantia Mínima do UC-VID-000.
+
+## D-13 — Onde se valida a ingestão e se calcula o plano da cópia MP4
+
+- **Onde:** `ddd-01-domain-model.md` (PoliticaFormatos, ProcessadorIngestao); ADD T-05, T-06.
+- **Dúvida:** O T-05 diz que o worker não tem cópia da matriz, mas os codecs só se conhecem depois do FFprobe no worker. Como se valida a ingestão e se planeia a cópia de pré-visualização?
+- **O que as fontes dizem:** ADD T-05: `projects/video/formats.js` é a única fonte da matriz; o worker recebe o plano. ADD T-06: a cópia é uma "conversão para MP4" planeada pelo mesmo módulo, com a condição de compatibilidade com o navegador.
+- **Opções:** (a) duas idas ao worker; (b) a mensagem de ingestão leva a matriz como dados.
+- **Resposta:** **(a).** A primeira ida só faz o FFprobe e devolve os metadados. O serviço de projetos valida-os com o `formats.js` (codecs e duração por perfil) e calcula o plano da cópia MP4 (T-05, T-06). A segunda ida gera a miniatura, o fotograma 0 e, se o plano o pedir, a cópia. Motivo: a validação de codecs e de duração já precisa do `formats.js` no serviço de projetos, e o worker fica sem uma segunda cópia da matriz.
+
+## D-14 — Códigos de erro da ingestão e evento WebSocket
+
+- **Onde:** `ddd-01-domain-model.md` (ErroVideo, evento VideoDisponivel); ADD T-03, T-10.
+- **Dúvida:** Que códigos de erro se usam para ficheiro corrompido e para transferência interrompida, que a ERS não fixa, e como se chama o evento WebSocket da ingestão, que o ADD não define?
+- **O que as fontes dizem:** REQ-VID-UPLOAD-012 e a exceção de rede do UC-VID-000 não dão código. ADD T-03 define só `video-task-update` e `video-batch-update`.
+- **Opções:** (a) `CORRUPTED_FILE`, `UPLOAD_ABORTED` e `video-ingest-update`; (b) outros nomes.
+- **Resposta:** **(a).** Aceitam-se `CORRUPTED_FILE` e `UPLOAD_ABORTED`. O evento WebSocket da ingestão chama-se `video-ingest-update`, ao lado do `video-task-update` do T-03.
