@@ -65,6 +65,8 @@ test("test_reencode only exists with VIDEO_TEST_OPERATIONS=1 (D-37)", () => {
       // B004 operations are always active; this B003 assertion isolates D-37.
       .split(",")
       .filter((name) => !["trim", "remove_audio", "speed"].includes(name.trim()))
+      // B005 operations are always active too (same isolation of D-37).
+      .filter((name) => !["watermark", "adjust", "filter", "resize", "orient"].includes(name.trim()))
       .join(",")
       .trim();
   assert.equal(names({}), "");

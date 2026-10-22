@@ -12,6 +12,7 @@ import executor
 import ingest
 import keyframe
 import video_msg
+import visual_input
 from control import ControlChannel
 from control_poll import ControlPoller
 from storage import StorageClient
@@ -199,6 +200,9 @@ class TaskRunner:
                           taskId=task_id, atMs=alternative['atMs'],
                           keyframeMs=alternative['atMs'] if self._video_mode == 'copy' else None,
                           videoMode=self._video_mode)
+
+        if visual_input.needed(plan):
+            plan = visual_input.resolve(plan, work_dir, self._storage)
 
         container = plan['output']['container']
         result_path = os.path.join(work_dir, f'result.{container}')

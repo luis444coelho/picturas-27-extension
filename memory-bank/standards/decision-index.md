@@ -1,6 +1,6 @@
 ---
-last_updated: 2026-10-22T19:00:00Z
-total_decisions: 9
+last_updated: 2026-10-22T22:04:24Z
+total_decisions: 12
 ---
 
 # Decision Index
@@ -19,6 +19,30 @@ Use this to find relevant prior decisions when working on related features.
 ## Decisions
 
 <!-- Entries are appended below in reverse chronological order (newest first) -->
+
+### ADR-012: Contraste e saturação do ajuste em RGB nos dois motores (`lutrgb` e matriz de luma BT.601)
+- **Status**: accepted
+- **Date**: 2026-10-22
+- **Bolt**: 005-video-visual-edits (002-video-transformations)
+- **Path**: `bolts/005-video-visual-edits/adr-012-adjust-rgb.md`
+- **Summary**: Com o `eq` do ADD 4.3 (YUV), a pré-visualização diferia do resultado até 45,78/255 no contraste e na saturação. D-67 (a), aprovada: contraste com `lutrgb` e pivô 128 no worker (sharp `linear(c, 128·(1−c))`, sem mudança) e saturação com a matriz `s·I + (1−s)·luma BT.601` (`colorchannelmixer` no worker e `recomb` no sharp), igual ao `ImageEnhance.Color` (DQ-020). O brilho não muda. Depois da mudança, a diferença ficou entre 0,42 e 1,39.
+- **Read when**: Working on the adjust operation, its preview, sharp/FFmpeg equivalence, or chains that combine adjust with other colour steps (B008).
+
+### ADR-011: `planExtrasVisual.js` e ponte `visual_input.py` para os extras do plano da B005
+- **Status**: accepted
+- **Date**: 2026-10-22
+- **Bolt**: 005-video-visual-edits (002-video-transformations)
+- **Path**: `bolts/005-video-visual-edits/adr-011-visual-plan-extras.md`
+- **Summary**: O `applyPlanExtras()` sai antes quando não há `trim`, `remove_audio` nem `speed` (linha existente, regra 2.6). D-63 (a), aprovada: o módulo novo `planExtrasVisual.js`, chamado por uma linha nova em `tasks.js`, acrescenta `plan.steps[i].filter` (entrada do catálogo) e `plan.steps[i].mark` (origem `video_src/wm-<id>.png` e caixa). No worker, `visual_input.py` (duas linhas novas no `task.py`) copia-os para `_filter` e `_overlay` numa cópia do plano. A marca entra no grafo único por `movie` + `overlay`, sem alterar o `executor.py`.
+- **Read when**: Adding plan extras for new operations (B007, B008), working on filter or watermark steps, the worker's step parameters, or the single filtergraph built by `executor.build_command`.
+
+### ADR-010: Dimensões da marca de água gravadas pelo servidor em `parameters._mark`, antes da validação
+- **Status**: accepted
+- **Date**: 2026-10-22
+- **Bolt**: 005-video-visual-edits (002-video-transformations)
+- **Path**: `bolts/005-video-visual-edits/adr-010-mark-resolution-middleware.md`
+- **Summary**: O `validate` é síncrono e não conhece as dimensões da marca (WATERMARK-005, RN3). D-61 (a), aprovada: um router novo, montado antes do router de vídeo da B001, remove o `_mark` do cliente, repete a autorização sem responder e grava `parameters._mark = {watermarkId?, width, height}` nos pedidos `…/validate` e `…/operations`. O texto é gerado com o sharp e só é guardado na aceitação.
+- **Read when**: Working on the watermark operation, `video_watermarks`, routes mounted before the B001 video router, recipe parameters set by the server, or reusing recipes with watermarks (B008 presets).
 
 ### ADR-009: Consulta explícita de controlo na ligação existente do worker
 - **Status**: accepted

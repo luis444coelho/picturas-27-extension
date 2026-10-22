@@ -491,3 +491,207 @@
 - **Opções:** (a) permitir recuo para a alternativa de recodificação já persistida quando uma verificação técnica dos PTS dos pacotes demonstrar que o prefixo copiável não corresponde ao intervalo de apresentação escolhido; manter cópia nos intervalos representáveis, o plano/assinaturas e a tolerância de um fotograma; publicar o modo real; (b) aceitar referência/fotogramas posteriores e alargar a tolerância, alterando os critérios de precisão; (c) introduzir recodificação parcial do GOP final e montagem de segmentos, alargando a arquitetura do executor e o âmbito da B004.
 - **Recomendação:** **(a)**. Preserva precisão e o executor existente; acrescenta apenas a verificação técnica local que pode selecionar a alternativa de recodificação já autorizada. Os casos de início em keyframe e fim representável continuam a copiar. Deve ficar explícita como extensão do ADR-007, sem o worker inventar destinos ou decisões de domínio.
 - **Resposta:** **(a), aprovada pela equipa.** Recuar para recodificação quando o fim não for representável por cópia; preservar a precisão. A verificação técnica dos PTS escolhe entre as alternativas já persistidas; mantêm-se os destinos, as assinaturas e o modo efetivamente executado em `metadata.videoMode`.
+
+## D-58 — Matrizes de cor dos filtros (Q-ADD-07)
+
+- **Onde:** B005, `projects/video/filters.json` (catálogo, ADD 4.4 e T-07); `Tools/video/ops/filter.py`.
+- **Dúvida:** Que matrizes 3×3 usam o Preto e Branco, o Sépia, o Vintage, o Frio e o Quente? E aceita-se que o catálogo fique só com transformações lineares (sem vinheta nem grão)?
+- **O que as fontes dizem:** ADD T-07: o Preto e Branco usa "pesos de luminância", o Sépia a "matriz clássica" e o Negativo o tipo `invert`. Estes três têm definição canónica, mas o ADD não diz que pesos de luminância usar. As matrizes do Vintage, do Frio e do Quente "têm de ser definidas pela equipa" (Q-ADD-07, em aberto). ADD 4.4: só matrizes, para a pré-visualização (`recomb`) coincidir com o resultado (`colorchannelmixer`). REQ-VID-FILTER-001: seis filtros exatos. Nenhuma D-xx responde a isto.
+- **Opções:**
+  - (a) Catálogo linear. Matrizes por linhas (R, G, B de saída):
+    - **Preto e Branco:** três linhas iguais com os pesos BT.601 `[0.299, 0.587, 0.114]`, os do `convert("L")` do PIL que as ferramentas de imagem usam.
+    - **Sépia:** a matriz clássica `[[0.393, 0.769, 0.189], [0.349, 0.686, 0.168], [0.272, 0.534, 0.131]]`.
+    - **Vintage:** dessaturado e quente, `[[0.6, 0.3, 0.1], [0.2, 0.7, 0.1], [0.2, 0.1, 0.6]]`.
+    - **Frio:** `[[0.9, 0, 0], [0, 1, 0], [0, 0, 1.1]]`.
+    - **Quente:** `[[1.1, 0, 0], [0, 1, 0], [0, 0, 0.9]]`.
+    - Os valores acima de 255 são saturados da mesma forma pelos dois motores.
+  - (b) Como (a), mas com o Preto e Branco em BT.709 `[0.2126, 0.7152, 0.0722]`.
+  - (c) A equipa dá outras matrizes.
+  - (d) Efeitos não lineares (`curves`, `vignette`). O T-07 exclui-os, porque o sharp não os reproduz.
+- **Recomendação:** (a). Os pesos BT.601 são os do PIL, e as três matrizes novas são transformações simples que a equipa pode afinar depois sem mudar o código (só o `filters.json`).
+- **Resposta:** **(a), aprovada pela equipa.** Catálogo linear: Preto e Branco com os pesos BT.601 `[0.299, 0.587, 0.114]`, Sépia com a matriz clássica, e Vintage, Frio e Quente com as matrizes propostas na opção (a). Registada como resposta à Q-ADD-07 do ADD.
+
+## D-59 — Marca de água de texto: `drawtext` no worker ou imagem gerada no serviço de projetos (Q-ADD-12, ADD 6)
+
+- **Onde:** B005, `Tools/video/ops/watermark.py`, `Tools/video/Dockerfile` (B001), `projects/video/operations/watermark.js`.
+- **Dúvida:** A marca de água de vídeo é feita de raiz no worker (Q-ADD-12, em aberto no ADD). Com que mecanismo se desenha a marca de texto? E entra a dependência `fonts-dejavu-core`?
+- **O que as fontes dizem:**
+  - ADD T-02: "`overlay` (…) ou `drawtext`; implementação de raiz no worker de vídeo (Q-ADD-12)".
+  - ADD 6: os tipos de letra entram "só se a marca de água de texto usar `drawtext`".
+  - UC-VID-004, passo 6: "`drawtext` para texto ou `overlay` para imagem". A ST-VID-004 dá a Q-ADD-12 como implementação de raiz.
+  - Na verificação desta etapa, o contentor `projects` tem o DejaVu (`/usr/share/fonts/truetype/dejavu`) e o sharp 0.33.5 com pango/fontconfig. O `Tools/video/Dockerfile` não tem tipos de letra.
+  - REQ-VID-WATERMARK-005: a marca ocupa "exatamente 20% da largura do quadro". O `drawtext` só recebe o tamanho de letra, por isso a largura do texto tem de ser medida.
+- **Opções:**
+  - **(a) Uma só via com `overlay`:** o serviço de projetos gera o texto como PNG RGBA com o sharp (DejaVu Sans, branco), já com a largura pedida. O worker trata o texto como uma marca de imagem (`overlay`, `format=rgba`, `colorchannelmixer=aa=<opacidade>`).
+    - Sem `drawtext`, o `fonts-dejavu-core` não entra e o `Dockerfile` fica como está.
+    - As dimensões exatas do texto são conhecidas para validar os limites.
+    - A pré-visualização usa o mesmo PNG que o resultado.
+    - Diverge da letra do UC-VID-004 no passo 6, mas o ADD, que tem mais autoridade, admite as duas vias.
+  - **(b) `drawtext` no worker:** acrescenta-se ao `Tools/video/Dockerfile` uma linha `RUN apt-get install fonts-dejavu-core`, só por acréscimo.
+    - O serviço de projetos mede o texto com o sharp e o mesmo tipo de letra, para validar e calcular o `fontsize`.
+    - Há risco de diferenças de 1 a 2 px entre o pango (medição e pré-visualização) e o freetype do `drawtext` (resultado).
+    - Muda a imagem do worker, que o ADD 6 trata como mudança de dependência.
+- **Recomendação:** (a). Um só caminho no worker, medição e resultado com o mesmo motor, e nenhuma dependência nova (o sharp e o DejaVu já existem no serviço de projetos).
+- **Resposta:** **(a), aprovada pela equipa.** O texto é gerado como PNG RGBA com o sharp no serviço de projetos (DejaVu Sans, branco) e aplicado pelo worker com `overlay`, como uma marca de imagem. Sem `drawtext` e sem `fonts-dejavu-core`; o `Tools/video/Dockerfile` não muda. Registada como resposta à Q-ADD-12 do ADD (implementação de raiz no worker de vídeo).
+
+## D-60 — Origem, armazenamento e ciclo de vida da imagem da marca de água
+
+- **Onde:** B005, rotas novas no router de vídeo, `imageStorageService/utils/videoStages.js` (B001), `projects/video/storage.js`, `Tools/video/storage.py`.
+- **Dúvida:** A REQ-VID-WATERMARK-003 pede "carregar ou selecionar a partir da galeria do projeto" um PNG ou JPEG. Como chega a imagem ao serviço de projetos e ao worker, onde fica guardada, até que tamanho e até quando?
+- **O que as fontes dizem:**
+  - UC-VID-004 FA1: galeria do projeto ou ficheiro local PNG/JPEG.
+  - O worker só pede URLs para os estágios de vídeo (`imageStorageService/route/video.js` aceita só `videoStages`: `video_src`, `video_out`, `video_preview` e `video_thumb`). As imagens da galeria estão nos estágios de imagem (`src`), que o worker não lê.
+  - O `location /api-gateway/` do nginx não tem `client_max_body_size`, por isso o limite é o de omissão, 1 MB.
+  - Acrescentar um estágio ao array de `videoStages.js` alteraria uma linha existente (regra 2.6).
+  - O plano é persistido para republicação (ADR-004). Por isso, um URL pré-assinado no plano expiraria.
+  - Nenhuma fonte fixa o tamanho máximo, o local nem a limpeza.
+- **Opções:**
+  - **(a) Recurso de marca próprio:** endpoint novo `POST /projects/:user/:project/videos/watermarks`, com a autorização da pré-visualização.
+    - Recebe um ficheiro local (`multer.memoryStorage()` num router novo, limite de 1 MB) ou `{imageId}` de uma imagem da galeria, que o serviço de projetos lê do storage de imagem.
+    - Valida a imagem com o sharp: PNG ou JPEG legível, no máximo 4096×4096 px. Caso contrário devolve `INVALID_WATERMARK_CONTENT`.
+    - Guarda a imagem normalizada para PNG RGBA no estágio existente `video_src`, com o nome `wm-<id>.png`, e regista-a numa coleção nova `video_watermarks` (`project_id`, `owner_id`, chave, `width` e `height`). Devolve `{watermarkId, width, height}`.
+    - As marcas de texto (D-59 a) são geradas na aceitação com o nome `wm-<taskId>.png`.
+    - O plano leva a origem como destino do storage (`{userId, projectId, stage: "video_src", name}`) e não como URL.
+    - **Limpeza:** um módulo novo apaga as marcas de projetos que já não existem e as que não são usadas por nenhuma tarefa ativa há mais de 24 h. A `maintenance.js` não muda.
+  - **(b)** Como (a), mas com um `location` novo no nginx para o upload, até 10 MB.
+  - **(c)** Imagem em base64 dentro dos `parameters`. Ficaria guardada na `recipe` e no plano do `VideoTask` (perto do limite de 16 MB de um documento MongoDB), por isso é de rejeitar.
+- **Recomendação:** (a). Uma marca de água de 1 MB chega para logótipos, não muda o nginx, e o worker lê a imagem por um estágio que já conhece. A `recipe` guarda o `watermarkId`, o que permite reproduzir a operação.
+- **Resposta:** **(a), com uma alteração da equipa na limpeza.** Endpoint `POST …/videos/watermarks` (ficheiro local até 1 MB ou `{imageId}` da galeria), validação com o sharp, PNG RGBA em `video_src/wm-<id>.png` e registo em `video_watermarks`; as marcas de texto ficam em `wm-<taskId>.png`; o plano leva o destino e não um URL. **Limpeza:** só se apagam as marcas de projetos que já não existem e as que, ao fim de 24 h, não são referenciadas por nenhum `VideoTask` nem por nenhuma `recipe` de vídeo. Justificação da equipa: uma marca usada num resultado tem de continuar disponível para a `recipe` ser reproduzível (e para as predefinições de cadeia da B008).
+
+## D-61 — Parâmetros, geometria e códigos de erro da marca de água
+
+- **Onde:** B005, `projects/video/operations/watermark.js` (`validate`, `estimate`), painel de marca de água.
+- **Dúvida:** Que nome e que parâmetros tem a operação, em que unidades, a que se refere a escala, onde ficam as posições predefinidas, e que código recebe cada erro? E como conhece o `validate` (síncrono, `chain.validateChain`) as dimensões da marca para verificar os limites?
+- **O que as fontes dizem:**
+  - REQ-VID-WATERMARK-004: posições predefinidas (cantos e centro) ou coordenadas X, Y.
+  - REQ-VID-WATERMARK-005: escala de 5% a 50% "da dimensão correspondente do quadro", e o critério diz "20% da largura do quadro".
+  - REQ-VID-WATERMARK-006: opacidade de 10% a 100%.
+  - UC-VID-004 RN3: `X + largura ≤ largura_vídeo` e `Y + altura ≤ altura_vídeo`.
+  - Códigos do UC: `INVALID_WATERMARK_CONTENT` e `WATERMARK_OUT_OF_BOUNDS`.
+  - D-50: parâmetros em camelCase, `version` 1, campos a mais ignorados.
+  - Q-ADD-13: dimensões de apresentação.
+  - O `validate(parameters, inputProps, profile)` não recebe as dimensões da marca e não pode ler a base de dados (é síncrono).
+  - Nenhuma fonte dá a margem das posições predefinidas, o passo dos controlos, o comprimento máximo do texto nem o código para escala ou opacidade fora do intervalo.
+- **Opções:**
+  - **(a)** Operação `watermark`, versão 1, com os parâmetros:
+    - `type: "text" | "image"`;
+    - `text` (1 a 100 caracteres depois de `trim()`) ou `watermarkId`;
+    - `position`: `{preset: "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center"}` ou `{x, y}`, inteiros em px de apresentação, canto superior esquerdo da marca;
+    - `scale` de 0.05 a 0.5, passo 0.01;
+    - `opacity` de 0.1 a 1, passo 0.01.
+
+    Regras e códigos:
+    - A escala é a da largura: a marca fica com `round(scale × display_width)` px de largura e a altura sai da proporção da marca.
+    - As posições predefinidas usam uma margem de `round(0.03 × min(display_width, display_height))` px.
+    - Texto vazio, `watermarkId` inexistente ou noutro projeto → `INVALID_WATERMARK_CONTENT` com `{field}`.
+    - Marca fora do quadro (incluindo uma altura que não cabe) → `WATERMARK_OUT_OF_BOUNDS` com `{field, limit}`.
+    - Tipo, posição, escala ou opacidade mal formados ou fora do intervalo → `INVALID_WATERMARK_PARAMS` com `{field, min, max}`, como o `INVALID_ADJUST_PARAMS`.
+    - **Dimensões da marca no servidor:** um *middleware* novo, num router novo montado antes do router de vídeo, resolve a marca antes da validação, nos pedidos `…/validate`, `…/operations` e de pré-visualização com passos `watermark`. Gera o texto (D-59 a) ou lê `video_watermarks` e grava `parameters._mark = {width, height}` por cima do que o cliente tenha enviado, como o `_input` da B004. O `validate` usa o `_mark`. Fica registado como ADR-010.
+  - **(b)** A escala aplica-se às duas dimensões: a marca cabe numa caixa de `scale·W × scale·H` (ajuste *contain*). Os limites verificam-se sem conhecer a marca, por isso não é preciso *middleware*. Mas uma marca mais alta do que o quadro em proporção não ocupa "exatamente" a percentagem da largura (critério da WATERMARK-005).
+- **Recomendação:** (a). Cumpre o critério da WATERMARK-005 à letra, e as dimensões da marca vêm sempre do servidor.
+- **Resposta:** **(a), aprovada pela equipa, com o ADR-010** para o *middleware* que grava `parameters._mark = {width, height}` antes da validação.
+
+## D-62 — Pré-visualização da marca de água (REQ-VID-WATERMARK-009) e o T-07
+
+- **Onde:** B005, endpoint de pré-visualização (T-07) e painel de marca de água.
+- **Dúvida:** A REQ-VID-WATERMARK-009 pede uma pré-visualização estática em tempo real da marca sobre o primeiro fotograma. Mas o T-07 diz que o endpoint `…/preview` ignora os passos de marca de água ("recorte, velocidade, áudio, marca de água, junção, conversão"). Como se mostra a pré-visualização?
+- **O que as fontes dizem:**
+  - ADD T-07: o endpoint só aplica o ajuste, o filtro, o redimensionamento e a orientação, os passos abrangidos pela NFR-015.
+  - REQ-VID-WATERMARK-009 é "Deveria ter" e não está na NFR-015.
+  - UC-VID-004 FA2: a pré-visualização é atualizada "imediatamente".
+- **Opções:**
+  - **(a) Endpoint novo** `POST …/videos/:video/watermark-preview`, com a autorização do T-07. Compõe com o sharp (`composite`, com a opacidade aplicada ao alfa) o PNG da marca (D-59/D-60) sobre o fotograma 0. O `…/preview` do T-07 continua a ignorar a marca, como o ADD diz.
+  - **(b)** O frontend sobrepõe a marca ao fotograma 0 com CSS: o texto no tipo de letra do navegador e a imagem por URL local. Não há pedido ao servidor, mas o texto pode não coincidir com o resultado.
+  - **(c)** O `…/preview` do T-07 passa a aplicar a marca, o que contraria o texto do T-07.
+- **Recomendação:** (a). A pré-visualização usa o mesmo PNG e a mesma geometria do resultado, sem mudar o que o T-07 fixa.
+- **Resposta:** **(a), aprovada pela equipa.** Endpoint novo `POST …/videos/:video/watermark-preview` com a autorização do T-07; o `…/preview` do T-07 continua a ignorar a marca.
+
+## D-63 — Ponto de ligação dos extras do plano da B005 (ADR-008)
+
+- **Onde:** `projects/video/planExtras.js` (B004), `projects/video/tasks.js:339` (única chamada, depois de `buildPlan()`).
+- **Dúvida:** O plano da B005 tem de levar dados que o `estimate` e o `copyable` não exprimem: a entrada completa do filtro do catálogo (T-07, "o plano leva a entrada completa do filtro escolhido") e a origem da marca de água no storage (D-60). O `applyPlanExtras()` sai logo na primeira instrução quando não há `trim`, `remove_audio` nem `speed`, e essa lista é uma linha existente que não pode mudar (regra 2.6). Onde se acrescentam estes extras?
+- **O que as fontes dizem:** O ADR-008 apresenta o `planExtras.js` como o padrão a seguir pela B005 (`Read when`: "any bolt that adds new operation modules"). A D-54 (b) já considerou válida uma "linha adicional em `submit()`, depois de `applyPlanExtras()`".
+- **Opções:**
+  - **(a)** Módulo novo `projects/video/planExtrasVisual.js` com `applyVisualPlanExtras(plan, steps, inputProps, registry)`, com a mesma assinatura e o mesmo padrão. É chamado por uma linha nova em `tasks.js`, logo a seguir à do `applyPlanExtras`. Acrescenta `plan.steps[i].filter` (a entrada do catálogo) e `plan.steps[i].mark` (o destino do PNG, D-60), e não toca nos campos da B003 nem da B004. Fica registado como ADR-010, ao lado do ADR-008.
+  - **(b)** As operações devolvem os extras pelo `estimate`, mas o `plan.js` não os passa para o plano.
+  - **(c)** O worker lê uma cópia do `filters.json`, o que contraria o T-07 e o T-01.
+- **Recomendação:** (a).
+- **Resposta:** **(a), aprovada pela equipa.** Módulo novo `projects/video/planExtrasVisual.js`, chamado por uma linha nova em `tasks.js` a seguir ao `applyPlanExtras`. A equipa deixou ao critério da construção juntar ao ADR-010 ou criar outro: fica no **ADR-011**, separado do ADR-010 (*middleware* do `_mark`), por serem pontos de ligação diferentes (pedido HTTP antes da validação vs. plano depois de `buildPlan()`).
+
+## D-64 — Pormenores da pré-visualização, das miniaturas e do painel de redimensionamento que as fontes não fixam
+
+- **Onde:** B005, endpoint `…/preview` (T-07), `GET …/filters/thumbnails` (4.4), painel de redimensionamento (4.5).
+- **Dúvida:** Que valores se usam nos pormenores que o ADD dá só como exemplo ou não define?
+- **O que as fontes dizem:**
+  - T-07: cache "por exemplo 100 fotogramas e 10 min", com remoção do menos usado; resposta em "JPEG ou WebP".
+  - 4.4: miniaturas sobre o fotograma 0 "reduzido (~160 px)".
+  - REQ-VID-RESIZE-003: as predefinições "aplicadas à altura".
+  - REQ-VID-RESIZE-004/005: avisos de distorção e de ampliação.
+  - Nenhuma fonte diz o que acontece com as predefinições num vídeo vertical, nem a tolerância do aviso de distorção.
+- **Opções:**
+  - **(a)** Os seguintes valores:
+    - Cache com um `Map` de 100 fotogramas e 10 min, com remoção do menos usado, partilhada pela pré-visualização e pelas miniaturas.
+    - Resposta em JPEG com qualidade 85.
+    - Miniaturas com 160 px de largura, devolvidas num só JSON com seis imagens JPEG em base64.
+    - Predefinições aplicadas à **menor** dimensão de apresentação, para que "720p" dê 720×1280 num vídeo vertical. Num vídeo horizontal coincide com a altura da RESIZE-003.
+    - Aviso de distorção quando `|w/h − W/H| > 0.01`.
+    - Aviso de ampliação quando `w > display_width` ou `h > display_height`.
+  - **(b)** Como (a), mas com as predefinições sempre na altura, à letra da RESIZE-003: num vídeo vertical, "720p" daria 406×720.
+  - **(c)** Outros valores.
+- **Recomendação:** (a).
+- **Resposta:** **(a), aprovada pela equipa.** Cache `Map` de 100 fotogramas e 10 min com remoção do menos usado; JPEG com qualidade 85; miniaturas de 160 px num só JSON; avisos de distorção (`|w/h − W/H| > 0.01`) e de ampliação. **Registo pedido pela equipa:** as predefinições aplicadas à menor dimensão de apresentação fogem à letra da REQ-VID-RESIZE-003 ("aplicadas à altura"); num vídeo horizontal coincidem com ela.
+
+## D-65 — Nome das marcas de água de texto no storage
+
+- **Onde:** B005, `projects/video/watermarks.js` (`storeText`), `projects/video/planExtrasVisual.js`, `projects/video/watermarkCleanup.js`; desvio 1 do `implementation-walkthrough.md`.
+- **Dúvida:** A D-60 (a) dizia que as marcas de texto eram geradas na aceitação com o nome `wm-<taskId>.png`. A implementação guarda-as como `wm-<watermarkId>.png`, com um registo em `video_watermarks` por projeto e texto (*hash*), e reutiliza o PNG quando o mesmo texto volta a ser usado. Aceita-se?
+- **O que as fontes dizem:** D-60 (a), com a alteração da equipa na limpeza: só se apagam marcas de projetos apagados ou sem referência em nenhum `VideoTask` nem em nenhuma `recipe` ao fim de 24 h, para a `recipe` ser reproduzível. ADR-010: o *middleware* resolve o texto antes da validação, quando ainda não há `taskId` (gerado no `submit()` da B003).
+- **Opções:** (a) aceitar `wm-<watermarkId>.png`, com um registo por projeto e texto e o PNG reutilizado; (b) voltar a `wm-<taskId>.png`, o que obrigaria a gerar o PNG depois da criação do `taskId`, dentro do `submit()` da B003, que não pode mudar.
+- **Recomendação:** (a).
+- **Resposta:** **(a), aceite pela equipa; altera a resposta à D-60.** As marcas de texto ficam em `wm-<watermarkId>.png`, com um registo por projeto e texto e o PNG reutilizado, em vez de `wm-<taskId>.png`. A `recipe` e a limpeza usam o `watermarkId`, o que mantém a reprodutibilidade pedida pela equipa. **Risco residual aceite:** a limpeza pode apagar um registo de texto com mais de 24 h que esteja a ser reutilizado nos milissegundos antes de o `VideoTask` ser criado.
+
+## D-66 — Duas sessões de tarefa no leitor de vídeo (B004 e B005)
+
+- **Onde:** `frontend/components/video/video-edit-actions.tsx` (B004) e `frontend/components/video/video-visual-actions.tsx` (B005), montados lado a lado no `video-player.tsx`; desvio 4 do `implementation-walkthrough.md`.
+- **Dúvida:** Cada componente cria a sua sessão (`useVideoEditSession`), por isso uma tarefa iniciada num não deixa o outro ocupado (`busy`) na interface. Aceita-se?
+- **O que as fontes dizem:** Regra 2.6: o `video-edit-actions.tsx` não pode ser alterado (tipo `Operation` e `TITLES`). D-47: as peças comuns de tarefa são montadas pelos painéis. REQ-VID-NFR-021 e T-03: uma tarefa ativa por projeto, garantida no servidor pelo lugar de tarefa ativa (`TASK_ALREADY_ACTIVE`).
+- **Opções:** (a) aceitar as duas sessões como risco residual; (b) partilhar a sessão, o que exigiria alterar o componente da B004.
+- **Recomendação:** (a).
+- **Resposta:** **(a), aceite pela equipa como risco residual**, porque o servidor garante uma tarefa por projeto. Na etapa 3, testa-se que um pedido da B005, com uma tarefa da B004 ativa, mostra na interface o erro do servidor.
+
+## D-67 — Contraste e saturação do ajuste: a pré-visualização (sharp) não corresponde ao resultado (FFmpeg) com as fórmulas do ADD 4.3
+
+- **Onde:** B005, etapa 3. Afeta `Tools/video/ops/adjust.py` (worker) e `projects/video/preview.js` (pré-visualização). Os casos de teste `adjust preview matches the FFmpeg result …` de `projects/test/video/e2e-visual-edits.test.js` estão marcados como `todo` ("D-67 pendente").
+- **Dúvida:** Com as fórmulas fixadas no ADD 4.3 e no T-07, a pré-visualização do ajuste afasta-se muito do resultado no contraste e na saturação. O brilho coincide. Muda-se a implementação, contra a letra do ADD, ou aceita-se a diferença?
+- **O que as fontes dizem:**
+  - ADD 4.3 e tabela do T-07:
+    - brilho com `colorchannelmixer=rr=f:gg=f:bb=f` ↔ `linear(f, 0)`;
+    - contraste com `eq=contrast=c` ↔ `linear(c, 128·(1−c))`, pivô fixo (Q-ADD-18);
+    - saturação com `eq=saturation=s` ↔ `modulate({saturation: s})`.
+  - O ADD 4.3 aponta como risco a "equivalência sharp ↔ FFmpeg (testes com fotogramas de referência)" e o espaço de cor (o `eq` trabalha em YUV).
+  - REQ-VID-ADJUST-005: pré-visualização "com os ajustes aplicados".
+  - DQ-020: a mesma semântica das ferramentas de imagem. O `ImageEnhance.Contrast` é uma mistura linear em RGB com um pivô. O `ImageEnhance.Color` é uma mistura com a imagem em tons de cinzento BT.601 (`convert("L")`).
+  - O critério de passagem do bolt sobre a NFR-015 só refere as orientações e os filtros.
+- **Medições:** diferença média por canal (0–255) entre a pré-visualização e o fotograma do resultado, com o FFmpeg 5.1.9 e o sharp 0.33.5.
+  - **Integração real (quadrantes de cor):**
+    - brilho 1.2: 0,42;
+    - contraste 1.3: 4,87;
+    - contraste 0.6: 27,46;
+    - saturação 0.5: 37,26;
+    - combinação 1.2/1.3/0.5: 45,78.
+    - Para comparação: as orientações dão 0,50 a 0,55 e os filtros 0,35 a 1,36.
+  - **Gradiente suave (sondagem):**
+    - brilho 1.2 e 0.7: 1,32 e 1,05;
+    - `eq=contrast` 1.3 e 0.6: 9,95 e 22,84;
+    - `eq=saturation` 0.5 e 1.5: 18,10 e 14,21.
+    - Alternativas: `lutrgb=val·c+128·(1−c)` dá 2,29 e 1,83; uma matriz de saturação que preserva a luma BT.601 (`colorchannelmixer` no FFmpeg e `recomb` no sharp) dá 1,37 a 1,75 para s = 0, 0.5 e 1.5.
+  - O `eq` aplica o contraste só à luma e a saturação só ao croma, em YUV. O sharp aplica o `linear` a cada canal RGB e o `modulate` em LCh.
+- **Opções:**
+  - **(a) Mudar o contraste e a saturação para RGB nos dois motores e manter o brilho:**
+    - contraste com `lutrgb=r=val*c+128*(1-c):g=…:b=…` no worker, mantendo o `linear(c, 128·(1−c))` no sharp (pivô fixo 128, Q-ADD-18);
+    - saturação com a matriz `s·I + (1−s)·[luma BT.601]` (`colorchannelmixer` no worker e `recomb` no sharp).
+    - Diverge da letra do ADD 4.3 e do T-07 (`eq`, `modulate`) e da A1 do UC-VID-008, mas cumpre a DQ-020 à letra: o `ImageEnhance.Color` do PIL é esta matriz. Fica registado como ADR-012. É uma linha de código em cada passo, em ficheiros novos da B005.
+  - **(b) Manter as fórmulas do ADD e aceitar a diferença:** a pré-visualização do ajuste fica só indicativa. Os casos `todo` passam a documentar a diferença em vez de a exigir.
+  - **(c) Mudar só a pré-visualização, para imitar o `eq` em YUV:** o sharp não tem operações em YUV, por isso exigiria código de conversão próprio por píxel no serviço de projetos e afastaria a pré-visualização do padrão do T-07.
+- **Recomendação:** (a). A pré-visualização passa a coincidir com o resultado (cerca de 2/255, como nos filtros), a semântica fica igual à das ferramentas de imagem (DQ-020), e não há dependências novas.
+- **Resposta:** **(a), aprovada pela equipa.** O contraste passa a `lutrgb` com pivô 128 no worker (`val·c + 128·(1−c)`), mantendo o `linear(c, 128·(1−c))` no sharp. A saturação passa à matriz que preserva a luma BT.601 (`colorchannelmixer` no worker e `recomb` no sharp). O brilho não muda. Registado no ADR-012 e no `decision-index.md`. Justificação da equipa: o ADD 4.3 pretende que a pré-visualização seja igual ao resultado (pivô fixo "igual ao da pré-visualização sharp"), e a DQ-020 pede a semântica RGB das ferramentas de imagem; o pivô 128 da Q-ADD-18 mantém-se.

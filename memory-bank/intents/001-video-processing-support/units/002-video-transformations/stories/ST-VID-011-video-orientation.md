@@ -2,11 +2,11 @@
 id: ST-VID-011
 unit: 002-video-transformations
 intent: 001-video-processing-support
-status: ready
+status: complete
 priority: must
-created: 2026-10-19T17:31:16Z
+created: 2026-10-19T17:31:16.000Z
 assigned_bolt: 005-video-visual-edits
-implemented: false
+implemented: true
 ---
 
 # Story: ST-VID-011 — Rodar ou espelhar vídeo

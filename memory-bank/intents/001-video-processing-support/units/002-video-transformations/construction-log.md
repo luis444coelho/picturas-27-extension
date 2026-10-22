@@ -2,7 +2,7 @@
 unit: 002-video-transformations
 intent: 001-video-processing-support
 created: 2026-10-22T16:32:12Z
-last_updated: 2026-10-22T20:02:18Z
+last_updated: 2026-10-22T22:08:52Z
 ---
 
 # Construction Log: 002-video-transformations
@@ -29,7 +29,7 @@ last_updated: 2026-10-22T20:02:18Z
 | Bolt ID | Stories | Status | Changed |
 |---------|---------|--------|---------|
 | 004-video-basic-edits | ST-VID-001, ST-VID-002, ST-VID-003 | ✅ complete | - |
-| 005-video-visual-edits | ST-VID-004, ST-VID-008, ST-VID-009, ST-VID-010, ST-VID-011 | [ ] planned | - |
+| 005-video-visual-edits | ST-VID-004, ST-VID-008, ST-VID-009, ST-VID-010, ST-VID-011 | ✅ complete | - |
 | 006-video-frame-export | ST-VID-005 | 🚫 blocked (D-06) | - |
 | 007-video-format-conversion | ST-VID-012 | [ ] planned | - |
 
@@ -44,6 +44,11 @@ last_updated: 2026-10-22T20:02:18Z
 | 2026-10-22T18:12:10Z | 004-video-basic-edits | stage-complete | Implement → Test (D-54) |
 | 2026-10-22T20:02:18Z | 004-video-basic-edits | stage-complete | Test → complete (D-55 a D-57, ADR-009; testes manuais aprovados) |
 | 2026-10-22T20:02:18Z | 004-video-basic-edits | completed | All 5 stages done |
+| 2026-10-22T20:11:21Z | 005-video-visual-edits | started | Stage 1: Plan |
+| 2026-10-22T20:22:31Z | 005-video-visual-edits | stage-complete | Plan → Implement (D-58 a D-64) |
+| 2026-10-22T20:49:13Z | 005-video-visual-edits | stage-complete | Implement → Test (ADR-010, ADR-011, D-65, D-66) |
+| 2026-10-22T22:08:52Z | 005-video-visual-edits | stage-complete | Test → complete (D-67, ADR-012; testes manuais aprovados) |
+| 2026-10-22T22:08:52Z | 005-video-visual-edits | completed | All 3 stages done |
 
 ## Execution Summary
 
@@ -51,9 +56,9 @@ last_updated: 2026-10-22T20:02:18Z
 |--------|-------|
 | Original bolts planned | 4 |
 | Current bolt count | 4 |
-| Bolts completed | 1 |
+| Bolts completed | 2 |
 | Bolts in progress | 0 |
-| Bolts remaining | 2 (mais 1 `blocked`, D-06) |
+| Bolts remaining | 1 (mais 1 `blocked`, D-06) |
 | Replanning events | 0 |
 
 ## Notes
@@ -75,3 +80,10 @@ last_updated: 2026-10-22T20:02:18Z
 - 2026-10-22T19:17:29Z: B004 etapa 5 preparada para checkpoint: 154 testes JS, 56 Python/FFmpeg 5.1.9, 50 frontend e 15 integração real passaram (275 casos distintos). Build de produção, TypeScript e ESLint executados e aprovados. D-55 (duração visual), D-56 (consulta explícita de controlo na ligação existente; ADR-009) e D-57 (recuo se o fim não for representável por cópia) respondidas pela equipa na opção (a) e implementadas. Precisão de recorte/PTS, B-frames e sincronismo corrigidos; `plan.js` intacto. Auditoria confirma só acréscimos face à main, incluindo ficheiros novos e B001–B003. Dados/buckets/diretórios próprios limpos; `test_reencode` desligada nos serviços. Resultados reais, falhas investigadas e limites em `ddd-03-test-report.md`; execução manual pendente em `manual-test-checklist.md`. `current_stage: test` e `status: in-progress` mantidos, sem fecho/merge. Aguardar testes manuais e aprovação explícita da equipa.
 
 - 2026-10-22T20:02:18Z: Checkpoint final da B004 aprovado, retomado noutra máquina sem repetir a etapa 5 (resultados automáticos de `a5d60d2`). Testes manuais no browser feitos pela equipa, todos aprovados: recorte, recorte inválido, remover áudio, vídeo sem áudio, velocidade, cancelamento, regressão de vídeo e de imagem; registados em `manual-test-checklist.md` e `ddd-03-test-report.md` (os itens não reportados individualmente ficam indicados como tal). `bolt-complete.cjs 004-video-basic-edits` executado (com `NODE_PATH` para as dependências do specsmd): bolt `in-progress → complete`, ST-VID-001, ST-VID-002 e ST-VID-003 `ready → complete` com `implemented: true`; unit e intent sem alteração (3 bolts da unit por fazer, 2 units do intent). Entrada `test` de `stages_completed` acrescentada à mão, como na B001 e na B003. Ramo `bolt/004-video-basic-edits` sem merge para a `main` (a `main` já tem o merge `f343e27`, feito pela equipa antes deste fecho).
+- 2026-10-22T20:11:21Z: B005 iniciada (Simple Construction Bolt, 3 etapas), no ramo `bolt/005-video-visual-edits` criado a partir da `main` com a B004. Regras da equipa: fontes por ordem `docs/add.md` (2.5, 2.6, T-01, T-02, T-05, T-07, 4.3 a 4.6 e as Q-ADD 07, 12, 13, 18, 23, 24 e 25), `docs/specsDuvidas.md` (D-01 a D-57), `decision-index.md` (ADR-001 a ADR-009), o bolt e as stories, `docs/requirements/` e `docs/use-cases/`, sem o `docs/merge.md`; regra 2.6 também para o código das B001 a B004; operações novas nos registos com linhas novas e extras do plano no padrão do ADR-008; T-07 em código novo, sem `applyToolsPreview`; D-39 pelo `encoding.js`; CRLF mantido; `test_reencode` desligada; dúvidas a partir da D-58 e ADR a partir do ADR-010; commit e push por etapa, sem merge. Etapa 1 escrita (`implementation-plan.md`); D-58 a D-64 registadas e pendentes: matrizes dos filtros (Q-ADD-07), texto da marca com `overlay` de um PNG gerado com o sharp ou com `drawtext` (Q-ADD-12), origem e armazenamento da imagem da marca, parâmetros e geometria da marca, pré-visualização da marca e o T-07, ponto de ligação dos extras do plano (o `planExtras.js` sai antes, quando não há `trim`, `remove_audio` nem `speed`) e pormenores da pré-visualização e do redimensionamento. Paragem no checkpoint da etapa 1.
+- 2026-10-22T20:22:31Z: B005 Estágio 1 aprovado (`implementation-plan.md`) com as respostas D-58 (a), D-59 (a), D-60 (a) com limpeza só de marcas de projetos apagados ou sem referência em `VideoTask` nem em `recipe` ao fim de 24 h, D-61 (a) com ADR-010, D-62 (a), D-63 (a) com ADR-011 (separado do ADR-010) e D-64 (a), com o registo de que as predefinições na menor dimensão fogem à letra da RESIZE-003 e coincidem com ela num vídeo horizontal. Estágio 2 (Implement) em curso.
+- 2026-10-22T20:40:42Z: B005 Estágio 2 implementado, à espera do checkpoint (`implementation-walkthrough.md`). Cinco operações no registo e no worker, endpoint de pré-visualização do T-07, miniaturas dos filtros, carregamento e pré-visualização da marca, limpeza das marcas e cinco painéis. ADR-010 (*middleware* do `_mark`) e ADR-011 (`planExtrasVisual.js` e `visual_input.py`) acrescentados ao `decision-index.md`. `git diff --numstat main` no código: 43 ficheiros, +2867, 0 removidas; os sete ficheiros existentes só com linhas acrescentadas. `express.raw` não existe no Express 4.16, o que pôs o `projects` em ciclo de reinício na primeira reconstrução; corrigido com um leitor próprio. TypeScript, ESLint, sintaxe, 401 sem JWT e sondagens isoladas (sharp e grafo FFmpeg da marca) passaram; testes persistentes, integração e browser ficam para o Estágio 3.
+- 2026-10-22T20:49:13Z: B005 Estágio 2 aprovado. D-65 aceite (marcas de texto em `wm-<watermarkId>.png`, um registo por projeto e texto; altera a D-60; risco residual da limpeza aceite). D-66 aceite como risco residual (duas sessões de tarefa no leitor; a etapa 3 testa que o erro do servidor aparece na interface). Desvios 2 (leitor do corpo, Express 4.16) e 3 (router próprio no gateway) aprovados sem dúvida nova; desvio 5 já na letra da D-60. Próximo ADR: ADR-012. Estágio 3 (Test) em curso.
+- 2026-10-22T21:18:05Z: B005 Estágio 3 executado, à espera do checkpoint (`test-walkthrough.md`, `manual-test-checklist.md`, `projects/test/video/README-b005.md`). Resultados: JS 254/254 (100 novos), Python/FFmpeg 5.1.9 68/68 (12 novos), frontend 62/62 (12 novos), integração B005 com 11 aprovados, 0 falhas e 5 `todo` (D-67), browser real por CDP 2/2 (D-66), integração B004 14/15 (a regressão de imagem fixa 127, mas a fixture dá 253 em aarch64; o teste da B005 calcula o valor esperado e passa). Equivalência sharp ↔ FFmpeg: 0,50 a 0,55/255 nas orientações e 0,35 a 1,36 nos filtros; o ajuste diverge no contraste e na saturação (até 45,78) → D-67, implementação não alterada. NFR-015: p95 de 21,6 ms. D-66: com o WebSocket a interface desativa o botão da B005; sem eventos mostra `TASK_ALREADY_ACTIVE` com o código de suporte. Regressão B003/B004: +2 e +3 linhas nos testes de registo, como a B004 fez. `git diff --numstat main` no código: 53 ficheiros, +4848, 0 removidas. Paragem no checkpoint: D-67, testes manuais e aprovação pendentes.
+- 2026-10-22T22:05:12Z: D-67 respondida (a) pela equipa e implementada: contraste com `lutrgb` e pivô 128 no worker (sharp `linear` sem mudança), saturação com a matriz de luma BT.601 (`colorchannelmixer` e `recomb`), brilho sem mudança; ADR-012 acrescentado ao `decision-index.md`. Suites de novo: JS 254/254, Python 69/69, frontend 62/62, integração B005 16/16 sem `todo` (ajuste entre 0,42 e 1,39/255), integração B004 14/15 (o teste da ferramenta de brilho de imagem dá 126 vs 127 em ARM, código que a B005 não toca, por isso não é regressão). `git diff --numstat main` no código: 54 ficheiros, +4983, 0 removidas. Testes manuais 12/12 aprovados pela equipa; a comparação do ajuste vai ser repetida depois da D-67. Etapa 3 ainda não aprovada.
+- 2026-10-22T22:08:52Z: Checkpoint final da B005 aprovado. A equipa repetiu a comparação do ajuste depois da D-67 (saturação 0, contraste 0.6 e 1.3) e a pré-visualização coincide; o item foi atualizado na checklist. `bolt-complete.cjs 005-video-visual-edits` executado (com `NODE_PATH` para as dependências do specsmd): bolt `in-progress → complete`, ST-VID-004, 008, 009, 010 e 011 `ready → complete` com `implemented: true`; unit e intent sem alteração (2 bolts da unit e 2 units do intent por fazer). Entrada `test` de `stages_completed` acrescentada à mão, como nas B001, B003 e B004. Ramo `bolt/005-video-visual-edits` sem merge para a `main`.
