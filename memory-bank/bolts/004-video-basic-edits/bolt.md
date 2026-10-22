@@ -3,19 +3,31 @@ id: 004-video-basic-edits
 unit: 002-video-transformations
 intent: 001-video-processing-support
 type: ddd-construction-bolt
-status: planned
+status: in-progress
 stories: [ST-VID-001, ST-VID-002, ST-VID-003]
 created: 2026-10-19T17:31:16Z
-started: null
+started: 2026-10-22T16:32:12Z
 completed: null
-current_stage: null
-stages_completed: []
+current_stage: test
+stages_completed:
+  - name: model
+    completed: 2026-10-22T16:42:11Z
+    artifact: ddd-01-domain-model.md
+  - name: design
+    completed: 2026-10-22T16:58:47Z
+    artifact: ddd-02-technical-design.md
+  - name: adr
+    completed: 2026-10-22T18:25:00Z
+    artifact: adr-007-keyframe-copy-worker-decision.md, adr-008-plan-extras.md
+  - name: implement
+    completed: 2026-10-22T18:12:10Z
+    artifact: implementation-report.md
 requires_bolts: [003-video-task-foundation]
 enables_bolts: [008-video-concat-chain, 009-video-batch]
 requires_units: [001-video-lifecycle]
 blocks: true
 # avg_complexity: maior esforço do ADD no bolt (S=1, M=2, L=3); os outros campos são preenchidos no início do bolt na Construção (specsDuvidas D-01)
-complexity: {avg_complexity: null, avg_uncertainty: null, max_dependencies: null, testing_scope: null}
+complexity: {avg_complexity: null, avg_uncertainty: 2, max_dependencies: 2, testing_scope: 3}
 ---
 
 # Bolt: 004-video-basic-edits
@@ -41,11 +53,11 @@ Acrescentar ao registo de operações (T-01) e ao worker (T-02) as operações d
 
 ## Etapas
 
-- [ ] **1. Domain Model**: Pending → `ddd-01-domain-model.md`
-- [ ] **2. Technical Design**: Pending → `ddd-02-technical-design.md`
-- [ ] **3. ADR Analysis** (opcional): Pending → `adr-{n}-{slug}.md`
-- [ ] **4. Implement**: Pending → código nos componentes indicados em "Saídas esperadas"
-- [ ] **5. Test**: Pending → `ddd-03-test-report.md`
+- [x] **1. Domain Model**: Complete → `ddd-01-domain-model.md`
+- [x] **2. Technical Design**: Complete → `ddd-02-technical-design.md`
+- [x] **3. ADR Analysis**: Complete → `adr-007-keyframe-copy-worker-decision.md`, `adr-008-plan-extras.md`
+- [x] **4. Implement**: Aprovado pela equipa → `implementation-report.md`
+- [ ] **5. Test**: Testes automatizados executados; testes manuais e revisão pendentes → `ddd-03-test-report.md`, `manual-test-checklist.md`
 
 ## Requisitos rastreados
 
@@ -74,8 +86,8 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 
 - [ ] Stories incluídas implementadas e respetivos critérios de aceitação cumpridos.
 - [ ] Critérios de aceitação dos requisitos rastreados (ficheiros `docs/requirements/REQ-VID-*.md`) verificados por testes.
-- [ ] Nenhuma linha de código existente alterada (regra 2.6 do ADD); o fluxo de imagem continua a funcionar como antes.
-- [ ] Testes automatizados e relatório do bolt registados; nenhum resultado de teste é presumido nesta fase.
+- [x] Nenhuma linha de código existente removida/reescrita face a `origin/main` (regra 2.6 do ADD); fluxo de imagem verificado na integração. Auditoria no relatório de testes.
+- [x] Testes automatizados persistentes e relatório do bolt registados; resultados e limitações em `ddd-03-test-report.md`. Testes manuais pendentes da equipa.
 - [ ] Código revisto.
 - [ ] Cada operação, isolada, corre como cadeia de um passo pelo executor da B003 e gera um novo recurso em `videos` com `source_video_ids` e `recipe`.
 
@@ -97,5 +109,7 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 - Monta nos seus painéis as peças comuns de tarefa do frontend construídas e testadas pela B003 (`lib/video-tasks.ts`, `use-video-task.ts`, `video-task-progress.tsx`), sem as reconstruir (specsDuvidas D-47).
 
 ## Notas
+
+- Etapa 4 aprovada explicitamente pela equipa em `2026-10-22T18:12:10Z`; aprovação e passagem à etapa 5 registadas no construction-log. Na etapa 5 foram respondidas D-55 (duração visual), D-56 (consulta de controlo; ADR-009) e D-57 (recuo se o fim não for representável por cópia). Todas aprovadas na opção (a), sem reabrir D-49 a D-54. O bolt permanece aberto até aos testes manuais e à aprovação explícita da etapa 5.
 
 - O ADD v1.1 não tem secção de decisão própria para os UC-VID-001 a 003 (âmbito 1.2); as decisões vêm do T-00, T-01, T-02 e T-05. Sem esforço no ADD para este bolt, por isso `avg_complexity` fica `null`; `avg_uncertainty`, `max_dependencies` e `testing_scope` são preenchidos no início do bolt na Construção (specsDuvidas D-01).

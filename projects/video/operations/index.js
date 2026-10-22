@@ -4,6 +4,9 @@
 // parameters)} and, for the conversion only, outputContainer(parameters).
 // Concrete operations are added by later bolts, one entry each (B004+).
 const MODULES = [];
+MODULES.push(require("./trim"));
+MODULES.push(require("./remove_audio"));
+MODULES.push(require("./speed"));
 
 if (process.env.VIDEO_TEST_OPERATIONS === "1") {
   MODULES.push(require("./test_reencode"));

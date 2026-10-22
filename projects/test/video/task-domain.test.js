@@ -62,6 +62,10 @@ test("test_reencode only exists with VIDEO_TEST_OPERATIONS=1 (D-37)", () => {
       { cwd: `${__dirname}/../..`, env: { PATH: process.env.PATH, ...env } },
     )
       .toString()
+      // B004 operations are always active; this B003 assertion isolates D-37.
+      .split(",")
+      .filter((name) => !["trim", "remove_audio", "speed"].includes(name.trim()))
+      .join(",")
       .trim();
   assert.equal(names({}), "");
   assert.equal(names({ VIDEO_TEST_OPERATIONS: "1" }), "test_reencode");

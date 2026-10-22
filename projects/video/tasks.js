@@ -6,6 +6,7 @@ const profiles = require("./profiles");
 const display = require("./display");
 const chain = require("./chain");
 const plans = require("./plan");
+const { applyPlanExtras } = require("./planExtras");
 const { VideoError, MESSAGES } = require("./errors");
 const { DUPLICATE_KEY } = require("./locks");
 
@@ -335,6 +336,7 @@ function createTasks({
       inputs: inputVideos,
       decided,
     });
+    applyPlanExtras(plan, steps, chain.propsFromMeta(inputVideos[0].meta), registry);
     const at = now();
     let task;
     try {

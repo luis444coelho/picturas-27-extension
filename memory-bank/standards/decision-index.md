@@ -1,6 +1,6 @@
 ---
-last_updated: 2026-10-22T16:30:00Z
-total_decisions: 6
+last_updated: 2026-10-22T19:00:00Z
+total_decisions: 9
 ---
 
 # Decision Index
@@ -19,6 +19,31 @@ Use this to find relevant prior decisions when working on related features.
 ## Decisions
 
 <!-- Entries are appended below in reverse chronological order (newest first) -->
+
+### ADR-009: Consulta explícita de controlo na ligação existente do worker
+- **Status**: accepted
+- **Date**: 2026-10-22
+- **Bolt**: 004-video-basic-edits (002-video-transformations)
+- **Path**: `bolts/004-video-basic-edits/adr-009-control-polling.md`
+- **Summary**: A integração real expôs que o Pika 1.3.2 adia callbacks reentrantes enquanto a tarefa corre. D-56 (a), aprovada: fila exclusiva adicional no canal de controlo existente, consultada por `basic_get` em `_wait()`, reutilizando `ControlChannel._on_message`. Mantêm-se a ligação única, thread principal, assinaturas e todas as linhas anteriores das B001–B003.
+- **Read when**: Working on cancellation, Pika callback dispatch, worker heartbeats, control queues or executor wait hooks.
+
+### ADR-008: `planExtras.js` como módulo de extensão do plano sem alterar o `plan.js` da B003
+- **Status**: accepted
+- **Date**: 2026-10-22
+- **Bolt**: 004-video-basic-edits (002-video-transformations)
+- **Path**: `bolts/004-video-basic-edits/adr-008-plan-extras.md`
+- **Summary**: O `plan.js` da B003 conhece `estimate` e `copyable { video, audio }` por stream. A B004 precisa de campos que esse contrato não exprime: `plan.keyframeCopy` (com `atMs`, `endMs`, `video`, `audio`, `preview` e `dropStep`, ADR-007) e `input: { fpsNum, fpsDen }` por passo (taxa de fotogramas da entrada, usada pelo filtro `fps=` da velocidade, D-52). O módulo `projects/video/planExtras.js` exporta `applyPlanExtras(plan, steps, inputProps, registry)`, aplicado após `plans.buildPlan(...)` no `tasks.js` com uma única linha nova, sem alterar o `plan.js` (regra 2.6). D-54 (a): pode também acrescentar `plan.targets.preview` ausente, determinístico a partir de `original`, com o mesmo proprietário/projeto, persistido antes da publicação; preserva `plan.preview`, `plan.output`, destinos existentes e assinatura. O worker só usa o destino recebido. Padrão declarado para as B005, B007 e B008.
+- **Read when**: Extending the execution plan with step-level data not expressible by `estimate`/`copyable` (e.g. conditional copy flags, per-step `input.fpsNum/fpsDen`, chain-specific metadata); working on `plan.js`, `tasks.js`, or any bolt that adds new operation modules (B005, B007, B008+).
+
+### ADR-007: O worker escolhe entre duas alternativas do plano calculadas pelo serviço de projetos (cópia no *keyframe* do recorte)
+- **Status**: accepted
+- **Date**: 2026-10-22
+- **Bolt**: 004-video-basic-edits (002-video-transformations)
+- **Path**: `bolts/004-video-basic-edits/adr-007-keyframe-copy-worker-decision.md`
+- **Summary**: REQ-VID-TRIM-010 permite copiar vídeo e áudio sem recodificação quando o instante de início do recorte coincide com um *keyframe*. O serviço de projetos (`planExtras.js`, ADR-008) calcula **ambas** as alternativas: cópia (`plan.keyframeCopy` com `atMs`, `endMs`, `video`, `audio`, `preview`, `dropStep`) e recodificação (restante plano). O worker verifica a coincidência com `round((pts − first_pts) × 1000) == atMs` e escolhe entre elas; falha do FFprobe recai para recodificação sem falhar a tarefa. Áudio na cópia: `copy` (AAC), `encode` (MP3/outro), ou `none` (sem áudio). `metadata.videoMode = "copy" | "encode"`. Precedente: B001 (ADR-002), onde o worker também devolve FFprobe e o serviço de projetos decide.
+- **Read when**: Working on the `trim` operation, the `keyframe.py` module, the `keyframeCopy` plan field (structure: `{atMs, endMs, video, audio, preview, dropStep}`), chains starting with a trim step (B008), or any future operation where the worker must choose between copy and re-encode at runtime.
+- **Stage 5 clarification (D-57 a, approved)**: If packet presentation timestamps show that a copied prefix cannot preserve the selected end because of B-frame references, use the persisted encode alternative. Keep the one-frame tolerance and publish the actual mode. Copy remains available for representable intervals.
 
 ### ADR-006: Pastas temporárias órfãs depois de um *dead-letter*: ficheiro de bloqueio por tarefa e limpeza no arranque do worker
 - **Status**: accepted

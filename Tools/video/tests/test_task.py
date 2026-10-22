@@ -6,6 +6,7 @@ FFmpeg 5.1 of the worker image:
     python -m unittest tests/test_task.py
 """
 import json
+import ast
 import os
 import shutil
 import subprocess
@@ -160,6 +161,10 @@ class CancelledTasksTest(unittest.TestCase):
         out = subprocess.run(['python', '-c', 'import ops; print(sorted(ops.OPERATIONS))'],
                              capture_output=True, text=True, env={'PATH': os.environ['PATH'],
                                                                   'PYTHONPATH': os.environ.get('PYTHONPATH', '')})
+        # B004 is always active. Retain the original D-37 check for other ops.
+        names = ast.literal_eval(out.stdout.strip())
+        self.assertEqual(set(names), {'trim', 'remove_audio', 'speed'})
+        out.stdout = str([name for name in names if name not in {'trim', 'remove_audio', 'speed'}])
         self.assertEqual(out.stdout.strip(), '[]')
 
 
@@ -247,6 +252,9 @@ class FakeChannel:
         self.acked.append(delivery_tag)
 
     # control channel
+    def basic_get(self, **kw):
+        return None, None, None
+
     def exchange_declare(self, **kw):
         pass
 
