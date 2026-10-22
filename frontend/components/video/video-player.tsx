@@ -9,6 +9,7 @@ import {
   videoErrorCode,
   videoErrorMessage,
 } from "@/lib/videos";
+import { VideoActions } from "./video-actions";
 
 // Integrated player (UPLOAD-015, RN6): the native controls give play, pause,
 // seek, volume and full screen. The server picks the MP4 preview copy when
@@ -88,6 +89,7 @@ export function VideoPlayer({
         onLoadedMetadata={onLoadedMetadata}
       />
       <p className="text-sm font-medium truncate">{video.originalName}</p>
+      <VideoActions target={target} video={video} />
     </div>
   );
 }

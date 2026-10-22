@@ -8,6 +8,8 @@ const MESSAGES = {
   INVALID_REQUEST: "Pedido inválido. Verifica os dados enviados.",
   RESOURCE_NOT_READY:
     "O vídeo ainda está a ser processado. Tenta novamente quando estiver concluído.",
+  RESOURCE_UNAVAILABLE:
+    "O ficheiro do vídeo não está disponível. Tenta novamente mais tarde.",
   UNSUPPORTED_FORMAT: "Só são suportados vídeos MP4, MOV e AVI.",
   INVALID_CODEC:
     "Os codecs do vídeo não são suportados. Converte-o para H.264/AAC (ou MPEG-4/MP3 em AVI) e tenta novamente.",

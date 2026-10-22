@@ -113,5 +113,7 @@ router.post(
 );
 router.delete(`${VIDEOS}/:video/upload`, checkVideoToken, forward("delete"));
 router.get(`${VIDEOS}/:video/playback`, checkVideoToken, forward("get"));
+router.get(`${VIDEOS}/:video`, checkVideoToken, forward("get"));
+router.get(`${VIDEOS}/:video/download`, checkVideoToken, forward("get"));
 
 module.exports = router;
