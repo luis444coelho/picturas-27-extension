@@ -3,19 +3,26 @@ id: 003-video-task-foundation
 unit: 001-video-lifecycle
 intent: 001-video-processing-support
 type: ddd-construction-bolt
-status: planned
+status: in-progress
 stories: [ST-VID-COM-001]
 created: 2026-10-19T17:31:16Z
-started: null
+started: 2026-10-22T15:15:43Z
 completed: null
-current_stage: null
-stages_completed: []
+current_stage: design
+stages_completed:
+  - name: model
+    completed: 2026-10-22T15:25:53Z
+    artifact: ddd-01-domain-model.md
 requires_bolts: [001-video-lifecycle]
 enables_bolts: [004-video-basic-edits, 005-video-visual-edits, 006-video-frame-export, 007-video-format-conversion]
 requires_units: []
 blocks: true
 # avg_complexity: maior esforço do ADD no bolt (S=1, M=2, L=3); os outros campos são preenchidos no início do bolt na Construção (specsDuvidas D-01)
-complexity: {avg_complexity: null, avg_uncertainty: null, max_dependencies: null, testing_scope: null}
+complexity:
+  avg_complexity: null
+  avg_uncertainty: 3
+  max_dependencies: 3
+  testing_scope: 3
 ---
 
 # Bolt: 003-video-task-foundation
@@ -39,8 +46,8 @@ Construir uma só vez o que todas as operações usam: no ADD, uma operação is
 
 ## Etapas
 
-- [ ] **1. Domain Model**: Pending → `ddd-01-domain-model.md`
-- [ ] **2. Technical Design**: Pending → `ddd-02-technical-design.md`
+- [x] **1. Domain Model**: Complete → `ddd-01-domain-model.md`
+- [ ] **2. Technical Design**: ⏳ In progress → `ddd-02-technical-design.md`
 - [ ] **3. ADR Analysis** (opcional): Pending → `adr-{n}-{slug}.md`
 - [ ] **4. Implement**: Pending → código nos componentes indicados em "Saídas esperadas"
 - [ ] **5. Test**: Pending → `ddd-03-test-report.md`
