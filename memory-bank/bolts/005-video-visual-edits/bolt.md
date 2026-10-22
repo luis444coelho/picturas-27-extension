@@ -47,7 +47,7 @@ Acrescentar ao registo de operações e ao worker as operações `watermark`, `a
 ## Etapas
 
 - [x] **1. Plan**: Complete (D-58 a D-64 respondidas) → `implementation-plan.md`
-- [ ] **2. Implement**: ⏳ In progress → código + `implementation-walkthrough.md`
+- [ ] **2. Implement**: ⏳ Implementado, à espera do checkpoint → código + `implementation-walkthrough.md`, ADR-010, ADR-011
 - [ ] **3. Test**: Pending → `test-walkthrough.md`
 
 ## Requisitos rastreados

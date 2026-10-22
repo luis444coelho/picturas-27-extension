@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 
 const { router: projectsRouter, process_msg } = require("./routes/projects");
 const videosRouter = require("./routes/videos");
+const videoVisualRouter = require("./routes/videoVisual");
 
 // Run Docker
 const mongoDB = "mongodb://projects_mongoDB:27018/project";
@@ -32,6 +33,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
+app.use("/", videoVisualRouter);
 app.use("/", videosRouter);
 app.use("/", projectsRouter);
 
@@ -39,6 +41,7 @@ app.use("/", projectsRouter);
 process_msg();
 require("./video").start();
 require("./video/taskModule").start();
+require("./video/watermarkCleanup").start();
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
