@@ -2,7 +2,7 @@
 unit: 002-video-transformations
 intent: 001-video-processing-support
 created: 2026-10-22T16:32:12Z
-last_updated: 2026-10-22T18:25:00Z
+last_updated: 2026-10-22T20:02:18Z
 ---
 
 # Construction Log: 002-video-transformations
@@ -28,7 +28,7 @@ last_updated: 2026-10-22T18:25:00Z
 
 | Bolt ID | Stories | Status | Changed |
 |---------|---------|--------|---------|
-| 004-video-basic-edits | ST-VID-001, ST-VID-002, ST-VID-003 | ⏳ in-progress | - |
+| 004-video-basic-edits | ST-VID-001, ST-VID-002, ST-VID-003 | ✅ complete | - |
 | 005-video-visual-edits | ST-VID-004, ST-VID-008, ST-VID-009, ST-VID-010, ST-VID-011 | [ ] planned | - |
 | 006-video-frame-export | ST-VID-005 | 🚫 blocked (D-06) | - |
 | 007-video-format-conversion | ST-VID-012 | [ ] planned | - |
@@ -41,6 +41,9 @@ last_updated: 2026-10-22T18:25:00Z
 | 2026-10-22T16:42:11Z | 004-video-basic-edits | stage-complete | Domain Model → Technical Design (D-49 a D-53) |
 | 2026-10-22T16:58:47Z | 004-video-basic-edits | stage-complete | Technical Design → ADR Analysis |
 | 2026-10-22T18:25:00Z | 004-video-basic-edits | stage-complete | ADR Analysis → Implement (ADR-007 e ADR-008, revisados e aprovados) |
+| 2026-10-22T18:12:10Z | 004-video-basic-edits | stage-complete | Implement → Test (D-54) |
+| 2026-10-22T20:02:18Z | 004-video-basic-edits | stage-complete | Test → complete (D-55 a D-57, ADR-009; testes manuais aprovados) |
+| 2026-10-22T20:02:18Z | 004-video-basic-edits | completed | All 5 stages done |
 
 ## Execution Summary
 
@@ -48,8 +51,8 @@ last_updated: 2026-10-22T18:25:00Z
 |--------|-------|
 | Original bolts planned | 4 |
 | Current bolt count | 4 |
-| Bolts completed | 0 |
-| Bolts in progress | 1 |
+| Bolts completed | 1 |
+| Bolts in progress | 0 |
 | Bolts remaining | 2 (mais 1 `blocked`, D-06) |
 | Replanning events | 0 |
 
@@ -70,3 +73,5 @@ last_updated: 2026-10-22T18:25:00Z
 - 2026-10-22T18:12:10Z: Etapa 4 da B004 aprovada explicitamente pela equipa (commit `6a72c67`). Passagem à etapa 5 registada em `bolt.md`; criar suite persistente, executar FFmpeg 5.1 real, integração/regressões e frontend, mantendo o checkpoint de testes manuais e aprovação final pendentes.
 
 - 2026-10-22T19:17:29Z: B004 etapa 5 preparada para checkpoint: 154 testes JS, 56 Python/FFmpeg 5.1.9, 50 frontend e 15 integração real passaram (275 casos distintos). Build de produção, TypeScript e ESLint executados e aprovados. D-55 (duração visual), D-56 (consulta explícita de controlo na ligação existente; ADR-009) e D-57 (recuo se o fim não for representável por cópia) respondidas pela equipa na opção (a) e implementadas. Precisão de recorte/PTS, B-frames e sincronismo corrigidos; `plan.js` intacto. Auditoria confirma só acréscimos face à main, incluindo ficheiros novos e B001–B003. Dados/buckets/diretórios próprios limpos; `test_reencode` desligada nos serviços. Resultados reais, falhas investigadas e limites em `ddd-03-test-report.md`; execução manual pendente em `manual-test-checklist.md`. `current_stage: test` e `status: in-progress` mantidos, sem fecho/merge. Aguardar testes manuais e aprovação explícita da equipa.
+
+- 2026-10-22T20:02:18Z: Checkpoint final da B004 aprovado, retomado noutra máquina sem repetir a etapa 5 (resultados automáticos de `a5d60d2`). Testes manuais no browser feitos pela equipa, todos aprovados: recorte, recorte inválido, remover áudio, vídeo sem áudio, velocidade, cancelamento, regressão de vídeo e de imagem; registados em `manual-test-checklist.md` e `ddd-03-test-report.md` (os itens não reportados individualmente ficam indicados como tal). `bolt-complete.cjs 004-video-basic-edits` executado (com `NODE_PATH` para as dependências do specsmd): bolt `in-progress → complete`, ST-VID-001, ST-VID-002 e ST-VID-003 `ready → complete` com `implemented: true`; unit e intent sem alteração (3 bolts da unit por fazer, 2 units do intent). Entrada `test` de `stages_completed` acrescentada à mão, como na B001 e na B003. Ramo `bolt/004-video-basic-edits` sem merge para a `main` (a `main` já tem o merge `f343e27`, feito pela equipa antes deste fecho).
