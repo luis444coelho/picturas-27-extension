@@ -36,6 +36,6 @@ A equipa executou os testes manuais no browser, noutra máquina, e comunicou que
 
 Os itens marcados acima correspondem às áreas reportadas; "remover áudio" corresponde à confirmação de áudio e ao resultado sem som. A equipa aprovou a etapa 5 com estes resultados.
 
-**Atualização (2026-10-22T20:13:03Z), comunicada pela equipa:**
+**Atualização (2026-10-22T20:08:20Z), comunicada pela equipa:**
 - Três painéis, Scrubbing, Loop preview e Progresso e continuidade também foram testados manualmente e passaram (faziam parte dos testes já feitos).
 - Galeria e informação e Compatibilidade e geometria **não foram testados manualmente**. Ficam cobertos pelos testes automáticos: em Galeria e informação, a integração real `projects/test/video/e2e-basic-edits.test.js` verifica `source_video_ids`, `recipe` do resultado e da tarefa e `recipe` no endpoint de informação. Em Compatibilidade e geometria, `Tools/video/tests/test_basic_edits.py` e a integração verificam a cópia 129×97, a recodificação 128×96, a rotação 96×128 e a preview H.264 `yuv420p` do trim ímpar.
