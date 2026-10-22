@@ -383,6 +383,12 @@ test("sharp adjust and filters follow the FFmpeg formulas (T-07 table)", async (
   for (const q of ["tl", "tr", "bl", "br"]) assert.ok(Math.max(...grey[q]) - Math.min(...grey[q]) <= 3, `${q}: ${grey[q]}`);
   const dark = await pixels(await preview.render(frame, [step("adjust", { ...neutral, brightness: 0.5 })]));
   assert.ok(near(dark.br, [128, 128, 128], 4) && near(dark.tl, [128, 0, 0], 6), JSON.stringify(dark));
+  // D-67/ADR-012: contrast through the pivot 128 and saturation mixed with
+  // the BT.601 luma (PIL ImageEnhance.Color), as the worker does in RGB.
+  const contrast = await pixels(await preview.render(frame, [step("adjust", { ...neutral, contrastFactor: 0.6 })]));
+  assert.ok(near(contrast.tl, [204, 51, 51], 4) && near(contrast.br, [204, 204, 204], 4), JSON.stringify(contrast));
+  const half = await pixels(await preview.render(frame, [step("adjust", { ...neutral, saturationFactor: 0.5 })]));
+  assert.ok(near(half.tl, [166, 38, 38], 4) && near(half.br, [255, 255, 255], 3), JSON.stringify(half));
   const sepia = await pixels(await preview.render(frame, [step("filter", { filter: "sepia" })]));
   assert.ok(near(sepia.tl, [100, 89, 69], 6), `${sepia.tl}`);
   const negative = await pixels(await preview.render(frame, [step("filter", { filter: "negative" })]));

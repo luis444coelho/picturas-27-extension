@@ -172,8 +172,9 @@ class VisualEditFFmpegTest(unittest.TestCase):
             ('adjust', {'brightness': 1, 'contrastFactor': 1, 'saturationFactor': 0}, {})]))
         self.assert_preserved(source, info, 320, 240)
         graph = cmd[cmd.index('-filter_complex') + 1]
-        self.assertIn('eq=saturation=0', graph)
-        self.assertNotIn('colorchannelmixer', graph, 'neutral brightness adds no filter')
+        self.assertIn('colorchannelmixer=rr=0.299:rg=0.587:rb=0.114', graph, 'BT.601 luma matrix (D-67)')
+        self.assertEqual(graph.count('colorchannelmixer'), 1, 'neutral brightness adds no filter')
+        self.assertNotIn('eq=', graph)
         self.assertEqual(cmd[cmd.index('-c:a') + 1], 'copy', 'AAC audio is copied')
         for at in (0, 1.5, 2.9):
             frame = frame_rgb(out, at)
@@ -194,7 +195,24 @@ class VisualEditFFmpegTest(unittest.TestCase):
     def test_adjust_step_values_are_normalized(self):
         filters = ops.get('adjust').video_filters(
             {'brightness': 0.15000000000000002, 'contrastFactor': 1.2, 'saturationFactor': 1})
-        self.assertEqual(filters, ['colorchannelmixer=rr=0.15:gg=0.15:bb=0.15', 'eq=contrast=1.2'])
+        self.assertEqual(filters, ['colorchannelmixer=rr=0.15:gg=0.15:bb=0.15',
+                                   'lutrgb=r=val*1.2-25.6:g=val*1.2-25.6:b=val*1.2-25.6'])
+
+    def test_adjust_contrast_and_saturation_in_rgb(self):
+        # D-67/ADR-012: contrast through the fixed pivot 128 in RGB and
+        # saturation as a mix with the BT.601 luma, like the sharp preview.
+        source = self.fixtures['quad.mp4']
+        points = self.quadrant_points(320, 240)
+        out, _, _, _ = self.run_plan(source, plan_for([
+            ('adjust', {'brightness': 1, 'contrastFactor': 0.6, 'saturationFactor': 1}, {})]))
+        frame = frame_rgb(out, 1.5)
+        self.assertTrue(close(pixel(frame, *points['tl']), (204, 51, 51), 12), pixel(frame, *points['tl']))
+        self.assertTrue(close(pixel(frame, *points['br']), (204, 204, 204), 12), pixel(frame, *points['br']))
+        out, _, _, _ = self.run_plan(source, plan_for([
+            ('adjust', {'brightness': 1, 'contrastFactor': 1, 'saturationFactor': 0.5}, {})]))
+        frame = frame_rgb(out, 1.5)
+        self.assertTrue(close(pixel(frame, *points['tl']), (166, 38, 38), 12), pixel(frame, *points['tl']))
+        self.assertTrue(close(pixel(frame, *points['br']), (255, 255, 255), 6), 'white keeps its luma')
 
     # ---- filter (FILTER-006/007) ----------------------------------------------
 

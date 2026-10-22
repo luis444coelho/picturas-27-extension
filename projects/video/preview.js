@@ -8,6 +8,12 @@ const { normalize } = require("./operations/visualSteps");
 const STATIC = ["adjust", "filter", "resize", "orient"];
 const MAX_WIDTH = 1280;
 const QUALITY = 85; // D-64
+const LUMA = [0.299, 0.587, 0.114]; // BT.601, as PIL convert("L")
+
+// Saturation as a mix with the luma (PIL ImageEnhance.Color), the same matrix
+// as the worker's colorchannelmixer (D-67, ADR-012).
+const saturationMatrix = (s) =>
+  [0, 1, 2].map((row) => [0, 1, 2].map((col) => LUMA[col] * (1 - s) + (row === col ? s : 0)));
 const THUMB_WIDTH = 160; // D-64
 
 const raw = (image) =>
@@ -38,7 +44,7 @@ function passesOf(step, image) {
       if (brightness !== 1) passes.push((s) => s.linear(brightness, 0));
       if (contrast !== 1)
         passes.push((s) => s.linear(contrast, 128 * (1 - contrast)));
-      if (saturation !== 1) passes.push((s) => s.modulate({ saturation }));
+      if (saturation !== 1) passes.push((s) => s.recomb(saturationMatrix(saturation)));
       return passes;
     }
     case "filter": {

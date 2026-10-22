@@ -318,8 +318,7 @@ test.describe("B005 real stack", { skip, timeout: 900000 }, () => {
     assert.ok((await difference(identity.data, plain.data)).mean <= 2, "identity preview equals the first frame");
   });
 
-  // D-67 (pending): the ADD 4.3 formulas eq=contrast / eq=saturation (YUV) do
-  // not match sharp linear / modulate (RGB, LCh); kept visible as a todo.
+  // D-67 (a)/ADR-012: contrast and saturation in RGB in both engines.
   for (const s of [
     step("adjust", { brightness: 1.2, contrastFactor: 1, saturationFactor: 1 }),
     step("adjust", { brightness: 1, contrastFactor: 1.3, saturationFactor: 1 }),
@@ -327,7 +326,7 @@ test.describe("B005 real stack", { skip, timeout: 900000 }, () => {
     step("adjust", { brightness: 1, contrastFactor: 1, saturationFactor: 0.5 }),
     step("adjust", { brightness: 1.2, contrastFactor: 1.3, saturationFactor: 0.5 }),
   ])
-    test(`adjust preview matches the FFmpeg result ${JSON.stringify(s.parameters)}`, { todo: "D-67 pendente" }, () => equivalent(s));
+    test(`adjust preview matches the FFmpeg result ${JSON.stringify(s.parameters)}`, () => equivalent(s));
 
   test("NFR-015: preview ≤ 1 s for 95% of requests; thumbnails and validation ≤ 1 s", async () => {
     const times = [];
