@@ -8,7 +8,7 @@ stories: [ST-VID-001, ST-VID-002, ST-VID-003]
 created: 2026-10-19T17:31:16Z
 started: 2026-10-22T16:32:12Z
 completed: null
-current_stage: adr
+current_stage: implement
 stages_completed:
   - name: model
     completed: 2026-10-22T16:42:11Z
@@ -16,6 +16,9 @@ stages_completed:
   - name: design
     completed: 2026-10-22T16:58:47Z
     artifact: ddd-02-technical-design.md
+  - name: adr
+    completed: 2026-10-22T18:25:00Z
+    artifact: adr-007-keyframe-copy-worker-decision.md, adr-008-plan-extras.md
 requires_bolts: [003-video-task-foundation]
 enables_bolts: [008-video-concat-chain, 009-video-batch]
 requires_units: [001-video-lifecycle]
@@ -49,8 +52,8 @@ Acrescentar ao registo de operações (T-01) e ao worker (T-02) as operações d
 
 - [x] **1. Domain Model**: Complete → `ddd-01-domain-model.md`
 - [x] **2. Technical Design**: Complete → `ddd-02-technical-design.md`
-- [ ] **3. ADR Analysis** (opcional): Pending → `adr-{n}-{slug}.md`
-- [ ] **4. Implement**: Pending → código nos componentes indicados em "Saídas esperadas"
+- [x] **3. ADR Analysis**: Complete → `adr-007-keyframe-copy-worker-decision.md`, `adr-008-plan-extras.md`
+- [ ] **4. Implement**: Código produzido; checkpoint de revisão pendente → `implementation-report.md`
 - [ ] **5. Test**: Pending → `ddd-03-test-report.md`
 
 ## Requisitos rastreados

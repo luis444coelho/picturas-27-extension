@@ -10,6 +10,7 @@ import requests
 import config
 import executor
 import ingest
+import keyframe
 import video_msg
 from control import ControlChannel
 from storage import StorageClient
@@ -113,6 +114,8 @@ class TaskRunner:
 
     def _reply(self, request, started_at, status, output=None, error=None, redelivered=None):
         reply = video_msg.build_reply(request, started_at, status, output=output, error=error)
+        if status == 'completed' and getattr(self, '_video_mode', None) is not None:
+            reply['metadata']['videoMode'] = self._video_mode
         reply['taskId'] = request.get('taskId')
         if redelivered is not None:
             reply['metadata']['redelivered'] = redelivered
@@ -121,6 +124,7 @@ class TaskRunner:
     # ---- one delivery ---------------------------------------------------
 
     def run(self, channel, method, request):
+        self._video_mode = None
         task_id = str(request.get('taskId', ''))
         correlation_id = request.get('correlationId')
         started_at = video_msg.now()
@@ -165,6 +169,7 @@ class TaskRunner:
         finally:
             self._reporter = None
             self._running = None
+            self._video_mode = None
             shutil.rmtree(work_dir, ignore_errors=True)
             os.close(lock_fd)
 
@@ -183,9 +188,19 @@ class TaskRunner:
             self._storage.download(item['source'], path)
             input_paths.append(path)
 
+        if any(step['operation'] in ('trim', 'remove_audio', 'speed') for step in plan['steps']):
+            plan, self._video_mode = keyframe.resolve_keyframe_copy(plan, input_paths[0], pump)
+            alternative = request['plan'].get('keyframeCopy')
+            if alternative:
+                self._log('info', 'video.task.keyframe', correlationId=request.get('correlationId'),
+                          taskId=task_id, atMs=alternative['atMs'],
+                          keyframeMs=alternative['atMs'] if self._video_mode == 'copy' else None,
+                          videoMode=self._video_mode)
+
         container = plan['output']['container']
         result_path = os.path.join(work_dir, f'result.{container}')
         cmd = executor.build_command(plan, input_paths, result_path)
+        cmd = keyframe.insert_input_options(cmd, plan)
         # One encoding invocation per task, visible in the logs (NFR-013).
         self._log('info', 'video.task.ffmpeg', correlationId=request.get('correlationId'),
                   taskId=task_id, command=' '.join(cmd))

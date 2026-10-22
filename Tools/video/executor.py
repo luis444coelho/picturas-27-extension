@@ -3,6 +3,7 @@ import subprocess
 
 import ingest
 import ops
+from step_input import with_filter_input
 
 """
 Chain executor (ADD T-02): turns the execution plan computed by the projects
@@ -22,6 +23,7 @@ class Cancelled(Exception):
 def _filters(plan, kind):
     chain = []
     for step in plan['steps']:
+        step = with_filter_input(step)
         module = ops.get(step['operation'])
         chain += getattr(module, f'{kind}_filters')(step.get('parameters') or {})
     return chain

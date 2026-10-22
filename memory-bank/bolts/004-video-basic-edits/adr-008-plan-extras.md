@@ -67,9 +67,11 @@ plan.keyframeCopy = {
 
 O restante plano (`video: encode`, `audio: encode` com `atrim`) é a alternativa de recodificação. As duas alternativas ficam no plano guardado na tarefa (`VideoTask.plan`, ADR-004), por isso a republicação da rotina (D-41) não precisa de recalcular os extras.
 
-### 3. Sem alterações a outros campos
+### 3. Destino adicional de preview (D-54, opção a, aprovada pela equipa)
 
-A função não altera nenhum outro campo do plano. Não duplica a lógica do `plan.js`. As propriedades de entrada (`input`) e o `keyframeCopy` são dados adicionais, não substituições.
+Além de `input` e `keyframeCopy`, a função pode acrescentar `plan.targets.preview` quando estiver ausente e alguma alternativa puder precisar de pré-visualização. O destino determinístico `video_preview/<taskId>.mp4` é calculado no serviço de projetos a partir do destino MP4 `original`, com o mesmo `userId` e `projectId`. Fica no plano persistido antes da publicação (ADR-004/005), para republicação e limpeza tardia. O worker usa esse destino recebido; não o calcula.
+
+Preservam-se `plan.preview`, `plan.output`, destinos existentes e a assinatura `applyPlanExtras(plan, steps, inputProps, registry)`. Nenhum outro campo do plano é alterado. A extensão não duplica o `plan.js`; os campos adicionais não substituem o plano normal de recodificação.
 
 ### Ponto de chamada
 

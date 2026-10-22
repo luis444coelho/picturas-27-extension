@@ -276,3 +276,9 @@ Se alguma verificação mostrar que a extensão não é possível só com linhas
 
 1. Desenho técnico aprovado pela equipa, sem alterações e sem dúvidas novas.
 2. Para o Estágio 3, a equipa pediu dois ADR: **ADR-007**, o worker escolhe entre duas alternativas do plano calculadas no serviço de projetos (cópia no *keyframe*, D-49); **ADR-008**, o `planExtras.js` como padrão de extensão do plano para as B005, B007 e B008.
+
+## Esclarecimentos de implementação aprovados na retoma (D-54)
+
+A D-54 (a) autoriza `applyPlanExtras(plan, steps, inputProps, registry)` a acrescentar também `plan.targets.preview` quando ausente e alguma alternativa puder precisar de pré-visualização. O destino `video_preview/<taskId>.mp4` é calculado no serviço de projetos a partir de `targets.original`, com o mesmo proprietário/projeto. É persistido antes da publicação para republicação e limpeza tardia. Preservam-se `plan.preview`, `plan.output`, destinos existentes e a assinatura aprovada; `plan.js` fica intacto. O worker recebe o destino e não o calcula.
+
+O preflight confirma os pontos adicionais por acréscimo: adaptador em `_filters()` que copia localmente os parâmetros de `speed` e injeta o `step.input` do servidor como `_input` (sobrescreve o cliente; ausência/formato inválido falha); modo de vídeo limitado à entrega atual, reinicializado antes de cada entrega e publicado por `_reply()` apenas em `metadata` de `completed`; helper de opções `-ss/-to` chamado em `task.py` depois de `build_command()` e antes do log/execução, preservando `executor.run()` e os argumentos anteriores. Nenhuma assinatura existente muda. Os painéis obtêm metadados por `useVideoInfo()` e usam `useCanEditProject()`; `useVideoTask()` já invalida a galeria ao concluir.
