@@ -1,6 +1,6 @@
 ---
-last_updated: 2026-10-22T15:39:16Z
-total_decisions: 5
+last_updated: 2026-10-22T16:30:00Z
+total_decisions: 6
 ---
 
 # Decision Index
@@ -19,6 +19,14 @@ Use this to find relevant prior decisions when working on related features.
 ## Decisions
 
 <!-- Entries are appended below in reverse chronological order (newest first) -->
+
+### ADR-006: Pastas temporárias órfãs depois de um *dead-letter*: ficheiro de bloqueio por tarefa e limpeza no arranque do worker
+- **Status**: accepted
+- **Date**: 2026-10-22
+- **Bolt**: 003-video-task-foundation (001-video-lifecycle)
+- **Path**: `bolts/003-video-task-foundation/adr-006-pastas-temporarias-orfas.md`
+- **Summary**: Depois de um *dead-letter*, nenhum worker volta a receber a tarefa, e o cancelamento em `video_control` pode perder-se se o worker reiniciado ainda não estiver ligado, deixando `/tmp/video/<taskId>` no volume. Cada tarefa em execução mantém um `flock` em `/tmp/video/<taskId>/.task.lock`; no arranque, e ao receber o cancelamento de uma tarefa que não corre, o worker apaga as pastas cujo *lock* consegue tomar.
+- **Read when**: Working on the video worker's temporary files (`video_tmp`), redelivery or dead-letter handling, worker restarts, the number of worker replicas (Q-ADD-10), or cleanup of ingestion or task leftovers.
 
 ### ADR-005: O vídeo de resultado tem o mesmo `_id` que a tarefa
 - **Status**: accepted

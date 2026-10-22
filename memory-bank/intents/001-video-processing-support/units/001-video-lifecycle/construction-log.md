@@ -2,7 +2,7 @@
 unit: 001-video-lifecycle
 intent: 001-video-processing-support
 created: 2026-10-21T16:12:26Z
-last_updated: 2026-10-22T15:57:56Z
+last_updated: 2026-10-22T16:28:25Z
 ---
 
 # Construction Log: 001-video-lifecycle
@@ -29,7 +29,7 @@ last_updated: 2026-10-22T15:57:56Z
 |---------|---------|--------|---------|
 | 001-video-lifecycle | ST-VID-000 | ✅ complete | - |
 | 002-video-access | ST-VID-006, ST-VID-007 | ✅ complete | - |
-| 003-video-task-foundation | ST-VID-COM-001 | ⏳ in-progress | - |
+| 003-video-task-foundation | ST-VID-COM-001 | ✅ complete | - |
 
 ## Execution History
 
@@ -51,6 +51,8 @@ last_updated: 2026-10-22T15:57:56Z
 | 2026-10-22T15:39:16Z | 003-video-task-foundation | stage-complete | Technical Design → ADR Analysis (D-44 a D-47) |
 | 2026-10-22T15:44:17Z | 003-video-task-foundation | stage-complete | ADR Analysis → Implement (ADR-003, ADR-004, ADR-005) |
 | 2026-10-22T15:57:56Z | 003-video-task-foundation | stage-complete | Implement → Test (D-48) |
+| 2026-10-22T16:28:03Z | 003-video-task-foundation | stage-complete | Test → complete (ADR-006) |
+| 2026-10-22T16:28:03Z | 003-video-task-foundation | completed | All 5 stages done |
 
 ## Execution Summary
 
@@ -58,9 +60,9 @@ last_updated: 2026-10-22T15:57:56Z
 |--------|-------|
 | Original bolts planned | 3 |
 | Current bolt count | 3 |
-| Bolts completed | 2 |
-| Bolts in progress | 1 |
-| Bolts remaining | 1 |
+| Bolts completed | 3 |
+| Bolts in progress | 0 |
+| Bolts remaining | 0 |
 | Replanning events | 0 |
 
 ## Notes
@@ -84,3 +86,4 @@ last_updated: 2026-10-22T15:57:56Z
 - 2026-10-22T15:55:45Z: B003 Estágio 4 implementado, à espera do checkpoint. Verificações V1 a V8 feitas no código antes de escrever: todas passam só com linhas acrescentadas (V1 `onReply` com um só *handler*, encaminhamento por `operation` num módulo novo chamado logo a seguir ao `start()` da B001; V2 ramo `task.run` no `on_message` do `video.py`, porque o `handle()` usa o `videoId` como pasta; V3 bloco novo no `emit()`; V8 os dois 701 distinguem-se pelo corpo literal). Código novo em `projects/` (2 modelos, 9 módulos), `Tools/video/` (4 módulos) e `frontend/` (4 ficheiros, não montados, D-47); 9 ficheiros existentes só com linhas acrescentadas (0 removidas). Serviços reconstruídos com `--no-deps` e `nginx -s reload`; exchange `video_control` declarada pelo worker; rotas novas respondem 401 sem JWT.
 - 2026-10-22T15:57:56Z: B003 Estágio 4 aprovado. Confirmado que a rotina apaga o objeto e o registo dos carregamentos abandonados (D-15). D-48 registada e aceite (reserva gravada com a resposta perdida; `video.task.reserve_failed` passa a registar também os créditos). `git diff --stat main` no código: 30 ficheiros, 2493 inserções, 0 remoções; os 9 ficheiros existentes têm 148 linhas acrescentadas e 0 removidas. No Estágio 5 a `test_reencode` é ativada com um ficheiro compose temporário fora do repositório, removido no fim.
 - 2026-10-22T16:22:18Z: B003 Estágio 5 executado (`ddd-03-test-report.md`): 249 testes a passar (B003: 54 unitários do serviço de projetos, 19 do worker com FFmpeg 5.1, 5 do frontend, 13 E2E; regressão B001/B002: 158). 10 E2E de navegador da regressão não corridas (sem `playwright-core` nesta máquina). 3 defeitos corrigidos (limpeza dos temporários depois do *dead-letter* com `flock`, cadência do progresso a 0,5 s, log de pedidos no gateway para a NFR-002). `test_reencode` ativada só com um compose temporário fora do repositório, já apagado; dados de teste apagados (35 utilizadores, 23 projetos, 53 vídeos, 25 tarefas, 18 *buckets*). À espera do checkpoint final para fechar o bolt com `bolt-complete.cjs`.
+- 2026-10-22T16:28:25Z: Checkpoint final da B003 aprovado. Correção 1 do Estágio 5 registada como ADR-006 (pastas temporárias órfãs depois de um *dead-letter*: `flock` por tarefa e limpeza no arranque do worker) e acrescentada ao `decision-index.md`; a correção 2 (cadência de 0,5 s) fica só no relatório, por cumprir o "pelo menos 1×/s" do T-02. `bolt-complete.cjs 003-video-task-foundation` executado (com `NODE_PATH` para as dependências do specsmd): bolt `in-progress → complete`, ST-VID-COM-001 `ready → complete` com `implemented: true`, unit `ready → complete`; intent sem alteração (2 units por fazer). Entrada `test` de `stages_completed` acrescentada à mão, como na B001. Ramo `bolt/003-video-task-foundation` sem merge para a `main`.

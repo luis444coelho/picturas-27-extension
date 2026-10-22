@@ -2,7 +2,7 @@
 unit: 001-video-lifecycle
 bolt: 003-video-task-foundation
 stage: test
-status: in-progress
+status: complete
 updated: 2026-10-22T16:22:18Z
 ---
 
@@ -172,7 +172,7 @@ Defeitos encontrados nos testes e corrigidos neste estágio (código novo, só a
 | 5. Defeitos dos próprios testes, sem efeito no código: vídeo de referência rodado mal construído (o FFmpeg 5.1 só escreve a matriz de rotação em cópia de streams, como já notava a B001); créditos do dono esgotados antes dos testes de queda, que passaram a ter um utilizador próprio | — | Fixed |
 | 6. As E2E no navegador das B001 e B002 (10) não foram corridas: precisam do `playwright-core` e do seu Chromium, que não estão instalados nesta máquina. A B003 não monta nenhum componente (D-47), e no frontend só acrescenta 4 ficheiros novos não importados por nenhum ecrã, por isso não pode alterar esses ecrãs | — | Registado |
 
-Correções 1 a 3: as duas primeiras vão além do texto do ADD (varrimento no arranque com `flock`; cadência de 0,5 s) e ficam à decisão da equipa no checkpoint (ADR ou D, se a equipa quiser).
+Checkpoint final: a correção 1 ficou registada como ADR-006 (`adr-006-pastas-temporarias-orfas.md`). A correção 2 não precisa de registo, porque os 0,5 s cumprem o "pelo menos 1×/s" do T-02 e da NFR-009.
 
 **Dados de teste apagados no fim:**
 - os 35 utilizadores criados (28 `e2e *` e 7 anónimos, filtrados pela data do `ObjectId` a partir das 16:00 UTC);
@@ -188,4 +188,4 @@ Ficam os 2 vídeos anteriores ao bolt. O ficheiro compose temporário foi apagad
 - [x] Critérios de aceitação da ST-VID-COM-001 cumpridos
 - [x] Nenhuma linha de código existente alterada
 - [x] Desempenho dentro dos alvos (NFR-005, NFR-009, D-43)
-- [ ] Checkpoint final da equipa e `bolt-complete.cjs`
+- [x] Checkpoint final da equipa (ADR-006) e `bolt-complete.cjs`

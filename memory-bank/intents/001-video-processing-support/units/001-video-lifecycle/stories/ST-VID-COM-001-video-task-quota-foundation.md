@@ -2,11 +2,11 @@
 id: ST-VID-COM-001
 unit: 001-video-lifecycle
 intent: 001-video-processing-support
-status: ready
+status: complete
 priority: must
-created: 2026-10-19T17:31:16Z
+created: 2026-10-19T17:31:16.000Z
 assigned_bolt: 003-video-task-foundation
-implemented: false
+implemented: true
 ---
 
 # Story: ST-VID-COM-001 — Acompanhar tarefas e quota de vídeo
