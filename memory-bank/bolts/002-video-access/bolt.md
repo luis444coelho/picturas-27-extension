@@ -3,19 +3,22 @@ id: 002-video-access
 unit: 001-video-lifecycle
 intent: 001-video-processing-support
 type: simple-construction-bolt
-status: planned
+status: in-progress
 stories: [ST-VID-006, ST-VID-007]
 created: 2026-10-19T17:31:16Z
-started: null
+started: 2026-10-22T13:32:32Z
 completed: null
-current_stage: null
-stages_completed: []
+current_stage: implement
+stages_completed:
+  - name: plan
+    completed: 2026-10-22T13:38:11Z
+    artifact: implementation-plan.md
 requires_bolts: [001-video-lifecycle]
 enables_bolts: [009-video-batch]
 requires_units: []
 blocks: true
 # avg_complexity: maior esforço do ADD no bolt (S=1, M=2, L=3); os outros campos são preenchidos no início do bolt na Construção (specsDuvidas D-01)
-complexity: {avg_complexity: 1, avg_uncertainty: null, max_dependencies: null, testing_scope: null}
+complexity: {avg_complexity: 1, avg_uncertainty: 2, max_dependencies: 1, testing_scope: 2}
 ---
 
 # Bolt: 002-video-access
@@ -40,7 +43,7 @@ Implementar os endpoints `GET /projects/:user/:project/videos/:video` (informaç
 
 ## Etapas
 
-- [ ] **1. Plan**: Pending → `implementation-plan.md`
+- [x] **1. Plan**: Complete → `implementation-plan.md`
 - [ ] **2. Implement**: Pending → código + `implementation-walkthrough.md`
 - [ ] **3. Test**: Pending → `test-walkthrough.md`
 
