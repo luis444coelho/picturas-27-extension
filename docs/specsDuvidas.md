@@ -399,3 +399,12 @@
 - **Opções:** (a) a B003 constrói as peças comuns (`lib/video-tasks.ts`, `use-video-task.ts`, `video-task-progress.tsx`), testadas com testes unitários do frontend e não montadas em nenhum ecrã; a B004 monta-as nos seus painéis; (b) a B004 constrói-as junto com os primeiros painéis; (c) a B003 constrói-as e monta um painel de tarefas na janela "Vídeos", visível mesmo sem operações.
 - **Recomendação:** (a). As regras dos eventos e do cancelamento são da B003, e a B004 só tem de as ligar aos seus painéis.
 - **Resposta:** **(a).** A B003 constrói e testa as peças comuns de tarefa no frontend (`lib/video-tasks.ts`, `use-video-task.ts`, `video-task-progress.tsx`) sem as montar em nenhum ecrã; a B004 monta-as nos seus painéis. Registado nos limites do `bolt.md` da B004.
+
+## D-48 — Reserva gravada pelo serviço de utilizadores com a resposta perdida (tempo esgotado)
+
+- **Onde:** `projects/video/quota.js` (`reserve`) e `projects/video/tasks.js` (`submit`, passo 9).
+- **Dúvida:** A verificação V8 confirmou que os dois 701 do `GET users:/:user/process/:n` se distinguem pelo corpo e que, no 701 de erro interno, nada é reservado. Fica um caso que o código não distingue: o serviço de utilizadores grava a reserva (`User.update`), mas a resposta não chega ao serviço de projetos (tempo esgotado de 5 s ou ligação cortada). A aceitação trata-o como `INTERNAL_ERROR`, liberta o lugar e não devolve nada, e os créditos ficam debitados sem tarefa. O que se faz?
+- **O que as fontes dizem:** ADD T-04: a reserva é um ciclo ler-modificar-escrever, sem idempotência, e não pode mudar (regra 2.6, Q-ADD-03). D-45, ponto 2: créditos perdidos numa queda entre a reserva e a criação da tarefa, aceites como risco residual. Nenhuma fonte trata a resposta perdida.
+- **Opções:** (a) aceitar como risco residual e registar no log; (b) devolver por precaução, o que daria créditos a mais quando a reserva não foi gravada.
+- **Recomendação:** (a).
+- **Resposta:** **(a). Aceite como risco residual, do mesmo tipo da D-45 ponto 2; fica registado em log.** A falha da reserva é registada como `video.task.reserve_failed`, com o `correlationId`, o utilizador e a causa (incluindo o tempo esgotado).

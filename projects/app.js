@@ -38,6 +38,7 @@ app.use("/", projectsRouter);
 // Start the message processing
 process_msg();
 require("./video").start();
+require("./video/taskModule").start();
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

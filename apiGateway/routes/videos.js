@@ -116,4 +116,10 @@ router.get(`${VIDEOS}/:video/playback`, checkVideoToken, forward("get"));
 router.get(`${VIDEOS}/:video`, checkVideoToken, forward("get"));
 router.get(`${VIDEOS}/:video/download`, checkVideoToken, forward("get"));
 
+// Video tasks (B003; ADD T-01, T-03).
+router.post(`${VIDEOS}/validate`, checkVideoToken, forward("post"));
+router.post(`${VIDEOS}/:video/operations`, checkVideoToken, forward("post"));
+router.get(`${VIDEOS}/tasks/:taskId`, checkVideoToken, forward("get"));
+router.delete(`${VIDEOS}/tasks/:taskId`, checkVideoToken, forward("delete"));
+
 module.exports = router;

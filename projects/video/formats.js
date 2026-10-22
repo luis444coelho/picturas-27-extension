@@ -93,3 +93,13 @@ module.exports = {
   isBrowserCompatible,
   previewPlan,
 };
+
+// B003: output codecs of each container (ADD T-05, "Saída") and the browser
+// profile of isBrowserCompatible as data, for the worker to check a result whose
+// video stream was copied (ADD T-06). Added by B003 without changing the above.
+module.exports.OUTPUT_CODECS = {
+  mp4: { video: "h264", audio: "aac" },
+  mov: { video: "h264", audio: "aac" },
+  avi: { video: "mpeg4", audio: "mp3" },
+};
+module.exports.BROWSER_PROFILE = { videoCodec: "h264", pixFmt: "yuv420p" };
