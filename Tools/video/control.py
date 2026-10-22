@@ -35,8 +35,9 @@ class ControlChannel:
     bound to the fanout exchange video_control. Its messages are delivered by
     the same loop that serves heartbeats and follows FFmpeg, with no threads."""
 
-    def __init__(self, connection, cancelled=None):
+    def __init__(self, connection, cancelled=None, on_cancel=None):
         self.cancelled = cancelled or CancelledTasks()
+        self._on_cancel = on_cancel
         self._channel = connection.channel()
         self._channel.exchange_declare(exchange=CONTROL_EXCHANGE, exchange_type='fanout', durable=True)
         queue = self._channel.queue_declare(queue='', exclusive=True, auto_delete=True).method.queue
@@ -50,3 +51,5 @@ class ControlChannel:
             return
         if task_id:
             self.cancelled.add(task_id)
+            if self._on_cancel:
+                self._on_cancel(task_id)

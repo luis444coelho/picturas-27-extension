@@ -1,3 +1,4 @@
+import fcntl
 import json
 import os
 import shutil
@@ -24,7 +25,45 @@ thread, on the worker's single connection.
 
 OPERATION = 'task.run'
 WS_QUEUE = 'video_ws_queue'
-PROGRESS_EVERY_S = 1.0
+# The loop turns every ~0.5 s; sending at most every 0.5 s keeps every gap
+# under 1 s (NFR-009: at least once per second).
+PROGRESS_EVERY_S = 0.5
+
+# A running task holds an flock on this file of its work directory. A directory
+# whose lock can be taken has no live owner: it was left by a delivery killed
+# with its worker. The flock dies with the process, on any replica sharing the
+# video_tmp volume. Ingestion directories (B001) have no lock and are not touched.
+LOCK_NAME = '.task.lock'
+
+
+def hold_lock(work_dir):
+    fd = os.open(os.path.join(work_dir, LOCK_NAME), os.O_CREAT | os.O_RDWR)
+    fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    return fd
+
+
+def remove_if_unowned(path):
+    lock = os.path.join(path, LOCK_NAME)
+    try:
+        fd = os.open(lock, os.O_RDWR)
+    except OSError:
+        return False
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        os.close(fd)
+        return False
+    shutil.rmtree(path, ignore_errors=True)
+    os.close(fd)
+    return True
+
+
+def sweep_leftovers(root):
+    """Task directories without a live owner (NFR-007, ERROR-003)."""
+    if not os.path.isdir(root):
+        return []
+    return [name for name in sorted(os.listdir(root))
+            if os.path.isdir(os.path.join(root, name)) and remove_if_unowned(os.path.join(root, name))]
 
 
 class TaskRunner:
@@ -33,9 +72,22 @@ class TaskRunner:
         self._log = log
         self._redact = redact
         self._clock = clock
-        self._control = ControlChannel(rabbit._connection)
+        self._control = ControlChannel(rabbit._connection, on_cancel=self._on_cancel)
         self._storage = StorageClient(self._tick)
         self._reporter = None
+        self._running = None
+        # Leftovers of deliveries killed with a previous worker, whose
+        # cancellation may have been published while no worker was listening.
+        removed = sweep_leftovers(config.TMP_ROOT)
+        if removed:
+            log('info', 'video.task.leftovers_removed', taskIds=removed)
+
+    def _on_cancel(self, task_id):
+        """A task closed by the projects service (cancelled, dead-lettered or
+        stuck) that this replica is not running: remove what a killed earlier
+        delivery may have left in video_tmp (NFR-007, ERROR-003)."""
+        if task_id != self._running:
+            remove_if_unowned(os.path.join(config.TMP_ROOT, os.path.basename(task_id)))
 
     # ---- loop helpers ---------------------------------------------------
 
@@ -84,11 +136,13 @@ class TaskRunner:
         # A redelivered message starts again from scratch, writing to the same keys.
         shutil.rmtree(work_dir, ignore_errors=True)
         os.makedirs(work_dir, exist_ok=True)
+        lock_fd = hold_lock(work_dir)
         self._log('info', 'video.task.start', correlationId=correlation_id, taskId=task_id,
                   redelivered=method.redelivered)
         self._reply(request, started_at, 'started', redelivered=method.redelivered)
 
         self._reporter = ProgressReporter(self._publish, request, self._clock)
+        self._running = task_id
         try:
             output = self._execute(request, work_dir)
             self._reply(request, started_at, 'completed', output=output)
@@ -110,7 +164,9 @@ class TaskRunner:
             status = 'failed'
         finally:
             self._reporter = None
+            self._running = None
             shutil.rmtree(work_dir, ignore_errors=True)
+            os.close(lock_fd)
 
         self._log('info', 'video.task.done', correlationId=correlation_id, taskId=task_id, status=status)
         # Ack only after the reply is published (ADD T-03).
@@ -182,7 +238,7 @@ class TaskRunner:
 
 
 class ProgressReporter:
-    """Publishes video-task-update at least once per second, repeating the last
+    """Publishes video-task-update about twice per second, repeating the last
     value when FFmpeg has nothing new, and never going down within a delivery."""
 
     def __init__(self, publish, request, clock):
