@@ -8,11 +8,14 @@ stories: [ST-VID-006, ST-VID-007]
 created: 2026-10-19T17:31:16Z
 started: 2026-10-22T13:32:32Z
 completed: null
-current_stage: implement
+current_stage: test
 stages_completed:
   - name: plan
     completed: 2026-10-22T13:38:11Z
     artifact: implementation-plan.md
+  - name: implement
+    completed: 2026-10-22T14:44:41Z
+    artifact: implementation-walkthrough.md
 requires_bolts: [001-video-lifecycle]
 enables_bolts: [009-video-batch]
 requires_units: []
@@ -44,7 +47,7 @@ Implementar os endpoints `GET /projects/:user/:project/videos/:video` (informaç
 ## Etapas
 
 - [x] **1. Plan**: Complete → `implementation-plan.md`
-- [ ] **2. Implement**: Pending → código + `implementation-walkthrough.md`
+- [x] **2. Implement**: Complete → código + `implementation-walkthrough.md`
 - [ ] **3. Test**: Pending → `test-walkthrough.md`
 
 ## Requisitos rastreados

@@ -291,3 +291,12 @@
 - **Opções:** (a) os identificadores das operações do `recipe`, pela ordem, unidos por `_` (`ferias_trim_filter.mp4`); numa junção, o nome base é o `original_name` do resultado (o da primeira origem) e a junção entra no sufixo como `concat` (`ferias_concat.mp4`); (b) só a última operação no sufixo; (c) a B002 implementa só originais e operações isoladas, e a regra das cadeias e junções fica para a B008, que a acrescenta ao `fileName.js`.
 - **Recomendação:** (a).
 - **Resposta:** **(a), registada como resposta à Q-ADD-08 do ADD.** O sufixo são os identificadores das operações do `recipe`, pela ordem, unidos por `_` (`ferias_trim_filter.mp4`); numa junção, o nome base é o `original_name` do resultado (o da primeira origem) e a junção entra no sufixo como `concat` (`ferias_concat.mp4`).
+
+## D-36 — Tamanhos imediatamente abaixo de 1 GB aparecem como "1024.00 MB"
+
+- **Onde:** `frontend/lib/video-format.ts` (`formatFileSize`); `frontend/lib/videos.ts` (`formatSize`, B001), que tem o mesmo comportamento.
+- **Dúvida:** Encontrado nos testes do Estágio 3 da B002. Com a regra da INFO-005 aplicada à letra (MB abaixo de 1 GB, GB a partir daí, 2 casas), um ficheiro entre 1024³ − 5 243 e 1024³ − 1 bytes (menos de 5 KB abaixo de 1 GB) aparece como `1024.00 MB`, porque o arredondamento a 2 casas sobe para 1024. Mantém-se, ou escolhe-se a unidade depois de arredondar?
+- **O que as fontes dizem:** REQ-VID-INFO-005: "em MB (abaixo de 1 GB) ou em GB, com 2 casas decimais, sendo 1 MB = 1024² bytes e 1 GB = 1024³ bytes"; exemplo `157 286 400` bytes → `150.00 MB`. ADD 4.2: "tamanho em MB abaixo de 1 GB e em GB a partir daí, com 2 casas". Nenhuma fonte trata o arredondamento na fronteira.
+- **Opções:** (a) manter a regra à letra: o caso só acontece numa janela de 5 KB, e só para Premium (o limite Registado é 200 MB); (b) escolher a unidade depois de arredondar (`1.00 GB` a partir de 1023,995 MB), na `formatFileSize` da B002; o `formatSize` da B001 fica como está (regra 2.6 aplicada ao código da B001), pelo que o seletor de carregamento e o painel podiam diferir nesses 5 KB.
+- **Recomendação:** (a).
+- **Resposta:** _em aberto._
