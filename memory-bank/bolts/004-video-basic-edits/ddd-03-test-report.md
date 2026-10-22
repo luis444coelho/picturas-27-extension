@@ -22,7 +22,7 @@ A equipa aprovou a etapa 4 (`6a72c67`) e autorizou esta etapa. O bolt continua `
 | ESLint das fontes novas do frontend | **Passou**, sem erros/avisos nesses ficheiros |
 | Auditoria `git diff --check` | **Passou** |
 | Browser automatizado | **Não executado**: `playwright-core`, `@playwright/test` e Chromium não encontrados no ambiente verificado |
-| Browser manual | **Passou** (equipa, 2026-10-22): recorte, recorte inválido, remover áudio, vídeo sem áudio, velocidade, cancelamento, regressão de vídeo e de imagem; ver [checklist](manual-test-checklist.md) |
+| Browser manual | **Passou** (equipa, 2026-10-22): três painéis, recorte, recorte inválido, scrubbing, loop preview, remover áudio, vídeo sem áudio, velocidade, progresso, cancelamento, regressão de vídeo e de imagem. Galeria/informação e compatibilidade/geometria não testadas manualmente (cobertas pelos testes automáticos); ver [checklist](manual-test-checklist.md) |
 
 As suites opt-in não foram contadas como aprovadas por estarem skipped. Os resultados históricos da B003 não são reutilizados como resultados desta etapa. Os comandos completos estão em [README-b004.md](../../../projects/test/video/README-b004.md) — a partir deste diretório, o caminho no repositório é `projects/test/video/README-b004.md`.
 
@@ -145,7 +145,7 @@ O checkpoint permanece pendente dos [testes manuais](manual-test-checklist.md) e
 
 ## Checkpoint final (2026-10-22T20:01:58Z)
 
-A equipa executou os testes manuais no browser, noutra máquina, e comunicou que passaram todos: recorte, recorte inválido, remover áudio, vídeo sem áudio, velocidade, cancelamento e regressão de vídeo e de imagem. Sem falhas reportadas. Os itens do [checklist](manual-test-checklist.md) não reportados individualmente (três painéis, scrubbing, loop preview, progresso e continuidade, galeria e informação, compatibilidade e geometria) ficam registados como tal.
+A equipa executou os testes manuais no browser, noutra máquina, e comunicou que passaram todos: recorte, recorte inválido, remover áudio, vídeo sem áudio, velocidade, cancelamento e regressão de vídeo e de imagem. Sem falhas reportadas. Atualização da equipa (2026-10-22T20:13:03Z): os itens três painéis, scrubbing, loop preview e progresso e continuidade também foram testados manualmente e passaram. Galeria e informação (`sourceVideoIds` e receita no painel) e compatibilidade e geometria (dimensões ímpares, rotação, preview de H.264 incompatível) **não foram testados manualmente** e ficam cobertos pelos testes automáticos: a integração real (`source_video_ids`, `recipe`, endpoint de informação; ver "Integração real e segurança") e `test_basic_edits.py` (ver ponto 6 de "FFmpeg/FFprobe"). A reprodução no browser destes dois itens não foi verificada manualmente.
 
 A etapa 5 não foi repetida: os resultados automáticos acima (commit `a5d60d2`) são os desta etapa.
 
