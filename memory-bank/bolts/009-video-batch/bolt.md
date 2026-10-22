@@ -33,7 +33,7 @@ Implementar o modelo `VideoBatch`, a pré-validação, a orquestração sequenci
 
 ## Stories incluídas
 
-- **ST-VID-015 — Processar vídeos em lote**: [Processar vídeos em lote](../../intents/001-video-processing-support/units/003-video-composition/stories/003-video-batch.md) (must).
+- **ST-VID-015 — Processar vídeos em lote**: [Processar vídeos em lote](../../intents/001-video-processing-support/units/003-video-composition/stories/ST-VID-015-video-batch.md) (must).
 
 ## Tipo de bolt
 

@@ -33,7 +33,7 @@ Implementar o UC-VID-005 sobre os contratos de tarefa, quota e cancelamento da B
 
 ## Stories incluídas
 
-- **ST-VID-005 — Extrair fotogramas**: [Extrair fotogramas](../../intents/001-video-processing-support/units/002-video-transformations/stories/005-video-frame-export.md) (must).
+- **ST-VID-005 — Extrair fotogramas**: [Extrair fotogramas](../../intents/001-video-processing-support/units/002-video-transformations/stories/ST-VID-005-video-frame-export.md) (must).
 
 ## Tipo de bolt
 

@@ -30,7 +30,7 @@ Construir uma só vez o que todas as operações usam: no ADD, uma operação is
 
 ## Stories incluídas
 
-- **ST-VID-COM-001 — Acompanhar tarefas e quota de vídeo**: [Acompanhar tarefas e quota de vídeo](../../intents/001-video-processing-support/units/001-video-lifecycle/stories/004-video-task-quota-foundation.md) (must).
+- **ST-VID-COM-001 — Acompanhar tarefas e quota de vídeo**: [Acompanhar tarefas e quota de vídeo](../../intents/001-video-processing-support/units/001-video-lifecycle/stories/ST-VID-COM-001-video-task-quota-foundation.md) (must).
 
 ## Tipo de bolt
 

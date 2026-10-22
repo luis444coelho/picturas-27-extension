@@ -52,7 +52,7 @@ Implementar o UC-VID-000 sobre a fundação mínima do ADD (T-00): coleção `vi
 
 ## Stories incluídas
 
-- **ST-VID-000 — Carregar e visualizar vídeo**: [Carregar e visualizar vídeo](../../intents/001-video-processing-support/units/001-video-lifecycle/stories/001-video-ingestion.md) (must).
+- **ST-VID-000 — Carregar e visualizar vídeo**: [Carregar e visualizar vídeo](../../intents/001-video-processing-support/units/001-video-lifecycle/stories/ST-VID-000-video-ingestion.md) (must).
 
 ## Tipo de bolt
 
