@@ -528,6 +528,29 @@ services:
         done
       '
 
+  # Video worker (ADD T-02): FFprobe/FFmpeg ingestion. 1 replica for now (D-18, Q-ADD-10);
+  # the replica count can grow here without touching video_operations_queue.
+  video_worker:
+    build:
+      context: ./Tools
+      dockerfile: video/Dockerfile
+    restart: on-failure
+    networks:
+      - elk
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      img_storage:
+        condition: service_started
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=user
+      - RABBITMQ_PASSWORD=password
+      - VIDEO_STORAGE_URL=http://img_storage:11000/video
+    volumes:
+      - video_tmp:/tmp/video
+
 networks:
   elk:
     driver: bridge
@@ -539,3 +562,4 @@ volumes:
   image_data:
   seaweedfs_data:
   subscription_data:
+  video_tmp:

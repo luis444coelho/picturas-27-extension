@@ -45,6 +45,7 @@ import { useUpdateSession } from "@/lib/mutations/session";
 import { getErrorMessage } from "@/lib/error-messages";
 import { PresetsDialog } from "@/components/presets/presets-dialog";
 import { AiAssistantDialog } from "@/components/assistant/ai-assistant-dialog";
+import { VideoSection } from "@/components/video/video-section";
 
 export default function Project({
   params,
@@ -726,6 +727,7 @@ const handleCancel = () => {
                 </>
               )}
 
+              <VideoSection />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button

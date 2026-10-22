@@ -4,6 +4,7 @@ var cors = require("cors"); // Import cors
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
+var videosRouter = require("./routes/videos");
 var projectsRouter = require("./routes/projects");
 var usersRouter = require("./routes/users");
 var subscriptionsRouter = require("./routes/subscriptions");
@@ -22,6 +23,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
+app.use("/projects", videosRouter);
 app.use("/projects", projectsRouter);
 app.use("/users", usersRouter);
 app.use("/subscriptions", subscriptionsRouter);

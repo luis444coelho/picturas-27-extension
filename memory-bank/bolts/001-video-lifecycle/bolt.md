@@ -8,7 +8,7 @@ stories: [ST-VID-000]
 created: 2026-10-19T17:31:16Z
 started: 2026-10-21T16:12:26Z
 completed: null
-current_stage: implement
+current_stage: test
 stages_completed:
   - name: model
     completed: 2026-10-21T16:19:54Z
@@ -19,6 +19,9 @@ stages_completed:
   - name: adr
     completed: 2026-10-21T23:46:03Z
     artifact: adr-001-upload-put-pre-assinado.md, adr-002-ingestao-em-duas-idas.md
+  - name: implement
+    completed: 2026-10-22T08:37:38Z
+    artifact: código (ver ddd-02-technical-design.md, Componentes e ficheiros)
 requires_bolts: []
 enables_bolts: [002-video-access, 003-video-task-foundation]
 requires_units: []
@@ -51,8 +54,8 @@ Implementar o UC-VID-000 sobre a fundação mínima do ADD (T-00): coleção `vi
 - [x] **1. Domain Model**: Concluído → `ddd-01-domain-model.md`
 - [x] **2. Technical Design**: Concluído → `ddd-02-technical-design.md`
 - [x] **3. ADR Analysis** (opcional): Concluído (ADR-001, ADR-002) → `adr-{n}-{slug}.md`
-- ⏳ **4. Implement**: Em curso → código nos componentes indicados em "Saídas esperadas"
-- [ ] **5. Test**: Pending → `ddd-03-test-report.md`
+- [x] **4. Implement**: Concluído → código nos componentes indicados em "Saídas esperadas"
+- ⏳ **5. Test**: Em curso → `ddd-03-test-report.md`
 
 ## Requisitos rastreados
 

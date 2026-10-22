@@ -187,3 +187,19 @@
 - **O que as fontes dizem:** REQ-VID-INFO-005 define, para a apresentação do tamanho, 1 MB = 1024² bytes e 1 GB = 1024³ bytes. O `client_max_body_size 2g` do nginx (T-08) é 2 × 1024³ bytes. As regras de limite não dizem a base.
 - **Opções:** (a) base 1024, coerente com a INFO-005 e com o nginx; (b) base 1000.
 - **Resposta:** **(a), aceite.** Base 1024: 200 MB = 200 × 1024² bytes e 2 GB = 2 × 1024³ bytes, coerente com a INFO-005 e com o `client_max_body_size 2g` do nginx.
+
+## D-23 — Códigos de erro das respostas dos *middlewares* reutilizados e de pedidos mal formados
+
+- **Onde:** `apiGateway/routes/videos.js` (normalização das respostas do serviço de projetos); `projects/video/ingest.js` (`requestUpload`); `projects/video/errors.js`.
+- **Dúvida:** Os *middlewares* reutilizados pelo router de vídeo (`checkSharePermission`, `requireEditPermission` e `enforcePresenceLimit`) respondem com texto simples e com estados que a D-21 não cobre: 410 (link de partilha revogado ou inexistente) e 429 (demasiados editores ativos). Pela regra 2.6, não podem ser alterados. Que `code` levam estas respostas no formato `{error: {code, message, details}, correlationId}` (ERROR-001)? E que código leva um pedido de URL de carregamento sem `fileName`, `mimeType` ou `sizeBytes` válidos?
+- **O que as fontes dizem:** REQ-VID-ERROR-001 e ADD T-10 exigem o formato com código estável em todas as respostas de erro de vídeo. A D-21 fixa só 401, 403, 404, 409, `PROCESSING_ERROR` e `INTERNAL_ERROR`. A REQ-VID-COM-005 dá HTTP 422 para parâmetros inválidos, sem código.
+- **Opções:** (a) o router de vídeo do gateway converte as respostas fora do formato, mantendo o estado HTTP: 401 → `UNAUTHENTICATED`, 403 → `FORBIDDEN`, 404 → `NOT_FOUND`, 409 → `INVALID_STATE`, 410 → `SHARE_LINK_REVOKED`, 429 → `TOO_MANY_EDITORS` e os restantes → `INTERNAL_ERROR`; um pedido de carregamento mal formado responde 422 `INVALID_REQUEST`, com `details.field`; (b) outros nomes.
+- **Resposta:** **(a), aceite.** O router de vídeo do gateway converte as respostas fora do formato, mantendo o estado HTTP: `SHARE_LINK_REVOKED` (410), `TOO_MANY_EDITORS` (429) e, para os restantes, os códigos da D-21. Um pedido de carregamento mal formado responde 422 `INVALID_REQUEST`, com `details.field`.
+
+## D-24 — Ficheiro sem stream de vídeo
+
+- **Onde:** `Tools/video/ingest.py` (`parse_probe`); `projects/video/formats.js` (`validateStreams`).
+- **Dúvida:** Um ficheiro MP4, MOV ou AVI que o FFprobe lê, mas que não tem stream de vídeo (por exemplo, só áudio), é rejeitado com que código?
+- **O que as fontes dizem:** REQ-VID-UPLOAD-009 rejeita com `INVALID_CODEC` uma stream de vídeo com codec não admitido. REQ-VID-UPLOAD-012 rejeita ficheiros com cabeçalhos corrompidos ou fluxos truncados (`CORRUPTED_FILE`, D-14). Nenhuma fonte trata um contentor válido sem stream de vídeo.
+- **Opções:** (a) `CORRUPTED_FILE` (o worker não encontra um vídeo legível); (b) `INVALID_CODEC` com `details: {stream: "video", codec: null}`; (c) `UNSUPPORTED_FORMAT`.
+- **Resposta:** **(b).** Um ficheiro sem stream de vídeo não está corrompido: viola a REQ-VID-UPLOAD-009. É rejeitado com `INVALID_CODEC` e `details: {stream: "video", codec: null}`. O worker devolve os metadados com `videoCodec: null` e o serviço de projetos aplica a regra no `formats.js`. `CORRUPTED_FILE` fica para ficheiros que o FFprobe não consegue ler, sem duração ou truncados.
