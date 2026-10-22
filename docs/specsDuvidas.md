@@ -210,7 +210,7 @@
 - **Dúvida:** A etiqueta `python:3.11-slim` passou a apontar para o Debian 13, que traz o FFmpeg 7.1 (verificado no Estágio 5). Fixa-se a imagem no Debian 12, ou aceita-se o FFmpeg 7.1?
 - **O que as fontes dizem:** ADD secção 6: "FFmpeg 5.1 no Debian 12, base da imagem `python:3.11-slim`"; "mudar a imagem base do worker muda a versão do FFmpeg e deve ser tratado como mudança de dependência". ADD T-02: "a mesma imagem base [...] de `Tools/brightness/Dockerfile`", que continua a usar a etiqueta flutuante.
 - **Opções:** (a) fixar `python:3.11-slim-bookworm` (Debian 12, FFmpeg 5.1), como diz a secção 6; (b) manter `python:3.11-slim` (Debian 13, FFmpeg 7.1) e atualizar o ADD.
-- **Resposta:** _Pendente._ Implementação provisória: **(a)**, conforme a secção 6 do ADD, que é o mestre. Os testes do Estágio 5 correram no FFmpeg 5.1.9.
+- **Resposta:** **(a).** Worker fixado em `python:3.11-slim-bookworm`, com FFmpeg 5.1, conforme a secção 6 do ADD. Os testes do Estágio 5 correram no FFmpeg 5.1.9.
 
 ## D-26 — Miniatura de vídeos com cerca de 1 s
 
@@ -218,7 +218,7 @@
 - **Dúvida:** Um vídeo com exatamente 1,0 s (ou pouco mais) não tem nenhum fotograma que comece em 00:00:01, e o FFmpeg não produz a miniatura. Que fotograma se usa?
 - **O que as fontes dizem:** REQ-VID-UPLOAD-014 e Q-ADD-22: miniatura a 00:00:01, ou no fotograma 0 "se o vídeo tiver menos de 1 s". Não tratam o caso em que não há fotograma em 00:00:01.
 - **Opções:** (a) quando não há fotograma a partir de 00:00:01, usa-se o fotograma 0, como nos vídeos com menos de 1 s; (b) usa-se o último fotograma.
-- **Resposta:** _Pendente._ Implementação provisória: **(a)**. O worker tenta 00:00:01 e, se o FFmpeg não produzir imagem, repete no fotograma 0.
+- **Resposta:** **(a).** Quando não há fotograma a 00:00:01, a miniatura é o fotograma 0 (Q-ADD-22). O worker tenta 00:00:01 e, se o FFmpeg não produzir imagem, repete no fotograma 0.
 
 ## D-27 — Assinaturas dos URLs no *error log* do nginx
 
@@ -226,7 +226,7 @@
 - **Dúvida:** O `log_format video_s3` (T-10) tira a *query string* do *access log*, mas o *error log* do nginx regista sempre o pedido completo, com a assinatura, quando recusa um pedido (por exemplo, 413 acima de 2 GB) ou quando o SeaweedFS falha. O formato do *error log* não é configurável. Aceita-se, ou baixa-se o nível do *error log* nesta `location`?
 - **O que as fontes dizem:** ADD T-10: a *query* contém a assinatura, "que é uma credencial válida durante 15 minutos e não pode ficar nos logs"; a decisão trata só do *access log*.
 - **Opções:** (a) aceitar como risco residual: só aparece em erros, e a assinatura expira em 15 min; (b) acrescentar `error_log /var/log/nginx/error.log crit;` na `location /s3-video/`, perdendo os erros de nível `error` (413, falhas de ligação ao SeaweedFS) dessa `location`.
-- **Resposta:** _Pendente._ Nada foi alterado.
+- **Resposta:** **(b).** `error_log /var/log/nginx/error.log crit;` dentro da `location /s3-video/` nova, para que a assinatura nunca fique nos logs (T-10). É uma diretiva na `location` acrescentada pela B001, por isso respeita a regra 2.6. Os erros de nível `error` dessa `location` (413, falhas de ligação ao SeaweedFS) deixam de ser registados; o *access log* continua a registar o estado.
 
 ## D-28 — Consumidor do `video_ws_queue` sem religação ao RabbitMQ
 
@@ -234,7 +234,7 @@
 - **Dúvida:** O `wsGateway/video.js` usa o `wsGateway/utils/rabbit_mq.js`, como manda o T-00. Esse utilitário não volta a ligar-se: depois de um reinício do RabbitMQ, os eventos `video-ingest-update` deixam de chegar até o `ws_gateway` ser reiniciado. É o mesmo comportamento que o `ws_queue` e o `project_queue` já têm (observado no Estágio 5). Mantém-se, ou o módulo de vídeo passa a ter o seu próprio consumidor com religação?
 - **O que as fontes dizem:** ADD T-00: "consome `video_ws_queue` (com `wsGateway/utils/rabbit_mq.js`)". ADD T-03 dá ao `projects/video/amqp.js` uma ligação persistente própria, que se volta a ligar.
 - **Opções:** (a) manter o T-00 e aceitar o risco, igual ao do fluxo de imagem; (b) consumidor próprio no `wsGateway/video.js` com `amqplib` e religação, como o `projects/video/amqp.js`, sem alterar o utilitário existente.
-- **Resposta:** _Pendente._ Implementação atual: **(a)**.
+- **Resposta:** **(b), alargada.** O código de vídeo novo religa-se sozinho ao RabbitMQ: o `wsGateway/video.js` passa a ter a sua própria ligação `amqplib`, e o `projects/video/amqp.js` passa a religar-se também quando só o canal fecha. O `utils/rabbit_mq.js` e as filas existentes (`ws_queue`, `project_queue`) ficam como estão (regra 2.6).
 
 ## D-29 — O SeaweedFS recusa URLs assinados com `response-*` (impacto na B002)
 
@@ -242,7 +242,7 @@
 - **Dúvida:** No Estágio 5 verificou-se que o SeaweedFS 4.47 responde 403 a URLs SigV2 com `response-content-type`. Na B001 deixou de ser enviado (os objetos já são gravados com o `Content-Type` certo). O descarregamento da B002 conta com `response-content-disposition` para o nome sugerido (DOWNLOAD-005), que deverá falhar da mesma forma. Segue-se a alternativa que o ADD já prevê?
 - **O que as fontes dizem:** ADD 4.1: "Confirmar que o SeaweedFS (`4.47`) aplica o parâmetro `response-content-disposition` dos URLs assinados. Se não aplicar, o nome sugerido vai no atributo `download` da âncora, que o navegador respeita porque o URL `/s3-video/` é da mesma origem que o frontend."
 - **Opções:** (a) a B002 usa o atributo `download` da âncora, como prevê o ADD; (b) a B002 investiga a assinatura SigV4 para os URLs de vídeo.
-- **Resposta:** _Pendente._ É uma decisão da B002; fica registada para o seu Technical Design.
+- **Resposta:** **Em aberto para a B002.** A B002 tem de testar primeiro o `response-content-disposition` no SeaweedFS e, se falhar, registar uma dúvida com alternativas antes de implementar o descarregamento.
 
 ## D-30 — Criar um projeto a partir de um vídeo (requisito novo da equipa)
 
@@ -264,4 +264,12 @@
 - **Dúvida:** (1) Na D-30, o projeto abre quando termina a transferência ou só quando termina a ingestão? E abre também quando o carregamento falha? (2) Na D-31, em que lugar da área principal fica a lista de vídeos, e aparece também no modo "results"?
 - **O que as fontes dizem:** A D-30 diz "carrega o vídeo pelo fluxo da B001 e abre o projeto" e que, em caso de falha, o projeto fica vazio e o utilizador pode carregar outro vídeo. A D-31 diz "junto ao `ProjectImageList`". Nenhuma fonte fixa os pormenores.
 - **Opções:** (1a) abrir quando a transferência termina (202 do `upload/complete`), com o vídeo a aparecer na lista quando a ingestão termina, e abrir também em caso de falha ou cancelamento, para o utilizador carregar outro vídeo; (1b) manter a janela aberta até a ingestão terminar. (2a) coluna à direita das imagens, só quando há vídeos concluídos, nos dois modos; (2b) faixa por cima da grelha de imagens.
-- **Resposta:** _Pendente._ Implementação provisória: **(1a)** e **(2a)**. A janela continua à escuta do `video-ingest-update` depois de abrir o projeto e avisa se a ingestão falhar.
+- **Resposta:** **(1a) e (2a), aceites como estão implementadas.** A janela continua à escuta do `video-ingest-update` depois de abrir o projeto e avisa se a ingestão falhar.
+
+## D-33 — O `bolt-complete.cjs` não encontra os ficheiros das stories
+
+- **Onde:** `.specsmd/aidlc/scripts/bolt-complete.cjs` (`findStoryFile`); `memory-bank/intents/001-video-processing-support/units/*/stories/`.
+- **Dúvida:** Ao fechar a B001, o script marcou o bolt como `complete`, mas não atualizou a ST-VID-000 ("File not found"). O script procura `stories/ST-VID-000.md` ou `stories/ST-VID-000-*.md`, e a Inception gravou as stories como `001-video-ingestion.md`, com o ID só no *frontmatter*. Acontece o mesmo em todos os bolts. O script recusa correr outra vez num bolt `complete`, e as stories não se editam à mão. Como se fecha a ST-VID-000 e se evita o problema nos próximos bolts?
+- **O que as fontes dizem:** O bolt type manda usar o `bolt-complete.cjs` e não editar as stories à mão. Nenhuma fonte trata o nome dos ficheiros das stories.
+- **Opções:** (a) renomear os ficheiros das stories para `ST-VID-xxx-<nome>.md` (com `git mv` e atualização das ligações), e a equipa autoriza, só desta vez, pôr a ST-VID-000 em `status: complete` e `implemented: true` como o script faria; (b) manter os nomes e a equipa autoriza essa atualização manual em cada fecho de bolt; (c) manter a ST-VID-000 como está até haver uma correção do specsmd.
+- **Resposta:** _Pendente._ A ST-VID-000 ficou `status: ready`, `implemented: false`.

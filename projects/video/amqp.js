@@ -22,10 +22,47 @@ let connection = null;
 let channel = null;
 let replyHandler = null;
 let connecting = null;
+let retry = null;
+
+// One pending reconnection at a time, whoever asks for it (D-28).
+function scheduleStart() {
+  if (retry) return;
+  retry = setTimeout(() => {
+    retry = null;
+    start();
+  }, RECONNECT_MS);
+}
 
 async function connect() {
-  connection = await amqp.connect(url());
-  channel = await connection.createConfirmChannel();
+  const conn = await amqp.connect(url());
+  connection = conn;
+  conn.on("error", (err) =>
+    log.error("video.amqp.connection_error", { message: err.message }),
+  );
+  conn.on("close", () => {
+    if (connection === conn) {
+      connection = null;
+      channel = null;
+    }
+    log.warn("video.amqp.connection_closed", {});
+    scheduleStart();
+  });
+
+  try {
+    await setUp(conn);
+  } catch (err) {
+    // Half-open connection: closing it schedules the reconnection.
+    conn.close().catch(() => undefined);
+    throw err;
+  }
+  log.info("video.amqp.connected", {});
+}
+
+async function setUp(conn) {
+  channel = await conn.createConfirmChannel();
+  // A channel closed by the broker leaves the connection open: close it, so
+  // the "close" handler above reconnects (D-28).
+  channel.on("close", () => conn.close().catch(() => undefined));
   await channel.assertExchange(EXCHANGE, "direct", { durable: true });
 
   // The queues are declared in rabbitMQ/definitions.json with their arguments;
@@ -34,18 +71,7 @@ async function connect() {
   await channel.checkQueue(QUEUES.replies);
   await channel.checkQueue(QUEUES.ws);
 
-  connection.on("error", (err) =>
-    log.error("video.amqp.connection_error", { message: err.message }),
-  );
-  connection.on("close", () => {
-    connection = null;
-    channel = null;
-    log.warn("video.amqp.connection_closed", {});
-    setTimeout(start, RECONNECT_MS);
-  });
-
   if (replyHandler) await consumeReplies();
-  log.info("video.amqp.connected", {});
 }
 
 async function consumeReplies() {
@@ -93,7 +119,7 @@ function start() {
   connecting = connect()
     .catch((err) => {
       log.error("video.amqp.connect_failed", { message: err.message });
-      setTimeout(start, RECONNECT_MS);
+      scheduleStart();
     })
     .finally(() => {
       connecting = null;

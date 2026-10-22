@@ -3,31 +3,41 @@ id: 001-video-lifecycle
 unit: 001-video-lifecycle
 intent: 001-video-processing-support
 type: ddd-construction-bolt
-status: in-progress
-stories: [ST-VID-000]
-created: 2026-10-19T17:31:16Z
-started: 2026-10-21T16:12:26Z
-completed: null
-current_stage: test
+status: complete
+stories:
+  - ST-VID-000
+created: 2026-10-19T17:31:16.000Z
+started: 2026-10-21T16:12:26.000Z
+completed: "2026-10-22T10:32:46Z"
+current_stage: null
 stages_completed:
   - name: model
-    completed: 2026-10-21T16:19:54Z
+    completed: 2026-10-21T16:19:54.000Z
     artifact: ddd-01-domain-model.md
   - name: design
-    completed: 2026-10-21T23:38:33Z
+    completed: 2026-10-21T23:38:33.000Z
     artifact: ddd-02-technical-design.md
   - name: adr
-    completed: 2026-10-21T23:46:03Z
+    completed: 2026-10-21T23:46:03.000Z
     artifact: adr-001-upload-put-pre-assinado.md, adr-002-ingestao-em-duas-idas.md
   - name: implement
-    completed: 2026-10-22T08:37:38Z
+    completed: 2026-10-22T08:37:38.000Z
     artifact: código (ver ddd-02-technical-design.md, Componentes e ficheiros)
+  - name: test
+    completed: 2026-10-22T10:32:46Z
+    artifact: ddd-03-test-report.md
 requires_bolts: []
-enables_bolts: [002-video-access, 003-video-task-foundation]
+enables_bolts:
+  - 002-video-access
+  - 003-video-task-foundation
 requires_units: []
 blocks: false
 # avg_complexity: maior esforço do ADD no bolt (S=1, M=2, L=3); os outros campos são preenchidos no início do bolt na Construção (specsDuvidas D-01)
-complexity: {avg_complexity: 3, avg_uncertainty: null, max_dependencies: null, testing_scope: null}
+complexity:
+  avg_complexity: 3
+  avg_uncertainty: null
+  max_dependencies: null
+  testing_scope: null
 ---
 
 # Bolt: 001-video-lifecycle

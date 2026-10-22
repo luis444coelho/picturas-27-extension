@@ -3,7 +3,7 @@ unit: 001-video-lifecycle
 bolt: 001-video-lifecycle
 stage: test
 status: complete
-updated: 2026-10-22T10:25:00Z
+updated: 2026-10-22T10:45:00Z
 ---
 
 # Test Report - Ciclo de vida do vídeo (ingestão e visualização)
@@ -18,7 +18,7 @@ Ambiente: a pilha Docker Compose da equipa a correr localmente (nginx em `https:
 | Unit: worker, com FFmpeg 5.1 real (`unittest`) | 25 | 0 | 0 | `ingest.py` 93 %, `video_msg.py` 94 %, `config.py` 100 % |
 | Integration / E2E pela pilha real (`e2e.test.js`) | 24 | 0 | 0 | não medida (atravessa gateway, projetos, storage, RabbitMQ, worker, wsGateway e nginx) |
 | Transferências grandes (`e2e-large.test.js`) | 2 | 0 | 0 | — |
-| Security (dentro das E2E, mais verificações de logs) | 10 | 0 | 0 | — (1 risco residual, D-27) |
+| Security (dentro das E2E, mais verificações de logs) | 10 | 0 | 0 | — (risco do *error log* fechado pela D-27) |
 | Performance (medições, sem carga) | 4 | 0 | 0 | — |
 | Unit: frontend, fluxo da D-30 (`node:test` com *type stripping*) | 8 | 0 | 0 | `lib/video-project.ts` (todos os ramos) |
 | E2E da D-30 pela API (`e2e-project.test.js`) | 3 | 0 | 0 | — |
@@ -155,18 +155,18 @@ Defeitos encontrados no Estágio 5, todos corrigidos e cobertos por testes:
 |-------|----------|--------|
 | 1. O PUT do worker ao SeaweedFS falhava (500): o `requests` com um gerador envia `Transfer-Encoding: chunked` mesmo com `Content-Length`. Passou a enviar um corpo com `__len__` (`_PumpingFile`) | High | Fixed |
 | 2. URLs públicos com `ResponseContentType` → 403 do SeaweedFS 4.47. O parâmetro deixou de ser enviado; os objetos já levam o `Content-Type` certo. Impacto previsto na B002 (D-29) | High | Fixed (B001) / aberto para a B002 |
-| 3. Miniatura não produzida num vídeo de 1,0 s (sem fotograma em 00:00:01). O worker recorre ao fotograma 0 (D-26) | Medium | Fixed (a confirmar em D-26) |
+| 3. Miniatura não produzida num vídeo de 1,0 s (sem fotograma em 00:00:01). O worker recorre ao fotograma 0 (D-26) | Medium | Fixed (D-26 aceite) |
 | 4. URLs assinados internos nos logs do worker e do serviço de projetos (mensagem de `HTTPError`). Passaram a ser redigidos antes de log e resposta | Medium (segurança) | Fixed |
-| 5. A etiqueta `python:3.11-slim` passou a Debian 13 / FFmpeg 7.1. Fixada em `bookworm`, como diz a secção 6 do ADD (D-25) | Medium | Fixed (a confirmar em D-25) |
+| 5. A etiqueta `python:3.11-slim` passou a Debian 13 / FFmpeg 7.1. Fixada em `bookworm`, como diz a secção 6 do ADD (D-25) | Medium | Fixed (D-25 aceite) |
 
 Problemas abertos:
 
 | Issue | Severity | Status |
 |-------|----------|--------|
-| 6. *Error log* do nginx regista a assinatura em pedidos recusados no `/s3-video/` (D-27) | Low | Open |
-| 7. O consumidor do `video_ws_queue` usa o `utils/rabbit_mq.js` existente, sem religação. Num reinício do RabbitMQ, os eventos param até reiniciar o `ws_gateway`, como já acontece ao `ws_queue` e ao `project_queue` (D-28) | Medium | Open |
+| 6. *Error log* do nginx regista a assinatura em pedidos recusados no `/s3-video/` (D-27) | Low | Fixed: `error_log ... crit` na `location /s3-video/`; um 413 com assinatura deixou 1 linha no log antes e 0 depois |
+| 7. O consumidor do `video_ws_queue` usava o `utils/rabbit_mq.js` existente, sem religação (D-28) | Medium | Fixed: ligação própria com religação no `wsGateway/video.js`; o `projects/video/amqp.js` religa-se também quando só o canal fecha, com uma única religação pendente. Verificado: `docker compose restart rabbitmq` → `projects` e `ws_gateway` religados em ~10 s, worker reiniciado pela política `on-failure`, e as 24 E2E (com os eventos WebSocket) a passar sem reiniciar nenhum serviço. As filas de imagem continuam sem religação (regra 2.6) |
 | 8. UI (carregamento, galeria, leitor) sem teste no navegador | Medium | Resolvido na adenda: `e2e-ui.test.js` (6 testes) |
-| 9. Os testes E2E deixam utilizadores, projetos e vídeos de teste (`e2e-*@test.local`) na base de dados e no storage locais | Low | Open: limpeza manual, se desejada |
+| 9. Os testes E2E deixam utilizadores, projetos e vídeos de teste (`e2e-*@test.local`) na base de dados e no storage locais | Low | Limpo em 2026-10-22: 39 utilizadores (32 `e2e-*@test.local` e os 7 anónimos criados pelo `e2e.test.js`, donos dos projetos "e2e video"), 46 projetos, 49 vídeos, 48 presenças, 20 *buckets* com 233 objetos. Mantidos o utilizador real, os seus 4 projetos e 2 vídeos, e 8 anónimos sem marca de teste (sessões do navegador, incluindo as abertas pelo `e2e-ui.test.js`, que não se distinguem das reais). Os testes voltam a deixar dados ao correr |
 | 10. Fora da B001 (código existente): `POST /users/:email/login` responde 701 para utilizadores acabados de criar com `POST /users`; o teste no navegador regista-se pela página `/register`, que não usa o *login*. Causa não investigada (regra 2.6) | Medium | Open: para a equipa |
 
 Incidente durante os testes: um `docker compose up -d --build video_worker` recriou também o `rabbitmq`. Os consumidores Node sem religação (`project_queue`, `ws_queue`, `video_ws_queue`) ficaram sem ligação, e o nginx ficou com o IP antigo do `ws_gateway`. Repus o estado com `docker compose restart projects ws_gateway` e `nginx -s reload`. As reconstruções seguintes usaram `--no-deps`.
@@ -181,9 +181,15 @@ Defeito encontrado no navegador e corrigido: o `react-dropzone` descarta os fich
 
 Regressão depois da adenda: unitários do serviço de projetos 40/40, E2E 24/24 e frontend `tsc` e ESLint sem erros (o único aviso, em `page.tsx:420`, é de código existente). Regra 2.6: `git diff f9c316a` não remove nem altera nenhuma linha de código existente; as linhas alteradas são só de documentação e do memory-bank (contagens e rastreabilidade da D-30).
 
+## Fecho (2026-10-22)
+
+Respostas da equipa: D-25, D-26 e D-32 aceites como implementadas; D-27 e D-28 implementadas (issues 6 e 7); D-29 fica para a B002, que testa primeiro o `response-content-disposition` no SeaweedFS.
+
+Regressão final, depois da D-27 e da D-28: unitários do serviço de projetos 40/40, worker 25/25, frontend 8/8 (`tsc` sem erros), E2E 24/24, E2E da D-30 3/3, navegador 6/6 e transferências grandes 2/2 (150 MB em 0,9 s; 413 acima de 2 GB). Total 108/108.
+
 ## Ready for Operations
 
 - [x] All acceptance criteria met (API, backend e navegador, incluindo D-30 e D-31)
 - [ ] Code coverage > 80% (cumprido no domínio e na aplicação; os adaptadores não são medidos)
 - [x] No critical/high severity issues open (as 2 *High* foram corrigidas)
-- [ ] D-25 a D-29 e D-32 respondidos pela equipa
+- [x] D-25 a D-29 e D-32 respondidos pela equipa (D-29 passa para a B002)
