@@ -8,11 +8,14 @@ stories: [ST-VID-COM-001]
 created: 2026-10-19T17:31:16Z
 started: 2026-10-22T15:15:43Z
 completed: null
-current_stage: design
+current_stage: adr
 stages_completed:
   - name: model
     completed: 2026-10-22T15:25:53Z
     artifact: ddd-01-domain-model.md
+  - name: design
+    completed: 2026-10-22T15:39:16Z
+    artifact: ddd-02-technical-design.md
 requires_bolts: [001-video-lifecycle]
 enables_bolts: [004-video-basic-edits, 005-video-visual-edits, 006-video-frame-export, 007-video-format-conversion]
 requires_units: []
@@ -47,8 +50,8 @@ Construir uma só vez o que todas as operações usam: no ADD, uma operação is
 ## Etapas
 
 - [x] **1. Domain Model**: Complete → `ddd-01-domain-model.md`
-- [ ] **2. Technical Design**: ⏳ In progress → `ddd-02-technical-design.md`
-- [ ] **3. ADR Analysis** (opcional): Pending → `adr-{n}-{slug}.md`
+- [x] **2. Technical Design**: Complete → `ddd-02-technical-design.md`
+- [ ] **3. ADR Analysis** (opcional): ⏳ In progress → `adr-{n}-{slug}.md`
 - [ ] **4. Implement**: Pending → código nos componentes indicados em "Saídas esperadas"
 - [ ] **5. Test**: Pending → `ddd-03-test-report.md`
 
