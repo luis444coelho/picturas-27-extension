@@ -1,6 +1,6 @@
 ---
-last_updated: 2026-10-22T16:30:00Z
-total_decisions: 6
+last_updated: 2026-10-22T18:15:00Z
+total_decisions: 8
 ---
 
 # Decision Index
@@ -19,6 +19,22 @@ Use this to find relevant prior decisions when working on related features.
 ## Decisions
 
 <!-- Entries are appended below in reverse chronological order (newest first) -->
+
+### ADR-008: `planExtras.js` como módulo de extensão do plano sem alterar o `plan.js` da B003
+- **Status**: accepted
+- **Date**: 2026-10-22
+- **Bolt**: 004-video-basic-edits (002-video-transformations)
+- **Path**: `bolts/004-video-basic-edits/adr-008-plan-extras.md`
+- **Summary**: O `plan.js` da B003 só conhece `estimate` e `copyable` booleanos. A B004 precisa de campos que esse contrato não exprime: `keyframeCopy` (ADR-007) e `inputFps` (taxa de fotogramas da entrada de cada passo, usada pelo filtro `fps=` da velocidade). O módulo `projects/video/planExtras.js` é aplicado ao plano já calculado, com uma única linha nova no `tasks.js`, sem alterar o `plan.js` (regra 2.6). Padrão declarado para as B005, B007 e B008.
+- **Read when**: Extending the execution plan with step-level data not expressible by `estimate`/`copyable` (e.g. conditional copy flags, per-step input fps, chain-specific metadata); working on `plan.js`, `tasks.js`, or any bolt that adds new operation modules (B005, B007, B008+).
+
+### ADR-007: O worker escolhe entre duas alternativas do plano calculadas pelo serviço de projetos (cópia no *keyframe* do recorte)
+- **Status**: accepted
+- **Date**: 2026-10-22
+- **Bolt**: 004-video-basic-edits (002-video-transformations)
+- **Path**: `bolts/004-video-basic-edits/adr-007-keyframe-copy-worker-decision.md`
+- **Summary**: REQ-VID-TRIM-010 permite copiar vídeo e áudio sem recodificação quando o instante de início do recorte coincide com um *keyframe*. O serviço de projetos decide as condições estruturais da cópia e expõe `keyframeCopy: { atMs }` no plano (via `planExtras.js`, ADR-008). O worker verifica o *keyframe* com FFprobe e escolhe entre a cópia e a recodificação — a primeira vez que o worker toma uma decisão de execução entre duas alternativas do plano, além da letra do T-01. O recuo para recodificação em caso de falha do FFprobe garante robustez. O `videoMode` no `metadata` do `completed` regista o caminho seguido.
+- **Read when**: Working on the `trim` operation, the `keyframe.py` module, the `keyframeCopy` field in execution plans, chains starting with a trim step (B008), or any future operation where the worker must choose between copy and re-encode based on a runtime check.
 
 ### ADR-006: Pastas temporárias órfãs depois de um *dead-letter*: ficheiro de bloqueio por tarefa e limpeza no arranque do worker
 - **Status**: accepted
