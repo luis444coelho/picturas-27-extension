@@ -3,25 +3,35 @@ id: 002-video-access
 unit: 001-video-lifecycle
 intent: 001-video-processing-support
 type: simple-construction-bolt
-status: in-progress
-stories: [ST-VID-006, ST-VID-007]
-created: 2026-10-19T17:31:16Z
-started: 2026-10-22T13:32:32Z
-completed: null
-current_stage: test
+status: complete
+stories:
+  - ST-VID-006
+  - ST-VID-007
+created: 2026-10-19T17:31:16.000Z
+started: 2026-10-22T13:32:32.000Z
+completed: "2026-10-22T15:11:16Z"
+current_stage: null
 stages_completed:
   - name: plan
-    completed: 2026-10-22T13:38:11Z
+    completed: 2026-10-22T13:38:11.000Z
     artifact: implementation-plan.md
   - name: implement
-    completed: 2026-10-22T14:44:41Z
+    completed: 2026-10-22T14:44:41.000Z
     artifact: implementation-walkthrough.md
-requires_bolts: [001-video-lifecycle]
-enables_bolts: [009-video-batch]
+  - name: test
+    completed: 2026-10-22T15:11:08.000Z
+    artifact: test-walkthrough.md
+requires_bolts:
+  - 001-video-lifecycle
+enables_bolts:
+  - 009-video-batch
 requires_units: []
 blocks: true
-# avg_complexity: maior esforço do ADD no bolt (S=1, M=2, L=3); os outros campos são preenchidos no início do bolt na Construção (specsDuvidas D-01)
-complexity: {avg_complexity: 1, avg_uncertainty: 2, max_dependencies: 1, testing_scope: 2}
+complexity:
+  avg_complexity: 1
+  avg_uncertainty: 2
+  max_dependencies: 1
+  testing_scope: 2
 ---
 
 # Bolt: 002-video-access
@@ -48,7 +58,7 @@ Implementar os endpoints `GET /projects/:user/:project/videos/:video` (informaç
 
 - [x] **1. Plan**: Complete → `implementation-plan.md`
 - [x] **2. Implement**: Complete → código + `implementation-walkthrough.md`
-- [ ] **3. Test**: Pending → `test-walkthrough.md`
+- [x] **3. Test**: Complete → `test-walkthrough.md`
 
 ## Requisitos rastreados
 

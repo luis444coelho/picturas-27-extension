@@ -2,11 +2,11 @@
 id: ST-VID-007
 unit: 001-video-lifecycle
 intent: 001-video-processing-support
-status: ready
+status: complete
 priority: must
-created: 2026-10-19T17:31:16Z
+created: 2026-10-19T17:31:16.000Z
 assigned_bolt: 002-video-access
-implemented: false
+implemented: true
 ---
 
 # Story: ST-VID-007 — Consultar informações do vídeo

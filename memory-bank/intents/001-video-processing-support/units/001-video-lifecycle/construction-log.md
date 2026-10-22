@@ -2,7 +2,7 @@
 unit: 001-video-lifecycle
 intent: 001-video-processing-support
 created: 2026-10-21T16:12:26Z
-last_updated: 2026-10-22T14:52:05Z
+last_updated: 2026-10-22T15:11:31Z
 ---
 
 # Construction Log: 001-video-lifecycle
@@ -28,7 +28,7 @@ last_updated: 2026-10-22T14:52:05Z
 | Bolt ID | Stories | Status | Changed |
 |---------|---------|--------|---------|
 | 001-video-lifecycle | ST-VID-000 | ✅ complete | - |
-| 002-video-access | ST-VID-006, ST-VID-007 | ⏳ in-progress | - |
+| 002-video-access | ST-VID-006, ST-VID-007 | ✅ complete | - |
 | 003-video-task-foundation | ST-VID-COM-001 | [ ] planned | - |
 
 ## Execution History
@@ -44,6 +44,8 @@ last_updated: 2026-10-22T14:52:05Z
 | 2026-10-22T13:32:32Z | 002-video-access | started | Stage 1: Plan |
 | 2026-10-22T13:38:11Z | 002-video-access | stage-complete | Plan → Implement (D-34, D-35) |
 | 2026-10-22T14:44:41Z | 002-video-access | stage-complete | Implement → Test |
+| 2026-10-22T15:11:08Z | 002-video-access | stage-complete | Test → complete (D-36) |
+| 2026-10-22T15:11:16Z | 002-video-access | completed | All 3 stages done |
 
 ## Execution Summary
 
@@ -51,8 +53,8 @@ last_updated: 2026-10-22T14:52:05Z
 |--------|-------|
 | Original bolts planned | 3 |
 | Current bolt count | 3 |
-| Bolts completed | 1 |
-| Bolts in progress | 1 |
+| Bolts completed | 2 |
+| Bolts in progress | 0 |
 | Bolts remaining | 1 |
 | Replanning events | 0 |
 
@@ -70,3 +72,4 @@ last_updated: 2026-10-22T14:52:05Z
 - 2026-10-22T13:38:11Z: B002 Estágio 1 aprovado. Verificação da D-29 feita no stack (SigV2 com `response-content-disposition` → 403; SigV4 só funciona com `Host: seaweedfs:9000`; `Range` → 206; expirado → 403). D-34 (a): atributo `download` da âncora. D-35 (a): resposta à Q-ADD-08. Ramo `bolt/002-video-access`, commit e push no fim de cada etapa, sem merge para a `main`.
 - 2026-10-22T13:44:28Z: B002 Estágio 2 implementado (`implementation-walkthrough.md`): rotas de informações e de descarregamento, `fileName.js`, `access.js` e componentes do frontend, só por acréscimo (0 linhas removidas). Verificado no stack; à espera do checkpoint.
 - 2026-10-22T14:52:05Z: B002 Estágio 3 executado (`test-walkthrough.md`): 60 testes novos (28 unitários do serviço de projetos, 10 do frontend, 18 E2E e 4 no navegador, incluindo a verificação da D-34 com `Férias São João.avi`) e regressão da B001 108/108; 168/168 a passar. Dados de teste apagados (23 utilizadores, 21 projetos, 29 vídeos, 11 *buckets*). D-36 registada, em aberto. À espera do checkpoint final para fechar o bolt com `bolt-complete.cjs`.
+- 2026-10-22T15:11:31Z: Checkpoint final da B002 aprovado (teste manual da equipa: informações, reprodução e descarregamento a funcionar). D-36 respondida (a). `bolt-complete.cjs 002-video-access` executado (com `NODE_PATH` para as dependências do specsmd): bolt `in-progress → complete`, ST-VID-006 e ST-VID-007 `ready → complete` com `implemented: true`; unit e intent sem alteração (falta a B003). Ramo `bolt/002-video-access` sem merge para a `main`.

@@ -65,7 +65,7 @@ Regressão (B001), com os comandos de `bolts/001-video-lifecycle/ddd-03-test-rep
 
 - **Fixture sem rotação** (teste, não código): o FFmpeg 5.1 descarta `-metadata:s:v:0 rotate=90` ao codificar; a etiqueta passou a ser aplicada por remux (`-c copy`). Depois disso, a resolução de apresentação deu 360 × 640, como esperado.
 - **Logs de erro lidos só do `stdout`** (teste, não código): o `video/log.js` escreve os erros no `stderr`; o auxiliar do E2E passou a ler os dois.
-- **D-36 (em aberto):** tamanhos a menos de 5 KB de 1 GB aparecem como `1024.00 MB` com a regra da INFO-005 aplicada à letra. Registado em `docs/specsDuvidas.md`.
+- **D-36 (respondida (a), mantém-se):** tamanhos a menos de 5 KB de 1 GB aparecem como `1024.00 MB` com a regra da INFO-005 aplicada à letra. Mantido por coerência com o `formatSize` da B001 e com a INFO-005.
 
 ### Notes
 

@@ -299,4 +299,4 @@
 - **O que as fontes dizem:** REQ-VID-INFO-005: "em MB (abaixo de 1 GB) ou em GB, com 2 casas decimais, sendo 1 MB = 1024² bytes e 1 GB = 1024³ bytes"; exemplo `157 286 400` bytes → `150.00 MB`. ADD 4.2: "tamanho em MB abaixo de 1 GB e em GB a partir daí, com 2 casas". Nenhuma fonte trata o arredondamento na fronteira.
 - **Opções:** (a) manter a regra à letra: o caso só acontece numa janela de 5 KB, e só para Premium (o limite Registado é 200 MB); (b) escolher a unidade depois de arredondar (`1.00 GB` a partir de 1023,995 MB), na `formatFileSize` da B002; o `formatSize` da B001 fica como está (regra 2.6 aplicada ao código da B001), pelo que o seletor de carregamento e o painel podiam diferir nesses 5 KB.
 - **Recomendação:** (a).
-- **Resposta:** _em aberto._
+- **Resposta:** **(a).** Mantém-se a regra à letra, por coerência com o `formatSize` da B001 e com a INFO-005.
