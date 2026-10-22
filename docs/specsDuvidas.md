@@ -695,3 +695,63 @@
   - **(c) Mudar só a pré-visualização, para imitar o `eq` em YUV:** o sharp não tem operações em YUV, por isso exigiria código de conversão próprio por píxel no serviço de projetos e afastaria a pré-visualização do padrão do T-07.
 - **Recomendação:** (a). A pré-visualização passa a coincidir com o resultado (cerca de 2/255, como nos filtros), a semântica fica igual à das ferramentas de imagem (DQ-020), e não há dependências novas.
 - **Resposta:** **(a), aprovada pela equipa.** O contraste passa a `lutrgb` com pivô 128 no worker (`val·c + 128·(1−c)`), mantendo o `linear(c, 128·(1−c))` no sharp. A saturação passa à matriz que preserva a luma BT.601 (`colorchannelmixer` no worker e `recomb` no sharp). O brilho não muda. Registado no ADR-012 e no `decision-index.md`. Justificação da equipa: o ADD 4.3 pretende que a pré-visualização seja igual ao resultado (pivô fixo "igual ao da pré-visualização sharp"), e a DQ-020 pede a semântica RGB das ferramentas de imagem; o pivô 128 da Q-ADD-18 mantém-se.
+
+## D-68 — Qualidade da saída AVI na conversão (parte pendente da Q-ADD-11)
+
+- **Onde:** B007, etapa 1; `projects/video/encoding.js`, `projects/video/operations/convert.js` e `Tools/video/ops/convert.py`.
+- **Dúvida:** Que valor de `-q:v` usa o codificador `mpeg4` e que bitrate constante (`-b:a`) usa o `libmp3lame` nos resultados AVI?
+- **O que as fontes dizem:** ADD T-02/T-05/4.7 fixa `mpeg4` + `libmp3lame`, `yuv420p`, MP3 em taxa constante e ausência de `+faststart`, mas deixa os valores na Q-ADD-11. D-19 fixa `veryfast`/CRF 23/AAC 128 kb/s para a pré-visualização MP4; D-39 aplica os mesmos valores aos resultados MP4/MOV e reserva os parâmetros de AVI para a B007. UC-VID-012 Q1 não dá valores.
+- **Opções:**
+  - **(a)** `mpeg4 -q:v 5 -pix_fmt yuv420p` e `libmp3lame -b:a 192k` com bitrate constante; qualidade visual moderada e áudio a uma taxa comum, com ficheiros AVI de tamanho variável em função do vídeo.
+  - **(b)** `mpeg4 -q:v 3 -pix_fmt yuv420p` e `libmp3lame -b:a 128k` com bitrate constante; mais qualidade de vídeo e menos bitrate de áudio.
+  - **(c)** Outros valores indicados pela equipa, mantendo MP3 em taxa constante.
+- **Recomendação:** (a), sujeita a ensaio de descodificação/reprodução na etapa 3. Nenhum valor AVI é adotado antes da resposta.
+- **Resposta:** pendente.
+
+## D-69 — Cópia MP4 para perfis H.264 incompatíveis com navegadores (Q-ADD-20)
+
+- **Onde:** B007, etapa 1; ADD T-06/4.7, `projects/video/formats.js`, `projects/video/plan.js` e o leitor de vídeo.
+- **Dúvida:** Confirma-se a cópia de pré-visualização MP4 também para originais e resultados MP4 com H.264 High 10, 4:2:2 ou 4:4:4, recodificada para `yuv420p`, ou rejeitam-se esses perfis na ingestão?
+- **O que as fontes dizem:** DQ-012 previa cópia para MOV/AVI. O ADD T-06 e Q-ADD-20 propõem alargá-la a MP4 incompatível. REQ-VID-CONVERT-008 já inclui resultados MP4 incompatíveis e REQ-VID-UPLOAD-009 admite H.264 sem fixar o perfil. A B001 já gera cópia segundo `formats.previewPlan`; rejeitar agora esses originais afetaria a fundação existente e a regra 2.6.
+- **Opções:**
+  - **(a)** Confirmar o alargamento do T-06: aceitar esses originais e gerar cópia MP4 `yuv420p` para originais e resultados incompatíveis, guardada em `storage.preview_key`.
+  - **(b)** Restringir a ingestão aos perfis reproduzíveis sem cópia; exige rever a fundação/ERS e a regra 2.6 antes de aplicar à B007.
+  - **(c)** Outra política de compatibilidade definida pela equipa.
+- **Recomendação:** (a), alinhada com o ADD, a ERS atual e o comportamento da B001.
+- **Resposta:** pendente.
+
+## D-70 — Critério de cópia por stream na conversão para AVI (Q-ADD-21)
+
+- **Onde:** B007, etapa 1; ADD T-05/4.7, `projects/video/formats.js` e `projects/video/plan.js`.
+- **Dúvida:** A cópia direta exige codec de origem igual ao codec de saída da matriz, ou basta que o codec de origem seja admitido pelo contentor de destino?
+- **O que as fontes dizem:** ADD T-05 e Q-ADD-21 seguem CONVERT-005: MP4 H.264/AAC → AVI produz MPEG-4 Part 2/MP3 por recodificação. A formulação antiga de CONVERT-006 admitia cópia de H.264/AAC para AVI, apesar de contradizer CONVERT-005; `REQ-VID-CONVERT.md` já diz «iguais aos codecs de saída da matriz». A B003 planeia por igualdade de codec.
+- **Opções:**
+  - **(a)** Confirmar igualdade com o codec de saída por stream, como no ADD e na redação atual da ERS; copiar MP4 H.264/AAC → MOV, recodificar MP4 H.264/AAC → AVI.
+  - **(b)** Copiar qualquer codec admitido pelo contentor de destino; a saída AVI poderia ter H.264/AAC, contrariando CONVERT-005, e exigiria rever a ERS e o plano B003.
+  - **(c)** Outra matriz de saída aprovada pela equipa.
+- **Recomendação:** (a), para manter saídas uniformes e o contrato já construído na B003.
+- **Resposta:** pendente.
+
+## D-71 — Dimensões ímpares quando a conversão recodifica (Q-ADD-25)
+
+- **Onde:** B007, etapa 1; ADD T-02/4.7, `projects/video/plan.js` e `Tools/video/executor.py`.
+- **Dúvida:** Confirma-se cortar 1 px em cada dimensão ímpar recodificada para o par abaixo, mantendo a resolução original nas streams copiadas?
+- **O que as fontes dizem:** ADD T-02/Q-ADD-25 prevê `crop=trunc(iw/2)*2:trunc(ih/2)*2` porque H.264/MPEG-4 Part 2 em `yuv420p` não codificam dimensões ímpares. CONVERT-007 e ST-VID-012 já incluem a exceção. O `plan.js` e o executor da B003 já aplicam o corte só no modo `encode`.
+- **Opções:**
+  - **(a)** Confirmar o corte de 1 px apenas nas streams de vídeo recodificadas; os metadados e a UI mostram a dimensão resultante.
+  - **(b)** Preservar a dimensão ímpar com outra codificação ou formato de píxel, o que exige rever T-02/T-05, CONVERT-007 e a matriz fixa.
+  - **(c)** Outra exceção de resolução definida pela equipa.
+- **Recomendação:** (a), alinhada com o ADD, a ERS atual e a infraestrutura já construída.
+- **Resposta:** pendente.
+
+## D-72 — Como expor no endpoint de validação a decisão de cópia ou recodificação (CONVERT-003)
+
+- **Onde:** B007, etapa 1; `projects/video/tasks.js`, `projects/routes/videos.js`, `frontend/lib/video-tasks.ts` e o painel de conversão.
+- **Dúvida:** Que campos adicionais do resultado de `POST …/videos/validate` permitem ao painel mostrar «Cópia direta» ou «Recodificação», incluindo o caso de uma stream copiada e outra recodificada?
+- **O que as fontes dizem:** ADD 4.7 exige obter a indicação pelo endpoint de validação. O `plan.js` calcula `decisions.video.mode` e `decisions.audio.mode`, mas a resposta atual de `tasks.validate` inclui apenas `output` (propriedades estimadas), custo e erros. O contrato não nomeia campos para os modos; a regra 2.6 proíbe substituir as linhas existentes. O frontend da D-47 já usa `useVideoEditValidation`.
+- **Opções:**
+  - **(a)** Acrescentar, apenas quando há `convert`, campos `videoMode` e `audioMode` ao objeto `output` já devolvido, através de uma linha de extensão antes do retorno existente; o painel usa os valores do servidor e indica as streams separadamente quando diferem.
+  - **(b)** Acrescentar um endpoint novo e exclusivo de previsão da conversão, que reutilize o planeamento do serviço; o painel teria duas chamadas de validação.
+  - **(c)** Outro formato de resposta compatível com o endpoint existente e a regra 2.6.
+- **Recomendação:** (a), desde que a verificação V4 confirme que pode ser ligada apenas com linhas novas e sem alterar respostas das operações anteriores.
+- **Resposta:** pendente.

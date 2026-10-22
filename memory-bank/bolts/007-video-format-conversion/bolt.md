@@ -3,19 +3,19 @@ id: 007-video-format-conversion
 unit: 002-video-transformations
 intent: 001-video-processing-support
 type: simple-construction-bolt
-status: planned
+status: in-progress
 stories: [ST-VID-012]
 created: 2026-10-19T17:31:16Z
-started: null
+started: 2026-10-22T22:13:29Z
 completed: null
-current_stage: null
+current_stage: plan
 stages_completed: []
 requires_bolts: [003-video-task-foundation]
 enables_bolts: [008-video-concat-chain]
 requires_units: [001-video-lifecycle]
 blocks: true
 # avg_complexity: maior esforço do ADD no bolt (S=1, M=2, L=3); os outros campos são preenchidos no início do bolt na Construção (specsDuvidas D-01)
-complexity: {avg_complexity: 2, avg_uncertainty: null, max_dependencies: null, testing_scope: null}
+complexity: {avg_complexity: 2, avg_uncertainty: 2, max_dependencies: 2, testing_scope: 3}
 ---
 
 # Bolt: 007-video-format-conversion
@@ -39,9 +39,19 @@ Acrescentar a operação `convert` `{target: "mp4"|"mov"|"avi"}` ao registo de o
 
 ## Etapas
 
-- [ ] **1. Plan**: Pending → `implementation-plan.md`
+- ⏳ **1. Plan**: plano escrito, checkpoint pendente → `implementation-plan.md`
 - [ ] **2. Implement**: Pending → código + `implementation-walkthrough.md`
 - [ ] **3. Test**: Pending → `test-walkthrough.md`
+
+## Dúvidas pendentes no checkpoint da etapa 1
+
+- **D-68 / Q-ADD-11:** `-q:v` de MPEG-4 Part 2 e bitrate constante do MP3 para AVI.
+- **D-69 / Q-ADD-20:** cópia MP4 para perfis H.264 incompatíveis ou rejeição desses perfis na ingestão.
+- **D-70 / Q-ADD-21:** cópia só com codec igual ao codec de saída ou com qualquer codec admitido no contentor.
+- **D-71 / Q-ADD-25:** corte de 1 px nas dimensões ímpares quando há recodificação.
+- **D-72 / CONVERT-003:** campos da resposta de validação que indicam o modo de cada stream ao painel.
+
+As opções, recomendações e respostas pendentes estão em `docs/specsDuvidas.md`. Não há decisão tomada nesta etapa. A B007 trata só a conversão isolada; a validação estrutural de cadeias (CONVERT-009) é da B008.
 
 ## Requisitos rastreados
 

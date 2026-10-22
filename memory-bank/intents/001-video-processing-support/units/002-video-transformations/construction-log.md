@@ -2,7 +2,7 @@
 unit: 002-video-transformations
 intent: 001-video-processing-support
 created: 2026-10-22T16:32:12Z
-last_updated: 2026-10-22T22:08:52Z
+last_updated: 2026-10-22T22:19:56Z
 ---
 
 # Construction Log: 002-video-transformations
@@ -31,7 +31,7 @@ last_updated: 2026-10-22T22:08:52Z
 | 004-video-basic-edits | ST-VID-001, ST-VID-002, ST-VID-003 | ✅ complete | - |
 | 005-video-visual-edits | ST-VID-004, ST-VID-008, ST-VID-009, ST-VID-010, ST-VID-011 | ✅ complete | - |
 | 006-video-frame-export | ST-VID-005 | 🚫 blocked (D-06) | - |
-| 007-video-format-conversion | ST-VID-012 | [ ] planned | - |
+| 007-video-format-conversion | ST-VID-012 | ⏳ in-progress (Plan) | - |
 
 ## Execution History
 
@@ -49,6 +49,7 @@ last_updated: 2026-10-22T22:08:52Z
 | 2026-10-22T20:49:13Z | 005-video-visual-edits | stage-complete | Implement → Test (ADR-010, ADR-011, D-65, D-66) |
 | 2026-10-22T22:08:52Z | 005-video-visual-edits | stage-complete | Test → complete (D-67, ADR-012; testes manuais aprovados) |
 | 2026-10-22T22:08:52Z | 005-video-visual-edits | completed | All 3 stages done |
+| 2026-10-22T22:13:29Z | 007-video-format-conversion | started | Stage 1: Plan |
 
 ## Execution Summary
 
@@ -57,8 +58,8 @@ last_updated: 2026-10-22T22:08:52Z
 | Original bolts planned | 4 |
 | Current bolt count | 4 |
 | Bolts completed | 2 |
-| Bolts in progress | 0 |
-| Bolts remaining | 1 (mais 1 `blocked`, D-06) |
+| Bolts in progress | 1 |
+| Bolts remaining | 0 (mais 1 `blocked`, D-06) |
 | Replanning events | 0 |
 
 ## Notes
@@ -87,3 +88,5 @@ last_updated: 2026-10-22T22:08:52Z
 - 2026-10-22T21:18:05Z: B005 Estágio 3 executado, à espera do checkpoint (`test-walkthrough.md`, `manual-test-checklist.md`, `projects/test/video/README-b005.md`). Resultados: JS 254/254 (100 novos), Python/FFmpeg 5.1.9 68/68 (12 novos), frontend 62/62 (12 novos), integração B005 com 11 aprovados, 0 falhas e 5 `todo` (D-67), browser real por CDP 2/2 (D-66), integração B004 14/15 (a regressão de imagem fixa 127, mas a fixture dá 253 em aarch64; o teste da B005 calcula o valor esperado e passa). Equivalência sharp ↔ FFmpeg: 0,50 a 0,55/255 nas orientações e 0,35 a 1,36 nos filtros; o ajuste diverge no contraste e na saturação (até 45,78) → D-67, implementação não alterada. NFR-015: p95 de 21,6 ms. D-66: com o WebSocket a interface desativa o botão da B005; sem eventos mostra `TASK_ALREADY_ACTIVE` com o código de suporte. Regressão B003/B004: +2 e +3 linhas nos testes de registo, como a B004 fez. `git diff --numstat main` no código: 53 ficheiros, +4848, 0 removidas. Paragem no checkpoint: D-67, testes manuais e aprovação pendentes.
 - 2026-10-22T22:05:12Z: D-67 respondida (a) pela equipa e implementada: contraste com `lutrgb` e pivô 128 no worker (sharp `linear` sem mudança), saturação com a matriz de luma BT.601 (`colorchannelmixer` e `recomb`), brilho sem mudança; ADR-012 acrescentado ao `decision-index.md`. Suites de novo: JS 254/254, Python 69/69, frontend 62/62, integração B005 16/16 sem `todo` (ajuste entre 0,42 e 1,39/255), integração B004 14/15 (o teste da ferramenta de brilho de imagem dá 126 vs 127 em ARM, código que a B005 não toca, por isso não é regressão). `git diff --numstat main` no código: 54 ficheiros, +4983, 0 removidas. Testes manuais 12/12 aprovados pela equipa; a comparação do ajuste vai ser repetida depois da D-67. Etapa 3 ainda não aprovada.
 - 2026-10-22T22:08:52Z: Checkpoint final da B005 aprovado. A equipa repetiu a comparação do ajuste depois da D-67 (saturação 0, contraste 0.6 e 1.3) e a pré-visualização coincide; o item foi atualizado na checklist. `bolt-complete.cjs 005-video-visual-edits` executado (com `NODE_PATH` para as dependências do specsmd): bolt `in-progress → complete`, ST-VID-004, 008, 009, 010 e 011 `ready → complete` com `implemented: true`; unit e intent sem alteração (2 bolts da unit e 2 units do intent por fazer). Entrada `test` de `stages_completed` acrescentada à mão, como nas B001, B003 e B004. Ramo `bolt/005-video-visual-edits` sem merge para a `main`.
+- 2026-10-22T22:14:14Z: B007 iniciada no ramo `bolt/007-video-format-conversion`; etapa 1 (Plan) escrita em `implementation-plan.md` e à espera do checkpoint obrigatório. Complexidade inicial: `avg_uncertainty` 2 (qualidade AVI por decidir e ligação aditiva ao executor), `max_dependencies` 2 (B003 e Unit 001), `testing_scope` 3 (matriz FFmpeg real, integração, frontend e leitores). A Q-ADD-11 sobre `mpeg4`/MP3 fica como decisão explícita no checkpoint. Nenhuma implementação ou teste da B007 foi iniciado.
+- 2026-10-22T22:19:56Z: Etapa 1 corrigida por instrução da equipa: fontes ordenadas, âmbito limitado à conversão isolada, plano ligado às D-68 a D-72 pendentes e verificações V1–V8 antes de qualquer código na etapa 2. D-68 regista os valores AVI, D-69/70/71 formalizam Q-ADD-20/21/25 e D-72 trata os modos na resposta de validação. A equipa pediu commit e push por etapa, sem merge para `main`; checkpoint ainda pendente.
