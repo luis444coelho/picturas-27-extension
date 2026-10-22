@@ -163,6 +163,9 @@ class CancelledTasksTest(unittest.TestCase):
                                                                   'PYTHONPATH': os.environ.get('PYTHONPATH', '')})
         # B004 is always active. Retain the original D-37 check for other ops.
         names = ast.literal_eval(out.stdout.strip())
+        # B005 is always active as well: present, then set aside like B004.
+        self.assertTrue({'watermark', 'adjust', 'filter', 'resize', 'orient'}.issubset(names))
+        names = [name for name in names if name not in {'watermark', 'adjust', 'filter', 'resize', 'orient'}]
         self.assertEqual(set(names), {'trim', 'remove_audio', 'speed'})
         out.stdout = str([name for name in names if name not in {'trim', 'remove_audio', 'speed'}])
         self.assertEqual(out.stdout.strip(), '[]')

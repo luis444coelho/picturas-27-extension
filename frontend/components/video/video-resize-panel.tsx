@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { VideoTarget } from "@/lib/videos";
 import {
-  fetchVideoPreview,
   lockedHeight,
   lockedWidth,
   presetSize,
@@ -16,6 +15,9 @@ import {
   resizeStep,
   resizeWarnings,
 } from "@/lib/video-visual";
+import {
+  fetchVideoPreview,
+} from "@/lib/video-visual-api";
 import { useVideoEditValidation, type VideoEditSession } from "./use-video-edit";
 import { useVideoPreview } from "./use-video-preview";
 import { VideoPreviewImage } from "./video-preview-image";

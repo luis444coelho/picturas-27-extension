@@ -7,12 +7,14 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { VideoTarget } from "@/lib/videos";
 import {
-  fetchFilterThumbnails,
-  fetchVideoPreview,
   FILTERS,
   type FilterId,
   filterStep,
 } from "@/lib/video-visual";
+import {
+  fetchFilterThumbnails,
+  fetchVideoPreview,
+} from "@/lib/video-visual-api";
 import { useVideoEditValidation, type VideoEditSession } from "./use-video-edit";
 import { useVideoPreview } from "./use-video-preview";
 import { VideoPreviewImage } from "./video-preview-image";

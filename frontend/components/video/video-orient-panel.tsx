@@ -6,13 +6,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import type { VideoTarget } from "@/lib/videos";
 import {
-  fetchVideoPreview,
   isOrientIdentity,
   orientedSize,
   orientStep,
   type OrientValues,
   type Rotation,
 } from "@/lib/video-visual";
+import {
+  fetchVideoPreview,
+} from "@/lib/video-visual-api";
 import { useVideoEditValidation, type VideoEditSession } from "./use-video-edit";
 import { useVideoPreview } from "./use-video-preview";
 import { VideoPreviewImage } from "./video-preview-image";

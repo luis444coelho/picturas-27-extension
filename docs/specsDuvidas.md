@@ -658,3 +658,40 @@
 - **Opções:** (a) aceitar as duas sessões como risco residual; (b) partilhar a sessão, o que exigiria alterar o componente da B004.
 - **Recomendação:** (a).
 - **Resposta:** **(a), aceite pela equipa como risco residual**, porque o servidor garante uma tarefa por projeto. Na etapa 3, testa-se que um pedido da B005, com uma tarefa da B004 ativa, mostra na interface o erro do servidor.
+
+## D-67 — Contraste e saturação do ajuste: a pré-visualização (sharp) não corresponde ao resultado (FFmpeg) com as fórmulas do ADD 4.3
+
+- **Onde:** B005, etapa 3. Afeta `Tools/video/ops/adjust.py` (worker) e `projects/video/preview.js` (pré-visualização). Os casos de teste `adjust preview matches the FFmpeg result …` de `projects/test/video/e2e-visual-edits.test.js` estão marcados como `todo` ("D-67 pendente").
+- **Dúvida:** Com as fórmulas fixadas no ADD 4.3 e no T-07, a pré-visualização do ajuste afasta-se muito do resultado no contraste e na saturação. O brilho coincide. Muda-se a implementação, contra a letra do ADD, ou aceita-se a diferença?
+- **O que as fontes dizem:**
+  - ADD 4.3 e tabela do T-07:
+    - brilho com `colorchannelmixer=rr=f:gg=f:bb=f` ↔ `linear(f, 0)`;
+    - contraste com `eq=contrast=c` ↔ `linear(c, 128·(1−c))`, pivô fixo (Q-ADD-18);
+    - saturação com `eq=saturation=s` ↔ `modulate({saturation: s})`.
+  - O ADD 4.3 aponta como risco a "equivalência sharp ↔ FFmpeg (testes com fotogramas de referência)" e o espaço de cor (o `eq` trabalha em YUV).
+  - REQ-VID-ADJUST-005: pré-visualização "com os ajustes aplicados".
+  - DQ-020: a mesma semântica das ferramentas de imagem. O `ImageEnhance.Contrast` é uma mistura linear em RGB com um pivô. O `ImageEnhance.Color` é uma mistura com a imagem em tons de cinzento BT.601 (`convert("L")`).
+  - O critério de passagem do bolt sobre a NFR-015 só refere as orientações e os filtros.
+- **Medições:** diferença média por canal (0–255) entre a pré-visualização e o fotograma do resultado, com o FFmpeg 5.1.9 e o sharp 0.33.5.
+  - **Integração real (quadrantes de cor):**
+    - brilho 1.2: 0,42;
+    - contraste 1.3: 4,87;
+    - contraste 0.6: 27,46;
+    - saturação 0.5: 37,26;
+    - combinação 1.2/1.3/0.5: 45,78.
+    - Para comparação: as orientações dão 0,50 a 0,55 e os filtros 0,35 a 1,36.
+  - **Gradiente suave (sondagem):**
+    - brilho 1.2 e 0.7: 1,32 e 1,05;
+    - `eq=contrast` 1.3 e 0.6: 9,95 e 22,84;
+    - `eq=saturation` 0.5 e 1.5: 18,10 e 14,21.
+    - Alternativas: `lutrgb=val·c+128·(1−c)` dá 2,29 e 1,83; uma matriz de saturação que preserva a luma BT.601 (`colorchannelmixer` no FFmpeg e `recomb` no sharp) dá 1,37 a 1,75 para s = 0, 0.5 e 1.5.
+  - O `eq` aplica o contraste só à luma e a saturação só ao croma, em YUV. O sharp aplica o `linear` a cada canal RGB e o `modulate` em LCh.
+- **Opções:**
+  - **(a) Mudar o contraste e a saturação para RGB nos dois motores e manter o brilho:**
+    - contraste com `lutrgb=r=val*c+128*(1-c):g=…:b=…` no worker, mantendo o `linear(c, 128·(1−c))` no sharp (pivô fixo 128, Q-ADD-18);
+    - saturação com a matriz `s·I + (1−s)·[luma BT.601]` (`colorchannelmixer` no worker e `recomb` no sharp).
+    - Diverge da letra do ADD 4.3 e do T-07 (`eq`, `modulate`) e da A1 do UC-VID-008, mas cumpre a DQ-020 à letra: o `ImageEnhance.Color` do PIL é esta matriz. Fica registado como ADR-012. É uma linha de código em cada passo, em ficheiros novos da B005.
+  - **(b) Manter as fórmulas do ADD e aceitar a diferença:** a pré-visualização do ajuste fica só indicativa. Os casos `todo` passam a documentar a diferença em vez de a exigir.
+  - **(c) Mudar só a pré-visualização, para imitar o `eq` em YUV:** o sharp não tem operações em YUV, por isso exigiria código de conversão próprio por píxel no serviço de projetos e afastaria a pré-visualização do padrão do T-07.
+- **Recomendação:** (a). A pré-visualização passa a coincidir com o resultado (cerca de 2/255, como nos filtros), a semântica fica igual à das ferramentas de imagem (DQ-020), e não há dependências novas.
+- **Resposta:** _pendente_

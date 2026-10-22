@@ -51,7 +51,7 @@ Acrescentar ao registo de operações e ao worker as operações `watermark`, `a
 
 - [x] **1. Plan**: Complete (D-58 a D-64 respondidas) → `implementation-plan.md`
 - [x] **2. Implement**: Complete (D-65 e D-66) → código + `implementation-walkthrough.md`, ADR-010, ADR-011
-- [ ] **3. Test**: ⏳ In progress → `test-walkthrough.md`
+- [ ] **3. Test**: ⏳ Testes automatizados executados; D-67, testes manuais e aprovação pendentes → `test-walkthrough.md`, `manual-test-checklist.md`
 
 ## Requisitos rastreados
 
@@ -107,3 +107,4 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 
 - Esforço no ADD: UC-VID-008 = M, 009 = M, 010 = S, 011 = S; o UC-VID-004 não tem secção própria no ADD. `avg_complexity` = 2 (maior esforço do ADD no bolt, com S=1, M=2, L=3); `avg_uncertainty`, `max_dependencies` e `testing_scope` são preenchidos no início do bolt na Construção (specsDuvidas D-01).
 - 2026-10-22T20:11:21Z: B005 iniciada no ramo `bolt/005-video-visual-edits`, criado a partir da `main` com a B004. Complexidade preenchida no início do bolt (D-01): `avg_uncertainty` 3 (Q-ADD-07 e Q-ADD-12 em aberto, marca de água sem secção no ADD, D-58 a D-64), `max_dependencies` 2 (B003 e Unit 001; o código da B004 é reutilizado), `testing_scope` 3 (FFmpeg real, equivalência sharp ↔ FFmpeg, integração pela pilha e painéis no navegador).
+- 2026-10-22T21:18:05Z: etapa 3 executada (`test-walkthrough.md`). D-67 registada e pendente (contraste e saturação do ajuste: as fórmulas do ADD 4.3 não dão uma pré-visualização equivalente). O bolt continua aberto até à resposta, aos testes manuais e à aprovação da etapa 3.

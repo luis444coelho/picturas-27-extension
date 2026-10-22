@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import type { VideoRecipeStep } from "@/lib/video-access";
 import type { VideoApiError, VideoTarget } from "@/lib/videos";
-import type { PreviewImage } from "@/lib/video-visual";
+import type {
+  PreviewImage,
+} from "@/lib/video-visual-api";
 import { fieldLabel, visualStepErrorMessage } from "@/lib/video-visual";
 
 type Fetcher = (

@@ -9,9 +9,11 @@ import {
   ADJUST_STEP,
   adjustStep,
   type AdjustValues,
-  fetchVideoPreview,
   NEUTRAL_ADJUST,
 } from "@/lib/video-visual";
+import {
+  fetchVideoPreview,
+} from "@/lib/video-visual-api";
 import { useVideoEditValidation, type VideoEditSession } from "./use-video-edit";
 import { useVideoPreview } from "./use-video-preview";
 import { VideoPreviewImage } from "./video-preview-image";

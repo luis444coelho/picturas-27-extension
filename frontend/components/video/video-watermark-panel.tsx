@@ -9,16 +9,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProjectInfo } from "@/providers/project-provider";
 import { videoErrorCode, type VideoTarget } from "@/lib/videos";
 import {
-  copyWatermarkFromGallery,
-  fetchWatermarkPreview,
   isAcceptedWatermarkFile,
-  uploadWatermarkFile,
   WATERMARK_PRESETS,
   WATERMARK_TEXT_MAX,
   type WatermarkPreset,
   type WatermarkValues,
   watermarkStep,
 } from "@/lib/video-visual";
+import {
+  copyWatermarkFromGallery,
+  fetchWatermarkPreview,
+  uploadWatermarkFile,
+} from "@/lib/video-visual-api";
 import { useVideoEditValidation, type VideoEditSession } from "./use-video-edit";
 import { useVideoPreview } from "./use-video-preview";
 import { VideoPreviewImage } from "./video-preview-image";
