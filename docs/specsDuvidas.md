@@ -509,7 +509,7 @@
   - (c) A equipa dá outras matrizes.
   - (d) Efeitos não lineares (`curves`, `vignette`). O T-07 exclui-os, porque o sharp não os reproduz.
 - **Recomendação:** (a). Os pesos BT.601 são os do PIL, e as três matrizes novas são transformações simples que a equipa pode afinar depois sem mudar o código (só o `filters.json`).
-- **Resposta:** _pendente_
+- **Resposta:** **(a), aprovada pela equipa.** Catálogo linear: Preto e Branco com os pesos BT.601 `[0.299, 0.587, 0.114]`, Sépia com a matriz clássica, e Vintage, Frio e Quente com as matrizes propostas na opção (a). Registada como resposta à Q-ADD-07 do ADD.
 
 ## D-59 — Marca de água de texto: `drawtext` no worker ou imagem gerada no serviço de projetos (Q-ADD-12, ADD 6)
 
@@ -532,7 +532,7 @@
     - Há risco de diferenças de 1 a 2 px entre o pango (medição e pré-visualização) e o freetype do `drawtext` (resultado).
     - Muda a imagem do worker, que o ADD 6 trata como mudança de dependência.
 - **Recomendação:** (a). Um só caminho no worker, medição e resultado com o mesmo motor, e nenhuma dependência nova (o sharp e o DejaVu já existem no serviço de projetos).
-- **Resposta:** _pendente_
+- **Resposta:** **(a), aprovada pela equipa.** O texto é gerado como PNG RGBA com o sharp no serviço de projetos (DejaVu Sans, branco) e aplicado pelo worker com `overlay`, como uma marca de imagem. Sem `drawtext` e sem `fonts-dejavu-core`; o `Tools/video/Dockerfile` não muda. Registada como resposta à Q-ADD-12 do ADD (implementação de raiz no worker de vídeo).
 
 ## D-60 — Origem, armazenamento e ciclo de vida da imagem da marca de água
 
@@ -556,7 +556,7 @@
   - **(b)** Como (a), mas com um `location` novo no nginx para o upload, até 10 MB.
   - **(c)** Imagem em base64 dentro dos `parameters`. Ficaria guardada na `recipe` e no plano do `VideoTask` (perto do limite de 16 MB de um documento MongoDB), por isso é de rejeitar.
 - **Recomendação:** (a). Uma marca de água de 1 MB chega para logótipos, não muda o nginx, e o worker lê a imagem por um estágio que já conhece. A `recipe` guarda o `watermarkId`, o que permite reproduzir a operação.
-- **Resposta:** _pendente_
+- **Resposta:** **(a), com uma alteração da equipa na limpeza.** Endpoint `POST …/videos/watermarks` (ficheiro local até 1 MB ou `{imageId}` da galeria), validação com o sharp, PNG RGBA em `video_src/wm-<id>.png` e registo em `video_watermarks`; as marcas de texto ficam em `wm-<taskId>.png`; o plano leva o destino e não um URL. **Limpeza:** só se apagam as marcas de projetos que já não existem e as que, ao fim de 24 h, não são referenciadas por nenhum `VideoTask` nem por nenhuma `recipe` de vídeo. Justificação da equipa: uma marca usada num resultado tem de continuar disponível para a `recipe` ser reproduzível (e para as predefinições de cadeia da B008).
 
 ## D-61 — Parâmetros, geometria e códigos de erro da marca de água
 
@@ -589,7 +589,7 @@
     - **Dimensões da marca no servidor:** um *middleware* novo, num router novo montado antes do router de vídeo, resolve a marca antes da validação, nos pedidos `…/validate`, `…/operations` e de pré-visualização com passos `watermark`. Gera o texto (D-59 a) ou lê `video_watermarks` e grava `parameters._mark = {width, height}` por cima do que o cliente tenha enviado, como o `_input` da B004. O `validate` usa o `_mark`. Fica registado como ADR-010.
   - **(b)** A escala aplica-se às duas dimensões: a marca cabe numa caixa de `scale·W × scale·H` (ajuste *contain*). Os limites verificam-se sem conhecer a marca, por isso não é preciso *middleware*. Mas uma marca mais alta do que o quadro em proporção não ocupa "exatamente" a percentagem da largura (critério da WATERMARK-005).
 - **Recomendação:** (a). Cumpre o critério da WATERMARK-005 à letra, e as dimensões da marca vêm sempre do servidor.
-- **Resposta:** _pendente_
+- **Resposta:** **(a), aprovada pela equipa, com o ADR-010** para o *middleware* que grava `parameters._mark = {width, height}` antes da validação.
 
 ## D-62 — Pré-visualização da marca de água (REQ-VID-WATERMARK-009) e o T-07
 
@@ -604,7 +604,7 @@
   - **(b)** O frontend sobrepõe a marca ao fotograma 0 com CSS: o texto no tipo de letra do navegador e a imagem por URL local. Não há pedido ao servidor, mas o texto pode não coincidir com o resultado.
   - **(c)** O `…/preview` do T-07 passa a aplicar a marca, o que contraria o texto do T-07.
 - **Recomendação:** (a). A pré-visualização usa o mesmo PNG e a mesma geometria do resultado, sem mudar o que o T-07 fixa.
-- **Resposta:** _pendente_
+- **Resposta:** **(a), aprovada pela equipa.** Endpoint novo `POST …/videos/:video/watermark-preview` com a autorização do T-07; o `…/preview` do T-07 continua a ignorar a marca.
 
 ## D-63 — Ponto de ligação dos extras do plano da B005 (ADR-008)
 
@@ -616,7 +616,7 @@
   - **(b)** As operações devolvem os extras pelo `estimate`, mas o `plan.js` não os passa para o plano.
   - **(c)** O worker lê uma cópia do `filters.json`, o que contraria o T-07 e o T-01.
 - **Recomendação:** (a).
-- **Resposta:** _pendente_
+- **Resposta:** **(a), aprovada pela equipa.** Módulo novo `projects/video/planExtrasVisual.js`, chamado por uma linha nova em `tasks.js` a seguir ao `applyPlanExtras`. A equipa deixou ao critério da construção juntar ao ADR-010 ou criar outro: fica no **ADR-011**, separado do ADR-010 (*middleware* do `_mark`), por serem pontos de ligação diferentes (pedido HTTP antes da validação vs. plano depois de `buildPlan()`).
 
 ## D-64 — Pormenores da pré-visualização, das miniaturas e do painel de redimensionamento que as fontes não fixam
 
@@ -639,4 +639,4 @@
   - **(b)** Como (a), mas com as predefinições sempre na altura, à letra da RESIZE-003: num vídeo vertical, "720p" daria 406×720.
   - **(c)** Outros valores.
 - **Recomendação:** (a).
-- **Resposta:** _pendente_
+- **Resposta:** **(a), aprovada pela equipa.** Cache `Map` de 100 fotogramas e 10 min com remoção do menos usado; JPEG com qualidade 85; miniaturas de 160 px num só JSON; avisos de distorção (`|w/h − W/H| > 0.01`) e de ampliação. **Registo pedido pela equipa:** as predefinições aplicadas à menor dimensão de apresentação fogem à letra da REQ-VID-RESIZE-003 ("aplicadas à altura"); num vídeo horizontal coincidem com ela.

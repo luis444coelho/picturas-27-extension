@@ -2,7 +2,7 @@
 unit: 002-video-transformations
 intent: 001-video-processing-support
 created: 2026-10-22T16:32:12Z
-last_updated: 2026-10-22T20:11:21Z
+last_updated: 2026-10-22T20:22:31Z
 ---
 
 # Construction Log: 002-video-transformations
@@ -45,6 +45,7 @@ last_updated: 2026-10-22T20:11:21Z
 | 2026-10-22T20:02:18Z | 004-video-basic-edits | stage-complete | Test → complete (D-55 a D-57, ADR-009; testes manuais aprovados) |
 | 2026-10-22T20:02:18Z | 004-video-basic-edits | completed | All 5 stages done |
 | 2026-10-22T20:11:21Z | 005-video-visual-edits | started | Stage 1: Plan |
+| 2026-10-22T20:22:31Z | 005-video-visual-edits | stage-complete | Plan → Implement (D-58 a D-64) |
 
 ## Execution Summary
 
@@ -77,3 +78,4 @@ last_updated: 2026-10-22T20:11:21Z
 
 - 2026-10-22T20:02:18Z: Checkpoint final da B004 aprovado, retomado noutra máquina sem repetir a etapa 5 (resultados automáticos de `a5d60d2`). Testes manuais no browser feitos pela equipa, todos aprovados: recorte, recorte inválido, remover áudio, vídeo sem áudio, velocidade, cancelamento, regressão de vídeo e de imagem; registados em `manual-test-checklist.md` e `ddd-03-test-report.md` (os itens não reportados individualmente ficam indicados como tal). `bolt-complete.cjs 004-video-basic-edits` executado (com `NODE_PATH` para as dependências do specsmd): bolt `in-progress → complete`, ST-VID-001, ST-VID-002 e ST-VID-003 `ready → complete` com `implemented: true`; unit e intent sem alteração (3 bolts da unit por fazer, 2 units do intent). Entrada `test` de `stages_completed` acrescentada à mão, como na B001 e na B003. Ramo `bolt/004-video-basic-edits` sem merge para a `main` (a `main` já tem o merge `f343e27`, feito pela equipa antes deste fecho).
 - 2026-10-22T20:11:21Z: B005 iniciada (Simple Construction Bolt, 3 etapas), no ramo `bolt/005-video-visual-edits` criado a partir da `main` com a B004. Regras da equipa: fontes por ordem `docs/add.md` (2.5, 2.6, T-01, T-02, T-05, T-07, 4.3 a 4.6 e as Q-ADD 07, 12, 13, 18, 23, 24 e 25), `docs/specsDuvidas.md` (D-01 a D-57), `decision-index.md` (ADR-001 a ADR-009), o bolt e as stories, `docs/requirements/` e `docs/use-cases/`, sem o `docs/merge.md`; regra 2.6 também para o código das B001 a B004; operações novas nos registos com linhas novas e extras do plano no padrão do ADR-008; T-07 em código novo, sem `applyToolsPreview`; D-39 pelo `encoding.js`; CRLF mantido; `test_reencode` desligada; dúvidas a partir da D-58 e ADR a partir do ADR-010; commit e push por etapa, sem merge. Etapa 1 escrita (`implementation-plan.md`); D-58 a D-64 registadas e pendentes: matrizes dos filtros (Q-ADD-07), texto da marca com `overlay` de um PNG gerado com o sharp ou com `drawtext` (Q-ADD-12), origem e armazenamento da imagem da marca, parâmetros e geometria da marca, pré-visualização da marca e o T-07, ponto de ligação dos extras do plano (o `planExtras.js` sai antes, quando não há `trim`, `remove_audio` nem `speed`) e pormenores da pré-visualização e do redimensionamento. Paragem no checkpoint da etapa 1.
+- 2026-10-22T20:22:31Z: B005 Estágio 1 aprovado (`implementation-plan.md`) com as respostas D-58 (a), D-59 (a), D-60 (a) com limpeza só de marcas de projetos apagados ou sem referência em `VideoTask` nem em `recipe` ao fim de 24 h, D-61 (a) com ADR-010, D-62 (a), D-63 (a) com ADR-011 (separado do ADR-010) e D-64 (a), com o registo de que as predefinições na menor dimensão fogem à letra da RESIZE-003 e coincidem com ela num vídeo horizontal. Estágio 2 (Implement) em curso.

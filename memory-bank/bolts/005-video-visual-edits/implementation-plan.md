@@ -101,17 +101,19 @@ Todos usam a pré-visualização com *debounce*, o `…/validate` existente e as
   - **`applyToolsPreview`:** não é chamado nem alterado.
 - **Regra 2.6:** a seguir a cada etapa, `git diff --numstat main` nos ficheiros de código deve mostrar 0 remoções. O CRLF mantém-se nos ficheiros que o usam: nenhum dos ficheiros a tocar (`projects/video/operations/index.js`, `Tools/video/ops/__init__.py`, `projects/video/tasks.js`, `projects/app.js`, `projects/routes/videos.js`, `apiGateway/routes/videos.js`, `frontend/components/video/video-edit-actions.tsx`) usa CRLF, segundo a verificação desta etapa (0 `\r`). Os ficheiros CRLF do repositório, como `projects/Dockerfile` e `Tools/resize/resize.py`, não são tocados.
 - **Fora do âmbito:** cadeias com vários passos, junção, lotes e extração de fotogramas (D-06, B008). Conversão de formato (B007).
-- **ADR previsto:** ADR-010, a escrever na etapa 2, com os pontos de ligação novos dos extras do plano e da resolução da marca no servidor, se as D-61 (a) e D-63 (a) forem aceites.
+- **ADR previstos (etapa 2):** ADR-010 (*middleware* do `_mark`, D-61) e ADR-011 (`planExtrasVisual.js`, D-63).
 
-### Questões pendentes nesta etapa (paragem no checkpoint)
+### Decisões tomadas no checkpoint (2026-10-22T20:22:31Z)
 
-- **D-58:** matrizes de cor dos filtros (Q-ADD-07).
-- **D-59:** marca de texto com `overlay` de um PNG gerado com o sharp ou com `drawtext` mais `fonts-dejavu-core` (Q-ADD-12, ADD 6).
-- **D-60:** origem, armazenamento, limite e limpeza da imagem da marca.
-- **D-61:** parâmetros, geometria, códigos de erro e dimensões da marca no servidor.
-- **D-62:** pré-visualização da marca e o T-07.
-- **D-63:** ponto de ligação dos extras do plano da B005 (o `planExtras.js` sai antes, quando não há `trim`, `remove_audio` nem `speed`).
-- **D-64:** cache, formato, miniaturas e predefinições e avisos do redimensionamento.
+A equipa aprovou o plano com as respostas seguintes (texto completo em `docs/specsDuvidas.md`):
+
+- **D-58 (a):** catálogo linear com BT.601 no Preto e Branco, Sépia clássica e as matrizes propostas para Vintage, Frio e Quente (Q-ADD-07).
+- **D-59 (a):** texto gerado como PNG com o sharp no serviço de projetos e aplicado com `overlay`; sem `drawtext` nem `fonts-dejavu-core` (Q-ADD-12).
+- **D-60 (a), com alteração:** recurso de marca em `video_src/wm-<id>.png` e `video_watermarks`. A limpeza só apaga as marcas de projetos que já não existem e as que, ao fim de 24 h, não são referenciadas por nenhum `VideoTask` nem por nenhuma `recipe` de vídeo, para a `recipe` continuar reproduzível (B008).
+- **D-61 (a):** operação `watermark` v1 e *middleware* que grava `_mark`, registado no **ADR-010**.
+- **D-62 (a):** endpoint novo `…/watermark-preview`; o `…/preview` do T-07 continua a ignorar a marca.
+- **D-63 (a):** `planExtrasVisual.js` com uma linha nova em `tasks.js`, registado no **ADR-011** (separado do ADR-010).
+- **D-64 (a):** valores propostos. As predefinições na menor dimensão fogem à letra da RESIZE-003 ("aplicadas à altura") e coincidem com ela num vídeo horizontal.
 
 As Q-ADD-13, 18, 23, 24 e 25 têm decisão no ADD, que este plano segue (dimensões de apresentação, pivô 128, brilho por `colorchannelmixer`, `NO_CHANGES` na identidade e corte de 1 px). A ERS já inclui as exceções da Q-ADD-24 (ORIENT-007) e da Q-ADD-25 (ADJUST-009, FILTER-007 e ORIENT-008).
 

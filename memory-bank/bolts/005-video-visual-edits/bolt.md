@@ -8,8 +8,11 @@ stories: [ST-VID-004, ST-VID-008, ST-VID-009, ST-VID-010, ST-VID-011]
 created: 2026-10-19T17:31:16Z
 started: 2026-10-22T20:11:21Z
 completed: null
-current_stage: plan
-stages_completed: []
+current_stage: implement
+stages_completed:
+  - name: plan
+    completed: 2026-10-22T20:22:31Z
+    artifact: implementation-plan.md
 requires_bolts: [003-video-task-foundation]
 enables_bolts: [008-video-concat-chain, 009-video-batch]
 requires_units: [001-video-lifecycle]
@@ -43,8 +46,8 @@ Acrescentar ao registo de operações e ao worker as operações `watermark`, `a
 
 ## Etapas
 
-- [ ] **1. Plan**: ⏳ Plano escrito, à espera do checkpoint (D-58 a D-64 pendentes) → `implementation-plan.md`
-- [ ] **2. Implement**: Pending → código + `implementation-walkthrough.md`
+- [x] **1. Plan**: Complete (D-58 a D-64 respondidas) → `implementation-plan.md`
+- [ ] **2. Implement**: ⏳ In progress → código + `implementation-walkthrough.md`
 - [ ] **3. Test**: Pending → `test-walkthrough.md`
 
 ## Requisitos rastreados
