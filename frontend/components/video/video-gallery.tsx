@@ -8,6 +8,7 @@ import {
   fetchProjectVideos,
   formatDuration,
 } from "@/lib/videos";
+import { VideoActions } from "./video-actions";
 
 // Gallery of the project videos (UC-VID-000 step 7, D-17): only completed
 // videos, with thumbnail, file name and duration.
@@ -77,6 +78,9 @@ export function VideoGallery({
               </span>
             </div>
           </button>
+          <div className="pt-1">
+            <VideoActions target={target} video={video} />
+          </div>
         </li>
       ))}
     </ul>

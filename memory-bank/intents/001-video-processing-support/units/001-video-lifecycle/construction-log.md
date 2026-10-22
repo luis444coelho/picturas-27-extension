@@ -2,7 +2,7 @@
 unit: 001-video-lifecycle
 intent: 001-video-processing-support
 created: 2026-10-21T16:12:26Z
-last_updated: 2026-10-22T13:38:11Z
+last_updated: 2026-10-22T13:44:28Z
 ---
 
 # Construction Log: 001-video-lifecycle
@@ -67,3 +67,4 @@ last_updated: 2026-10-22T13:38:11Z
 - 2026-10-22T10:32:46Z: `bolt-complete.cjs 001-video-lifecycle` executado (com `NODE_PATH` para as dependências do specsmd): bolt `in-progress → complete`; unit e intent sem alteração (2 bolts da unit por fazer). A ST-VID-000 não foi atualizada ("File not found": o script procura `ST-VID-000*.md` e o ficheiro é `001-video-ingestion.md`); registado como D-33, pendente.
 - 2026-10-22T10:55:00Z: D-33 respondida (a): stories renomeadas para `ST-VID-xxx-<nome>.md` com `git mv` e ligações atualizadas (0 ligações partidas); ST-VID-000 atualizada à mão para `status: complete` e `implemented: true`, como o script faria.
 - 2026-10-22T13:38:11Z: B002 Estágio 1 aprovado. Verificação da D-29 feita no stack (SigV2 com `response-content-disposition` → 403; SigV4 só funciona com `Host: seaweedfs:9000`; `Range` → 206; expirado → 403). D-34 (a): atributo `download` da âncora. D-35 (a): resposta à Q-ADD-08. Ramo `bolt/002-video-access`, commit e push no fim de cada etapa, sem merge para a `main`.
+- 2026-10-22T13:44:28Z: B002 Estágio 2 implementado (`implementation-walkthrough.md`): rotas de informações e de descarregamento, `fileName.js`, `access.js` e componentes do frontend, só por acréscimo (0 linhas removidas). Verificado no stack; à espera do checkpoint.

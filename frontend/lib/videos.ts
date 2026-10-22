@@ -202,6 +202,8 @@ const VIDEO_ERROR_MESSAGES: Record<string, string> = {
   INVALID_STATE: "Este carregamento já não pode ser alterado.",
   INVALID_REQUEST: "O pedido de carregamento é inválido.",
   RESOURCE_NOT_READY: "O vídeo ainda está a ser processado.",
+  RESOURCE_UNAVAILABLE:
+    "O ficheiro do vídeo não está disponível. Tenta novamente mais tarde.",
   UNSUPPORTED_FORMAT: "Só são suportados vídeos MP4, MOV e AVI.",
   INVALID_CODEC:
     "Os codecs do vídeo não são suportados. Converte-o para H.264/AAC e tenta novamente.",

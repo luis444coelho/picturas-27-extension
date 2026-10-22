@@ -16,6 +16,10 @@ const storage = require("../video/storage");
 const users = require("../video/users");
 const log = require("../video/log");
 const { VideoError, sendError } = require("../video/errors");
+const { createAccess } = require("../video/access");
+
+// Information and download (UC-VID-006, UC-VID-007; ADD 4.1, 4.2).
+const access = createAccess({ Video, storage, log });
 
 // Video router of the projects service (ADD T-00). Mounted before the existing
 // router; it only answers /:user/:project/videos… and lets every other request
@@ -188,6 +192,33 @@ router.get(
     );
 
     res.status(200).json({ url, mimeType, expiresIn: storage.URL_EXPIRES });
+  }),
+);
+
+// Information panel (UC-VID-007, ADD 4.2): read permission is enough; no task, no quota.
+router.get(
+  `${VIDEOS}/:video`,
+  ...canRead,
+  loadVideo,
+  wrap(async (req, res) => {
+    const info = await access.getInfo(req.video, {
+      correlationId: req.correlationId,
+    });
+    res.status(200).json(info);
+  }),
+);
+
+// Download URL (UC-VID-006, ADD 4.1): generated only when the user confirms.
+router.get(
+  `${VIDEOS}/:video/download`,
+  ...canRead,
+  loadVideo,
+  wrap(async (req, res) => {
+    const result = await access.issueDownload(req.video, {
+      callerId: req.callerId,
+      correlationId: req.correlationId,
+    });
+    res.status(200).json(result);
   }),
 );
 
