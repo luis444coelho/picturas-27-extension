@@ -2,7 +2,7 @@
 stage: test
 bolt: 004-video-basic-edits
 created: 2026-10-22T19:07:25Z
-status: awaiting-manual-tests-and-review
+status: complete
 ---
 
 # Relatório de testes — etapa 5 da B004
@@ -22,7 +22,7 @@ A equipa aprovou a etapa 4 (`6a72c67`) e autorizou esta etapa. O bolt continua `
 | ESLint das fontes novas do frontend | **Passou**, sem erros/avisos nesses ficheiros |
 | Auditoria `git diff --check` | **Passou** |
 | Browser automatizado | **Não executado**: `playwright-core`, `@playwright/test` e Chromium não encontrados no ambiente verificado |
-| Browser manual | **Pendente da equipa**, checklist próprio entregue |
+| Browser manual | **Passou** (equipa, 2026-10-22): recorte, recorte inválido, remover áudio, vídeo sem áudio, velocidade, cancelamento, regressão de vídeo e de imagem; ver [checklist](manual-test-checklist.md) |
 
 As suites opt-in não foram contadas como aprovadas por estarem skipped. Os resultados históricos da B003 não são reutilizados como resultados desta etapa. Os comandos completos estão em [README-b004.md](../../../projects/test/video/README-b004.md) — a partir deste diretório, o caminho no repositório é `projects/test/video/README-b004.md`.
 
@@ -142,3 +142,14 @@ $ git status --short
 `git diff --check` e `git diff --cached --check` passaram. Commit/push no ramo `bolt/004-video-basic-edits`; sem merge. O commit é de checkpoint e não declara a etapa/bolt aprovados.
 
 O checkpoint permanece pendente dos [testes manuais](manual-test-checklist.md) e da revisão/aprovação explícita da equipa. Não se acrescenta a etapa `test` a `stages_completed` nem se fecha o bolt antes disso.
+
+## Checkpoint final (2026-10-22T20:01:58Z)
+
+A equipa executou os testes manuais no browser, noutra máquina, e comunicou que passaram todos: recorte, recorte inválido, remover áudio, vídeo sem áudio, velocidade, cancelamento e regressão de vídeo e de imagem. Sem falhas reportadas. Os itens do [checklist](manual-test-checklist.md) não reportados individualmente (três painéis, scrubbing, loop preview, progresso e continuidade, galeria e informação, compatibilidade e geometria) ficam registados como tal.
+
+A etapa 5 não foi repetida: os resultados automáticos acima (commit `a5d60d2`) são os desta etapa.
+
+### Decisões tomadas no checkpoint
+
+- Etapa 5 aprovada explicitamente pela equipa; fecho do bolt com `bolt-complete.cjs` (com `NODE_PATH` para as dependências do specsmd), como nas B001 a B003.
+- Commit "B004 fecho" e push no ramo `bolt/004-video-basic-edits`, sem merge para a `main`. Nota: a `main` já contém um merge da B004 (`f343e27`), feito pela equipa antes deste fecho; o fecho não o altera.

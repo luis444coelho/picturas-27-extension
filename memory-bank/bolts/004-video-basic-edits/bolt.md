@@ -3,31 +3,44 @@ id: 004-video-basic-edits
 unit: 002-video-transformations
 intent: 001-video-processing-support
 type: ddd-construction-bolt
-status: in-progress
-stories: [ST-VID-001, ST-VID-002, ST-VID-003]
-created: 2026-10-19T17:31:16Z
-started: 2026-10-22T16:32:12Z
-completed: null
-current_stage: test
+status: complete
+stories:
+  - ST-VID-001
+  - ST-VID-002
+  - ST-VID-003
+created: 2026-10-19T17:31:16.000Z
+started: 2026-10-22T16:32:12.000Z
+completed: "2026-10-22T20:02:18Z"
+current_stage: null
 stages_completed:
   - name: model
-    completed: 2026-10-22T16:42:11Z
+    completed: 2026-10-22T16:42:11.000Z
     artifact: ddd-01-domain-model.md
   - name: design
-    completed: 2026-10-22T16:58:47Z
+    completed: 2026-10-22T16:58:47.000Z
     artifact: ddd-02-technical-design.md
   - name: adr
-    completed: 2026-10-22T18:25:00Z
+    completed: 2026-10-22T18:25:00.000Z
     artifact: adr-007-keyframe-copy-worker-decision.md, adr-008-plan-extras.md
   - name: implement
-    completed: 2026-10-22T18:12:10Z
+    completed: 2026-10-22T18:12:10.000Z
     artifact: implementation-report.md
-requires_bolts: [003-video-task-foundation]
-enables_bolts: [008-video-concat-chain, 009-video-batch]
-requires_units: [001-video-lifecycle]
+  - name: test
+    completed: 2026-10-22T20:02:18Z
+    artifact: ddd-03-test-report.md, manual-test-checklist.md
+requires_bolts:
+  - 003-video-task-foundation
+enables_bolts:
+  - 008-video-concat-chain
+  - 009-video-batch
+requires_units:
+  - 001-video-lifecycle
 blocks: true
-# avg_complexity: maior esforço do ADD no bolt (S=1, M=2, L=3); os outros campos são preenchidos no início do bolt na Construção (specsDuvidas D-01)
-complexity: {avg_complexity: null, avg_uncertainty: 2, max_dependencies: 2, testing_scope: 3}
+complexity:
+  avg_complexity: null
+  avg_uncertainty: 2
+  max_dependencies: 2
+  testing_scope: 3
 ---
 
 # Bolt: 004-video-basic-edits
@@ -57,7 +70,7 @@ Acrescentar ao registo de operações (T-01) e ao worker (T-02) as operações d
 - [x] **2. Technical Design**: Complete → `ddd-02-technical-design.md`
 - [x] **3. ADR Analysis**: Complete → `adr-007-keyframe-copy-worker-decision.md`, `adr-008-plan-extras.md`
 - [x] **4. Implement**: Aprovado pela equipa → `implementation-report.md`
-- [ ] **5. Test**: Testes automatizados executados; testes manuais e revisão pendentes → `ddd-03-test-report.md`, `manual-test-checklist.md`
+- [x] **5. Test**: Complete (testes manuais da equipa aprovados; etapa aprovada no checkpoint final) → `ddd-03-test-report.md`, `manual-test-checklist.md`
 
 ## Requisitos rastreados
 
@@ -113,3 +126,5 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 - Etapa 4 aprovada explicitamente pela equipa em `2026-10-22T18:12:10Z`; aprovação e passagem à etapa 5 registadas no construction-log. Na etapa 5 foram respondidas D-55 (duração visual), D-56 (consulta de controlo; ADR-009) e D-57 (recuo se o fim não for representável por cópia). Todas aprovadas na opção (a), sem reabrir D-49 a D-54. O bolt permanece aberto até aos testes manuais e à aprovação explícita da etapa 5.
 
 - O ADD v1.1 não tem secção de decisão própria para os UC-VID-001 a 003 (âmbito 1.2); as decisões vêm do T-00, T-01, T-02 e T-05. Sem esforço no ADD para este bolt, por isso `avg_complexity` fica `null`; `avg_uncertainty`, `max_dependencies` e `testing_scope` são preenchidos no início do bolt na Construção (specsDuvidas D-01).
+
+- 2026-10-22T20:02:18Z: checkpoint final aprovado pela equipa. Testes manuais no browser feitos noutra máquina, todos aprovados (recorte, recorte inválido, remover áudio, vídeo sem áudio, velocidade, cancelamento, regressão de vídeo e de imagem). Etapa 5 não repetida (resultados automáticos de `a5d60d2`). `bolt-complete.cjs` executado; bolt fechado no ramo `bolt/004-video-basic-edits`.
