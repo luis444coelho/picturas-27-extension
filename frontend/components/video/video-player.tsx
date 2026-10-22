@@ -12,6 +12,7 @@ import {
 import { VideoActions } from "./video-actions";
 import { VideoEditActions } from "./video-edit-actions";
 import { VideoVisualActions } from "./video-visual-actions";
+import { VideoConvertActions } from "./video-convert-actions";
 
 // Integrated player (UPLOAD-015, RN6): the native controls give play, pause,
 // seek, volume and full screen. The server picks the MP4 preview copy when
@@ -94,6 +95,7 @@ export function VideoPlayer({
       <VideoActions target={target} video={video} />
       <VideoEditActions target={target} video={video} />
       <VideoVisualActions target={target} video={video} />
+      <VideoConvertActions target={target} video={video} />
     </div>
   );
 }

@@ -13,6 +13,7 @@ import ingest
 import keyframe
 import video_msg
 import visual_input
+import convert_task
 from control import ControlChannel
 from control_poll import ControlPoller
 from storage import StorageClient
@@ -191,6 +192,9 @@ class TaskRunner:
             path = os.path.join(work_dir, f'input{index}')
             self._storage.download(item['source'], path)
             input_paths.append(path)
+
+        if convert_task.applies(plan):
+            return convert_task.execute(self, request, plan, input_paths, work_dir)
 
         if any(step['operation'] in ('trim', 'remove_audio', 'speed') for step in plan['steps']):
             plan, self._video_mode = keyframe.resolve_keyframe_copy(plan, input_paths[0], pump)

@@ -2,7 +2,7 @@
 unit: 002-video-transformations
 intent: 001-video-processing-support
 created: 2026-10-22T16:32:12Z
-last_updated: 2026-10-22T22:19:56Z
+last_updated: 2026-10-22T22:34:45Z
 ---
 
 # Construction Log: 002-video-transformations
@@ -50,6 +50,7 @@ last_updated: 2026-10-22T22:19:56Z
 | 2026-10-22T22:08:52Z | 005-video-visual-edits | stage-complete | Test → complete (D-67, ADR-012; testes manuais aprovados) |
 | 2026-10-22T22:08:52Z | 005-video-visual-edits | completed | All 3 stages done |
 | 2026-10-22T22:13:29Z | 007-video-format-conversion | started | Stage 1: Plan |
+| 2026-10-22T22:28:37Z | 007-video-format-conversion | stage-complete | Plan → Implement (D-68 a D-72 respondidas) |
 
 ## Execution Summary
 
@@ -90,3 +91,5 @@ last_updated: 2026-10-22T22:19:56Z
 - 2026-10-22T22:08:52Z: Checkpoint final da B005 aprovado. A equipa repetiu a comparação do ajuste depois da D-67 (saturação 0, contraste 0.6 e 1.3) e a pré-visualização coincide; o item foi atualizado na checklist. `bolt-complete.cjs 005-video-visual-edits` executado (com `NODE_PATH` para as dependências do specsmd): bolt `in-progress → complete`, ST-VID-004, 008, 009, 010 e 011 `ready → complete` com `implemented: true`; unit e intent sem alteração (2 bolts da unit e 2 units do intent por fazer). Entrada `test` de `stages_completed` acrescentada à mão, como nas B001, B003 e B004. Ramo `bolt/005-video-visual-edits` sem merge para a `main`.
 - 2026-10-22T22:14:14Z: B007 iniciada no ramo `bolt/007-video-format-conversion`; etapa 1 (Plan) escrita em `implementation-plan.md` e à espera do checkpoint obrigatório. Complexidade inicial: `avg_uncertainty` 2 (qualidade AVI por decidir e ligação aditiva ao executor), `max_dependencies` 2 (B003 e Unit 001), `testing_scope` 3 (matriz FFmpeg real, integração, frontend e leitores). A Q-ADD-11 sobre `mpeg4`/MP3 fica como decisão explícita no checkpoint. Nenhuma implementação ou teste da B007 foi iniciado.
 - 2026-10-22T22:19:56Z: Etapa 1 corrigida por instrução da equipa: fontes ordenadas, âmbito limitado à conversão isolada, plano ligado às D-68 a D-72 pendentes e verificações V1–V8 antes de qualquer código na etapa 2. D-68 regista os valores AVI, D-69/70/71 formalizam Q-ADD-20/21/25 e D-72 trata os modos na resposta de validação. A equipa pediu commit e push por etapa, sem merge para `main`; checkpoint ainda pendente.
+- 2026-10-22T22:28:37Z: Etapa 1 aprovada pela equipa, com D-68 (c: `mpeg4 -q:v 3`, MP3 192k constante), D-69/70/71 (a) e D-72 (a) condicional à V4. Registadas respostas em `specsDuvidas.md`, `bolt.md` e plano; `current_stage: implement`.
+- 2026-10-22T22:34:45Z: V1–V8 confirmadas antes de escrever código, em `implementation-preflight.md`; V4 encontrou acréscimo isolado da validação sem mudar as operações B004/B005, V5 encontrou ramo exclusivo de `convert` para saída dupla AVI/MP4 sem tocar no construtor da B003. Etapa 2 implementada e descrita em `implementation-walkthrough.md`, à espera de checkpoint; ADR-013/014 propostos. Sintaxe JS/Python, TypeScript e ESLint passaram; Prettier passou nos módulos novos e manteve aviso antigo nas duas linhas B004/B005 de `tasks.js`, que a regra 2.6 impede reformatar. Sondagem FFmpeg 9.0.2 no host gerou AVI MPEG-4/MP3 e preview MP4 H.264/AAC na mesma invocação. Testes persistentes, FFmpeg 5.1 do contentor, integração e reprodução ficam para a etapa 3. Nenhum código anterior removido ou alterado.

@@ -13,7 +13,7 @@ Entregar a ST-VID-012 como operação isolada `convert` v1 com `{target: "mp4" |
 **Fontes, por ordem de autoridade:**
 
 1. `docs/add.md`, v1.1, secções 2.5, 2.6, T-01, T-02, T-05, T-06 e 4.7, Q-ADD-11/20/21/25, e a secção «Decisões do ADD v1.1» do `bolt.md`.
-2. `docs/specsDuvidas.md`, D-01 a D-67, sobretudo D-19 e D-39; D-68 a D-72 ficam pendentes no checkpoint desta etapa.
+2. `docs/specsDuvidas.md`, D-01 a D-72, sobretudo D-19, D-39 e as respostas D-68 a D-72 aprovadas no checkpoint.
 3. `memory-bank/standards/decision-index.md`, ADR-001 a ADR-012, sobretudo ADR-008/011 (extras do plano) e ADR-009 (cancelamento efetivo).
 4. `docs/requirements/REQ-VID-CONVERT.md` e `REQ-VID-NFR.md`, NFR-012/026.
 5. `docs/use-cases/UC-VID-012.md`.
@@ -23,7 +23,7 @@ Entregar a ST-VID-012 como operação isolada `convert` v1 com `{target: "mp4" |
 
 ### Entregas
 
-1. **Serviço de projetos:** `projects/video/operations/convert.js` com `validate`, `estimate`, `copyable`, `cost` e `outputContainer`, a usar `formats.js` como única fonte da matriz. Uma linha nova em `projects/video/operations/index.js` regista a operação. `encoding.js` recebe apenas acréscimos para AVI, depois da D-68; MP4/MOV conservam a D-39: `libx264 -preset veryfast -crf 23`, AAC 128 kb/s. Um módulo novo de extras no padrão do ADR-008/011, ligado por uma linha nova em `tasks.js`, transporta apenas os dados de conversão que `estimate`/`copyable` não exprimem. A resposta de validação só ganha modos de stream depois da D-72 e de confirmar um ponto aditivo; não se muda o contrato das operações anteriores.
+1. **Serviço de projetos:** `projects/video/operations/convert.js` com `validate`, `estimate`, `copyable`, `cost` e `outputContainer`, a usar `formats.js` como única fonte da matriz. Uma linha nova em `projects/video/operations/index.js` regista a operação. `encoding.js` recebe apenas acréscimos para AVI segundo D-68; MP4/MOV conservam a D-39: `libx264 -preset veryfast -crf 23`, AAC 128 kb/s. Um módulo novo de extras no padrão do ADR-008/011, ligado por uma linha nova em `tasks.js`, transporta apenas os dados de conversão que `estimate`/`copyable` não exprimem. A resposta de validação só ganha modos de stream depois de V4 confirmar um ponto aditivo; não se muda o contrato das operações anteriores.
 2. **Worker:** `Tools/video/ops/convert.py`, registado por linhas novas em `Tools/video/ops/__init__.py`. Um módulo novo e linhas novas de ligação no `task.py` adaptam o comando da conversão sem editar `executor.py`: AVI usa `mpeg4` e `libmp3lame` com os valores que a equipa escolher na D-68, sem `+faststart`; `-fps_mode passthrough` nas recodificações. T-06 exige uma só invocação FFmpeg com `split`/`asplit` para resultado AVI e pré-visualização MP4. Resultado MOV usa segunda invocação de *remux* a partir do MOV concluído. MP4 com perfil incompatível usa a política de cópia que a equipa decidir na D-69. FFprobe, miniatura, fotograma 0, upload, progresso, cancelamento e limpeza continuam no fluxo existente; o ADR-009 mantém a consulta de controlo.
 3. **Frontend:** componentes novos para ação e painel de conversão, montados por uma linha nova em `frontend/components/video/video-player.tsx`, como os painéis da B004/B005. Mostram contentor e codecs atuais, destinos sem o atual, codecs fixos de saída e decisão do servidor entre cópia e recodificação (incluindo modo por stream, segundo D-72). Usam `useVideoEditValidation`, `useVideoEditSession`, `VideoEditStatus` e a submissão de tarefa existentes (D-47). A reprodução já prefere `preview_key`; confirmar em teste, sem alterar o leitor existente.
 4. **Testes e evidência da etapa 3:** unitários JS da operação, plano e validação; Python/FFmpeg real para cada caminho da matriz, áudio ausente, cópia parcial, perfil H.264 incompatível, AVI com timestamps incompletos e dimensão ímpar; integração API → tarefa → worker → storage → novo recurso; regressão B001–B005 e imagem; testes frontend e checklist manual no navegador. FFprobe e descodificação verificam NFR-012; VLC e leitor integrado verificam NFR-026 por caminho, com disponibilidade dos demais leitores de referência explicitada no relatório.
@@ -37,11 +37,11 @@ Entregar a ST-VID-012 como operação isolada `convert` v1 com `{target: "mp4" |
 
 ### Abordagem técnica condicionada às dúvidas
 
-- **D-68 / Q-ADD-11:** o plano final só pode fixar `-q:v` de `mpeg4` e bitrate constante do MP3 depois da resposta. Os valores `-q:v 5` e 192 kb/s são uma opção, não a decisão. O ramo MP4/MOV conserva a D-39.
-- **D-69 / Q-ADD-20:** o ADD T-06, o requisito CONVERT-008 e o código da B001 apontam para cópia MP4 também para H.264 incompatível. A decisão formal sobre aceitar esses perfis ou rejeitá-los na ingestão fica pendente.
-- **D-70 / Q-ADD-21:** ADD T-05 e o texto atual de CONVERT-006 apontam para cópia apenas quando cada codec é igual ao codec de saída. Assim, MP4 H.264/AAC → AVI recodificaria para MPEG-4 Part 2/MP3; esta regra continua condicionada à resposta da D-70.
-- **D-71 / Q-ADD-25:** o `plan.js` e o executor da B003 já cortam 1 px por dimensão ímpar quando recodificam, e CONVERT-007 já regista a exceção. Confirmar a política antes de a usar como critério de passagem da B007.
-- **D-72 / CONVERT-003:** o `plan.js` calcula modos de vídeo/áudio, mas `tasks.validate` devolve apenas propriedades estimadas. A forma dos campos que o painel recebe e o ponto aditivo de ligação dependem desta resposta.
+- **D-68 (c) / Q-ADD-11:** `mpeg4 -q:v 3 -pix_fmt yuv420p` e `libmp3lame -b:a 192k` em taxa constante; MP4/MOV conservam a D-39. Verificar reprodução na etapa 3.
+- **D-69 (a) / Q-ADD-20:** cópia MP4 também para originais e resultados MP4 com H.264 incompatível, em consonância com CONVERT-008.
+- **D-70 (a) / Q-ADD-21:** cópia apenas quando o codec de origem é igual ao de saída da matriz; MP4 H.264/AAC → AVI recodifica para MPEG-4 Part 2/MP3.
+- **D-71 (a) / Q-ADD-25:** cortar 1 px por dimensão ímpar só na recodificação, conforme CONVERT-007.
+- **D-72 (a) / CONVERT-003:** expor `videoMode`/`audioMode` na validação de `convert` apenas se V4 confirmar acréscimo de linhas e respostas B004/B005 intactas.
 - `SAME_FORMAT` e `UNSUPPORTED_TARGET_FORMAT` são recusados antes de criar tarefa ou reservar quota. No envio da operação, o erro é HTTP 422; a validação prévia usa o contrato atual `{valid, errors}`. O planeamento por stream continua no serviço de projetos, nunca é recalculado a partir da matriz no worker. A ausência de áudio mantém-se na saída.
 - A B007 não acrescenta uma guarda estrutural de cadeias. A regra «`convert` só no fim» (CONVERT-009) é testada na B008, responsável por cadeias com vários passos.
 
@@ -67,4 +67,4 @@ Entregar a ST-VID-012 como operação isolada `convert` v1 com `{target: "mp4" |
 - [ ] B003: novo recurso apenas após sucesso; cancelamento/falha sem publicação parcial, com devolução de quota e limpeza; progresso visível. Regressões de vídeo e imagem sem nova falha.
 - [ ] Regra 2.6: zero linhas removidas ou alteradas no código face a `origin/main`; verificação de CRLF, lint/typecheck, revisão de código e relatório de testes.
 
-CONVERT-009 fica rastreado para a B008, que valida a estrutura das cadeias. A etapa 2 só começa após aprovação do plano e decisão sobre as D-68 a D-72.
+CONVERT-009 fica rastreado para a B008, que valida a estrutura das cadeias. O checkpoint da etapa 1 foi aprovado em 2026-10-22T22:28:37Z. A etapa 2 começa pelas verificações V1–V8, antes de escrever código.

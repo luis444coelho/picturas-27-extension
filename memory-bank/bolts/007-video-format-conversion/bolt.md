@@ -8,8 +8,11 @@ stories: [ST-VID-012]
 created: 2026-10-19T17:31:16Z
 started: 2026-10-22T22:13:29Z
 completed: null
-current_stage: plan
-stages_completed: []
+current_stage: implement
+stages_completed:
+  - name: plan
+    completed: 2026-10-22T22:28:37Z
+    artifact: implementation-plan.md
 requires_bolts: [003-video-task-foundation]
 enables_bolts: [008-video-concat-chain]
 requires_units: [001-video-lifecycle]
@@ -39,19 +42,19 @@ Acrescentar a operação `convert` `{target: "mp4"|"mov"|"avi"}` ao registo de o
 
 ## Etapas
 
-- ⏳ **1. Plan**: plano escrito, checkpoint pendente → `implementation-plan.md`
-- [ ] **2. Implement**: Pending → código + `implementation-walkthrough.md`
+- ✅ **1. Plan**: aprovado → `implementation-plan.md`
+- ⏳ **2. Implement**: em curso → código + `implementation-walkthrough.md`
 - [ ] **3. Test**: Pending → `test-walkthrough.md`
 
-## Dúvidas pendentes no checkpoint da etapa 1
+## Respostas do checkpoint da etapa 1
 
-- **D-68 / Q-ADD-11:** `-q:v` de MPEG-4 Part 2 e bitrate constante do MP3 para AVI.
-- **D-69 / Q-ADD-20:** cópia MP4 para perfis H.264 incompatíveis ou rejeição desses perfis na ingestão.
-- **D-70 / Q-ADD-21:** cópia só com codec igual ao codec de saída ou com qualquer codec admitido no contentor.
-- **D-71 / Q-ADD-25:** corte de 1 px nas dimensões ímpares quando há recodificação.
-- **D-72 / CONVERT-003:** campos da resposta de validação que indicam o modo de cada stream ao painel.
+- **D-68 (c):** AVI com `mpeg4 -q:v 3 -pix_fmt yuv420p` e `libmp3lame -b:a 192k` em taxa constante; verificar reprodução na etapa 3.
+- **D-69 (a):** cópia MP4 também para originais e resultados MP4 com H.264 incompatível.
+- **D-70 (a):** cópia por stream apenas se o codec de origem for igual ao de saída da matriz.
+- **D-71 (a):** corte de 1 px nas dimensões ímpares quando há recodificação.
+- **D-72 (a), condicional:** `videoMode`/`audioMode` apenas na validação da conversão, se V4 confirmar ligação só por acréscimo e respostas B004/B005 intactas.
 
-As opções, recomendações e respostas pendentes estão em `docs/specsDuvidas.md`. Não há decisão tomada nesta etapa. A B007 trata só a conversão isolada; a validação estrutural de cadeias (CONVERT-009) é da B008.
+As opções e respostas completas estão em `docs/specsDuvidas.md`. A B007 trata só a conversão isolada; a validação estrutural de cadeias (CONVERT-009) é da B008. Antes de escrever código na etapa 2, confirmar V1–V8; uma falha que impeça a extensão só por acréscimo origina dúvida nova a partir da D-73 e paragem.
 
 ## Requisitos rastreados
 

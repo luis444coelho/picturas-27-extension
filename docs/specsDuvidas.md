@@ -706,7 +706,7 @@
   - **(b)** `mpeg4 -q:v 3 -pix_fmt yuv420p` e `libmp3lame -b:a 128k` com bitrate constante; mais qualidade de vídeo e menos bitrate de áudio.
   - **(c)** Outros valores indicados pela equipa, mantendo MP3 em taxa constante.
 - **Recomendação:** (a), sujeita a ensaio de descodificação/reprodução na etapa 3. Nenhum valor AVI é adotado antes da resposta.
-- **Resposta:** pendente.
+- **Resposta:** **(c), aprovada pela equipa para a B007:** `mpeg4 -q:v 3 -pix_fmt yuv420p` e `libmp3lame -b:a 192k` em taxa constante. O `mpeg4` é menos eficiente do que H.264; `-q:v 3` aproxima a qualidade do CRF 23 da D-39, e MP3 a 192 kb/s fica próximo do AAC a 128 kb/s. Confirmar a reprodução na etapa 3 (NFR-026).
 
 ## D-69 — Cópia MP4 para perfis H.264 incompatíveis com navegadores (Q-ADD-20)
 
@@ -718,7 +718,7 @@
   - **(b)** Restringir a ingestão aos perfis reproduzíveis sem cópia; exige rever a fundação/ERS e a regra 2.6 antes de aplicar à B007.
   - **(c)** Outra política de compatibilidade definida pela equipa.
 - **Recomendação:** (a), alinhada com o ADD, a ERS atual e o comportamento da B001.
-- **Resposta:** pendente.
+- **Resposta:** **(a), aprovada pela equipa.** Gerar cópia MP4 para originais e resultados MP4 com perfis H.264 incompatíveis com o navegador. A REQ-VID-CONVERT-008 já inclui estes resultados.
 
 ## D-70 — Critério de cópia por stream na conversão para AVI (Q-ADD-21)
 
@@ -730,7 +730,7 @@
   - **(b)** Copiar qualquer codec admitido pelo contentor de destino; a saída AVI poderia ter H.264/AAC, contrariando CONVERT-005, e exigiria rever a ERS e o plano B003.
   - **(c)** Outra matriz de saída aprovada pela equipa.
 - **Recomendação:** (a), para manter saídas uniformes e o contrato já construído na B003.
-- **Resposta:** pendente.
+- **Resposta:** **(a), aprovada pela equipa.** Copiar uma stream apenas quando o codec de origem é igual ao codec de saída da matriz. A REQ-VID-CONVERT-006 já contém esta redação.
 
 ## D-71 — Dimensões ímpares quando a conversão recodifica (Q-ADD-25)
 
@@ -742,7 +742,7 @@
   - **(b)** Preservar a dimensão ímpar com outra codificação ou formato de píxel, o que exige rever T-02/T-05, CONVERT-007 e a matriz fixa.
   - **(c)** Outra exceção de resolução definida pela equipa.
 - **Recomendação:** (a), alinhada com o ADD, a ERS atual e a infraestrutura já construída.
-- **Resposta:** pendente.
+- **Resposta:** **(a), aprovada pela equipa.** Cortar 1 px nas dimensões ímpares quando há recodificação. A REQ-VID-CONVERT-007 já inclui a exceção.
 
 ## D-72 — Como expor no endpoint de validação a decisão de cópia ou recodificação (CONVERT-003)
 
@@ -754,4 +754,4 @@
   - **(b)** Acrescentar um endpoint novo e exclusivo de previsão da conversão, que reutilize o planeamento do serviço; o painel teria duas chamadas de validação.
   - **(c)** Outro formato de resposta compatível com o endpoint existente e a regra 2.6.
 - **Recomendação:** (a), desde que a verificação V4 confirme que pode ser ligada apenas com linhas novas e sem alterar respostas das operações anteriores.
-- **Resposta:** pendente.
+- **Resposta:** **(a), aprovada condicionalmente pela equipa.** Acrescentar `videoMode` e `audioMode` apenas à resposta de validação de `convert`, desde que V4 confirme que só entram linhas novas e que as respostas da B004 e B005 não mudam; se a V4 falhar, registar dúvida nova e parar.
