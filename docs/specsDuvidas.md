@@ -640,3 +640,21 @@
   - **(c)** Outros valores.
 - **Recomendação:** (a).
 - **Resposta:** **(a), aprovada pela equipa.** Cache `Map` de 100 fotogramas e 10 min com remoção do menos usado; JPEG com qualidade 85; miniaturas de 160 px num só JSON; avisos de distorção (`|w/h − W/H| > 0.01`) e de ampliação. **Registo pedido pela equipa:** as predefinições aplicadas à menor dimensão de apresentação fogem à letra da REQ-VID-RESIZE-003 ("aplicadas à altura"); num vídeo horizontal coincidem com ela.
+
+## D-65 — Nome das marcas de água de texto no storage
+
+- **Onde:** B005, `projects/video/watermarks.js` (`storeText`), `projects/video/planExtrasVisual.js`, `projects/video/watermarkCleanup.js`; desvio 1 do `implementation-walkthrough.md`.
+- **Dúvida:** A D-60 (a) dizia que as marcas de texto eram geradas na aceitação com o nome `wm-<taskId>.png`. A implementação guarda-as como `wm-<watermarkId>.png`, com um registo em `video_watermarks` por projeto e texto (*hash*), e reutiliza o PNG quando o mesmo texto volta a ser usado. Aceita-se?
+- **O que as fontes dizem:** D-60 (a), com a alteração da equipa na limpeza: só se apagam marcas de projetos apagados ou sem referência em nenhum `VideoTask` nem em nenhuma `recipe` ao fim de 24 h, para a `recipe` ser reproduzível. ADR-010: o *middleware* resolve o texto antes da validação, quando ainda não há `taskId` (gerado no `submit()` da B003).
+- **Opções:** (a) aceitar `wm-<watermarkId>.png`, com um registo por projeto e texto e o PNG reutilizado; (b) voltar a `wm-<taskId>.png`, o que obrigaria a gerar o PNG depois da criação do `taskId`, dentro do `submit()` da B003, que não pode mudar.
+- **Recomendação:** (a).
+- **Resposta:** **(a), aceite pela equipa; altera a resposta à D-60.** As marcas de texto ficam em `wm-<watermarkId>.png`, com um registo por projeto e texto e o PNG reutilizado, em vez de `wm-<taskId>.png`. A `recipe` e a limpeza usam o `watermarkId`, o que mantém a reprodutibilidade pedida pela equipa. **Risco residual aceite:** a limpeza pode apagar um registo de texto com mais de 24 h que esteja a ser reutilizado nos milissegundos antes de o `VideoTask` ser criado.
+
+## D-66 — Duas sessões de tarefa no leitor de vídeo (B004 e B005)
+
+- **Onde:** `frontend/components/video/video-edit-actions.tsx` (B004) e `frontend/components/video/video-visual-actions.tsx` (B005), montados lado a lado no `video-player.tsx`; desvio 4 do `implementation-walkthrough.md`.
+- **Dúvida:** Cada componente cria a sua sessão (`useVideoEditSession`), por isso uma tarefa iniciada num não deixa o outro ocupado (`busy`) na interface. Aceita-se?
+- **O que as fontes dizem:** Regra 2.6: o `video-edit-actions.tsx` não pode ser alterado (tipo `Operation` e `TITLES`). D-47: as peças comuns de tarefa são montadas pelos painéis. REQ-VID-NFR-021 e T-03: uma tarefa ativa por projeto, garantida no servidor pelo lugar de tarefa ativa (`TASK_ALREADY_ACTIVE`).
+- **Opções:** (a) aceitar as duas sessões como risco residual; (b) partilhar a sessão, o que exigiria alterar o componente da B004.
+- **Recomendação:** (a).
+- **Resposta:** **(a), aceite pela equipa como risco residual**, porque o servidor garante uma tarefa por projeto. Na etapa 3, testa-se que um pedido da B005, com uma tarefa da B004 ativa, mostra na interface o erro do servidor.

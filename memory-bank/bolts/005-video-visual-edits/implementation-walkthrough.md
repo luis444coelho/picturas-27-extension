@@ -80,6 +80,13 @@ O serviço de projetos valida cada operação com o `validate` síncrono do regi
 - **Imagens da galeria:** o limite de 1 MB aplica-se só ao ficheiro local, que passa pelo nginx. As imagens da galeria são lidas entre serviços e só têm o limite de 4096 px.
 - **Pré-visualização com parâmetros inválidos:** responde 422 `INVALID_STEP_PARAMS` com os erros do passo. `NO_CHANGES` não impede a pré-visualização (mostra o fotograma inalterado).
 
+**Decisões tomadas no checkpoint (2026-10-22T20:49:13Z):** a equipa aprovou a etapa 2.
+- **Desvio 1:** registado como D-65 e aceite (`wm-<watermarkId>.png`, altera a resposta à D-60).
+- **Desvios 2 e 3:** aprovados sem dúvida nova. O desvio 2 é o leitor próprio do corpo, porque o Express dos serviços é o 4.16. O desvio 3 é o router próprio no gateway, porque o `forward()` da B001 só reencaminha JSON.
+- **Desvio 4:** registado como D-66 e aceite como risco residual. Na etapa 3 testa-se o erro do servidor na interface.
+- **Desvio 5:** aprovado; já está na letra da D-60.
+- **ADR seguinte:** ADR-012.
+
 ### Dependencies Added
 
 - Nenhuma. O sharp 0.33.5 e o DejaVu já estão no contentor `projects`; o `Tools/video/Dockerfile` não mudou (D-59).

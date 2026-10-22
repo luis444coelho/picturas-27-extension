@@ -2,7 +2,7 @@
 unit: 002-video-transformations
 intent: 001-video-processing-support
 created: 2026-10-22T16:32:12Z
-last_updated: 2026-10-22T20:40:42Z
+last_updated: 2026-10-22T20:49:13Z
 ---
 
 # Construction Log: 002-video-transformations
@@ -46,6 +46,7 @@ last_updated: 2026-10-22T20:40:42Z
 | 2026-10-22T20:02:18Z | 004-video-basic-edits | completed | All 5 stages done |
 | 2026-10-22T20:11:21Z | 005-video-visual-edits | started | Stage 1: Plan |
 | 2026-10-22T20:22:31Z | 005-video-visual-edits | stage-complete | Plan → Implement (D-58 a D-64) |
+| 2026-10-22T20:49:13Z | 005-video-visual-edits | stage-complete | Implement → Test (ADR-010, ADR-011, D-65, D-66) |
 
 ## Execution Summary
 
@@ -80,3 +81,4 @@ last_updated: 2026-10-22T20:40:42Z
 - 2026-10-22T20:11:21Z: B005 iniciada (Simple Construction Bolt, 3 etapas), no ramo `bolt/005-video-visual-edits` criado a partir da `main` com a B004. Regras da equipa: fontes por ordem `docs/add.md` (2.5, 2.6, T-01, T-02, T-05, T-07, 4.3 a 4.6 e as Q-ADD 07, 12, 13, 18, 23, 24 e 25), `docs/specsDuvidas.md` (D-01 a D-57), `decision-index.md` (ADR-001 a ADR-009), o bolt e as stories, `docs/requirements/` e `docs/use-cases/`, sem o `docs/merge.md`; regra 2.6 também para o código das B001 a B004; operações novas nos registos com linhas novas e extras do plano no padrão do ADR-008; T-07 em código novo, sem `applyToolsPreview`; D-39 pelo `encoding.js`; CRLF mantido; `test_reencode` desligada; dúvidas a partir da D-58 e ADR a partir do ADR-010; commit e push por etapa, sem merge. Etapa 1 escrita (`implementation-plan.md`); D-58 a D-64 registadas e pendentes: matrizes dos filtros (Q-ADD-07), texto da marca com `overlay` de um PNG gerado com o sharp ou com `drawtext` (Q-ADD-12), origem e armazenamento da imagem da marca, parâmetros e geometria da marca, pré-visualização da marca e o T-07, ponto de ligação dos extras do plano (o `planExtras.js` sai antes, quando não há `trim`, `remove_audio` nem `speed`) e pormenores da pré-visualização e do redimensionamento. Paragem no checkpoint da etapa 1.
 - 2026-10-22T20:22:31Z: B005 Estágio 1 aprovado (`implementation-plan.md`) com as respostas D-58 (a), D-59 (a), D-60 (a) com limpeza só de marcas de projetos apagados ou sem referência em `VideoTask` nem em `recipe` ao fim de 24 h, D-61 (a) com ADR-010, D-62 (a), D-63 (a) com ADR-011 (separado do ADR-010) e D-64 (a), com o registo de que as predefinições na menor dimensão fogem à letra da RESIZE-003 e coincidem com ela num vídeo horizontal. Estágio 2 (Implement) em curso.
 - 2026-10-22T20:40:42Z: B005 Estágio 2 implementado, à espera do checkpoint (`implementation-walkthrough.md`). Cinco operações no registo e no worker, endpoint de pré-visualização do T-07, miniaturas dos filtros, carregamento e pré-visualização da marca, limpeza das marcas e cinco painéis. ADR-010 (*middleware* do `_mark`) e ADR-011 (`planExtrasVisual.js` e `visual_input.py`) acrescentados ao `decision-index.md`. `git diff --numstat main` no código: 43 ficheiros, +2867, 0 removidas; os sete ficheiros existentes só com linhas acrescentadas. `express.raw` não existe no Express 4.16, o que pôs o `projects` em ciclo de reinício na primeira reconstrução; corrigido com um leitor próprio. TypeScript, ESLint, sintaxe, 401 sem JWT e sondagens isoladas (sharp e grafo FFmpeg da marca) passaram; testes persistentes, integração e browser ficam para o Estágio 3.
+- 2026-10-22T20:49:13Z: B005 Estágio 2 aprovado. D-65 aceite (marcas de texto em `wm-<watermarkId>.png`, um registo por projeto e texto; altera a D-60; risco residual da limpeza aceite). D-66 aceite como risco residual (duas sessões de tarefa no leitor; a etapa 3 testa que o erro do servidor aparece na interface). Desvios 2 (leitor do corpo, Express 4.16) e 3 (router próprio no gateway) aprovados sem dúvida nova; desvio 5 já na letra da D-60. Próximo ADR: ADR-012. Estágio 3 (Test) em curso.

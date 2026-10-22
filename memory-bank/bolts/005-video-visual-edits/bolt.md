@@ -8,11 +8,14 @@ stories: [ST-VID-004, ST-VID-008, ST-VID-009, ST-VID-010, ST-VID-011]
 created: 2026-10-19T17:31:16Z
 started: 2026-10-22T20:11:21Z
 completed: null
-current_stage: implement
+current_stage: test
 stages_completed:
   - name: plan
     completed: 2026-10-22T20:22:31Z
     artifact: implementation-plan.md
+  - name: implement
+    completed: 2026-10-22T20:49:13Z
+    artifact: implementation-walkthrough.md, adr-010-mark-resolution-middleware.md, adr-011-visual-plan-extras.md
 requires_bolts: [003-video-task-foundation]
 enables_bolts: [008-video-concat-chain, 009-video-batch]
 requires_units: [001-video-lifecycle]
@@ -47,8 +50,8 @@ Acrescentar ao registo de operações e ao worker as operações `watermark`, `a
 ## Etapas
 
 - [x] **1. Plan**: Complete (D-58 a D-64 respondidas) → `implementation-plan.md`
-- [ ] **2. Implement**: ⏳ Implementado, à espera do checkpoint → código + `implementation-walkthrough.md`, ADR-010, ADR-011
-- [ ] **3. Test**: Pending → `test-walkthrough.md`
+- [x] **2. Implement**: Complete (D-65 e D-66) → código + `implementation-walkthrough.md`, ADR-010, ADR-011
+- [ ] **3. Test**: ⏳ In progress → `test-walkthrough.md`
 
 ## Requisitos rastreados
 
