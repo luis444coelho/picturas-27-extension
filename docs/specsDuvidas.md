@@ -300,3 +300,111 @@
 - **Opções:** (a) manter a regra à letra: o caso só acontece numa janela de 5 KB, e só para Premium (o limite Registado é 200 MB); (b) escolher a unidade depois de arredondar (`1.00 GB` a partir de 1023,995 MB), na `formatFileSize` da B002; o `formatSize` da B001 fica como está (regra 2.6 aplicada ao código da B001), pelo que o seletor de carregamento e o painel podiam diferir nesses 5 KB.
 - **Recomendação:** (a).
 - **Resposta:** **(a).** Mantém-se a regra à letra, por coerência com o `formatSize` da B001 e com a INFO-005.
+
+## D-37 — Operação usada para verificar o executor na B003
+
+- **Onde:** `memory-bank/bolts/003-video-task-foundation/ddd-01-domain-model.md` (RegistoOperacoes); critérios de passagem da B003 ("uma operação de um passo percorre `queued → processing → completed | failed | cancelled`").
+- **Dúvida:** A B003 constrói o registo de operações, a aceitação, o executor de cadeias, o cancelamento e a quota, mas nenhuma operação concreta (essas chegam a partir da B004). Com que operação se verificam de ponta a ponta a aceitação, o progresso, o cancelamento do FFmpeg, a devolução e o esgotamento das entregas?
+- **O que as fontes dizem:** ADD T-01: uma operação isolada é uma cadeia de um passo e cada operação é um módulo `projects/video/operations/<op>.js` e `Tools/video/ops/<op>.py`. O bolt pede que uma operação de um passo percorra a máquina de estados. Nenhuma fonte diz qual.
+- **Opções:** (a) uma operação de teste (`test_reencode`: recodifica no formato de trabalho sem filtros, custo 1), registada só quando a variável `VIDEO_TEST_OPERATIONS=1` está definida, nunca exposta na UI nem em produção; (b) antecipar uma operação simples da B004 (por exemplo, remover o áudio) e a B004 só a completa; (c) testar o executor só com planos sintéticos publicados diretamente na fila, sem passar pela API.
+- **Recomendação:** (a). Exercita todo o caminho (incluindo uma recodificação real, para o progresso e o cancelamento) sem invadir o âmbito da B004.
+- **Resposta:** **(a).** A operação `test_reencode` (recodifica no formato de trabalho sem filtros, custo 1) só é registada quando `VIDEO_TEST_OPERATIONS=1` está definida; a variável não fica ativa no `docker-compose.yaml` e a operação não aparece na UI.
+
+## D-38 — O processamento de imagens conta como tarefa ativa? (Q-ADD-02)
+
+- **Onde:** `ddd-01-domain-model.md` (Lugar de tarefa ativa).
+- **Dúvida:** O limite de uma tarefa de vídeo ativa por projeto (NFR-021, DQ-016) também bloqueia, ou é bloqueado por, um processamento de imagens em curso no mesmo projeto (`activeToken`)?
+- **O que as fontes dizem:** ADD T-03 e Q-ADD-02 (em aberto). A regra 2.6 impede que o fluxo de imagem passe a consultar o `video_project_locks`, por isso, na opção (b), o bloqueio só funcionaria num sentido.
+- **Opções:** (a) não conta: o lugar é só para tarefas de vídeo; (b) conta num só sentido: a aceitação de vídeo recusa (409) se o projeto tiver um processamento de imagens em curso, lido do documento do projeto, mas o processamento de imagens continua a não ver as tarefas de vídeo.
+- **Recomendação:** (a). A opção (b) seria assimétrica e dependeria de ler o estado interno do fluxo de imagem.
+- **Resposta:** **(a), registada como resposta à Q-ADD-02 do ADD.** O processamento de imagens não conta como tarefa ativa: o lugar de `video_project_locks` é só para tarefas de vídeo.
+
+## D-39 — Parâmetros de qualidade da codificação por omissão dos resultados (Q-ADD-11)
+
+- **Onde:** `ddd-01-domain-model.md` (PoliticaCodificacao, PlanoExecucao).
+- **Dúvida:** Que *preset* e CRF do `libx264` e que bitrate de AAC usa a codificação por omissão (MP4/MOV) dos resultados das operações? Os parâmetros do `mpeg4` e do MP3 (saída AVI) ficam para a B007, que constrói a conversão.
+- **O que as fontes dizem:** ADD T-02: `libx264` + `aac`, `yuv420p`, `+faststart`; "o CRF e o *preset* ficam por definir (Q-ADD-11)". D-19 fixou `-preset veryfast -crf 23` e AAC a 128 kb/s só para a cópia de pré-visualização da ingestão. D-18: uma réplica do worker.
+- **Opções:** (a) os mesmos valores da D-19 (`veryfast`, CRF 23, AAC 128 kb/s): um só conjunto de valores, codificação rápida com uma réplica; (b) `-preset medium -crf 20` e AAC a 160 kb/s: melhor qualidade, cerca de 2 a 3 vezes mais lento; (c) outros valores.
+- **Recomendação:** (a). O CRF 23 é o valor por omissão do `libx264` e, com uma só réplica, a rapidez reduz a espera dos outros projetos.
+- **Resposta:** **(a) para MP4 e MOV, registada como resposta parcial à Q-ADD-11 do ADD:** `-preset veryfast -crf 23` e AAC a 128 kb/s, os valores da D-19. O executor da B003 não gera AVI (o formato de trabalho é MP4, T-05/DQ-013, e a `test_reencode` da D-37 produz MP4; só a conversão, B007, escolhe outro contentor), por isso o `-q:v` do `mpeg4` e o bitrate do MP3 ficam para a B007.
+
+## D-40 — Passo corrente (`step`) quando a cadeia corre num único *filtergraph* (TASK-008)
+
+- **Onde:** `ddd-01-domain-model.md` (ProgressoTarefa); evento `video-task-update` e `GET …/videos/tasks/:taskId`.
+- **Dúvida:** A REQ-VID-TASK-008 pede o passo corrente (exemplo: `step: 3`, `totalSteps: 4`). Com o T-02, todos os passos correm ao mesmo tempo numa única invocação FFmpeg, por isso não há um "passo em execução" observável. Que valor leva `step`?
+- **O que as fontes dizem:** REQ-VID-TASK-008; ADD T-02 (um único `-filter_complex`) e T-03 (eventos de progresso com `step`, `totalSteps` e `progress`). Nenhuma fonte trata a contradição.
+- **Opções:** (a) `step` proporcional ao progresso: `step = min(totalSteps, floor(progress / 100 × totalSteps) + 1)`, monótono e coerente com o exemplo da ERS; (b) `step = totalSteps` durante toda a codificação (todos os passos em curso); (c) `step = 1` até ao fim e `totalSteps` só como informação.
+- **Recomendação:** (a). Cumpre o critério da TASK-008 e dá à UI um "passo k de N" que avança; fica documentado que é uma indicação derivada do progresso global.
+- **Resposta:** **(a), registada como resposta à Q-ADD-16 do ADD na parte do passo corrente:** `step = min(totalSteps, floor(progress / 100 × totalSteps) + 1)`, a aproximação "proporção do tempo" que a Q-ADD-16 propõe para um grafo FFmpeg único, sem execução passo a passo (NFR-013). A outra parte da Q-ADD-16 (indicar a fase em vez do passo numa falha, UC-VID-014 exceção 7) é da B008 e não é respondida aqui.
+
+## D-41 — Parâmetros da rotina de manutenção (Q-ADD-14, D-15)
+
+- **Onde:** `ddd-01-domain-model.md` (RotinaManutencao).
+- **Dúvida:** Com que período corre a rotina, quando é que uma tarefa ativa está "parada", o que significa "retomar", e qual é a margem dos carregamentos abandonados (900 s + margem, D-15)?
+- **O que as fontes dizem:** ADD Q-ADD-14: tarefas "sem progresso há mais do que um *timeout* proporcional à duração" são retomadas (republicando) ou fechadas como `failed` com devolução; lugares órfãos ao fim de um minuto. O T-03 não grava o progresso no MongoDB (vai só para o WebSocket), por isso o serviço de projetos não vê o progresso de uma tarefa. As quedas do worker já são tratadas pela reentrega e pelo *dead-letter*, e as respostas só são confirmadas depois de gravadas; o caso que sobra é uma queda do serviço de projetos entre a criação da tarefa e a publicação. D-18: `x-consumer-timeout` de 3 h.
+- **Opções:** (a) período de 60 s; lugares órfãos ao fim de 60 s (ADD); a tarefa guarda o instante da publicação, e uma tarefa `queued` nunca publicada há mais de 60 s é **retomada** (republicada); uma tarefa ativa sem transição há mais de 3 h 10 min (o `x-consumer-timeout` mais uma margem) é **fechada** como `failed` (`PROCESSING_ERROR`), com devolução, cancelamento em `video_control` e lugar libertado; carregamentos abandonados com mais de 900 s + 300 s (20 min); projetos apagados verificados a cada 10 min; (b) a equipa indica outros valores.
+- **Recomendação:** (a). Os limites seguem os do ADD e da D-18, e o fecho por tempo só apanha tarefas que já não podem estar a correr.
+- **Resposta:** **(a), registada como resposta à Q-ADD-14 do ADD na parte que não depende de lotes (D-04).** Período de 60 s; lugares órfãos ao fim de 60 s; tarefa `queued` nunca publicada há mais de 60 s → republicada; tarefa ativa sem transição há mais de 3 h 10 min → `failed` (`PROCESSING_ERROR`) com devolução, cancelamento em `video_control` e lugar libertado; carregamentos abandonados (D-15) com mais de 900 s + 300 s; projetos apagados verificados a cada 10 min. **Porquê 3 h 10 min:** fica acima do `x-consumer-timeout` de 3 h da `video_operations_queue` (D-18). Uma entrega sem confirmação não dura mais de 3 h (o RabbitMQ devolve-a à fila e o novo `started` conta como transição), por isso, passados 3 h 10 min sem transição, a tarefa já não pode estar a correr. **Porquê um valor fixo e não o *timeout* proporcional à duração da Q-ADD-14:** o progresso não é gravado no MongoDB (T-03), pelo que o serviço de projetos não vê se uma tarefa avança; e um valor proporcional à duração do vídeo teria de estimar a velocidade de codificação de cada operação e resolução, e podia fechar como `failed` uma tarefa lenta (4K, junção longa) que ainda está a correr. O limite fixo só fecha tarefas que já não podem estar vivas.
+
+## D-42 — Códigos de erro da aceitação que as fontes não fixam
+
+- **Onde:** `ddd-01-domain-model.md` (ErroVideo, ErroValidacao).
+- **Dúvida:** Que `code` levam: (1) o 409 de "já existe uma tarefa ativa no projeto"; (2) um passo com `operation` desconhecida; (3) uma `version` que a operação não aceita; (4) um corpo sem `steps` ou com `steps` vazio ou mal formado; (5) o 422 que agrega os erros do `validate` dos passos?
+- **O que as fontes dizem:** ADD T-03 dá 409 para a tarefa ativa, sem código. ADD T-10 cita "o índice do passo no `INVALID_STEP_PARAMS`, ou a lista de erros de validação do T-01". REQ-VID-COM-005: HTTP 422 com o atributo causador. D-21: `INVALID_STATE` (409 de estado inválido). D-23: `INVALID_REQUEST` (422) com `details.field` para pedidos mal formados.
+- **Opções:** (a) (1) 409 `TASK_ALREADY_ACTIVE`; (2) 422 `UNKNOWN_OPERATION` com `{index, operation}`; (3) 422 `UNSUPPORTED_OPERATION_VERSION` com `{index, operation, version, supportedVersions}`; (4) 422 `INVALID_REQUEST` com `{field: "steps"}` (D-23); (5) 422 com o código do primeiro erro e `details: {index, errors: [{code, field?, …}]}` com todos os erros desse passo; (b) (1) 409 `INVALID_STATE` (D-21) e (2), (3) e (5) todos como 422 `INVALID_STEP_PARAMS` com `{index, errors}`; (c) outros nomes.
+- **Recomendação:** (b). Reutiliza os códigos já fixados (D-21, T-10) e dá uma só forma aos erros dos passos; o frontend distingue os casos pelos `errors`.
+- **Resposta:** **Opção nova da equipa.** Não se reutiliza o `INVALID_STATE`: a sua mensagem fala do carregamento e, pela regra 2.6, não pode ser mudada. Para uma tarefa fora de `queued`/`processing` usa-se um código novo, acrescentado ao fim do `MESSAGES` em `projects/video/errors.js`. Os erros dos passos (operação ou versão desconhecida e erros do `validate`) são 422 `INVALID_STEP_PARAMS` com `{index, errors}`, como proposto na (b); um corpo sem `steps` válido é 422 `INVALID_REQUEST` com `{field: "steps"}` (D-23). O nome do código novo e o código do 409 de tarefa ativa no projeto ficam na D-44.
+
+## D-43 — Orçamento de latência do endpoint de validação (Q-ADD-15)
+
+- **Onde:** `ddd-01-domain-model.md` (RegistoOperacoes); `POST /projects/:user/:project/videos/validate`.
+- **Dúvida:** Há um limite de tempo para a resposta do endpoint de validação, que o editor chama com *debounce*?
+- **O que as fontes dizem:** ADD T-01 e Q-ADD-15 (em aberto: "≤ 1 s como em NFR-005?"). A validação é síncrona, lê `videos.meta` e não usa filas.
+- **Opções:** (a) ≤ 1 s, como a NFR-005, verificado nos testes; (b) ≤ 300 ms, para a UI parecer imediata; (c) sem orçamento.
+- **Recomendação:** (a). É o valor já usado para a aceitação e a validação só faz uma leitura ao MongoDB e cálculos em memória.
+- **Resposta:** **(a), registada como resposta à Q-ADD-15 do ADD.** O endpoint de validação responde em ≤ 1 s, como a NFR-005, e isso é verificado nos testes.
+
+## D-44 — Nomes dos códigos novos da aceitação e do cancelamento, e estado HTTP do `QUOTA_EXCEEDED`
+
+- **Onde:** `memory-bank/bolts/003-video-task-foundation/ddd-02-technical-design.md` (API Design, Error Handling); `projects/video/errors.js` (fim do `MESSAGES`).
+- **Dúvida:** A D-42 decidiu não reutilizar o `INVALID_STATE` e deixou por nomear: (1) o código do 409 de cancelamento de uma tarefa fora de `queued`/`processing`; (2) o código do 409 de "o projeto já tem uma tarefa ativa", que, pela mesma razão, também não pode ser o `INVALID_STATE`. Falta ainda (3) o estado HTTP do `QUOTA_EXCEEDED`.
+- **O que as fontes dizem:** ADD T-03: 409 nos dois casos, sem código; `QUOTA_EXCEEDED` com `{cost, remaining}`, sem estado HTTP. UC-VID-001 a 011 (exceção "Quota diária esgotada"): o sistema informa e sugere o upgrade para Premium; a tarefa não é criada. D-23: o 429 já é o `TOO_MANY_EDITORS`. Nenhuma fonte dá estes nomes nem o estado.
+- **Opções:** (a) (1) `TASK_NOT_ACTIVE`; (2) `TASK_ALREADY_ACTIVE` com `details: {taskId}` da tarefa ativa, para o cliente a poder acompanhar; (3) `QUOTA_EXCEEDED` com 429, o estado HTTP de limites de pedidos por período (RFC 6585); (b) como (a), mas (3) com 402, que sugere pagamento (upgrade); (c) como (a), mas (3) com 403; (d) outros nomes.
+- **Recomendação:** (a). O 429 já é usado por limites, o corpo distingue o `QUOTA_EXCEEDED` do `TOO_MANY_EDITORS`, e o 402 é um estado reservado e pouco usado.
+- **Resposta:** **(a).** `TASK_NOT_ACTIVE` (409) para cancelar uma tarefa fora de `queued`/`processing`; `TASK_ALREADY_ACTIVE` (409) com `details: {taskId}` da tarefa ativa; `QUOTA_EXCEEDED` com HTTP 429 e `details: {cost, remaining}`. Os dois códigos novos são acrescentados ao fim do `MESSAGES` de `projects/video/errors.js` (D-42).
+
+## D-45 — Garantia de devolução com um `refund` que não é idempotente
+
+- **Onde:** `ddd-02-technical-design.md` (Data Persistence, campo `refund`; Respostas do worker; Rotina de manutenção).
+- **Dúvida:** O invariante T3 do modelo pede que, em `failed` ou `cancelled`, os créditos sejam devolvidos exatamente uma vez. O `POST users:/:user/process/refund/:k` não é idempotente e não pode mudar (regra 2.6, T-04). Uma queda do serviço de projetos entre a chamada e o registo de que ela foi feita leva a devolver duas vezes ou a não devolver. O que se garante?
+- **O que as fontes dizem:** REQ-VID-QUOTA-004: em falha, o saldo é incrementado "de imediato". ADD T-04 e Q-ADD-03: aceitam limitações do `refund` atual (corrida e dia corrente). ADD T-03: um lugar sem dono, por queda entre a aquisição e a criação da tarefa, é libertado pela rotina, mas nada diz sobre os créditos já reservados nessa janela. Nenhuma fonte trata a queda a meio de uma devolução.
+- **Opções:** (a) **pelo menos uma vez**: a transição para `failed`/`cancelled` grava `refund.state: pending` na mesma escrita; depois chama-se o `refund` e grava-se `done`; uma reentrega da resposta e a rotina (pendentes há mais de 60 s, D-41) repetem a chamada. Numa queda entre a chamada e o `done` (milissegundos), o utilizador pode receber os créditos duas vezes. A queda entre a reserva (passo 9) e a criação da tarefa (passo 10) perde os créditos reservados, e isso é aceite e registado no log, como o lugar sem dono do T-03; (b) **no máximo uma vez**: grava-se `done` antes de chamar; numa queda, o utilizador perde a devolução; (c) a equipa aceita mudar o serviço de utilizadores numa fase posterior (Q-ADD-03) e, nesta fase, escolhe (a) ou (b).
+- **Recomendação:** (a). A QUOTA-004 é a garantia que o utilizador vê, e uma devolução a mais numa janela de milissegundos é melhor do que cobrar trabalho não feito.
+- **Resposta:** **(a), pelo menos uma vez.** A transição para `failed`/`cancelled` grava `refund.state: pending` na mesma escrita; depois chama-se o `refund/:k` e grava-se `done`; a reentrega da resposta e a rotina de manutenção (pendentes há mais de 60 s, D-41) repetem a chamada até ficar `done`. **Risco residual aceite:** (1) uma queda do serviço de projetos depois de o `refund` responder e antes de se gravar `done` faz a devolução repetir-se, e o utilizador recebe os créditos duas vezes (janela de milissegundos); (2) uma queda entre a reserva (passo 9 da aceitação) e a criação da tarefa (passo 10) perde os créditos reservados, porque ainda não há tarefa onde registar a devolução; o lugar fica sem dono e é libertado pela rotina (T-03), e a reserva fica registada no log com o `correlationId`. Os dois riscos desaparecem com uma reserva e uma devolução idempotentes no serviço de utilizadores, que a regra 2.6 deixa para uma fase posterior (Q-ADD-03).
+
+## D-46 — Tarefas ativas de um projeto apagado
+
+- **Onde:** `ddd-02-technical-design.md` (Rotina de manutenção, passo "Projetos apagados").
+- **Dúvida:** Quando a rotina encontra um projeto apagado que ainda tem uma tarefa em `queued` ou `processing`, o que acontece à tarefa, ao FFmpeg e aos créditos reservados?
+- **O que as fontes dizem:** ADD T-00 e Q-ADD-14: a rotina remove os vídeos, as tarefas, os lugares e os objetos de projetos que já não existem. REQ-VID-QUOTA-004: devolução em cancelamento, rejeição ou falha. Nenhuma fonte trata uma tarefa ativa nesse momento.
+- **Opções:** (a) fechar a tarefa como `cancelled` com devolução, publicar o cancelamento em `video_control` (para terminar o FFmpeg) e só depois remover tudo; o resultado que ainda chegue é apagado como resultado tardio; (b) fechar como `failed` (`PROCESSING_ERROR`) com devolução; (c) remover sem devolução.
+- **Recomendação:** (a). Apagar o projeto equivale a desistir da tarefa, e o cancelamento já trata o FFmpeg, os temporários e o resultado tardio.
+- **Resposta:** **(a).** A rotina fecha a tarefa ativa de um projeto apagado como `cancelled`, com devolução (D-45), publica o cancelamento em `video_control` para terminar o FFmpeg e só depois remove os vídeos, as tarefas, os lugares e os objetos; um resultado que ainda chegue é apagado como resultado tardio.
+
+## D-47 — Bolt que constrói a UI comum de tarefa (progresso, passo, cancelar)
+
+- **Onde:** `ddd-02-technical-design.md` (Frontend); `memory-bank/bolts/003-video-task-foundation/bolt.md` e `004-video-basic-edits/bolt.md` ("Saídas esperadas").
+- **Dúvida:** A ST-VID-COM-001 é uma story de utilizador (acompanhar o estado, o progresso e o passo, e cancelar), mas as "Saídas esperadas" da B003 não falam do frontend, e as da B004 só falam dos painéis das operações. Que bolt constrói as peças comuns de tarefa no frontend (chamadas à API, escuta de `video-task-update`, recuperação depois de recarregar, barra de progresso com "passo k de N", Cancelar, erro com o `correlationId`)?
+- **O que as fontes dizem:** unit-brief: a Unit 001 é "uma fatia vertical da aplicação web". ADD T-03: "o frontend ignora os eventos de tarefas que já sabe terminadas"; T-10: o `correlationId` "serve ao frontend como código de suporte". A B003 não tem operações visíveis (D-37), por isso não há onde montar a UI neste bolt.
+- **Opções:** (a) a B003 constrói as peças comuns (`lib/video-tasks.ts`, `use-video-task.ts`, `video-task-progress.tsx`), testadas com testes unitários do frontend e não montadas em nenhum ecrã; a B004 monta-as nos seus painéis; (b) a B004 constrói-as junto com os primeiros painéis; (c) a B003 constrói-as e monta um painel de tarefas na janela "Vídeos", visível mesmo sem operações.
+- **Recomendação:** (a). As regras dos eventos e do cancelamento são da B003, e a B004 só tem de as ligar aos seus painéis.
+- **Resposta:** **(a).** A B003 constrói e testa as peças comuns de tarefa no frontend (`lib/video-tasks.ts`, `use-video-task.ts`, `video-task-progress.tsx`) sem as montar em nenhum ecrã; a B004 monta-as nos seus painéis. Registado nos limites do `bolt.md` da B004.
+
+## D-48 — Reserva gravada pelo serviço de utilizadores com a resposta perdida (tempo esgotado)
+
+- **Onde:** `projects/video/quota.js` (`reserve`) e `projects/video/tasks.js` (`submit`, passo 9).
+- **Dúvida:** A verificação V8 confirmou que os dois 701 do `GET users:/:user/process/:n` se distinguem pelo corpo e que, no 701 de erro interno, nada é reservado. Fica um caso que o código não distingue: o serviço de utilizadores grava a reserva (`User.update`), mas a resposta não chega ao serviço de projetos (tempo esgotado de 5 s ou ligação cortada). A aceitação trata-o como `INTERNAL_ERROR`, liberta o lugar e não devolve nada, e os créditos ficam debitados sem tarefa. O que se faz?
+- **O que as fontes dizem:** ADD T-04: a reserva é um ciclo ler-modificar-escrever, sem idempotência, e não pode mudar (regra 2.6, Q-ADD-03). D-45, ponto 2: créditos perdidos numa queda entre a reserva e a criação da tarefa, aceites como risco residual. Nenhuma fonte trata a resposta perdida.
+- **Opções:** (a) aceitar como risco residual e registar no log; (b) devolver por precaução, o que daria créditos a mais quando a reserva não foi gravada.
+- **Recomendação:** (a).
+- **Resposta:** **(a). Aceite como risco residual, do mesmo tipo da D-45 ponto 2; fica registado em log.** A falha da reserva é registada como `video.task.reserve_failed`, com o `correlationId`, o utilizador e a causa (incluindo o tempo esgotado).

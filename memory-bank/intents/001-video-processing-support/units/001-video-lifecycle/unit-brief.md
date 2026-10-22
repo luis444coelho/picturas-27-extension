@@ -2,9 +2,9 @@
 unit: 001-video-lifecycle
 intent: 001-video-processing-support
 phase: inception
-status: ready
-created: 2026-10-18T18:00:00Z
-updated: 2026-10-21T11:19:15Z
+status: complete
+created: 2026-10-18T18:00:00.000Z
+updated: 2026-10-21T11:19:15.000Z
 default_bolt_type: ddd-construction-bolt
 ---
 

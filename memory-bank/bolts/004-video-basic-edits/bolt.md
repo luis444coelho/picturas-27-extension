@@ -94,6 +94,7 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 
 - **Regra 2.6 do ADD ("só acrescentar"):** o código existente não é alterado. Só se acrescentam ficheiros novos e pontos de ligação novos (uma linha `app.use` ou `require`, uma fila, exchange ou *binding* em `rabbitMQ/definitions.json`, um serviço ou volume no `docker-compose.yaml`, um `location` ou `log_format` no `nginx/nginx.conf`, componentes novos no frontend), sem tocar nas linhas existentes nem mudar o comportamento do fluxo de imagem.
 - Não implementa cadeias com vários passos, junção nem lotes (Unit 003).
+- Monta nos seus painéis as peças comuns de tarefa do frontend construídas e testadas pela B003 (`lib/video-tasks.ts`, `use-video-task.ts`, `video-task-progress.tsx`), sem as reconstruir (specsDuvidas D-47).
 
 ## Notas
 

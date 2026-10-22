@@ -10,6 +10,7 @@ import utils.env as env
 
 import config
 import ingest
+import task
 import video_msg
 from storage import StorageClient
 from video_rabbit import VideoRabbitMQ
@@ -44,6 +45,8 @@ class VideoWorker:
                                      env.RABBITMQ_USERNAME, env.RABBITMQ_PASSWORD)
         self._rabbit.declare_queues()
         self._storage = StorageClient(self._rabbit.pump)
+        # Chain executor of B003 (ADD T-02, T-03), on the same connection.
+        self._tasks = task.TaskRunner(self._rabbit, log, redact)
 
     def run(self):
         log('info', 'video.worker.started')
@@ -55,6 +58,11 @@ class VideoWorker:
         except ValueError:
             log('error', 'video.worker.invalid_message')
             channel.basic_ack(delivery_tag=method.delivery_tag)
+            return
+
+        # Task messages of B003 have their own flow, matched by taskId (ADD T-03).
+        if request.get('operation') == task.OPERATION:
+            self._tasks.run(channel, method, request)
             return
 
         reply = self.handle(request, redelivered=method.redelivered)

@@ -46,6 +46,19 @@ function emit(io, msg) {
       payload,
     );
   }
+
+  // B003: status and progress of video tasks (ADD T-03, D-40).
+  if (content.event === "video-task-update") {
+    const { userId, projectId, taskId, status, step, totalSteps, progress } =
+      content;
+    if (!userId || !projectId || !taskId) return;
+
+    const payload = { projectId, taskId, status, step, totalSteps, progress };
+    if (content.resultVideoId) payload.resultVideoId = content.resultVideoId;
+    if (content.error?.code) payload.error = { code: content.error.code };
+
+    io.to([userId, `project:${projectId}`]).emit("video-task-update", payload);
+  }
 }
 
 module.exports = function (io) {

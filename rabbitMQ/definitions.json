@@ -196,6 +196,15 @@
     ],
     "exchanges": [
         {
+            "name": "video_control",
+            "vhost": "/",
+            "type": "fanout",
+            "durable": true,
+            "auto_delete": false,
+            "internal": false,
+            "arguments": {}
+        },
+        {
             "name": "picturas",
             "vhost": "/",
             "type": "direct",

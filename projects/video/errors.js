@@ -21,6 +21,13 @@ const MESSAGES = {
   PROCESSING_ERROR:
     "Ocorreu um erro ao processar o vídeo. Tenta novamente mais tarde.",
   INTERNAL_ERROR: "Ocorreu um erro interno. Tenta novamente mais tarde.",
+  INVALID_STEP_PARAMS:
+    "Os parâmetros da operação não são válidos. Corrige o passo indicado e tenta novamente.",
+  TASK_ALREADY_ACTIVE:
+    "Este projeto já tem uma tarefa de vídeo em curso. Espera que termine ou cancela-a.",
+  TASK_NOT_ACTIVE: "A tarefa já terminou e não pode ser cancelada.",
+  QUOTA_EXCEEDED:
+    "Atingiste o limite diário de operações. Tenta amanhã ou passa a Premium.",
 };
 
 class VideoError extends Error {

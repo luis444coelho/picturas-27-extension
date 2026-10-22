@@ -222,4 +222,84 @@ router.get(
   }),
 );
 
+// Video tasks (B003; ADD T-01, T-03). The shared instance keeps one
+// reservation queue per runner (ADD T-04).
+const { tasks } = require("../video/taskModule");
+
+// Input video named in the body (validation endpoint, ADD T-01).
+const loadBodyVideo = wrap(async (req, res, next) => {
+  const videoId = req.body?.videoId;
+  if (!mongoose.isValidObjectId(videoId))
+    throw new VideoError(422, "INVALID_REQUEST", { field: "videoId" });
+
+  const video = await Video.findOne({
+    _id: videoId,
+    project_id: req.videoProject._id,
+  }).lean();
+  if (!video) throw new VideoError(404, "NOT_FOUND");
+
+  req.video = video;
+  next();
+});
+
+// Real-time validation of the editor (ADD T-01, D-43): no task, no quota.
+router.post(
+  `${VIDEOS}/validate`,
+  ...canEdit,
+  loadBodyVideo,
+  wrap(async (req, res) => {
+    const result = await tasks.validate({
+      callerId: req.callerId,
+      inputVideos: [req.video],
+      steps: req.body?.steps,
+    });
+    res.status(200).json(result);
+  }),
+);
+
+// Acceptance of an operation or chain on one video (ADD T-03): 202 {taskId, status}.
+router.post(
+  `${VIDEOS}/:video/operations`,
+  ...canEdit,
+  loadVideo,
+  wrap(async (req, res) => {
+    const result = await tasks.submit({
+      project: req.videoProject,
+      callerId: req.callerId,
+      inputVideos: [req.video],
+      steps: req.body?.steps,
+      correlationId: req.correlationId,
+    });
+    res.status(202).json(result);
+  }),
+);
+
+// Task state after a page reload (TASK-002, TASK-008): read permission is enough.
+router.get(
+  `${VIDEOS}/tasks/:taskId`,
+  ...canRead,
+  wrap(async (req, res) => {
+    const task = await tasks.get({
+      projectId: req.videoProject._id,
+      taskId: req.params.taskId,
+    });
+    res.status(200).json(task);
+  }),
+);
+
+// Cancellation by whoever submitted the task (TASK-004).
+router.delete(
+  `${VIDEOS}/tasks/:taskId`,
+  ...canEdit,
+  wrap(async (req, res) => {
+    const task = await tasks.cancel({
+      projectId: req.videoProject._id,
+      taskId: req.params.taskId,
+      callerId: req.callerId,
+      correlationId: req.correlationId,
+    });
+    res.status(200).json(task);
+  }),
+);
+
 module.exports = router;

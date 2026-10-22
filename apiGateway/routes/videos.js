@@ -104,6 +104,18 @@ router.use(VIDEOS, (req, res, next) => {
   next();
 });
 
+// B003 (NFR-002, ADD T-10): one log line per video request, with the same
+// correlationId the projects service and the worker log.
+router.use(VIDEOS, (req, res, next) => {
+  res.on("finish", () =>
+    log("info", "video.gateway.request", req, {
+      method: req.method,
+      status: res.statusCode,
+    }),
+  );
+  next();
+});
+
 router.post(`${VIDEOS}/uploads`, checkVideoToken, forward("post"));
 router.get(VIDEOS, checkVideoToken, forward("get"));
 router.post(
@@ -115,5 +127,11 @@ router.delete(`${VIDEOS}/:video/upload`, checkVideoToken, forward("delete"));
 router.get(`${VIDEOS}/:video/playback`, checkVideoToken, forward("get"));
 router.get(`${VIDEOS}/:video`, checkVideoToken, forward("get"));
 router.get(`${VIDEOS}/:video/download`, checkVideoToken, forward("get"));
+
+// Video tasks (B003; ADD T-01, T-03).
+router.post(`${VIDEOS}/validate`, checkVideoToken, forward("post"));
+router.post(`${VIDEOS}/:video/operations`, checkVideoToken, forward("post"));
+router.get(`${VIDEOS}/tasks/:taskId`, checkVideoToken, forward("get"));
+router.delete(`${VIDEOS}/tasks/:taskId`, checkVideoToken, forward("delete"));
 
 module.exports = router;

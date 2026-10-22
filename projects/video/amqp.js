@@ -151,3 +151,17 @@ module.exports = {
   publishOperation: (message) => publish(QUEUES.operations, message),
   publishWs: (message) => publish(QUEUES.ws, message),
 };
+
+// B003 (ADD T-03, ADR-003): cancellations go to the fanout exchange
+// video_control, declared in rabbitMQ/definitions.json. Added at the end of the
+// module, without changing the code above.
+const CONTROL_EXCHANGE = "video_control";
+
+module.exports.CONTROL_EXCHANGE = CONTROL_EXCHANGE;
+module.exports.publishControl = async (message) => {
+  if (!channel) throw new Error("RabbitMQ channel not available");
+  channel.publish(CONTROL_EXCHANGE, "", Buffer.from(JSON.stringify(message)), {
+    contentType: "application/json",
+  });
+  await channel.waitForConfirms();
+};
