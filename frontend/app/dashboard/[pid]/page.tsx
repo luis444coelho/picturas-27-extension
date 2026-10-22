@@ -45,6 +45,8 @@ import { useUpdateSession } from "@/lib/mutations/session";
 import { getErrorMessage } from "@/lib/error-messages";
 import { PresetsDialog } from "@/components/presets/presets-dialog";
 import { AiAssistantDialog } from "@/components/assistant/ai-assistant-dialog";
+import { VideoSection } from "@/components/video/video-section";
+import { ProjectVideoList } from "@/components/video/project-video-list";
 
 export default function Project({
   params,
@@ -726,6 +728,7 @@ const handleCancel = () => {
                 </>
               )}
 
+              <VideoSection />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -832,6 +835,7 @@ const handleCancel = () => {
           setCurrentImageId={setCurrentImage}
           results={projectResults.data}
         />
+        <ProjectVideoList />
       </div>
       </div>
       <Transition

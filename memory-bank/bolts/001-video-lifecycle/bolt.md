@@ -3,19 +3,41 @@ id: 001-video-lifecycle
 unit: 001-video-lifecycle
 intent: 001-video-processing-support
 type: ddd-construction-bolt
-status: planned
-stories: [ST-VID-000]
-created: 2026-10-19T17:31:16Z
-started: null
-completed: null
+status: complete
+stories:
+  - ST-VID-000
+created: 2026-10-19T17:31:16.000Z
+started: 2026-10-21T16:12:26.000Z
+completed: "2026-10-22T10:32:46Z"
 current_stage: null
-stages_completed: []
+stages_completed:
+  - name: model
+    completed: 2026-10-21T16:19:54.000Z
+    artifact: ddd-01-domain-model.md
+  - name: design
+    completed: 2026-10-21T23:38:33.000Z
+    artifact: ddd-02-technical-design.md
+  - name: adr
+    completed: 2026-10-21T23:46:03.000Z
+    artifact: adr-001-upload-put-pre-assinado.md, adr-002-ingestao-em-duas-idas.md
+  - name: implement
+    completed: 2026-10-22T08:37:38.000Z
+    artifact: código (ver ddd-02-technical-design.md, Componentes e ficheiros)
+  - name: test
+    completed: 2026-10-22T10:32:46Z
+    artifact: ddd-03-test-report.md
 requires_bolts: []
-enables_bolts: [002-video-access, 003-video-task-foundation]
+enables_bolts:
+  - 002-video-access
+  - 003-video-task-foundation
 requires_units: []
 blocks: false
 # avg_complexity: maior esforço do ADD no bolt (S=1, M=2, L=3); os outros campos são preenchidos no início do bolt na Construção (specsDuvidas D-01)
-complexity: {avg_complexity: 3, avg_uncertainty: null, max_dependencies: null, testing_scope: null}
+complexity:
+  avg_complexity: 3
+  avg_uncertainty: null
+  max_dependencies: null
+  testing_scope: null
 ---
 
 # Bolt: 001-video-lifecycle
@@ -30,7 +52,7 @@ Implementar o UC-VID-000 sobre a fundação mínima do ADD (T-00): coleção `vi
 
 ## Stories incluídas
 
-- **ST-VID-000 — Carregar e visualizar vídeo**: [Carregar e visualizar vídeo](../../intents/001-video-processing-support/units/001-video-lifecycle/stories/001-video-ingestion.md) (must).
+- **ST-VID-000 — Carregar e visualizar vídeo**: [Carregar e visualizar vídeo](../../intents/001-video-processing-support/units/001-video-lifecycle/stories/ST-VID-000-video-ingestion.md) (must).
 
 ## Tipo de bolt
 
@@ -39,15 +61,15 @@ Implementar o UC-VID-000 sobre a fundação mínima do ADD (T-00): coleção `vi
 
 ## Etapas
 
-- [ ] **1. Domain Model**: Pending → `ddd-01-domain-model.md`
-- [ ] **2. Technical Design**: Pending → `ddd-02-technical-design.md`
-- [ ] **3. ADR Analysis** (opcional): Pending → `adr-{n}-{slug}.md`
-- [ ] **4. Implement**: Pending → código nos componentes indicados em "Saídas esperadas"
-- [ ] **5. Test**: Pending → `ddd-03-test-report.md`
+- [x] **1. Domain Model**: Concluído → `ddd-01-domain-model.md`
+- [x] **2. Technical Design**: Concluído → `ddd-02-technical-design.md`
+- [x] **3. ADR Analysis** (opcional): Concluído (ADR-001, ADR-002) → `adr-{n}-{slug}.md`
+- [x] **4. Implement**: Concluído → código nos componentes indicados em "Saídas esperadas"
+- ⏳ **5. Test**: Em curso → `ddd-03-test-report.md`
 
 ## Requisitos rastreados
 
-REQ-VID-AUTH-001 a 003; REQ-VID-UPLOAD-001 a 020; REQ-VID-STORAGE-001 a 005; REQ-VID-NFR-001, 003, 008, 010, 011, 017.
+REQ-VID-AUTH-001 a 003; REQ-VID-UPLOAD-001 a 021 (021: specsDuvidas D-30); REQ-VID-STORAGE-001 a 005; REQ-VID-NFR-001, 003, 008, 010, 011, 017.
 
 Os `REQ-VID-AUTH-*` passam para este bolt, que constrói os routers de vídeo com o `videoAuth` (specsDuvidas D-02). A NFR-010 (FFmpeg em Docker) passa para este bolt, que cria o worker (specsDuvidas D-03). A NFR-011 (filas AMQP de vídeo independentes) passa para este bolt, que cria as filas e o worker; a B003 continua a verificá-la (specsDuvidas D-09).
 

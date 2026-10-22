@@ -112,3 +112,5 @@ function process_msg() {
 }
 
 process_msg();
+
+require("./video")(io);

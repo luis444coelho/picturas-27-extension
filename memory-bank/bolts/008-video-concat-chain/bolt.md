@@ -30,8 +30,8 @@ Implementar a operação `concat` com sub-cadeias por clip, a validação em tr�
 
 ## Stories incluídas
 
-- **ST-VID-013 — Juntar vídeos**: [Juntar vídeos](../../intents/001-video-processing-support/units/003-video-composition/stories/001-video-concat.md) (must).
-- **ST-VID-014 — Encadear operações**: [Encadear operações](../../intents/001-video-processing-support/units/003-video-composition/stories/002-video-chain.md) (must).
+- **ST-VID-013 — Juntar vídeos**: [Juntar vídeos](../../intents/001-video-processing-support/units/003-video-composition/stories/ST-VID-013-video-concat.md) (must).
+- **ST-VID-014 — Encadear operações**: [Encadear operações](../../intents/001-video-processing-support/units/003-video-composition/stories/ST-VID-014-video-chain.md) (must).
 
 ## Tipo de bolt
 

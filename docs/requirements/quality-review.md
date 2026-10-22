@@ -4,8 +4,8 @@
 
 ## Resultado da verificação
 
-- Foram revistos **240 requisitos**: 214 funcionais e 26 de qualidade.
-- Os 240 identificadores são únicos (214 funcionais e 26 de qualidade).
+- Foram revistos **241 requisitos**: 215 funcionais e 26 de qualidade.
+- Os 241 identificadores são únicos (215 funcionais e 26 de qualidade).
 - Todos os requisitos têm origem e critério de aceitação/verificação preenchidos.
 - As referências a casos de uso nos campos de origem apontam para casos existentes (`UC-VID-000` a `UC-VID-015`).
 - As referências a outros requisitos e a decisões DQ usadas nas origens resolvem para identificadores presentes na ERS.

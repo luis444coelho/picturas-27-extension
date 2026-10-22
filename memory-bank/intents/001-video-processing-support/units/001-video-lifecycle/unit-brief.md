@@ -18,7 +18,7 @@ Disponibilizar recursos de vídeo autorizados em projetos e definir os contratos
 
 ## Requisitos atribuídos
 
-- **71 FR (propriedade exclusiva):** `REQ-VID-COM-*` (33, incluindo AUTH, QUOTA, STORAGE, TASK e ERROR), `REQ-VID-UPLOAD-*` (20), `REQ-VID-DOWNLOAD-*` (9), `REQ-VID-INFO-*` (9).
+- **72 FR (propriedade exclusiva):** `REQ-VID-COM-*` (33, incluindo AUTH, QUOTA, STORAGE, TASK e ERROR), `REQ-VID-UPLOAD-*` (21, o `021` vem da specsDuvidas D-30), `REQ-VID-DOWNLOAD-*` (9), `REQ-VID-INFO-*` (9).
 - **NFR (16):** `REQ-VID-NFR-001`, `002`, `003`, `005` a `011`, `013`, `016`, `017`, `018`, `021`, `025`. A NFR-010 passa para a B001 e a NFR-013 e a NFR-018 para a B003, que constroem o worker e o executor (specsDuvidas D-03); a NFR-011 passa da B003 para a B001, que cria as filas e o worker (specsDuvidas D-09).
 - Não cobertos nesta construção (specsDuvidas D-06): `REQ-VID-TASK-007` e a parte de lotes da `REQ-VID-QUOTA-007`.
 - Outras Units consomem contratos comuns, mas não voltam a ser donas desses FR.

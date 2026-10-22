@@ -30,11 +30,11 @@ Acrescentar ao registo de operações e ao worker as operações `watermark`, `a
 
 ## Stories incluídas
 
-- **ST-VID-004 — Aplicar marca de água**: [Aplicar marca de água](../../intents/001-video-processing-support/units/002-video-transformations/stories/004-video-watermark.md) (must).
-- **ST-VID-008 — Ajustar propriedades visuais**: [Ajustar propriedades visuais](../../intents/001-video-processing-support/units/002-video-transformations/stories/006-video-adjust.md) (must).
-- **ST-VID-009 — Aplicar filtro visual**: [Aplicar filtro visual](../../intents/001-video-processing-support/units/002-video-transformations/stories/007-video-filter.md) (must).
-- **ST-VID-010 — Redimensionar vídeo**: [Redimensionar vídeo](../../intents/001-video-processing-support/units/002-video-transformations/stories/008-video-resize.md) (must).
-- **ST-VID-011 — Rodar ou espelhar vídeo**: [Rodar ou espelhar vídeo](../../intents/001-video-processing-support/units/002-video-transformations/stories/009-video-orientation.md) (must).
+- **ST-VID-004 — Aplicar marca de água**: [Aplicar marca de água](../../intents/001-video-processing-support/units/002-video-transformations/stories/ST-VID-004-video-watermark.md) (must).
+- **ST-VID-008 — Ajustar propriedades visuais**: [Ajustar propriedades visuais](../../intents/001-video-processing-support/units/002-video-transformations/stories/ST-VID-008-video-adjust.md) (must).
+- **ST-VID-009 — Aplicar filtro visual**: [Aplicar filtro visual](../../intents/001-video-processing-support/units/002-video-transformations/stories/ST-VID-009-video-filter.md) (must).
+- **ST-VID-010 — Redimensionar vídeo**: [Redimensionar vídeo](../../intents/001-video-processing-support/units/002-video-transformations/stories/ST-VID-010-video-resize.md) (must).
+- **ST-VID-011 — Rodar ou espelhar vídeo**: [Rodar ou espelhar vídeo](../../intents/001-video-processing-support/units/002-video-transformations/stories/ST-VID-011-video-orientation.md) (must).
 
 ## Tipo de bolt
 

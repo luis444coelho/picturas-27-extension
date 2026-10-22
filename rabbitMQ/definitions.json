@@ -34,6 +34,33 @@
     ],
     "queues": [
         {
+            "name": "video_operations_queue",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "quorum",
+                "x-delivery-limit": 1,
+                "x-consumer-timeout": 10800000,
+                "x-dead-letter-exchange": "picturas",
+                "x-dead-letter-routing-key": "video_project_queue"
+            }
+        },
+        {
+            "name": "video_project_queue",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {}
+        },
+        {
+            "name": "video_ws_queue",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {}
+        },
+        {
             "name": "project_queue",
             "vhost": "/",
             "durable": true,
@@ -179,6 +206,30 @@
         }
     ],
     "bindings": [
+        {
+            "source": "picturas",
+            "vhost": "/",
+            "destination": "video_operations_queue",
+            "destination_type": "queue",
+            "routing_key": "video_operations_queue",
+            "arguments": {}
+        },
+        {
+            "source": "picturas",
+            "vhost": "/",
+            "destination": "video_project_queue",
+            "destination_type": "queue",
+            "routing_key": "video_project_queue",
+            "arguments": {}
+        },
+        {
+            "source": "picturas",
+            "vhost": "/",
+            "destination": "video_ws_queue",
+            "destination_type": "queue",
+            "routing_key": "video_ws_queue",
+            "arguments": {}
+        },
         {
             "source": "picturas",
             "vhost": "/",

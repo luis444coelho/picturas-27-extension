@@ -30,7 +30,7 @@ Acrescentar a operação `convert` `{target: "mp4"|"mov"|"avi"}` ao registo de o
 
 ## Stories incluídas
 
-- **ST-VID-012 — Converter formato**: [Converter formato](../../intents/001-video-processing-support/units/002-video-transformations/stories/010-video-convert.md) (must).
+- **ST-VID-012 — Converter formato**: [Converter formato](../../intents/001-video-processing-support/units/002-video-transformations/stories/ST-VID-012-video-convert.md) (must).
 
 ## Tipo de bolt
 

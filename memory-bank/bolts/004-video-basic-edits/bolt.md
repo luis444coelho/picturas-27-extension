@@ -30,9 +30,9 @@ Acrescentar ao registo de operações (T-01) e ao worker (T-02) as operações d
 
 ## Stories incluídas
 
-- **ST-VID-001 — Recortar vídeo**: [Recortar vídeo](../../intents/001-video-processing-support/units/002-video-transformations/stories/001-video-trim.md) (must).
-- **ST-VID-002 — Remover áudio**: [Remover áudio](../../intents/001-video-processing-support/units/002-video-transformations/stories/002-video-remove-audio.md) (must).
-- **ST-VID-003 — Alterar velocidade**: [Alterar velocidade](../../intents/001-video-processing-support/units/002-video-transformations/stories/003-video-speed.md) (must).
+- **ST-VID-001 — Recortar vídeo**: [Recortar vídeo](../../intents/001-video-processing-support/units/002-video-transformations/stories/ST-VID-001-video-trim.md) (must).
+- **ST-VID-002 — Remover áudio**: [Remover áudio](../../intents/001-video-processing-support/units/002-video-transformations/stories/ST-VID-002-video-remove-audio.md) (must).
+- **ST-VID-003 — Alterar velocidade**: [Alterar velocidade](../../intents/001-video-processing-support/units/002-video-transformations/stories/ST-VID-003-video-speed.md) (must).
 
 ## Tipo de bolt
 

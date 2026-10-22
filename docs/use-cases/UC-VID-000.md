@@ -16,7 +16,7 @@
 | **Âmbito** | Módulo de gestão de projetos, armazenamento multimédia e visualização do PictuRAS |
 | **Ator Principal** | Utilizador **Registado** ou **Premium** com sessão iniciada e permissão de edição no projeto |
 | **Stakeholders e Interesses** | - **Utilizador Registado / Premium**: pretende armazenar os seus vídeos na plataforma e inspecioná-los visualmente com controlos de reprodução sem que o upload debite a sua quota diária de operações.<br>- **Sistema PictuRAS**: deve validar a conformidade de contentor e codecs (MP4, MOV ou AVI, segundo a matriz da DQ-002), extrair metadados técnicos com precisão e armazenar os ficheiros de grande porte de forma segura no SeaweedFS/S3.<br>- **Equipa de Infraestrutura / DevOps**: pretende assegurar que os uploads respeitam os tetos de tamanho e duração do perfil, impedindo o esgotamento do disco por ficheiros corrompidos ou não suportados. |
-| **Pré-condições** | - O utilizador tem sessão iniciada (token JWT válido).<br>- O utilizador acede a um projeto sobre o qual possui permissão de proprietário ou de edição.<br>- O dispositivo do utilizador dispõe de acesso a um ficheiro de vídeo local. |
+| **Pré-condições** | - O utilizador tem sessão iniciada (token JWT válido).<br>- O utilizador acede a um projeto sobre o qual possui permissão de proprietário ou de edição.<br>- O dispositivo do utilizador dispõe de acesso a um ficheiro de vídeo local.<br>- Na FA6, o utilizador não precisa de um projeto existente: cria-o a partir do vídeo, como proprietário. |
 | **Trigger** | O utilizador acede ao projeto e seleciona a opção "Carregar Vídeo" ou arrasta um ficheiro de vídeo para a área de carregamento do projeto. |
 
 ---
@@ -45,6 +45,7 @@
 | **FA3 – Utilizador com perfil Premium** | Nos passos 4 e 5, o sistema aplica os limites alargados de subscrição Premium: ficheiros até 2 GB e duração até 60 minutos. |
 | **FA4 – Carregar vídeo sem stream de áudio** | No passo 5, o sistema deteta que o MP4 contém apenas stream H.264 (vídeo silencioso de origem) → O sistema aceita o ficheiro, regista a ausência de áudio nos metadados e conclui o upload normalmente. |
 | **FA5 – Carregar vídeo em MOV ou AVI** | No passo 5, o sistema deteta um contentor MOV ou AVI com codecs admitidos → O sistema aceita o ficheiro, preserva-o no formato original e, no passo 6, gera adicionalmente uma cópia de pré-visualização em MP4 (H.264/AAC), usada exclusivamente pelo reprodutor integrado. O mesmo acontece com um MP4 cujo perfil H.264 os navegadores não reproduzem (10 bits, 4:2:2, 4:4:4): a cópia é recodificada para H.264 `yuv420p` (ADD v1.1, Q-ADD-20). |
+| **FA6 – Criar projeto a partir de um vídeo** | No passo 1, na dashboard, o utilizador escolhe "Novo projeto com vídeo", indica o nome do projeto e seleciona o vídeo (MP4, MOV ou AVI), validado como no passo 2 → O sistema cria um projeto novo sem imagens, de que o utilizador é proprietário, e segue o fluxo principal a partir do passo 3; quando a transferência termina, abre o projeto, onde o vídeo aparece ao concluir a ingestão (passo 7). Se o carregamento falhar ou for cancelado, o projeto fica criado e vazio, o utilizador é informado, o projeto abre e o utilizador pode carregar outro vídeo pelo fluxo principal (specsDuvidas D-30, D-32). |
 
 ---
 

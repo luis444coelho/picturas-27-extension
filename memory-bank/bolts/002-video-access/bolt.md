@@ -30,8 +30,8 @@ Implementar os endpoints `GET /projects/:user/:project/videos/:video` (informaç
 
 ## Stories incluídas
 
-- **ST-VID-006 — Descarregar vídeo**: [Descarregar vídeo](../../intents/001-video-processing-support/units/001-video-lifecycle/stories/002-video-download.md) (must).
-- **ST-VID-007 — Consultar informações do vídeo**: [Consultar informações do vídeo](../../intents/001-video-processing-support/units/001-video-lifecycle/stories/003-video-information.md) (must).
+- **ST-VID-006 — Descarregar vídeo**: [Descarregar vídeo](../../intents/001-video-processing-support/units/001-video-lifecycle/stories/ST-VID-006-video-download.md) (must).
+- **ST-VID-007 — Consultar informações do vídeo**: [Consultar informações do vídeo](../../intents/001-video-processing-support/units/001-video-lifecycle/stories/ST-VID-007-video-information.md) (must).
 
 ## Tipo de bolt
 
