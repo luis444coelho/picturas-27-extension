@@ -128,7 +128,13 @@ export function VideoUpload({ target }: { target: VideoTarget }) {
       </p>
 
       {phase === "idle" && (
-        <Dropzone onDrop={select} accept={ACCEPT} multiple={false}>
+        <Dropzone
+          onDrop={select}
+          // Files outside ACCEPT never reach onDrop (Exception 1).
+          onDropRejected={() => showError("UNSUPPORTED_FORMAT")}
+          accept={ACCEPT}
+          multiple={false}
+        >
           {({ getRootProps, getInputProps, isDragActive }) => (
             <div
               {...getRootProps()}

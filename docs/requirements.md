@@ -54,7 +54,7 @@
 | **Secção** | **Âmbito / Caso de Uso** | **Prefixo dos Requisitos** | **Qtd.** | **Ficheiro de Especificação** |
 |---|---|---|:---:|---|
 | **4.1.1.1** | Requisitos Comuns e Transversais (Sessão, Quotas, Storage, Tasks, Erros) | `REQ-VID-COM`, `AUTH`, `QUOTA`, `STORAGE`, `TASK`, `ERROR` | 33 | [REQ-VID-COM.md](requirements/REQ-VID-COM.md) |
-| **4.1.1.2** | UC-VID-000: Carregamento, Ingestão e Visualização de Vídeo | `REQ-VID-UPLOAD` | 20 | [REQ-VID-UPLOAD.md](requirements/REQ-VID-UPLOAD.md) |
+| **4.1.1.2** | UC-VID-000: Carregamento, Ingestão e Visualização de Vídeo | `REQ-VID-UPLOAD` | 21 | [REQ-VID-UPLOAD.md](requirements/REQ-VID-UPLOAD.md) |
 | **4.1.1.3** | UC-VID-001: Recorte Temporal (*Trim*) | `REQ-VID-TRIM` | 10 | [REQ-VID-TRIM.md](requirements/REQ-VID-TRIM.md) |
 | **4.1.1.4** | UC-VID-002: Remoção do Áudio | `REQ-VID-AUDIO` | 6 | [REQ-VID-AUDIO.md](requirements/REQ-VID-AUDIO.md) |
 | **4.1.1.5** | UC-VID-003: Alteração da Velocidade de Reprodução | `REQ-VID-SPEED` | 8 | [REQ-VID-SPEED.md](requirements/REQ-VID-SPEED.md) |
@@ -70,7 +70,7 @@
 | **4.1.1.15** | UC-VID-013: Junção de Vídeos | `REQ-VID-CONCAT` | 13 | [REQ-VID-CONCAT.md](requirements/REQ-VID-CONCAT.md) |
 | **4.1.1.16** | UC-VID-014: Encadeamento de Operações de Vídeo | `REQ-VID-CHAIN` | 18 | [REQ-VID-CHAIN.md](requirements/REQ-VID-CHAIN.md) |
 | **4.1.1.17** | UC-VID-015: Processamento de Vídeos em Lote | `REQ-VID-BATCH` | 19 | [REQ-VID-BATCH.md](requirements/REQ-VID-BATCH.md) |
-| **Total** | **Requisitos Funcionais do Subsistema de Vídeo** | — | **214** | — |
+| **Total** | **Requisitos Funcionais do Subsistema de Vídeo** | — | **215** | — |
 
 ---
 
@@ -98,7 +98,7 @@ A classificação cobre:
 
 | **Tópico a verificar** | **Aplicável?** | **Decisão / justificação** | **Requisito(s) relacionado(s)** |
 |---|:---:|---|---|
-| **Carregamento, ingestão e visualização de vídeo** | **Sim** | O sistema suporta nativamente o carregamento por seleção e arrastamento, validação de cabeçalhos e codecs, armazenamento em SeaweedFS/S3, extração de metadados técnicos, geração de miniatura JPEG e visualização num leitor multimédia integrado com controlos de navegação e atalhos para edição. | REQ-VID-UPLOAD-001 a 020, REQ-VID-NFR-001, REQ-VID-NFR-003, REQ-VID-NFR-008 |
+| **Carregamento, ingestão e visualização de vídeo** | **Sim** | O sistema suporta nativamente o carregamento por seleção e arrastamento, validação de cabeçalhos e codecs, armazenamento em SeaweedFS/S3, extração de metadados técnicos, geração de miniatura JPEG e visualização num leitor multimédia integrado com controlos de navegação e atalhos para edição. | REQ-VID-UPLOAD-001 a 021, REQ-VID-NFR-001, REQ-VID-NFR-003, REQ-VID-NFR-008 |
 | **Formato, codec, duração e dimensão do vídeo** | **Sim** | O sistema aceita na entrada os contentores MP4, MOV e AVI com os codecs da matriz aprovada (H.264/AAC em MP4 e MOV; H.264 ou MPEG-4 Part 2 / AAC ou MP3 em AVI), gera os resultados das operações em MP4 (H.264/AAC) e, na conversão de formato, no contentor escolhido entre MP4, MOV e AVI; os originais e resultados MOV/AVI, e os MP4 com perfis H.264 que os navegadores não reproduzem (10 bits, 4:2:2, 4:4:4), são reproduzidos através de uma cópia de pré-visualização MP4 (ADD v1.1, Q-ADD-20); exporta fotogramas em JPEG/PNG. Impõe limites de duração e tamanho diferenciados por perfil (Registado: $\leq 5$ min e $\leq 200$ MB; Premium: $\leq 60$ min e $\leq 2$ GB). | REQ-VID-UPLOAD-003, REQ-VID-UPLOAD-004, REQ-VID-UPLOAD-009 a 011, REQ-VID-UPLOAD-016, REQ-VID-UPLOAD-017, REQ-VID-CONVERT-005, REQ-VID-NFR-003, REQ-VID-NFR-004, REQ-VID-NFR-008, REQ-VID-NFR-012 |
 | **Estado, progresso, cancelamento e resultado** | **Sim** | Implementado ciclo de vida assíncrono completo com estados `queued → processing → completed \| failed \| cancelled`. Progresso contínuo 0–100% via WebSocket, emitido pelo menos uma vez por segundo em todas as operações (ADD v1.1, T-02). Cancelamento suportado com interrupção do worker e limpeza de temporários. | REQ-VID-TASK-001 a 005, REQ-VID-NFR-005, REQ-VID-NFR-006, REQ-VID-NFR-009 |
 | **Falhas durante o processamento** | **Sim** | Política estrita de integridade: em caso de falha durante a descodificação, recorte ou codificação, o vídeo original é preservado, nenhum resultado parcial é gravado no projeto, os temporários são purgados e a operação de quota reservada é estornada ao utilizador registado. | REQ-VID-COM-002, REQ-VID-QUOTA-004, REQ-VID-FRAMES-013, REQ-VID-ERROR-001 a 003, REQ-VID-NFR-007 |
@@ -145,7 +145,7 @@ A matriz seguinte rastreia detalhadamente cada requisito do sistema até aos ele
 
 | **Elemento de Origem** | **Descrição Abreviada** | **Requisito(s) Relacionado(s)** |
 |---|---|---|
-| **UC-VID-000 Pré-condições** | JWT válido, permissão no projeto, ficheiro local disponível | REQ-VID-AUTH-001, REQ-VID-AUTH-003, REQ-VID-UPLOAD-001, REQ-VID-NFR-001 |
+| **UC-VID-000 Pré-condições** | JWT válido, permissão no projeto, ficheiro local disponível (na FA6, o projeto é criado a partir do vídeo) | REQ-VID-AUTH-001, REQ-VID-AUTH-003, REQ-VID-UPLOAD-001, REQ-VID-UPLOAD-021, REQ-VID-NFR-001 |
 | **UC-VID-000 Passo 1** | Abertura do projeto e apresentação da interface de upload e limites | REQ-VID-UPLOAD-001, REQ-VID-NFR-008 |
 | **UC-VID-000 Passo 2** | Seleção do ficheiro local e validação cliente de extensão/MIME | REQ-VID-UPLOAD-001, REQ-VID-UPLOAD-003 |
 | **UC-VID-000 Passo 3** | Confirmação e streaming de envio com progresso percentual | REQ-VID-UPLOAD-005 |
@@ -169,6 +169,7 @@ A matriz seguinte rastreia detalhadamente cada requisito do sistema até aos ele
 | **UC-VID-000 RN1 a RN7** | Regras de autenticação, isenção de quota, formatos MP4/MOV/AVI, limites, miniatura e reprodutor | REQ-VID-AUTH-001 a 002, REQ-VID-UPLOAD-003 a 015, REQ-VID-STORAGE-001 a 005, REQ-VID-NFR-003, REQ-VID-NFR-008 |
 | **UC-VID-000 FA5** | Carregamento de vídeo em MOV ou AVI (ou MP4 com perfil H.264 incompatível com o navegador) com cópia de pré-visualização MP4 | REQ-VID-UPLOAD-003, REQ-VID-UPLOAD-009, REQ-VID-UPLOAD-010, REQ-VID-UPLOAD-016, REQ-VID-UPLOAD-017, REQ-VID-NFR-003 |
 | **UC-VID-000 RN8** | Cópia de pré-visualização (MOV, AVI e MP4 incompatíveis) exclusiva do reprodutor; operações e descarregamento usam o original | REQ-VID-UPLOAD-016, REQ-VID-UPLOAD-017, REQ-VID-DOWNLOAD-006 |
+| **UC-VID-000 FA6** | Criação de um projeto novo, sem imagens, a partir de um vídeo; se o carregamento falhar ou for cancelado, o projeto fica vazio (specsDuvidas D-30) | REQ-VID-UPLOAD-021, REQ-VID-UPLOAD-001, REQ-VID-UPLOAD-003, REQ-VID-UPLOAD-020, REQ-VID-AUTH-002 |
 
 ---
 
@@ -611,7 +612,7 @@ A matriz seguinte rastreia detalhadamente cada requisito do sistema até aos ele
 
 #### 4.3.2 Verificações de Cobertura
 
-- [x] **Cada requisito funcional e não funcional aparece na matriz**: Todos os 214 requisitos funcionais e 26 requisitos não funcionais da ERS têm origem registada nos respetivos ficheiros e constam da matriz de rastreabilidade da secção 7 do relatório Typst; a revisão está registada em [quality-review.md](requirements/quality-review.md).
+- [x] **Cada requisito funcional e não funcional aparece na matriz**: Todos os 215 requisitos funcionais e 26 requisitos não funcionais da ERS têm origem registada nos respetivos ficheiros e constam da matriz de rastreabilidade da secção 7 do relatório Typst; a revisão está registada em [quality-review.md](requirements/quality-review.md).
 - [x] **Cada requisito tem origem identificada**: Todas as linhas possuem ligação direta a um passo do fluxo, exceção, regra de negócio ou decisão de qualidade documentada nos casos de uso.
 - [x] **Todos os elementos relevantes dos casos de uso têm requisito associado**: Pré-condições, passos dos fluxos principais, fluxos alternativos, exceções, garantias pós-condicionais e regras de negócio de `UC-VID-000` a `UC-VID-015` estão integralmente cobertos.
 - [x] **Os tópicos de âmbito da secção 4.1.3 estão justificados**: O encadeamento de operações de vídeo e o processamento em lote de vários vídeos passaram a integrar o MVP (v2.3); as exclusões remanescentes (extração de fotogramas como passo de cadeia ou de lote de vídeos, transições na junção) estão justificadas na secção 4.1.3, na DQ-017 e na Q-ERS-006.

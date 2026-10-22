@@ -25,11 +25,12 @@ implemented: false
 - [ ] Quando o ficheiro excede os limites, tem formato ou codec fora da matriz, está corrompido, ou a transferência falha ou é cancelada, então o carregamento é rejeitado e não fica objeto no storage nem registo em `videos`.
 - [ ] Sem JWT válido, qualquer rota de vídeo responde 401; o utilizador `anonymous` recebe 403; a autorização distingue leitura (consultar e descarregar) de edição ou propriedade (carregar e transformar), com o `videoAuth` nos routers de vídeo.
 - [ ] Quando abro um vídeo concluído, posso reproduzi-lo no leitor integrado; o carregamento e a reprodução não debitam quota.
+- [ ] Na dashboard, quando escolho "Novo projeto com vídeo", indico um nome e um MP4, MOV ou AVI válido, então o projeto é criado sem imagens, o vídeo é carregado pelo fluxo deste caso de uso e o projeto abre com o vídeo; se o carregamento falhar ou for cancelado, o projeto fica criado e vazio (UC-VID-000 FA6, REQ-VID-UPLOAD-021, specsDuvidas D-30).
 
 ## Traceability
 
 - **Use case:** UC-VID-000.
-- **Requirements:** `REQ-VID-AUTH-001` a `003` (specsDuvidas D-02); `REQ-VID-UPLOAD-001` a `020`; `REQ-VID-STORAGE-001` a `005`; `REQ-VID-NFR-001`, `003`, `008`, `010` (specsDuvidas D-03), `011` (specsDuvidas D-09), `017`. Consome `REQ-VID-COM-*`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
+- **Requirements:** `REQ-VID-AUTH-001` a `003` (specsDuvidas D-02); `REQ-VID-UPLOAD-001` a `021` (o `021` vem da specsDuvidas D-30); `REQ-VID-STORAGE-001` a `005`; `REQ-VID-NFR-001`, `003`, `008`, `010` (specsDuvidas D-03), `011` (specsDuvidas D-09), `017`. Consome `REQ-VID-COM-*`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
 - **Decisões do ADD v1.1:** T-00 (coleção `videos`, ingestão, estágios), T-06 e Q-ADD-20 (cópia MP4), T-07 e Q-ADD-06 (fotograma 0), T-08 (estágios de vídeo, `location` de carregamento), Q-ADD-13 (dimensões de apresentação), Q-ADD-22 (miniatura de vídeos curtos), Q-ADD-04 (estratégia de carregamento, pendente no ADD); T-00 e T-02 na parte de que a ingestão precisa: `formats.js`, routers com o `videoAuth`, filas, `wsGateway/video.js`, URLs de escrita e worker com a ingestão (specsDuvidas D-02); `amqp.js`, URLs internos de leitura com o `route/video.js` e o `videoUrls.js`, volume `video_tmp` e declaração completa da `video_operations_queue` (specsDuvidas D-08). Sem `video_zip` nem `batch_id` (specsDuvidas D-06).
 
 ## Dependencies

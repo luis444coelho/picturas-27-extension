@@ -243,3 +243,25 @@
 - **O que as fontes dizem:** ADD 4.1: "Confirmar que o SeaweedFS (`4.47`) aplica o parâmetro `response-content-disposition` dos URLs assinados. Se não aplicar, o nome sugerido vai no atributo `download` da âncora, que o navegador respeita porque o URL `/s3-video/` é da mesma origem que o frontend."
 - **Opções:** (a) a B002 usa o atributo `download` da âncora, como prevê o ADD; (b) a B002 investiga a assinatura SigV4 para os URLs de vídeo.
 - **Resposta:** _Pendente._ É uma decisão da B002; fica registada para o seu Technical Design.
+
+## D-30 — Criar um projeto a partir de um vídeo (requisito novo da equipa)
+
+- **Onde:** `docs/requirements/REQ-VID-UPLOAD.md` (REQ-VID-UPLOAD-021); `docs/use-cases/UC-VID-000.md` (FA6 e pré-condições); `frontend/components/video/new-video-project-dialog.tsx`; `frontend/components/dashboard-sidebar/dashboard-sidebar.tsx`.
+- **Dúvida:** Hoje só se cria um projeto com imagens (`new-project-dialog.tsx` exige pelo menos uma). Como começa um utilizador que só tem um vídeo?
+- **O que as fontes dizem:** Nada; o UC-VID-000 parte de um projeto existente. A rota existente `POST /projects/:user` já aceita `imgs` vazio.
+- **Resposta:** **Requisito novo da equipa (REQ-VID-UPLOAD-021, UC-VID-000 FA6), construído na B001.** Componente novo `new-video-project-dialog.tsx` com o nome do projeto e o seletor de vídeo (MP4, MOV, AVI, com as validações do passo 2): cria o projeto com `POST /projects/:user`, carrega o vídeo pelo fluxo da B001 e abre o projeto. Fica ligado com uma linha nova na `dashboard-sidebar`, junto a "New Project"; o `new-project-dialog.tsx` não muda (regra 2.6). Se o carregamento falhar ou for cancelado, o projeto fica criado e vazio, e o utilizador pode carregar outro vídeo. Utilizadores anónimos não veem a opção (RN1).
+
+## D-31 — Vídeos concluídos na área principal do projeto (correção do UC-VID-000, passos 7 e 8)
+
+- **Onde:** `frontend/components/video/project-video-list.tsx`; `frontend/app/dashboard/[pid]/page.tsx`.
+- **Dúvida:** Na B001, os vídeos concluídos só aparecem dentro da janela "Vídeos". Os passos 7 e 8 pedem que o vídeo apareça "na galeria de recursos do projeto".
+- **O que as fontes dizem:** UC-VID-000, passo 7: o vídeo aparece "na galeria de recursos do projeto com a miniatura gerada, nome do ficheiro e duração formatada"; passo 8: ao selecioná-lo, abre o reprodutor integrado.
+- **Resposta:** **Correção da equipa.** Componente novo `project-video-list.tsx`, montado com uma linha nova em `app/dashboard/[pid]/page.tsx`, junto ao `ProjectImageList` existente, que não muda (regra 2.6). Mostra cada vídeo `completed` com miniatura, nome do ficheiro, duração formatada e um ícone que o distingue das imagens; ao clicar, abre o `VideoPlayer` da B001. Atualiza-se com o evento `video-ingest-update`, para o vídeo aparecer logo que a ingestão termina. A janela "Vídeos" fica como ponto de carregamento.
+
+## D-32 — Pormenores de interface da D-30 e da D-31 que as fontes não fixam
+
+- **Onde:** `frontend/components/video/new-video-project-dialog.tsx`; `frontend/components/video/project-video-list.tsx`.
+- **Dúvida:** (1) Na D-30, o projeto abre quando termina a transferência ou só quando termina a ingestão? E abre também quando o carregamento falha? (2) Na D-31, em que lugar da área principal fica a lista de vídeos, e aparece também no modo "results"?
+- **O que as fontes dizem:** A D-30 diz "carrega o vídeo pelo fluxo da B001 e abre o projeto" e que, em caso de falha, o projeto fica vazio e o utilizador pode carregar outro vídeo. A D-31 diz "junto ao `ProjectImageList`". Nenhuma fonte fixa os pormenores.
+- **Opções:** (1a) abrir quando a transferência termina (202 do `upload/complete`), com o vídeo a aparecer na lista quando a ingestão termina, e abrir também em caso de falha ou cancelamento, para o utilizador carregar outro vídeo; (1b) manter a janela aberta até a ingestão terminar. (2a) coluna à direita das imagens, só quando há vídeos concluídos, nos dois modos; (2b) faixa por cima da grelha de imagens.
+- **Resposta:** _Pendente._ Implementação provisória: **(1a)** e **(2a)**. A janela continua à escuta do `video-ingest-update` depois de abrir o projeto e avisa se a ingestão falhar.

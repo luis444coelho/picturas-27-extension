@@ -268,6 +268,7 @@ A coluna “Story proprietária” identifica o trabalho dono do requisito; “S
 | `REQ-VID-UPLOAD-018` | [`REQ-VID-UPLOAD.md`](../../../docs/requirements/REQ-VID-UPLOAD.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, T-06, T-07, T-08 | ST-VID-000 | Especificado; implementação pendente |
 | `REQ-VID-UPLOAD-019` | [`REQ-VID-UPLOAD.md`](../../../docs/requirements/REQ-VID-UPLOAD.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, Q-ADD-13 | ST-VID-000 | Especificado; implementação pendente |
 | `REQ-VID-UPLOAD-020` | [`REQ-VID-UPLOAD.md`](../../../docs/requirements/REQ-VID-UPLOAD.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, T-06, T-07, T-08 | ST-VID-000 | Especificado; implementação pendente |
+| `REQ-VID-UPLOAD-021` | [`REQ-VID-UPLOAD.md`](../../../docs/requirements/REQ-VID-UPLOAD.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | — (specsDuvidas D-30) | ST-VID-000 | Especificado; implementação pendente |
 | `REQ-VID-WATERMARK-001` | [`REQ-VID-WATERMARK.md`](../../../docs/requirements/REQ-VID-WATERMARK.md) | ST-VID-004 | `002-video-transformations` | `005-video-visual-edits` | T-02, Q-ADD-12 | ST-VID-004 | Especificado; implementação pendente |
 | `REQ-VID-WATERMARK-002` | [`REQ-VID-WATERMARK.md`](../../../docs/requirements/REQ-VID-WATERMARK.md) | ST-VID-004 | `002-video-transformations` | `005-video-visual-edits` | T-02, Q-ADD-12 | ST-VID-004 | Especificado; implementação pendente |
 | `REQ-VID-WATERMARK-003` | [`REQ-VID-WATERMARK.md`](../../../docs/requirements/REQ-VID-WATERMARK.md) | ST-VID-004 | `002-video-transformations` | `005-video-visual-edits` | T-02, Q-ADD-12 | ST-VID-004 | Especificado; implementação pendente |
@@ -282,8 +283,8 @@ A coluna “Story proprietária” identifica o trabalho dono do requisito; “S
 
 ## Verificações
 
-- Catálogo: **214 FR e 26 NFR**; todos os IDs canónicos estão listados uma vez nesta matriz.
-- A propriedade dos FR é exclusiva por Unit: Unit 001 = 71; Unit 002 = 93; Unit 003 = 50 (214 no total).
+- Catálogo: **215 FR e 26 NFR**; todos os IDs canónicos estão listados uma vez nesta matriz.
+- A propriedade dos FR é exclusiva por Unit: Unit 001 = 72; Unit 002 = 93; Unit 003 = 50 (215 no total).
 - A propriedade dos NFR é exclusiva por Unit: Unit 001 = 16; Unit 002 = 6; Unit 003 = 4 (26 no total).
 - Os `REQ-VID-AUTH-*` pertencem à ST-VID-000 e à B001, que constrói os routers de vídeo com o `videoAuth` (specsDuvidas D-02). A NFR-010 pertence à B001 (worker) e a NFR-013 e a NFR-018 à B003 (executor e codificação por omissão); a B004 e a B008 verificam as três nos seus critérios de aceitação, sem serem donas (specsDuvidas D-03).
 - Não cobertos nesta construção (specsDuvidas D-06, D-07): os 13 `REQ-VID-FRAMES-*`, os 19 `REQ-VID-BATCH-*`, a `REQ-VID-TASK-007` e a NFR-004, a NFR-019 e a NFR-020 (só extração). Parcialmente não cobertas, só na parte de lotes: a `REQ-VID-QUOTA-007` e a NFR-014; a NFR-014 continua coberta na parte da junção e da cadeia, que pertence à ST-VID-013 e à B008, com a ST-VID-014 a verificá-la (specsDuvidas D-10). A NFR-011 pertence à ST-VID-000 e à B001, que cria as filas e o worker; a B003 verifica-a nos critérios de passagem (specsDuvidas D-09).

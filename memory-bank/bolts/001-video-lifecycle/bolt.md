@@ -59,7 +59,7 @@ Implementar o UC-VID-000 sobre a fundação mínima do ADD (T-00): coleção `vi
 
 ## Requisitos rastreados
 
-REQ-VID-AUTH-001 a 003; REQ-VID-UPLOAD-001 a 020; REQ-VID-STORAGE-001 a 005; REQ-VID-NFR-001, 003, 008, 010, 011, 017.
+REQ-VID-AUTH-001 a 003; REQ-VID-UPLOAD-001 a 021 (021: specsDuvidas D-30); REQ-VID-STORAGE-001 a 005; REQ-VID-NFR-001, 003, 008, 010, 011, 017.
 
 Os `REQ-VID-AUTH-*` passam para este bolt, que constrói os routers de vídeo com o `videoAuth` (specsDuvidas D-02). A NFR-010 (FFmpeg em Docker) passa para este bolt, que cria o worker (specsDuvidas D-03). A NFR-011 (filas AMQP de vídeo independentes) passa para este bolt, que cria as filas e o worker; a B003 continua a verificá-la (specsDuvidas D-09).
 

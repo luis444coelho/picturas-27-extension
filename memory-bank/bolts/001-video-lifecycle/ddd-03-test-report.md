@@ -3,7 +3,7 @@ unit: 001-video-lifecycle
 bolt: 001-video-lifecycle
 stage: test
 status: complete
-updated: 2026-10-22T09:07:51Z
+updated: 2026-10-22T10:25:00Z
 ---
 
 # Test Report - Ciclo de vida do vídeo (ingestão e visualização)
@@ -20,7 +20,10 @@ Ambiente: a pilha Docker Compose da equipa a correr localmente (nginx em `https:
 | Transferências grandes (`e2e-large.test.js`) | 2 | 0 | 0 | — |
 | Security (dentro das E2E, mais verificações de logs) | 10 | 0 | 0 | — (1 risco residual, D-27) |
 | Performance (medições, sem carga) | 4 | 0 | 0 | — |
-| **Total** | **91** + 13 verificações | **0** | **0** | ver "Coverage Report" |
+| Unit: frontend, fluxo da D-30 (`node:test` com *type stripping*) | 8 | 0 | 0 | `lib/video-project.ts` (todos os ramos) |
+| E2E da D-30 pela API (`e2e-project.test.js`) | 3 | 0 | 0 | — |
+| E2E no navegador, D-30 e D-31 (`e2e-ui.test.js`, Playwright/Chromium) | 6 | 0 | 0 | — |
+| **Total** | **108** + 13 verificações | **0** | **0** | ver "Coverage Report" |
 
 Como correr:
 
@@ -35,7 +38,16 @@ cd projects && VIDEO_E2E_URL=https://localhost:8080 VIDEO_E2E_FIXTURES=<pasta> \
   NODE_TLS_REJECT_UNAUTHORIZED=0 node --test test/video/e2e.test.js
 cd projects && VIDEO_E2E_URL=https://localhost:8080 VIDEO_E2E_LARGE=1 \
   NODE_TLS_REJECT_UNAUTHORIZED=0 node --test test/video/e2e-large.test.js
+# D-30 e D-31 (adenda): unitários do frontend, E2E pela API e no navegador
+cd frontend && node --experimental-strip-types --test test/video-project.test.mts
+cd projects && VIDEO_E2E_URL=https://localhost:8080 VIDEO_E2E_FIXTURES=<pasta> \
+  NODE_TLS_REJECT_UNAUTHORIZED=0 node --test test/video/e2e-project.test.js
+cd projects && VIDEO_E2E_URL=https://localhost:8080 VIDEO_E2E_FIXTURES=<pasta> \
+  VIDEO_E2E_PLAYWRIGHT=<node_modules/playwright-core> \
+  NODE_TLS_REJECT_UNAUTHORIZED=0 node --test test/video/e2e-ui.test.js
 ```
+
+O `e2e-ui.test.js` precisa do `playwright-core` (1.58) e do seu Chromium, instalados fora do repositório; o frontend tem de estar reconstruído (`docker compose build frontend && docker compose up -d --no-deps frontend`), porque o contentor serve uma *build* de produção.
 
 Os vídeos de referência (MP4 com etiqueta de rotação, MOV, AVI MPEG-4/MP3, MP4 High 10, MP4 de 0,5 s, HEVC, só áudio, MP4 truncado, 5:10 min, PNG) são gerados pelo FFmpeg da imagem do worker; os comandos estão em `projects/test/video/e2e.test.js` (cabeçalho) e no histórico do Estágio 5.
 
@@ -48,11 +60,13 @@ Os vídeos de referência (MP4 com etiqueta de rotação, MOV, AVI MPEG-4/MP3, M
 | ST-VID-000 | **AC3:** cópia MP4 `yuv420p` para MOV, AVI e MP4 H.264 incompatível | ✅ E2E: MOV (remux), AVI (recodificado), High 10 (recodificado), todos `h264`/`yuv420p`; MP4 compatível sem cópia |
 | ST-VID-000 | **AC4:** limites, formato, codec, corrupção, falha ou cancelamento → rejeitado, sem objeto nem registo | ✅ E2E: `UNSUPPORTED_FORMAT`, `LIMIT_EXCEEDED` (tamanho e duração), `INVALID_CODEC` (HEVC e só áudio, D-24), `CORRUPTED_FILE` (truncado e 150 MB de ruído), cancelamento, envio parcial e confirmação sem ficheiro (`UPLOAD_ABORTED`), sempre com o registo e os objetos verificados como apagados |
 | ST-VID-000 | **AC5:** 401 sem JWT; 403 `anonymous`; leitura vs edição com o `videoAuth` | ✅ E2E: 401 nas 5 rotas (sem token e com token inválido), 403 utilizador ≠ caminho, 403 `anonymous`, leitura por partilha lista mas não carrega, 410 em link revogado |
-| ST-VID-000 | **AC6:** reproduzir no leitor integrado; carregamento e reprodução não debitam quota | ✅ API: URL de reprodução por `/s3-video/` (200 e `Range` 206), a cópia MP4 quando existe; `remaining_operations` igual antes e depois. ⚠️ O leitor no navegador não foi testado (ver "Issues Found") |
+| ST-VID-000 | **AC6:** reproduzir no leitor integrado; carregamento e reprodução não debitam quota | ✅ API: URL de reprodução por `/s3-video/` (200 e `Range` 206), a cópia MP4 quando existe; `remaining_operations` igual antes e depois. Navegador (adenda): o leitor abre a partir da lista do projeto, com `controls`, e carrega o vídeo (`readyState` ≥ 1) |
+| ST-VID-000 | **AC7 (D-30):** "Novo projeto com vídeo" cria o projeto sem imagens, carrega o vídeo e abre o projeto; com falha ou cancelamento, o projeto fica vazio | ✅ Unit (8): ordem dos passos, erro ao criar o projeto, recusa do pedido, cancelamento antes e durante a transferência, falha de rede, confirmação recusada. API (3): projeto vazio recebe o MOV; cancelamento e vídeo rejeitado deixam o projeto vazio e utilizável. Navegador: MOV → projeto aberto com o vídeo; cancelamento aos ~5 % (rede limitada) → projeto vazio e sem registo em `videos`; HEVC → aviso de codecs depois de o projeto abrir; MKV bloqueado sem criar projeto |
+| ST-VID-000 | **D-31:** vídeos concluídos na área principal, junto às imagens, com miniatura, nome, duração e ícone; clique abre o leitor; atualização pelo `video-ingest-update` | ✅ Navegador: coluna "Vídeos" ao lado das imagens com miniatura carregada, ícone e `m:ss`; vídeo carregado por fora com a página aberta aparece sem recarregar (< 30 s; sem o evento só ao fim de 10 min); a janela "Vídeos" continua a carregar e o vídeo aparece na coluna |
 
 | Critério de passagem do bolt | Estado |
 |---|---|
-| Story implementada e critérios cumpridos | ✅ (com a ressalva do UI acima) |
+| Story implementada e critérios cumpridos | ✅ (AC1 a AC7 e D-31) |
 | Critérios dos requisitos rastreados verificados por testes | ✅ AUTH-001/002/003, UPLOAD-003/004/005/006/007/008/009/010/011/012/013/014/016/017/019/020, STORAGE-001/003, NFR-001/003/008/010/011/017 |
 | Nenhuma linha de código existente alterada | ✅ `git diff main`: 0 linhas removidas ou alteradas em ficheiros existentes |
 | Testes automatizados e relatório registados | ✅ este relatório |
@@ -62,7 +76,7 @@ Os vídeos de referência (MP4 com etiqueta de rotação, MOV, AVI MPEG-4/MP3, M
 | 401/403; worker arranca com `docker compose up` | ✅ |
 | Só filas de vídeo e `amqp.js`; ferramentas de imagem intactas (NFR-011) | ✅ filas com os argumentos certos (`rabbitmqctl`); `Tools/utils` sem alterações |
 
-Não verificados nesta bolt, por serem de outras: UPLOAD-001/002/015/018 só por *type-check*, *lint* e revisão (UI); UPLOAD-015 (controlos do leitor) depende do `<video controls>` nativo; STORAGE-002/004 (proveniência e receita, B003+); STORAGE-005 (rotina da Q-ADD-14, B003).
+Não verificados nesta bolt, por serem de outras: UPLOAD-002 (arrastar) só por revisão, porque o teste no navegador usa o seletor de ficheiros; UPLOAD-001/015/018/021 verificados no navegador na adenda; UPLOAD-015 (controlos do leitor) depende do `<video controls>` nativo; STORAGE-002/004 (proveniência e receita, B003+); STORAGE-005 (rotina da Q-ADD-14, B003).
 
 ## Unit Tests
 
@@ -151,14 +165,25 @@ Problemas abertos:
 |-------|----------|--------|
 | 6. *Error log* do nginx regista a assinatura em pedidos recusados no `/s3-video/` (D-27) | Low | Open |
 | 7. O consumidor do `video_ws_queue` usa o `utils/rabbit_mq.js` existente, sem religação. Num reinício do RabbitMQ, os eventos param até reiniciar o `ws_gateway`, como já acontece ao `ws_queue` e ao `project_queue` (D-28) | Medium | Open |
-| 8. UI (carregamento, galeria, leitor) sem teste no navegador: só *type-check*, *lint* e as rotas que usa (testadas por E2E) | Medium | Open: recomenda-se um teste manual |
+| 8. UI (carregamento, galeria, leitor) sem teste no navegador | Medium | Resolvido na adenda: `e2e-ui.test.js` (6 testes) |
 | 9. Os testes E2E deixam utilizadores, projetos e vídeos de teste (`e2e-*@test.local`) na base de dados e no storage locais | Low | Open: limpeza manual, se desejada |
+| 10. Fora da B001 (código existente): `POST /users/:email/login` responde 701 para utilizadores acabados de criar com `POST /users`; o teste no navegador regista-se pela página `/register`, que não usa o *login*. Causa não investigada (regra 2.6) | Medium | Open: para a equipa |
 
 Incidente durante os testes: um `docker compose up -d --build video_worker` recriou também o `rabbitmq`. Os consumidores Node sem religação (`project_queue`, `ws_queue`, `video_ws_queue`) ficaram sem ligação, e o nginx ficou com o IP antigo do `ws_gateway`. Repus o estado com `docker compose restart projects ws_gateway` e `nginx -s reload`. As reconstruções seguintes usaram `--no-deps`.
 
+## Adenda: D-30 e D-31 (2026-10-22)
+
+Pedido da equipa depois do checkpoint do Estágio 5: criar um projeto a partir de um vídeo (D-30, REQ-VID-UPLOAD-021, UC-VID-000 FA6) e mostrar os vídeos concluídos na área principal do projeto (D-31). Os pormenores de interface que as fontes não fixam ficaram na D-32 (pendente, com implementação provisória).
+
+Ficheiros novos: `frontend/lib/video-project.ts` (fluxo, com os passos injetados para ser testável), `frontend/components/video/new-video-project-dialog.tsx`, `frontend/components/video/project-video-list.tsx`, `frontend/test/video-project.test.mts`, `projects/test/video/e2e-project.test.js` e `projects/test/video/e2e-ui.test.js`. Linhas acrescentadas: 2 na `dashboard-sidebar.tsx` e 2 em `app/dashboard/[pid]/page.tsx`. O `new-project-dialog.tsx` e o `ProjectImageList` não mudaram. Sem alterações no backend: a rota `POST /projects/:user` já aceita `imgs` vazio.
+
+Defeito encontrado no navegador e corrigido: o `react-dropzone` descarta os ficheiros fora do `accept` antes do `onDrop`, por isso um MKV era ignorado sem mensagem (Exceção 1 do UC-VID-000 pede o aviso). Afetava a janela "Vídeos" da B001 e o novo diálogo; os dois passaram a usar `onDropRejected` com `UNSUPPORTED_FORMAT` (Medium, Fixed).
+
+Regressão depois da adenda: unitários do serviço de projetos 40/40, E2E 24/24 e frontend `tsc` e ESLint sem erros (o único aviso, em `page.tsx:420`, é de código existente). Regra 2.6: `git diff f9c316a` não remove nem altera nenhuma linha de código existente; as linhas alteradas são só de documentação e do memory-bank (contagens e rastreabilidade da D-30).
+
 ## Ready for Operations
 
-- [x] All acceptance criteria met (API e backend; o UI do navegador falta verificar à mão)
+- [x] All acceptance criteria met (API, backend e navegador, incluindo D-30 e D-31)
 - [ ] Code coverage > 80% (cumprido no domínio e na aplicação; os adaptadores não são medidos)
 - [x] No critical/high severity issues open (as 2 *High* foram corrigidas)
-- [ ] D-25 a D-29 respondidos pela equipa
+- [ ] D-25 a D-29 e D-32 respondidos pela equipa
