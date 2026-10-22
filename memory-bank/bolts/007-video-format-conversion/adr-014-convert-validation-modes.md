@@ -1,7 +1,7 @@
 ---
 bolt: 007-video-format-conversion
 created: 2026-10-22T22:33:00Z
-status: proposed
+status: accepted
 superseded_by: null
 ---
 
@@ -11,7 +11,7 @@ superseded_by: null
 
 O ADD 4.7 e CONVERT-003 exigem que o painel mostre cópia direta ou recodificação a partir do endpoint de validação. `plan.decide` já calcula os modos por stream, mas `tasks.validate` devolve só as propriedades estimadas em `output`. O contrato dos painéis B004/B005 não pode mudar (regra 2.6, D-72).
 
-## Decisão proposta
+## Decisão
 
 Uma linha nova após `plans.decide` chama um módulo da B007 que acrescenta `videoMode` e `audioMode` a `decided.output` somente se a lista tiver um único passo `convert`. `tasks.validate` devolve esse objeto pela linha existente. O painel lê os dois modos do servidor; diz «Cópia direta» apenas se todas as streams presentes forem copiadas. A resposta de todas as outras operações conserva as mesmas chaves. Em `submit`, um helper novo transforma apenas `SAME_FORMAT` e `UNSUPPORTED_TARGET_FORMAT` da conversão nos respetivos códigos HTTP 422 antes do tratamento genérico de parâmetros; as outras operações continuam a usar `INVALID_STEP_PARAMS`.
 

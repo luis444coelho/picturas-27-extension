@@ -31,15 +31,15 @@ O módulo de operação valida e estima a conversão. Um módulo de extras trans
 - [x] `memory-bank/bolts/007-video-format-conversion/implementation-preflight.md` — evidência V1–V8 antes de escrever código.
 - [x] `memory-bank/bolts/007-video-format-conversion/adr-013-convert-worker-path.md` — decisão proposta sobre o ramo do worker.
 - [x] `memory-bank/bolts/007-video-format-conversion/adr-014-convert-validation-modes.md` — decisão proposta sobre a resposta de validação.
-- [x] `memory-bank/standards/decision-index.md` — índice dos ADR-013/014 propostos.
+- [x] `memory-bank/standards/decision-index.md` — índice dos ADR-013/014 aceites no checkpoint da etapa 2.
 
 ### Key Decisions
 
 - **D-68 (c):** AVI usa a qualidade e o bitrate aprovados pela equipa; MP4/MOV conservam a D-39.
 - **D-69/70/71 (a):** cópia MP4 para perfis incompatíveis, cópia de stream apenas por igualdade de codec e corte de dimensão ímpar apenas ao recodificar.
 - **D-72 (a):** os modos são acrescentados apenas à validação da conversão; os caminhos B004/B005 não recebem os novos campos.
-- **ADR-013 proposto:** o comando genérico da B003 permanece intacto; a conversão isolada usa um ramo novo que partilha os serviços de execução e publicação.
-- **ADR-014 proposto:** a validação transmite os modos do plano ao painel sem duplicar a matriz no frontend.
+- **ADR-013 aceite:** o comando genérico da B003 permanece intacto; a conversão isolada usa um ramo novo que partilha os serviços de execução e publicação.
+- **ADR-014 aceite:** a validação transmite os modos do plano ao painel sem duplicar a matriz no frontend.
 
 ### Deviations from Plan
 
@@ -51,4 +51,4 @@ Nenhuma.
 
 ### Developer Notes
 
-Esta etapa passou nas verificações de sintaxe, TypeScript, ESLint e Prettier dos módulos novos. O `tasks.js` existente continua a produzir um aviso Prettier nas duas chamadas longas de `applyPlanExtras`/`applyVisualPlanExtras` herdadas da B004/B005; a regra 2.6 impede reformatá-las, e todas as linhas acrescentadas estão formatadas. Um ensaio isolado de FFmpeg gerou AVI MPEG-4/MP3 e cópia MP4 H.264/AAC na mesma invocação; a matriz completa, integração, regressões e reprodução manual pertencem à etapa 3. CONVERT-009 e as cadeias com vários passos pertencem à B008. Os ADR-013/014 aguardam validação no checkpoint desta etapa.
+Esta etapa passou nas verificações de sintaxe, TypeScript, ESLint e Prettier dos módulos novos. O `tasks.js` existente continua a produzir um aviso Prettier nas duas chamadas longas de `applyPlanExtras`/`applyVisualPlanExtras` herdadas da B004/B005; a regra 2.6 impede reformatá-las, e todas as linhas acrescentadas estão formatadas. Um ensaio isolado de FFmpeg gerou AVI MPEG-4/MP3 e cópia MP4 H.264/AAC na mesma invocação; a matriz completa, integração, regressões e reprodução manual pertencem à etapa 3. CONVERT-009 e as cadeias com vários passos pertencem à B008. Os ADR-013/014 foram aceites no checkpoint desta etapa.

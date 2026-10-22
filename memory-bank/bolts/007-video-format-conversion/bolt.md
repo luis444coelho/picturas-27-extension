@@ -8,11 +8,14 @@ stories: [ST-VID-012]
 created: 2026-10-19T17:31:16Z
 started: 2026-10-22T22:13:29Z
 completed: null
-current_stage: implement
+current_stage: test
 stages_completed:
   - name: plan
     completed: 2026-10-22T22:28:37Z
     artifact: implementation-plan.md
+  - name: implement
+    completed: 2026-10-22T22:47:00Z
+    artifact: implementation-walkthrough.md
 requires_bolts: [003-video-task-foundation]
 enables_bolts: [008-video-concat-chain]
 requires_units: [001-video-lifecycle]
@@ -43,8 +46,8 @@ Acrescentar a operação `convert` `{target: "mp4"|"mov"|"avi"}` ao registo de o
 ## Etapas
 
 - ✅ **1. Plan**: aprovado → `implementation-plan.md`
-- ⏳ **2. Implement**: em curso → código + `implementation-walkthrough.md`
-- [ ] **3. Test**: Pending → `test-walkthrough.md`
+- ✅ **2. Implement**: aprovado → código + `implementation-walkthrough.md`; ADR-013/014 aceites
+- ⏳ **3. Test**: em curso → `test-walkthrough.md`
 
 ## Respostas do checkpoint da etapa 1
 

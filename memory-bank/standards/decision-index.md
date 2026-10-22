@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-10-22T22:34:06Z
+last_updated: 2026-10-22T23:34:11Z
 total_decisions: 14
 ---
 
@@ -21,7 +21,7 @@ Use this to find relevant prior decisions when working on related features.
 <!-- Entries are appended below in reverse chronological order (newest first) -->
 
 ### ADR-014: Modos de stream na validação apenas de `convert`
-- **Status**: proposed (checkpoint de implementação da B007 pendente)
+- **Status**: accepted
 - **Date**: 2026-10-22
 - **Bolt**: 007-video-format-conversion (002-video-transformations)
 - **Path**: `bolts/007-video-format-conversion/adr-014-convert-validation-modes.md`
@@ -29,7 +29,7 @@ Use this to find relevant prior decisions when working on related features.
 - **Read when**: Adding conversion UI, validating video steps, changing the `output` response or handling `SAME_FORMAT`/`UNSUPPORTED_TARGET_FORMAT`.
 
 ### ADR-013: Ramo aditivo para a conversão isolada no worker
-- **Status**: proposed (checkpoint de implementação da B007 pendente)
+- **Status**: accepted
 - **Date**: 2026-10-22
 - **Bolt**: 007-video-format-conversion (002-video-transformations)
 - **Path**: `bolts/007-video-format-conversion/adr-013-convert-worker-path.md`

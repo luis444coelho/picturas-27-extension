@@ -1,7 +1,7 @@
 ---
 bolt: 007-video-format-conversion
 created: 2026-10-22T22:33:00Z
-status: proposed
+status: accepted
 superseded_by: null
 ---
 
@@ -11,7 +11,7 @@ superseded_by: null
 
 O T-06 exige que a conversão para AVI produza AVI e cópia MP4 na mesma invocação FFmpeg, com `split`/`asplit`. O `executor.build_command` da B003 constrói exatamente uma saída e usa sempre `-preset`/`-crf` em vídeo recodificado. A regra 2.6 proíbe substituir essas linhas. A B007 suporta apenas a operação isolada `convert`; a B008 tratará cadeias.
 
-## Decisão proposta
+## Decisão
 
 Antes do bloco genérico de execução de `task._execute`, uma guarda acrescentada para um único passo `convert` chama `convert_task.execute`. O módulo novo lê exclusivamente as decisões do plano persistido: codec, modo de cada stream, qualidade AVI e indicador `previewInSameInvocation`. Ele constrói a saída AVI+MP4 num só comando quando o plano o pede; MP4/MOV produzem um resultado e a pré-visualização posterior usa `ingest.preview` se o plano a pedir. Reutiliza `executor.run`, `ingest.probe`, geração de imagens, `StorageClient.upload`, progresso e cancelamento do `TaskRunner` (ADR-009), e devolve o mesmo contrato de resultado da B003.
 

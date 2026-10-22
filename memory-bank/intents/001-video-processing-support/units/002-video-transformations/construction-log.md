@@ -2,7 +2,7 @@
 unit: 002-video-transformations
 intent: 001-video-processing-support
 created: 2026-10-22T16:32:12Z
-last_updated: 2026-10-22T22:34:45Z
+last_updated: 2026-10-22T23:34:11Z
 ---
 
 # Construction Log: 002-video-transformations
@@ -31,7 +31,7 @@ last_updated: 2026-10-22T22:34:45Z
 | 004-video-basic-edits | ST-VID-001, ST-VID-002, ST-VID-003 | ✅ complete | - |
 | 005-video-visual-edits | ST-VID-004, ST-VID-008, ST-VID-009, ST-VID-010, ST-VID-011 | ✅ complete | - |
 | 006-video-frame-export | ST-VID-005 | 🚫 blocked (D-06) | - |
-| 007-video-format-conversion | ST-VID-012 | ⏳ in-progress (Plan) | - |
+| 007-video-format-conversion | ST-VID-012 | ⏳ in-progress (Test) | - |
 
 ## Execution History
 
@@ -51,6 +51,7 @@ last_updated: 2026-10-22T22:34:45Z
 | 2026-10-22T22:08:52Z | 005-video-visual-edits | completed | All 3 stages done |
 | 2026-10-22T22:13:29Z | 007-video-format-conversion | started | Stage 1: Plan |
 | 2026-10-22T22:28:37Z | 007-video-format-conversion | stage-complete | Plan → Implement (D-68 a D-72 respondidas) |
+| 2026-10-22T22:47:00Z | 007-video-format-conversion | stage-complete | Implement → Test (ADR-013 e ADR-014 aceites) |
 
 ## Execution Summary
 
