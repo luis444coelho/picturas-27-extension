@@ -2,7 +2,7 @@
 unit: 002-video-transformations
 intent: 001-video-processing-support
 created: 2026-10-22T16:32:12Z
-last_updated: 2026-10-22T16:42:11Z
+last_updated: 2026-10-22T16:58:47Z
 ---
 
 # Construction Log: 002-video-transformations
@@ -39,6 +39,7 @@ last_updated: 2026-10-22T16:42:11Z
 |------|------|-------|---------|
 | 2026-10-22T16:32:12Z | 004-video-basic-edits | started | Stage 1: Domain Model |
 | 2026-10-22T16:42:11Z | 004-video-basic-edits | stage-complete | Domain Model → Technical Design (D-49 a D-53) |
+| 2026-10-22T16:58:47Z | 004-video-basic-edits | stage-complete | Technical Design → ADR Analysis |
 
 ## Execution Summary
 
@@ -55,3 +56,8 @@ last_updated: 2026-10-22T16:42:11Z
 
 - 2026-10-22T16:32:12Z: B004 iniciada. Complexidade preenchida no início do bolt (D-01): `avg_uncertainty` 2 (cópia condicionada ao *keyframe* e cadência da velocidade por decidir), `max_dependencies` 2 (B003 e Unit 001), `testing_scope` 3 (worker com FFmpeg real, E2E pela pilha e painéis no navegador). Regras da equipa: fontes por ordem `docs/add.md` (mestre), `docs/specsDuvidas.md`, `memory-bank/standards/decision-index.md`, o bolt e as stories, `docs/requirements/` e `docs/use-cases/`, sem o `docs/merge.md`; regra 2.6 também para o código das B001 a B003 (só acréscimo); dúvidas novas a partir da D-49, com paragem no checkpoint seguinte; ramo `bolt/004-video-basic-edits`, commit e push no fim de cada etapa, sem merge para a `main`.
 - 2026-10-22T16:42:11Z: B004 Estágio 1 aprovado (`ddd-01-domain-model.md`) com as decisões D-49 a D-53: cópia condicionada ao *keyframe* no plano, verificada pelo worker, com o áudio a seguir o vídeo (D-49); `trim {startMs, endMs}`, `remove_audio {}`, `speed {factor}` (D-50); intervalo mínimo de um fotograma (D-51); velocidade com `fps=<taxa original>` (D-52); fator 1.0 → `NO_CHANGES` (D-53). Na D-52 e na D-53 a equipa escreveu "(a)" com o conteúdo da opção (b) recomendada; registado pelo conteúdo.
+- 2026-10-22T16:58:47Z: B004 Estágio 2 aprovado (`ddd-02-technical-design.md`), sem dúvidas novas. O bolt para aqui e é continuado por outra pessoa noutra máquina, a partir do ramo `bolt/004-video-basic-edits`.
+- **Para o Estágio 3 (ADR Analysis), pedido da equipa:**
+  - **ADR-007:** o worker escolhe entre duas alternativas do plano, ambas calculadas no serviço de projetos (cópia no *keyframe* do recorte, `keyframeCopy`, D-49): o serviço de projetos decide se a cópia é permitida e o worker só verifica o *keyframe* com o FFprobe. Vai além da letra do T-01 ("o worker não volta a tomar esta decisão") e afeta a B008.
+  - **ADR-008:** o `projects/video/planExtras.js` como padrão para estender o plano sem mudar o `plan.js` da B003 (regra 2.6), a seguir pelas B005, B007 e B008 quando precisarem de dados que o `estimate` e os `copyable` booleanos não exprimem.
+  - Depois dos dois ADR, acrescentá-los ao `memory-bank/standards/decision-index.md` e parar no checkpoint do Estágio 3. No Estágio 4, fazer primeiro as verificações V1 a V8 do desenho técnico (a mais importante é a V2(a): `audio: none` a partir do `estimate` do último passo, de que a `remove_audio` precisa).

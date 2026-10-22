@@ -8,11 +8,14 @@ stories: [ST-VID-001, ST-VID-002, ST-VID-003]
 created: 2026-10-19T17:31:16Z
 started: 2026-10-22T16:32:12Z
 completed: null
-current_stage: design
+current_stage: adr
 stages_completed:
   - name: model
     completed: 2026-10-22T16:42:11Z
     artifact: ddd-01-domain-model.md
+  - name: design
+    completed: 2026-10-22T16:58:47Z
+    artifact: ddd-02-technical-design.md
 requires_bolts: [003-video-task-foundation]
 enables_bolts: [008-video-concat-chain, 009-video-batch]
 requires_units: [001-video-lifecycle]
@@ -45,7 +48,7 @@ Acrescentar ao registo de operações (T-01) e ao worker (T-02) as operações d
 ## Etapas
 
 - [x] **1. Domain Model**: Complete → `ddd-01-domain-model.md`
-- [ ] **2. Technical Design**: Pending → `ddd-02-technical-design.md`
+- [x] **2. Technical Design**: Complete → `ddd-02-technical-design.md`
 - [ ] **3. ADR Analysis** (opcional): Pending → `adr-{n}-{slug}.md`
 - [ ] **4. Implement**: Pending → código nos componentes indicados em "Saídas esperadas"
 - [ ] **5. Test**: Pending → `ddd-03-test-report.md`
