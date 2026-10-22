@@ -2,7 +2,7 @@
 unit: 001-video-lifecycle
 intent: 001-video-processing-support
 created: 2026-10-21T16:12:26Z
-last_updated: 2026-10-22T15:39:16Z
+last_updated: 2026-10-22T15:44:17Z
 ---
 
 # Construction Log: 001-video-lifecycle
@@ -49,6 +49,7 @@ last_updated: 2026-10-22T15:39:16Z
 | 2026-10-22T15:15:43Z | 003-video-task-foundation | started | Stage 1: Domain Model |
 | 2026-10-22T15:25:53Z | 003-video-task-foundation | stage-complete | Domain Model → Technical Design (D-37 a D-43) |
 | 2026-10-22T15:39:16Z | 003-video-task-foundation | stage-complete | Technical Design → ADR Analysis (D-44 a D-47) |
+| 2026-10-22T15:44:17Z | 003-video-task-foundation | stage-complete | ADR Analysis → Implement (ADR-003, ADR-004, ADR-005) |
 
 ## Execution Summary
 
@@ -78,3 +79,4 @@ last_updated: 2026-10-22T15:39:16Z
 - 2026-10-22T15:11:31Z: Checkpoint final da B002 aprovado (teste manual da equipa: informações, reprodução e descarregamento a funcionar). D-36 respondida (a). `bolt-complete.cjs 002-video-access` executado (com `NODE_PATH` para as dependências do specsmd): bolt `in-progress → complete`, ST-VID-006 e ST-VID-007 `ready → complete` com `implemented: true`; unit e intent sem alteração (falta a B003). Ramo `bolt/002-video-access` sem merge para a `main`.
 - 2026-10-22T15:25:53Z: B003 Estágio 1 aprovado (`ddd-01-domain-model.md`) com as decisões D-37 a D-43; D-42 com opção nova da equipa (código novo no fim do `MESSAGES` de `projects/video/errors.js`, nome na D-44). Regras da equipa para a B003: fontes por ordem `docs/add.md` (mestre), `docs/specsDuvidas.md`, `memory-bank/standards/decision-index.md`, o bolt e a story, `docs/requirements/` e `docs/use-cases/`, sem o `docs/merge.md`; regra 2.6 também para o código das B001 e B002 (só acréscimo); nada de lotes (D-06) nem operações concretas (B004, B005, B007); a `test_reencode` só com `VIDEO_TEST_OPERATIONS=1`, inativa no `docker-compose.yaml`; a rotina da Q-ADD-14 inclui os carregamentos abandonados (D-15); dúvidas novas a partir da D-44, com paragem no checkpoint seguinte; rebuilds com `--no-deps` (SeaweedFS no porto 9091 do host por um `docker-compose.override.yml` local, fora do git). Ramo `bolt/003-video-task-foundation`, commit e push no fim de cada etapa, sem merge para a `main`.
 - 2026-10-22T15:39:16Z: B003 Estágio 2 aprovado (`ddd-02-technical-design.md`) com as decisões D-44 a D-47; a D-47 acrescentou uma linha aos limites do `bolt.md` da B004. A equipa pediu a verificação V8 (os dois casos de 701 do `process/:n`) no Estágio 4 e ADR, no Estágio 3, para o reenvio do cancelamento, os campos extra do `VideoTask` e o `_id` do resultado igual ao da tarefa.
+- 2026-10-22T15:44:17Z: B003 Estágio 3 aprovado: ADR-003 (reenvio do cancelamento no `started`), ADR-004 (campos extra do `VideoTask`) e ADR-005 (`_id` do resultado igual ao da tarefa), acrescentados ao `decision-index.md`.
