@@ -13,6 +13,7 @@ import ingest
 import keyframe
 import video_msg
 from control import ControlChannel
+from control_poll import ControlPoller
 from storage import StorageClient
 
 """
@@ -74,6 +75,7 @@ class TaskRunner:
         self._redact = redact
         self._clock = clock
         self._control = ControlChannel(rabbit._connection, on_cancel=self._on_cancel)
+        self._control_poller = ControlPoller(self._control)
         self._storage = StorageClient(self._tick)
         self._reporter = None
         self._running = None
@@ -95,6 +97,7 @@ class TaskRunner:
     def _wait(self, seconds):
         """Heartbeats and control messages (cancellations) for up to `seconds`."""
         self._rabbit._connection.process_data_events(time_limit=seconds)
+        self._control_poller.poll()
 
     def _tick(self):
         """Called between transfer blocks: heartbeats, progress cadence, cancel."""

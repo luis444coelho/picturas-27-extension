@@ -4,9 +4,11 @@ NAME = 'trim'
 
 def video_filters(parameters):
     start, end = parameters['startMs'] / 1000, parameters['endMs'] / 1000
-    return [f'trim=start={start:.3f}:end={end:.3f}', 'setpts=PTS-STARTPTS']
+    return ['setpts=PTS-STARTPTS', f'trim=start={start:.3f}:end={end:.3f}',
+            'setpts=PTS-STARTPTS']
 
 
 def audio_filters(parameters):
     start, end = parameters['startMs'] / 1000, parameters['endMs'] / 1000
-    return [f'atrim=start={start:.3f}:end={end:.3f}', 'asetpts=PTS-STARTPTS']
+    return ['asetpts=PTS-STARTPTS', f'atrim=start={start:.3f}:end={end:.3f}',
+            'asetpts=PTS-STARTPTS']

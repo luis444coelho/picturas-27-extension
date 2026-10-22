@@ -1,6 +1,6 @@
 ---
-last_updated: 2026-10-22T18:15:00Z
-total_decisions: 8
+last_updated: 2026-10-22T19:00:00Z
+total_decisions: 9
 ---
 
 # Decision Index
@@ -20,6 +20,14 @@ Use this to find relevant prior decisions when working on related features.
 
 <!-- Entries are appended below in reverse chronological order (newest first) -->
 
+### ADR-009: Consulta explícita de controlo na ligação existente do worker
+- **Status**: accepted
+- **Date**: 2026-10-22
+- **Bolt**: 004-video-basic-edits (002-video-transformations)
+- **Path**: `bolts/004-video-basic-edits/adr-009-control-polling.md`
+- **Summary**: A integração real expôs que o Pika 1.3.2 adia callbacks reentrantes enquanto a tarefa corre. D-56 (a), aprovada: fila exclusiva adicional no canal de controlo existente, consultada por `basic_get` em `_wait()`, reutilizando `ControlChannel._on_message`. Mantêm-se a ligação única, thread principal, assinaturas e todas as linhas anteriores das B001–B003.
+- **Read when**: Working on cancellation, Pika callback dispatch, worker heartbeats, control queues or executor wait hooks.
+
 ### ADR-008: `planExtras.js` como módulo de extensão do plano sem alterar o `plan.js` da B003
 - **Status**: accepted
 - **Date**: 2026-10-22
@@ -35,6 +43,7 @@ Use this to find relevant prior decisions when working on related features.
 - **Path**: `bolts/004-video-basic-edits/adr-007-keyframe-copy-worker-decision.md`
 - **Summary**: REQ-VID-TRIM-010 permite copiar vídeo e áudio sem recodificação quando o instante de início do recorte coincide com um *keyframe*. O serviço de projetos (`planExtras.js`, ADR-008) calcula **ambas** as alternativas: cópia (`plan.keyframeCopy` com `atMs`, `endMs`, `video`, `audio`, `preview`, `dropStep`) e recodificação (restante plano). O worker verifica a coincidência com `round((pts − first_pts) × 1000) == atMs` e escolhe entre elas; falha do FFprobe recai para recodificação sem falhar a tarefa. Áudio na cópia: `copy` (AAC), `encode` (MP3/outro), ou `none` (sem áudio). `metadata.videoMode = "copy" | "encode"`. Precedente: B001 (ADR-002), onde o worker também devolve FFprobe e o serviço de projetos decide.
 - **Read when**: Working on the `trim` operation, the `keyframe.py` module, the `keyframeCopy` plan field (structure: `{atMs, endMs, video, audio, preview, dropStep}`), chains starting with a trim step (B008), or any future operation where the worker must choose between copy and re-encode at runtime.
+- **Stage 5 clarification (D-57 a, approved)**: If packet presentation timestamps show that a copied prefix cannot preserve the selected end because of B-frame references, use the persisted encode alternative. Keep the one-frame tolerance and publish the actual mode. Copy remains available for representable intervals.
 
 ### ADR-006: Pastas temporárias órfãs depois de um *dead-letter*: ficheiro de bloqueio por tarefa e limpeza no arranque do worker
 - **Status**: accepted

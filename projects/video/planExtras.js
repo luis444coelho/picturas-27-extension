@@ -3,6 +3,12 @@ const encoding = require("./encoding");
 
 // ADR-007/008 and D-54: add data to the B003 plan, preserving its decisions.
 function applyPlanExtras(plan, steps, inputProps, registry) {
+  if (
+    !steps.some((step) =>
+      ["trim", "remove_audio", "speed"].includes(step.operation),
+    )
+  )
+    return plan;
   let props = inputProps;
   const effects = steps.map((step, index) => {
     const op = registry.get(step.operation);

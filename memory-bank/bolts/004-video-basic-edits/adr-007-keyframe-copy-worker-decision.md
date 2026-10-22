@@ -110,6 +110,12 @@ A solução escolhida mantém o serviço de projetos como o único dono das regr
 
 - A correspondência de *keyframe* usa `round((pts − first_pts) × 1000) == atMs`. Ficheiros com *keyframes* a instantes irregulares podem ser recodificados em vez de copiados — resultado sempre correto, mas sem a otimização da cópia.
 
+## Esclarecimento aprovado na etapa 5 — D-57 (a)
+
+O keyframe inicial é necessário, mas um prefixo de pacotes só é copiável se representar também o fim escolhido. Em H.264 com B-frames, uma referência posterior ao fim pode ser descodificada antes do último B-frame do intervalo. A equipa aprovou recuo para a alternativa de recodificação já persistida quando a análise dos PTS dos pacotes demonstra que a cópia não conserva os fotogramas escolhidos. Não se alarga a tolerância nem se introduz recodificação parcial/montagem de GOPs. O modo publicado continua a ser o efetivamente executado.
+
+O worker compara os PTS dos primeiros N pacotes a partir do keyframe com os N PTS dos fotogramas apresentados no intervalo; divergência/PTS indisponíveis seleciona a recodificação. Na cópia segura, limita a saída a N fotogramas com `-frames:v`, além das opções de entrada. Compensa também a diferença entre o primeiro PTS de vídeo e o `format.start_time`, para `-ss/-to` continuarem relativos ao primeiro fotograma conforme D-49. Estes valores são locais à execução: não acrescentam decisões ou destinos ao plano persistido.
+
 ## Related
 
 - **Stories**: ST-VID-001 (AC2)

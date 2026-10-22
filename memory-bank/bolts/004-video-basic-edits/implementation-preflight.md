@@ -87,6 +87,8 @@ A equipa aprovou a D-54 (a) e autorizou implementar a etapa 4. O ADR-008, o dese
 
 ## Auditoria desta paragem
 
+Nota posterior, etapa 5: a auditoria abaixo é histórica da paragem antes da implementação. As verificações reais, correções de precisão/sincronismo e decisões D-55/56/57 estão no relatório de testes. D-56 acrescenta consulta explícita de controlo no canal existente (ADR-009); D-57 permite recodificar se o fim não for representável por cópia. O helper continua depois de `build_command()`, preservando `executor.run()` e os argumentos anteriores; acrescenta localmente a compensação da origem temporal e o limite de fotogramas na cópia segura, ou o limite de duração na velocidade com áudio. `plan.js` continua intacto.
+
 Os dois comandos abaixo devolveram saída vazia:
 
 ```bash
