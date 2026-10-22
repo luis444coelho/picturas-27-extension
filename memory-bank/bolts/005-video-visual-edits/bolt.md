@@ -3,19 +3,19 @@ id: 005-video-visual-edits
 unit: 002-video-transformations
 intent: 001-video-processing-support
 type: simple-construction-bolt
-status: planned
+status: in-progress
 stories: [ST-VID-004, ST-VID-008, ST-VID-009, ST-VID-010, ST-VID-011]
 created: 2026-10-19T17:31:16Z
-started: null
+started: 2026-10-22T20:11:21Z
 completed: null
-current_stage: null
+current_stage: plan
 stages_completed: []
 requires_bolts: [003-video-task-foundation]
 enables_bolts: [008-video-concat-chain, 009-video-batch]
 requires_units: [001-video-lifecycle]
 blocks: true
 # avg_complexity: maior esforço do ADD no bolt (S=1, M=2, L=3); os outros campos são preenchidos no início do bolt na Construção (specsDuvidas D-01)
-complexity: {avg_complexity: 2, avg_uncertainty: null, max_dependencies: null, testing_scope: null}
+complexity: {avg_complexity: 2, avg_uncertainty: 3, max_dependencies: 2, testing_scope: 3}
 ---
 
 # Bolt: 005-video-visual-edits
@@ -43,7 +43,7 @@ Acrescentar ao registo de operações e ao worker as operações `watermark`, `a
 
 ## Etapas
 
-- [ ] **1. Plan**: Pending → `implementation-plan.md`
+- [ ] **1. Plan**: ⏳ Plano escrito, à espera do checkpoint (D-58 a D-64 pendentes) → `implementation-plan.md`
 - [ ] **2. Implement**: Pending → código + `implementation-walkthrough.md`
 - [ ] **3. Test**: Pending → `test-walkthrough.md`
 
@@ -100,3 +100,4 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 ## Notas
 
 - Esforço no ADD: UC-VID-008 = M, 009 = M, 010 = S, 011 = S; o UC-VID-004 não tem secção própria no ADD. `avg_complexity` = 2 (maior esforço do ADD no bolt, com S=1, M=2, L=3); `avg_uncertainty`, `max_dependencies` e `testing_scope` são preenchidos no início do bolt na Construção (specsDuvidas D-01).
+- 2026-10-22T20:11:21Z: B005 iniciada no ramo `bolt/005-video-visual-edits`, criado a partir da `main` com a B004. Complexidade preenchida no início do bolt (D-01): `avg_uncertainty` 3 (Q-ADD-07 e Q-ADD-12 em aberto, marca de água sem secção no ADD, D-58 a D-64), `max_dependencies` 2 (B003 e Unit 001; o código da B004 é reutilizado), `testing_scope` 3 (FFmpeg real, equivalência sharp ↔ FFmpeg, integração pela pilha e painéis no navegador).
