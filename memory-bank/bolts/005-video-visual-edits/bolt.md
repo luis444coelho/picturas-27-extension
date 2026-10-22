@@ -3,25 +3,40 @@ id: 005-video-visual-edits
 unit: 002-video-transformations
 intent: 001-video-processing-support
 type: simple-construction-bolt
-status: in-progress
-stories: [ST-VID-004, ST-VID-008, ST-VID-009, ST-VID-010, ST-VID-011]
-created: 2026-10-19T17:31:16Z
-started: 2026-10-22T20:11:21Z
-completed: null
-current_stage: test
+status: complete
+stories:
+  - ST-VID-004
+  - ST-VID-008
+  - ST-VID-009
+  - ST-VID-010
+  - ST-VID-011
+created: 2026-10-19T17:31:16.000Z
+started: 2026-10-22T20:11:21.000Z
+completed: "2026-10-22T22:08:52Z"
+current_stage: null
 stages_completed:
   - name: plan
-    completed: 2026-10-22T20:22:31Z
+    completed: 2026-10-22T20:22:31.000Z
     artifact: implementation-plan.md
   - name: implement
-    completed: 2026-10-22T20:49:13Z
+    completed: 2026-10-22T20:49:13.000Z
     artifact: implementation-walkthrough.md, adr-010-mark-resolution-middleware.md, adr-011-visual-plan-extras.md
-requires_bolts: [003-video-task-foundation]
-enables_bolts: [008-video-concat-chain, 009-video-batch]
-requires_units: [001-video-lifecycle]
+  - name: test
+    completed: 2026-10-22T22:08:52Z
+    artifact: test-walkthrough.md, manual-test-checklist.md, adr-012-adjust-rgb.md
+requires_bolts:
+  - 003-video-task-foundation
+enables_bolts:
+  - 008-video-concat-chain
+  - 009-video-batch
+requires_units:
+  - 001-video-lifecycle
 blocks: true
-# avg_complexity: maior esforço do ADD no bolt (S=1, M=2, L=3); os outros campos são preenchidos no início do bolt na Construção (specsDuvidas D-01)
-complexity: {avg_complexity: 2, avg_uncertainty: 3, max_dependencies: 2, testing_scope: 3}
+complexity:
+  avg_complexity: 2
+  avg_uncertainty: 3
+  max_dependencies: 2
+  testing_scope: 3
 ---
 
 # Bolt: 005-video-visual-edits
@@ -51,7 +66,7 @@ Acrescentar ao registo de operações e ao worker as operações `watermark`, `a
 
 - [x] **1. Plan**: Complete (D-58 a D-64 respondidas) → `implementation-plan.md`
 - [x] **2. Implement**: Complete (D-65 e D-66) → código + `implementation-walkthrough.md`, ADR-010, ADR-011
-- [ ] **3. Test**: ⏳ D-67 implementada (ADR-012) e testes manuais aprovados; repetição do item do ajuste e aprovação da etapa pendentes → `test-walkthrough.md`, `manual-test-checklist.md`
+- [x] **3. Test**: Complete (D-67/ADR-012; testes manuais aprovados; etapa aprovada no checkpoint final) → `test-walkthrough.md`, `manual-test-checklist.md`
 
 ## Requisitos rastreados
 
@@ -109,3 +124,4 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 - 2026-10-22T20:11:21Z: B005 iniciada no ramo `bolt/005-video-visual-edits`, criado a partir da `main` com a B004. Complexidade preenchida no início do bolt (D-01): `avg_uncertainty` 3 (Q-ADD-07 e Q-ADD-12 em aberto, marca de água sem secção no ADD, D-58 a D-64), `max_dependencies` 2 (B003 e Unit 001; o código da B004 é reutilizado), `testing_scope` 3 (FFmpeg real, equivalência sharp ↔ FFmpeg, integração pela pilha e painéis no navegador).
 - 2026-10-22T21:18:05Z: etapa 3 executada (`test-walkthrough.md`). D-67 registada e pendente (contraste e saturação do ajuste: as fórmulas do ADD 4.3 não dão uma pré-visualização equivalente). O bolt continua aberto até à resposta, aos testes manuais e à aprovação da etapa 3.
 - 2026-10-22T22:05:12Z: D-67 (a) implementada (ADR-012); suites de novo a verde (integração B005 16/16). Testes manuais 12/12 aprovados pela equipa; a comparação do ajuste vai ser repetida depois da correção. Etapa 3 ainda não aprovada.
+- 2026-10-22T22:08:52Z: checkpoint final aprovado pela equipa (a comparação do ajuste foi repetida depois da D-67 e coincide). `bolt-complete.cjs` executado; bolt fechado no ramo `bolt/005-video-visual-edits`, sem merge.

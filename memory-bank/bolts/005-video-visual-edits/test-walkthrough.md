@@ -2,7 +2,7 @@
 stage: test
 bolt: 005-video-visual-edits
 created: 2026-10-22T21:17:46Z
-status: awaiting-checkpoint
+status: complete
 ---
 
 ## Test Report: 002-video-transformations
@@ -138,3 +138,12 @@ Ficheiros existentes (só acréscimos):
   - **Contentores:** os diretórios temporários (`/tmp/b005-*` e `/tmp/b004-e2e-fixtures-b005run`) foram removidos. As fixtures e as capturas ficaram no *scratchpad* da sessão, fora do repositório.
 - **Não executado:** as suites históricas `e2e-*.test.js` das B001 a B003, pelas razões do README da B004 (ambientes próprios, `test_reencode`, reinícios), e testes de carga. A regressão de vídeo fica coberta pelas suites unitárias e pela integração da B004.
 - **O checkpoint fica à espera de:** a repetição, pela equipa, da comparação do ajuste depois da D-67, e a aprovação explícita da etapa 3. Não se acrescenta `test` a `stages_completed` antes disso.
+
+## Checkpoint final (2026-10-22T22:08:52Z)
+
+A equipa repetiu a comparação do ajuste depois da D-67 (saturação 0, contraste 0.6 e contraste 1.3) e confirmou que a pré-visualização coincide com o resultado. A equipa aprovou explicitamente a etapa 3.
+
+### Decisões tomadas no checkpoint
+
+- Etapa 3 aprovada; fecho do bolt com `bolt-complete.cjs` (com `NODE_PATH` para as dependências do specsmd).
+- Commit e push do fecho no ramo `bolt/005-video-visual-edits`, sem merge para a `main`.

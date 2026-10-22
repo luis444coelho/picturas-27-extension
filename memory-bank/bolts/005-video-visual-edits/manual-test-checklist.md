@@ -35,4 +35,4 @@ Depois da execução, comunica os itens aprovados e os que falharam. O bolt fica
 
 A equipa executou os 12 itens no browser e comunicou que **todos foram aprovados**. Não foram comunicados o browser nem a versão.
 
-**Pendente:** a comparação da pré-visualização com o resultado no **contraste e na saturação** (item "Ajuste") vai ser repetida pela equipa depois da correção da D-67 (ADR-012), e confirmada no próximo checkpoint.
+A comparação da pré-visualização com o resultado no **contraste e na saturação** (item "Ajuste") foi repetida pela equipa depois da correção da D-67 (ADR-012), em 2026-10-22T22:08:52Z, com saturação 0, contraste 0.6 e contraste 1.3: **a pré-visualização coincide com o resultado.** Item aprovado.
