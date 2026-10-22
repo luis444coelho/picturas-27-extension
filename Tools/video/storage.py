@@ -42,24 +42,35 @@ class StorageClient:
 
     def upload(self, target, path, content_type):
         url = self._url('put', target, contentType=content_type)
-        size = os.path.getsize(path)
-
-        def blocks():
-            with open(path, 'rb') as src:
-                while True:
-                    chunk = src.read(config.CHUNK_SIZE)
-                    if not chunk:
-                        break
-                    self._pump()
-                    yield chunk
-
-        # Content-Length is required: without it requests sends a chunked body,
-        # which presigned S3 PUT URLs do not accept.
+        # A body with __len__ makes requests send Content-Length and no
+        # Transfer-Encoding: chunked, which presigned S3 PUT URLs refuse (ADD T-03).
+        # A plain generator gets both headers, even with Content-Length set.
         resp = requests.put(
             url,
-            data=blocks(),
-            headers={'Content-Type': content_type, 'Content-Length': str(size)},
+            data=_PumpingFile(path, self._pump),
+            headers={'Content-Type': content_type},
             timeout=60,
         )
         resp.raise_for_status()
         return f"{target['projectId']}/{target['stage']}/{target['name']}"
+
+
+class _PumpingFile:
+    """Iterates a file in blocks, serving heartbeats between blocks."""
+
+    def __init__(self, path, pump):
+        self._path = path
+        self._pump = pump
+        self._size = os.path.getsize(path)
+
+    def __len__(self):
+        return self._size
+
+    def __iter__(self):
+        with open(self._path, 'rb') as src:
+            while True:
+                chunk = src.read(config.CHUNK_SIZE)
+                if not chunk:
+                    break
+                self._pump()
+                yield chunk

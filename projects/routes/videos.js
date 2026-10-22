@@ -135,7 +135,6 @@ router.get(
         createdAt: video.createdAt,
         thumbnailUrl: await storage.publicReadUrl(
           storage.parseKey(video.owner_id, video.storage.thumb_key),
-          "image/jpeg",
         ),
       })),
     );
@@ -186,7 +185,6 @@ router.get(
     const mimeType = video.storage.preview_key ? "video/mp4" : video.mime_type;
     const url = await storage.publicReadUrl(
       storage.parseKey(video.owner_id, key),
-      mimeType,
     );
 
     res.status(200).json({ url, mimeType, expiresIn: storage.URL_EXPIRES });

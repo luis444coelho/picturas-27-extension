@@ -37,10 +37,12 @@ async function publicWriteUrl(target, contentType) {
   return resp.data.url;
 }
 
-async function publicReadUrl(target, responseContentType) {
+// No ResponseContentType: SeaweedFS 4.47 answers 403 to SigV2 URLs with
+// response-* overrides (found in Stage 5). Objects are written with their
+// Content-Type, which storage returns as it is.
+async function publicReadUrl(target) {
   const resp = await axios.post(`${VIDEO_STORAGE}/url/get`, {
     ...target,
-    responseContentType,
     expires: URL_EXPIRES,
     public: true,
   });

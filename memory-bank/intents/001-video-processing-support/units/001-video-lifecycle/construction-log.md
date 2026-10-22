@@ -2,7 +2,7 @@
 unit: 001-video-lifecycle
 intent: 001-video-processing-support
 created: 2026-10-21T16:12:26Z
-last_updated: 2026-10-22T08:37:38Z
+last_updated: 2026-10-22T09:08:10Z
 ---
 
 # Construction Log: 001-video-lifecycle
@@ -58,3 +58,4 @@ last_updated: 2026-10-22T08:37:38Z
 - Regras da equipa para a B001: o `docs/add.md` é o mestre, seguido de `docs/specsDuvidas.md`, do bolt e das suas stories, de `docs/requirements/` e de `docs/use-cases/`; não se usa o `docs/merge.md`. O que não estiver nas fontes vai para `docs/specsDuvidas.md` (D-15 e seguintes) e para no checkpoint seguinte. Ramo `bolt/001-video-lifecycle`, com um commit por etapa, sem push.
 - Checkpoint do Estágio 2 aprovado com as decisões D-15 a D-22 (`docs/specsDuvidas.md`). A limpeza dos carregamentos abandonados (D-15) passou para o âmbito da B003 (rotina da Q-ADD-14), registada em `bolts/003-video-task-foundation/bolt.md`.
 - Checkpoint do Estágio 4 aprovado com as decisões D-23 e D-24. Nenhuma linha de código existente foi alterada (só linhas acrescentadas em 8 ficheiros).
+- 2026-10-22T09:08:10Z: Estágio 5 executado: 40 testes unitários (projetos), 25 (worker com FFmpeg 5.1), 24 E2E e 2 de transferências grandes, todos a passar (`ddd-03-test-report.md`). 5 defeitos corrigidos; D-25 a D-29 registados para a equipa. À espera da aprovação do checkpoint final para fechar o bolt com `bolt-complete.cjs`.

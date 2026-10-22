@@ -203,3 +203,43 @@
 - **O que as fontes dizem:** REQ-VID-UPLOAD-009 rejeita com `INVALID_CODEC` uma stream de vídeo com codec não admitido. REQ-VID-UPLOAD-012 rejeita ficheiros com cabeçalhos corrompidos ou fluxos truncados (`CORRUPTED_FILE`, D-14). Nenhuma fonte trata um contentor válido sem stream de vídeo.
 - **Opções:** (a) `CORRUPTED_FILE` (o worker não encontra um vídeo legível); (b) `INVALID_CODEC` com `details: {stream: "video", codec: null}`; (c) `UNSUPPORTED_FORMAT`.
 - **Resposta:** **(b).** Um ficheiro sem stream de vídeo não está corrompido: viola a REQ-VID-UPLOAD-009. É rejeitado com `INVALID_CODEC` e `details: {stream: "video", codec: null}`. O worker devolve os metadados com `videoCodec: null` e o serviço de projetos aplica a regra no `formats.js`. `CORRUPTED_FILE` fica para ficheiros que o FFprobe não consegue ler, sem duração ou truncados.
+
+## D-25 — Imagem base do worker de vídeo e versão do FFmpeg
+
+- **Onde:** `Tools/video/Dockerfile`.
+- **Dúvida:** A etiqueta `python:3.11-slim` passou a apontar para o Debian 13, que traz o FFmpeg 7.1 (verificado no Estágio 5). Fixa-se a imagem no Debian 12, ou aceita-se o FFmpeg 7.1?
+- **O que as fontes dizem:** ADD secção 6: "FFmpeg 5.1 no Debian 12, base da imagem `python:3.11-slim`"; "mudar a imagem base do worker muda a versão do FFmpeg e deve ser tratado como mudança de dependência". ADD T-02: "a mesma imagem base [...] de `Tools/brightness/Dockerfile`", que continua a usar a etiqueta flutuante.
+- **Opções:** (a) fixar `python:3.11-slim-bookworm` (Debian 12, FFmpeg 5.1), como diz a secção 6; (b) manter `python:3.11-slim` (Debian 13, FFmpeg 7.1) e atualizar o ADD.
+- **Resposta:** _Pendente._ Implementação provisória: **(a)**, conforme a secção 6 do ADD, que é o mestre. Os testes do Estágio 5 correram no FFmpeg 5.1.9.
+
+## D-26 — Miniatura de vídeos com cerca de 1 s
+
+- **Onde:** `Tools/video/ingest.py` (`thumbnail`).
+- **Dúvida:** Um vídeo com exatamente 1,0 s (ou pouco mais) não tem nenhum fotograma que comece em 00:00:01, e o FFmpeg não produz a miniatura. Que fotograma se usa?
+- **O que as fontes dizem:** REQ-VID-UPLOAD-014 e Q-ADD-22: miniatura a 00:00:01, ou no fotograma 0 "se o vídeo tiver menos de 1 s". Não tratam o caso em que não há fotograma em 00:00:01.
+- **Opções:** (a) quando não há fotograma a partir de 00:00:01, usa-se o fotograma 0, como nos vídeos com menos de 1 s; (b) usa-se o último fotograma.
+- **Resposta:** _Pendente._ Implementação provisória: **(a)**. O worker tenta 00:00:01 e, se o FFmpeg não produzir imagem, repete no fotograma 0.
+
+## D-27 — Assinaturas dos URLs no *error log* do nginx
+
+- **Onde:** `nginx/nginx.conf` (`location /s3-video/`).
+- **Dúvida:** O `log_format video_s3` (T-10) tira a *query string* do *access log*, mas o *error log* do nginx regista sempre o pedido completo, com a assinatura, quando recusa um pedido (por exemplo, 413 acima de 2 GB) ou quando o SeaweedFS falha. O formato do *error log* não é configurável. Aceita-se, ou baixa-se o nível do *error log* nesta `location`?
+- **O que as fontes dizem:** ADD T-10: a *query* contém a assinatura, "que é uma credencial válida durante 15 minutos e não pode ficar nos logs"; a decisão trata só do *access log*.
+- **Opções:** (a) aceitar como risco residual: só aparece em erros, e a assinatura expira em 15 min; (b) acrescentar `error_log /var/log/nginx/error.log crit;` na `location /s3-video/`, perdendo os erros de nível `error` (413, falhas de ligação ao SeaweedFS) dessa `location`.
+- **Resposta:** _Pendente._ Nada foi alterado.
+
+## D-28 — Consumidor do `video_ws_queue` sem religação ao RabbitMQ
+
+- **Onde:** `wsGateway/video.js`.
+- **Dúvida:** O `wsGateway/video.js` usa o `wsGateway/utils/rabbit_mq.js`, como manda o T-00. Esse utilitário não volta a ligar-se: depois de um reinício do RabbitMQ, os eventos `video-ingest-update` deixam de chegar até o `ws_gateway` ser reiniciado. É o mesmo comportamento que o `ws_queue` e o `project_queue` já têm (observado no Estágio 5). Mantém-se, ou o módulo de vídeo passa a ter o seu próprio consumidor com religação?
+- **O que as fontes dizem:** ADD T-00: "consome `video_ws_queue` (com `wsGateway/utils/rabbit_mq.js`)". ADD T-03 dá ao `projects/video/amqp.js` uma ligação persistente própria, que se volta a ligar.
+- **Opções:** (a) manter o T-00 e aceitar o risco, igual ao do fluxo de imagem; (b) consumidor próprio no `wsGateway/video.js` com `amqplib` e religação, como o `projects/video/amqp.js`, sem alterar o utilitário existente.
+- **Resposta:** _Pendente._ Implementação atual: **(a)**.
+
+## D-29 — O SeaweedFS recusa URLs assinados com `response-*` (impacto na B002)
+
+- **Onde:** `imageStorageService/services/videoUrls.js` (`ResponseContentType`); ADD 4.1 (`ResponseContentDisposition` do descarregamento, B002).
+- **Dúvida:** No Estágio 5 verificou-se que o SeaweedFS 4.47 responde 403 a URLs SigV2 com `response-content-type`. Na B001 deixou de ser enviado (os objetos já são gravados com o `Content-Type` certo). O descarregamento da B002 conta com `response-content-disposition` para o nome sugerido (DOWNLOAD-005), que deverá falhar da mesma forma. Segue-se a alternativa que o ADD já prevê?
+- **O que as fontes dizem:** ADD 4.1: "Confirmar que o SeaweedFS (`4.47`) aplica o parâmetro `response-content-disposition` dos URLs assinados. Se não aplicar, o nome sugerido vai no atributo `download` da âncora, que o navegador respeita porque o URL `/s3-video/` é da mesma origem que o frontend."
+- **Opções:** (a) a B002 usa o atributo `download` da âncora, como prevê o ADD; (b) a B002 investiga a assinatura SigV4 para os URLs de vídeo.
+- **Resposta:** _Pendente._ É uma decisão da B002; fica registada para o seu Technical Design.

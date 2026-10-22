@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+import re
 import shutil
 
 import pytz
@@ -12,6 +13,15 @@ import ingest
 import video_msg
 from storage import StorageClient
 from video_rabbit import VideoRabbitMQ
+
+
+_URL_QUERY = re.compile(r'(https?://[^\s?]+)\?\S*')
+
+
+def redact(text):
+    """Drops query strings from URLs: presigned URLs carry their signature
+    there, and it must not reach logs or replies (ADD T-10)."""
+    return _URL_QUERY.sub(r'\1?<redacted>', str(text))
 
 
 def log(level, event, **fields):
@@ -79,11 +89,13 @@ class VideoWorker:
                 reply = video_msg.failure(request, started_at, 'PROCESSING_ERROR',
                                           f'unknown operation {operation}')
         except ingest.CorruptedFile as exc:
-            log('error', 'video.worker.corrupted', correlationId=correlation_id, videoId=video_id, cause=str(exc))
-            reply = video_msg.failure(request, started_at, 'CORRUPTED_FILE', str(exc))
+            cause = redact(exc)
+            log('error', 'video.worker.corrupted', correlationId=correlation_id, videoId=video_id, cause=cause)
+            reply = video_msg.failure(request, started_at, 'CORRUPTED_FILE', cause)
         except Exception as exc:  # noqa: BLE001 - any failure becomes an error reply
-            log('error', 'video.worker.failed', correlationId=correlation_id, videoId=video_id, cause=str(exc))
-            reply = video_msg.failure(request, started_at, 'PROCESSING_ERROR', str(exc))
+            cause = redact(exc)
+            log('error', 'video.worker.failed', correlationId=correlation_id, videoId=video_id, cause=cause)
+            reply = video_msg.failure(request, started_at, 'PROCESSING_ERROR', cause)
         finally:
             shutil.rmtree(work_dir, ignore_errors=True)
 

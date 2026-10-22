@@ -154,15 +154,21 @@ def _ffmpeg(args, pump):
 
 
 def thumbnail(path, out, at_ms, max_width, pump):
-    """JPEG at at_ms with the rotation applied (FFmpeg autorotate) (UPLOAD-014, D-20)."""
-    _ffmpeg(
-        ['-ss', f'{at_ms / 1000:.3f}', '-i', path, '-frames:v', '1',
-         '-vf', f"scale='min({max_width},iw)':-2",
-         '-q:v', config.THUMBNAIL_JPEG_QUALITY, out],
-        pump,
-    )
-    if not os.path.exists(out):
-        raise ProcessFailed('thumbnail not produced')
+    """JPEG at at_ms with the rotation applied (FFmpeg autorotate) (UPLOAD-014, D-20).
+
+    A video of about 1 s has no frame starting at 00:00:01; then frame 0 is
+    used, as for videos shorter than 1 s (Q-ADD-22, D-26).
+    """
+    for seek_ms in ([at_ms, 0] if at_ms > 0 else [0]):
+        _ffmpeg(
+            ['-ss', f'{seek_ms / 1000:.3f}', '-i', path, '-frames:v', '1',
+             '-vf', f"scale='min({max_width},iw)':-2",
+             '-q:v', config.THUMBNAIL_JPEG_QUALITY, out],
+            pump,
+        )
+        if os.path.exists(out):
+            return
+    raise ProcessFailed('thumbnail not produced')
 
 
 def first_frame(path, out, max_width, pump):

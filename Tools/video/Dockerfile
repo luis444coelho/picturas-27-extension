@@ -1,4 +1,6 @@
-FROM python:3.11-slim
+# Pinned to Debian 12 (bookworm): the floating python:3.11-slim tag moved to
+# Debian 13 (FFmpeg 7.1). The ADD (section 6) fixes FFmpeg 5.1 on Debian 12 (D-25).
+FROM python:3.11-slim-bookworm
 
 # FFmpeg/FFprobe from Debian 12 (ADD section 6, NFR-010).
 RUN apt-get update \
