@@ -1,93 +1,273 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Film } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  useCanEditProject,
+  useProjectInfo,
+} from "@/providers/project-provider";
 import { useSession } from "@/providers/session-provider";
-import { ProjectVideo, fetchProjectVideos, formatDuration } from "@/lib/videos";
+import { fetchProjectVideos } from "@/lib/videos";
+import { fetchVideoLineage } from "@/lib/video-lineage";
+import { isFinalStatus } from "@/lib/video-task-state";
 import { useVideoTarget } from "./use-video-target";
 import { useVideoIngestEvents } from "./use-video-ingest-events";
+import { useVideoTask } from "./use-video-task";
+import { VideoTaskProgress } from "./video-task-progress";
+import { VideoGallery } from "./video-gallery";
 import { VideoPlayer } from "./video-player";
+import { VideoUpload } from "./video-upload";
+import { VideoWorkspaceTools } from "./video-workspace-tools";
 
 const ignoreUpdate = () => undefined;
 
-// Completed videos in the main area of the project, next to the images
-// (UC-VID-000 steps 7 and 8, D-31). The "Vídeos" window stays the upload
-// point. The list only shows when the project has completed videos (D-32).
+// The page already mounts this component beside the image area (D-31).
+// The workspace covers that area by CSS when videos are selected, keeping
+// page.tsx and its image JSX untouched (D-91/D-92).
 export function ProjectVideoList() {
   const session = useSession();
   const target = useVideoTarget();
-  const [selected, setSelected] = useState<ProjectVideo | null>(null);
-  const isAnonymous = session.user.type === "anonymous";
-
+  const project = useProjectInfo();
+  const canEdit = useCanEditProject();
+  const search = useSearchParams();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [showUpload, setShowUpload] = useState(false);
+  const [dismissedTaskId, setDismissedTaskId] = useState<string | null>(null);
+  const [mobileTab, setMobileTab] = useState<"versions" | "reader" | "tools">(
+    "reader",
+  );
+  const anonymous = session.user.type === "anonymous";
   const videos = useQuery({
-    // Same key as the gallery of the "Vídeos" window.
     queryKey: ["projectVideos", target.pid, target.ownerId, target.shareId],
     queryFn: () => fetchProjectVideos(target),
-    // Anonymous users have no access to video (RN1).
-    enabled: !isAnonymous,
-    // Thumbnail URLs are valid for 15 min (NFR-017): refresh before they expire.
+    enabled: !anonymous,
     refetchInterval: 10 * 60 * 1000,
   });
-
-  // A completed ingestion refreshes the list (video-ingest-update, D-14).
+  const lineage = useQuery({
+    queryKey: [
+      "videoLineage",
+      target.pid,
+      target.ownerId,
+      target.shareId,
+      (videos.data ?? []).map((video) => video.id).join(","),
+    ],
+    queryFn: () => fetchVideoLineage(target),
+    enabled: !anonymous && Boolean(videos.data?.length),
+  });
+  const task = useVideoTask(target);
   useVideoIngestEvents(target.pid, ignoreUpdate);
 
-  if (isAnonymous || !videos.data || videos.data.length === 0) return null;
+  const finalTaskId =
+    task.task && isFinalStatus(task.task.status) ? task.task.taskId : null;
+  useEffect(() => {
+    if (!finalTaskId) return;
+    const timeout = window.setTimeout(
+      () => setDismissedTaskId(finalTaskId),
+      10_000,
+    );
+    return () => window.clearTimeout(timeout);
+  }, [finalTaskId]);
+
+  useEffect(() => {
+    if (selectedId === null && videos.data?.length) {
+      setSelectedId(videos.data[0].id);
+    }
+  }, [selectedId, videos.data]);
+
+  const preference = search.get("resource");
+  const active =
+    preference === "videos" ||
+    (preference !== "images" && project.imgs.length === 0);
+  if (!active) return null;
+
+  const selected = videos.data?.find((item) => item.id === selectedId) ?? null;
+  const completed =
+    task.task?.status === "completed" ? task.task.resultVideoId : null;
+  const resultReady = Boolean(
+    completed && videos.data?.some((item) => item.id === completed),
+  );
+  const canUpload = !anonymous && canEdit;
 
   return (
-    <Dialog
-      open={selected !== null}
-      onOpenChange={(open) => !open && setSelected(null)}
-    >
-      <aside
-        aria-label="Vídeos do projeto"
-        className="w-40 md:w-48 xl:w-56 shrink-0 border-l border-sidebar-border overflow-y-auto overflow-x-hidden flex flex-col gap-2 p-2"
+    <>
+      <style>{`div:has(> .video-workspace-root[data-active="true"]) > :not(.video-workspace-root):not(style) { display: none !important; }
+        @keyframes video-task-countdown { from { transform: scaleX(1); } to { transform: scaleX(0); } }`}</style>
+      <div
+        data-active="true"
+        className="video-workspace-root flex min-w-0 flex-1 flex-col overflow-hidden bg-background"
       >
-        <h2 className="pt-2 text-sm text-gray-500 text-center">Vídeos</h2>
-        <ul className="flex flex-col gap-2">
-          {videos.data.map((video) => (
-            <li key={video.id}>
-              <button
-                type="button"
-                onClick={() => setSelected(video)}
-                title={video.originalName}
-                className="w-full text-left rounded-md border overflow-hidden hover:border-primary"
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b p-3">
+          <div>
+            <h2 className="font-semibold">Vídeos do projeto</h2>
+            <p className="text-xs text-muted-foreground">
+              Seleciona um vídeo para ver e editar as suas versões.
+            </p>
+          </div>
+          {canUpload && (
+            <Button
+              type="button"
+              onClick={() => setShowUpload((value) => !value)}
+            >
+              <Plus aria-hidden="true" />
+              Adicionar vídeo
+            </Button>
+          )}
+        </div>
+        {canUpload && (
+          <div className={showUpload ? "border-b p-3" : "hidden"}>
+            <VideoUpload target={target} />
+          </div>
+        )}
+        {task.task && task.task.taskId !== dismissedTaskId && (
+          <div
+            className={finalTaskId ? "border-b bg-muted/30 px-3 pt-3" : "border-b bg-muted/30 p-3"}
+            role="status"
+            aria-live="polite"
+          >
+            <VideoTaskProgress
+              task={task.task}
+              canCancel={!isFinalStatus(task.task.status)}
+              onCancel={task.cancel}
+            />
+            {resultReady && (
+              <Button
+                className="mt-2"
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setSelectedId(completed!);
+                  setMobileTab("reader");
+                  setDismissedTaskId(task.task!.taskId);
+                }}
               >
-                <div className="relative">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={video.thumbnailUrl}
-                    alt=""
-                    className="w-full aspect-video object-cover bg-muted"
-                  />
-                  <span className="absolute top-1 left-1 rounded bg-black/70 p-1 text-white">
-                    <Film className="size-3" aria-label="Vídeo" />
-                  </span>
-                  <span className="absolute bottom-1 right-1 rounded bg-black/70 px-1 text-xs text-white">
-                    {formatDuration(video.durationMs)}
-                  </span>
-                </div>
-                <p className="p-2 text-xs truncate">{video.originalName}</p>
-              </button>
-            </li>
-          ))}
-        </ul>
-      </aside>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Vídeo</DialogTitle>
-          <DialogDescription>Leitor integrado do projeto.</DialogDescription>
-        </DialogHeader>
-        {selected && <VideoPlayer target={target} video={selected} />}
-      </DialogContent>
-    </Dialog>
+                Abrir resultado
+              </Button>
+            )}
+            {finalTaskId && (
+              <div className="mt-3 h-1 overflow-hidden rounded-full bg-primary/15">
+                <div
+                  key={`${finalTaskId}:${task.task.status}`}
+                  className="h-full w-full origin-left bg-primary motion-reduce:hidden"
+                  style={{
+                    animation: "video-task-countdown 10s linear forwards",
+                  }}
+                  aria-hidden="true"
+                />
+              </div>
+            )}
+          </div>
+        )}
+        {anonymous ? (
+          <p className="p-4 text-sm">
+            Os vídeos estão disponíveis para utilizadores registados e Premium.
+          </p>
+        ) : videos.isLoading ? (
+          <p className="p-4 text-sm" role="status">
+            A carregar vídeos…
+          </p>
+        ) : videos.isError ? (
+          <div className="p-4 text-sm" role="alert">
+            Não foi possível carregar os vídeos.{" "}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => void videos.refetch()}
+            >
+              Tentar novamente
+            </Button>
+          </div>
+        ) : videos.data?.length && lineage.isLoading ? (
+          <p className="p-4 text-sm" role="status">
+            A carregar versões…
+          </p>
+        ) : videos.data?.length && lineage.isError ? (
+          <div className="p-4 text-sm" role="alert">
+            Não foi possível carregar as versões.{" "}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => void lineage.refetch()}
+            >
+              Tentar novamente
+            </Button>
+          </div>
+        ) : !videos.data?.length ? (
+          <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
+            <p>Adiciona imagens ou vídeos para começar.</p>
+            <p className="text-sm text-muted-foreground">
+              Escolhe «Imagens» para adicionar imagens ou «Adicionar vídeo» para
+              carregar um vídeo.
+            </p>
+          </div>
+        ) : (
+          <>
+            <div
+              className="flex gap-1 border-b p-2 lg:hidden"
+              aria-label="Secções do vídeo"
+            >
+              {(["versions", "reader", "tools"] as const).map((tab) => (
+                <Button
+                  key={tab}
+                  type="button"
+                  size="sm"
+                  variant={mobileTab === tab ? "default" : "outline"}
+                  onClick={() => setMobileTab(tab)}
+                >
+                  {
+                    {
+                      versions: "Versões",
+                      reader: "Leitor",
+                      tools: "Ferramentas",
+                    }[tab]
+                  }
+                </Button>
+              ))}
+            </div>
+            <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[minmax(14rem,22%)_minmax(0,1fr)_minmax(18rem,30%)]">
+              <aside
+                className={`${mobileTab === "versions" ? "block" : "hidden"} min-h-0 overflow-y-auto border-r p-3 lg:block`}
+                aria-label="Vídeos e versões"
+              >
+                <VideoGallery
+                  videos={videos.data}
+                  lineage={lineage.data ?? []}
+                  selectedId={selectedId}
+                  onSelect={(id) => {
+                    setSelectedId(id);
+                    setMobileTab("reader");
+                  }}
+                />
+              </aside>
+              <main
+                className={`${mobileTab === "reader" ? "block" : "hidden"} min-h-0 overflow-y-auto p-3 lg:block`}
+              >
+                {selected ? (
+                  <VideoPlayer target={target} video={selected} />
+                ) : (
+                  <p role="status">
+                    O vídeo selecionado deixou de estar disponível. Escolhe
+                    outra versão.
+                  </p>
+                )}
+              </main>
+              <aside
+                className={`${mobileTab === "tools" ? "block" : "hidden"} min-h-0 overflow-y-auto border-l p-3 lg:block`}
+              >
+                <VideoWorkspaceTools
+                  key={selectedId ?? "none"}
+                  target={target}
+                  video={selected}
+                />
+              </aside>
+            </div>
+          </>
+        )}
+      </div>
+    </>
   );
 }
