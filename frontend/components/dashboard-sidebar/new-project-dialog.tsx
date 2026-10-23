@@ -17,6 +17,7 @@ import { useSession } from "@/providers/session-provider";
 import { LoaderCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getErrorMessage } from "@/lib/error-messages";
+import { NewVideoProjectDialog } from "../video/new-video-project-dialog";
 
 export default function NewProjectDialog({
   files = [],
@@ -31,6 +32,7 @@ export default function NewProjectDialog({
   const router = useRouter();
 
   const [open, setOpen] = useState<boolean>(false);
+  const [mode, setMode] = useState<"image" | "video">("image");
   const [name, setName] = useState<string>("");
   const [imageFiles, setImageFiles] = useState<File[]>([]);
 
@@ -68,11 +70,13 @@ export default function NewProjectDialog({
 
   useEffect(() => {
     if (files.length > 0) {
+      setMode("image");
       setOpen(true);
     }
   }, [files]);
 
   useEffect(() => {
+    if (!open) setMode("image");
     setName("");
     setImageFiles([]);
     if (setFiles && open === false) setFiles([]);
@@ -85,29 +89,60 @@ export default function NewProjectDialog({
         <DialogHeader>
           <DialogTitle>Create New Project</DialogTitle>
         </DialogHeader>
-        <Label htmlFor="project-name">Project Name</Label>
-        <Input
-          id="project-name"
-          placeholder="Enter project name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <ImageSubmissionArea
-          onDrop={(files) => setImageFiles(files)}
-          receivedFiles={files}
-        />
-        <DialogFooter>
+        <div className="flex gap-2" role="tablist" aria-label="Tipo de projeto">
           <Button
-            onClick={() => handleCreate()}
-            disabled={imageFiles.length <= 0 || name === ""}
-            className="inline-flex items-center gap-1"
+            type="button"
+            role="tab"
+            aria-selected={mode === "image"}
+            variant={mode === "image" ? "default" : "outline"}
+            onClick={() => setMode("image")}
           >
-            <span>Create</span>
-            {addProject.isPending && (
-              <LoaderCircle className="size-[1em] animate-spin" />
-            )}
+            Imagem
           </Button>
-        </DialogFooter>
+          {session.user.type !== "anonymous" && (
+            <Button
+              type="button"
+              role="tab"
+              aria-selected={mode === "video"}
+              variant={mode === "video" ? "default" : "outline"}
+              onClick={() => setMode("video")}
+            >
+              Vídeo
+            </Button>
+          )}
+        </div>
+        {mode === "image" ? (
+          <>
+            <Label htmlFor="project-name">Project Name</Label>
+            <Input
+              id="project-name"
+              placeholder="Enter project name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            <ImageSubmissionArea
+              onDrop={(files) => setImageFiles(files)}
+              receivedFiles={files}
+            />
+            <DialogFooter>
+              <Button
+                onClick={() => handleCreate()}
+                disabled={imageFiles.length <= 0 || name === ""}
+                className="inline-flex items-center gap-1"
+              >
+                <span>Create</span>
+                {addProject.isPending && (
+                  <LoaderCircle className="size-[1em] animate-spin" />
+                )}
+              </Button>
+            </DialogFooter>
+          </>
+        ) : (
+          <div className="flex flex-col gap-3 text-sm">
+            <p>Continua para escolher o nome e carregar o vídeo.</p>
+            <NewVideoProjectDialog />
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

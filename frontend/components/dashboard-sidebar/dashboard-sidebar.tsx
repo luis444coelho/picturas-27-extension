@@ -17,7 +17,6 @@ import NewProjectDialog from "./new-project-dialog";
 import ProjectList from "./project-list";
 import { useSession } from "@/providers/session-provider";
 import OperationsCounter from "../operations-counter";
-import { NewVideoProjectDialog } from "../video/new-video-project-dialog";
 
 export default function DashboardSidebar() {
   const path = usePathname();
@@ -44,7 +43,6 @@ export default function DashboardSidebar() {
                 <Plus /> New Project
               </Button>
             </NewProjectDialog>
-            <NewVideoProjectDialog />
             {(isFreePlan || isAnonymous) && (
               <Button
                 className="inline-flex"

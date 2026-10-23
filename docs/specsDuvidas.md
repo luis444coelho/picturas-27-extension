@@ -246,6 +246,8 @@
 
 ## D-30 — Criar um projeto a partir de um vídeo (requisito novo da equipa)
 
+- **Revisão:** Revisto pela D-93.
+
 - **Onde:** `docs/requirements/REQ-VID-UPLOAD.md` (REQ-VID-UPLOAD-021); `docs/use-cases/UC-VID-000.md` (FA6 e pré-condições); `frontend/components/video/new-video-project-dialog.tsx`; `frontend/components/dashboard-sidebar/dashboard-sidebar.tsx`.
 - **Dúvida:** Hoje só se cria um projeto com imagens (`new-project-dialog.tsx` exige pelo menos uma). Como começa um utilizador que só tem um vídeo?
 - **O que as fontes dizem:** Nada; o UC-VID-000 parte de um projeto existente. A rota existente `POST /projects/:user` já aceita `imgs` vazio.
@@ -987,3 +989,9 @@
 - **Onde:** `frontend/components/video/project-video-list.tsx`, `video-section.tsx`, `video-gallery.tsx` e `frontend/app/dashboard/[pid]/page.tsx`.
 - **Dúvida:** Como passam a aparecer os vídeos na página do projeto após a proposta UI-VID-01 a UI-VID-12?
 - **Resposta da equipa:** A apresentação das D-31/D-32 fica revista. O espaço de vídeo ocupa a área principal por cima do `Toolbar` e da lista de imagens quando se escolhe «Vídeos», ocultando também o estado vazio das imagens. O seletor «Imagens/Vídeos» alterna as vistas; o botão «Apply» do cabeçalho permanece como está. Em `page.tsx` só se podem acrescentar linhas, sem envolver nem alterar JSX existente. A proveniência vem de `source_video_ids` por uma rota nova `GET …/videos/lineage`, antes de `/:video`, sem mudar a listagem existente. Quando a fonte já não existe, mostra-se «Origem removida»; «Origem indisponível» só se usa quando não há `source_video_ids`. Uma junção mostra «Junção de N clips», fontes na ordem e com repetições. Resultados de junção e Movie Maker constituem um mini grupo próprio. B006 e B009 continuam bloqueadas pela D-06.
+
+## D-93 — Criação de projetos de imagem e vídeo num único botão
+
+- **Onde:** `frontend/components/dashboard-sidebar/dashboard-sidebar.tsx`; `frontend/components/dashboard-sidebar/new-project-dialog.tsx`; apresentação da D-30.
+- **Dúvida:** Como reunir a criação de projetos sem duplicar o fluxo de vídeo da D-30 nem alterar a criação de imagem?
+- **Resposta da equipa:** A barra lateral mostra só «New Project». O seu diálogo tem um seletor «Imagem / Vídeo», com «Imagem» por omissão. A opção de imagem conserva os campos, a API e a navegação atuais. A opção de vídeo utiliza o componente `NewVideoProjectDialog` da D-30, mantendo a recusa de anónimos e os limites do perfil. A equipa aceita, para esta alteração, a exceção à regra 2.6 limitada a alterações mínimas das linhas existentes de `dashboard-sidebar.tsx` e `new-project-dialog.tsx`; nenhum outro código de imagem muda.

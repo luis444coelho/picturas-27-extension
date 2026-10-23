@@ -525,6 +525,21 @@ test(
       await until(() => evaluate(`Boolean(document.querySelector('.video-workspace-root'))`), "video workspace");
       await until(() => evaluate(`Boolean(document.querySelector('[aria-label="Ferramentas de vídeo"]'))`), "tools");
       assert.equal(await evaluate(`document.querySelector('.video-workspace-root')?.dataset.active`), "true");
+      assert.equal(await evaluate(`[...document.querySelectorAll('button')].filter((button) => button.innerText.includes('New Project')).length`), 1, "one project button");
+      assert.ok(await evaluate(click("button", "New Project")), "open project dialog");
+      await until(() => evaluate(`Boolean(document.querySelector('[role=dialog]'))`), "project dialog");
+      assert.ok(await evaluate(`document.querySelector('[role=tab][aria-selected=true]')?.innerText === 'Imagem'`), "image selected by default");
+      assert.ok(await evaluate(`Boolean(document.querySelector('#project-name'))`), "existing image fields");
+      assert.ok(await evaluate(click("[role=tab]", "Vídeo")), "choose video");
+      await until(() => evaluate(`Boolean([...document.querySelectorAll('[role=dialog] button')].find((button) => button.innerText.includes('Novo projeto com vídeo')))`), "video flow entry");
+      assert.ok(await evaluate(click("button", "Novo projeto com vídeo")), "open D-30 video dialog");
+      await until(() => evaluate(`Boolean(document.querySelector('#video-project-name'))`), "D-30 video fields");
+      await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+      await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+      await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+      await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+      assert.ok(await evaluate(`document.querySelector('.video-workspace-root button')?.innerText.includes('Adicionar vídeo')`), "add video button");
+      assert.ok(await evaluate(`Boolean(document.querySelector('.video-workspace-root button svg'))`), "add video icon");
 
       const region = `document.querySelector('[role=region][aria-label^="Parâmetros:"]')`;
       const actions = {
@@ -548,6 +563,7 @@ test(
         assert.ok(await evaluate(click("button", label, `document.querySelector('[aria-label="Ferramentas de vídeo"]')`)), label);
         await until(() => evaluate(`${region}?.innerText.includes(${JSON.stringify(label)})`), `${label} region`);
       }
+      assert.ok(await evaluate(`[...document.querySelectorAll('[aria-label="Ferramentas de vídeo"] button')].filter((button) => button.querySelector('svg')).length >= 12`), "icons for all operations");
       const videoRoute = `/projects/${workspace.user.id}/${workspace.project}/videos`;
       const trimmed = await api("POST", `${videoRoute}/${workspace.video}/operations`, workspace.user.token, {
         steps: [{ operation: "trim", version: 1, parameters: { startMs: 0, endMs: 2000 } }],
@@ -562,6 +578,7 @@ test(
       assert.ok(await evaluate(`document.querySelector('button[aria-current=true]')?.getAttribute('aria-label')?.includes('Original')`), "original stays selected");
       assert.ok(await evaluate(click("button", "Abrir resultado")), "open result");
       await until(() => evaluate(`document.querySelector('button[aria-current=true]')?.getAttribute('aria-label')?.includes('Recortado')`), "result selected");
+      assert.equal(await evaluate(`document.body.innerText.includes('Abrir resultado')`), false, "result banner dismissed on opening");
       const joined = await api("POST", `${videoRoute}/operations`, workspace.user.token, {
         steps: [{ operation: "concat", version: 1, parameters: { clips: [
           { videoId: workspace.video, steps: [] }, { videoId: workspace.video, steps: [] },
@@ -573,6 +590,9 @@ test(
         return ["completed", "failed"].includes(response.data.status) ? response.data : null;
       }, "join result", 120000);
       assert.equal(joinTask.status, "completed", JSON.stringify(joinTask));
+      await until(() => evaluate(`document.body.innerText.includes('Abrir resultado')`), "joined result banner");
+      assert.ok(await evaluate(`Boolean(document.querySelector('[style*="video-task-countdown"]'))`), "ten-second countdown line");
+      await until(() => evaluate(`!document.body.innerText.includes('Abrir resultado')`), "joined banner auto-dismisses", 15000);
       const movie = await api("POST", `${videoRoute}/operations`, workspace.user.token, {
         steps: [{ operation: "concat", version: 1, parameters: { clips: [
           { videoId: workspace.video, steps: [{ operation: "trim", version: 1, parameters: { startMs: 0, endMs: 2000 } }] },

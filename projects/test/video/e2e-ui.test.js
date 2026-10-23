@@ -83,8 +83,10 @@ test.describe("D-30 and D-31 in the browser", { skip }, () => {
 
   async function openNewVideoProject(name, files) {
     await page.goto(`${BASE}/dashboard`);
+    await page.getByRole("button", { name: "New Project" }).click();
+    await page.getByRole("tab", { name: "Vídeo" }).click();
     await page.getByRole("button", { name: "Novo projeto com vídeo" }).click();
-    const dialog = page.getByRole("dialog");
+    const dialog = page.getByRole("dialog").last();
     await dialog.getByLabel("Nome do projeto").fill(name);
     await dialog.locator('input[type="file"]').setInputFiles(files);
     return dialog;

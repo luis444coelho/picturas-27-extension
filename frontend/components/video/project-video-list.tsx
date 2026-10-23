@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import {
   useCanEditProject,
   useProjectInfo,
@@ -34,6 +35,7 @@ export function ProjectVideoList() {
   const search = useSearchParams();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showUpload, setShowUpload] = useState(false);
+  const [dismissedTaskId, setDismissedTaskId] = useState<string | null>(null);
   const [mobileTab, setMobileTab] = useState<"versions" | "reader" | "tools">(
     "reader",
   );
@@ -58,6 +60,17 @@ export function ProjectVideoList() {
   const task = useVideoTask(target);
   useVideoIngestEvents(target.pid, ignoreUpdate);
 
+  const finalTaskId =
+    task.task && isFinalStatus(task.task.status) ? task.task.taskId : null;
+  useEffect(() => {
+    if (!finalTaskId) return;
+    const timeout = window.setTimeout(
+      () => setDismissedTaskId(finalTaskId),
+      10_000,
+    );
+    return () => window.clearTimeout(timeout);
+  }, [finalTaskId]);
+
   useEffect(() => {
     if (selectedId === null && videos.data?.length) {
       setSelectedId(videos.data[0].id);
@@ -80,7 +93,8 @@ export function ProjectVideoList() {
 
   return (
     <>
-      <style>{`div:has(> .video-workspace-root[data-active="true"]) > :not(.video-workspace-root):not(style) { display: none !important; }`}</style>
+      <style>{`div:has(> .video-workspace-root[data-active="true"]) > :not(.video-workspace-root):not(style) { display: none !important; }
+        @keyframes video-task-countdown { from { transform: scaleX(1); } to { transform: scaleX(0); } }`}</style>
       <div
         data-active="true"
         className="video-workspace-root flex min-w-0 flex-1 flex-col overflow-hidden bg-background"
@@ -95,9 +109,9 @@ export function ProjectVideoList() {
           {canUpload && (
             <Button
               type="button"
-              variant="outline"
               onClick={() => setShowUpload((value) => !value)}
             >
+              <Plus aria-hidden="true" />
               Adicionar vídeo
             </Button>
           )}
@@ -107,9 +121,9 @@ export function ProjectVideoList() {
             <VideoUpload target={target} />
           </div>
         )}
-        {task.task && (
+        {task.task && task.task.taskId !== dismissedTaskId && (
           <div
-            className="border-b bg-muted/30 p-3"
+            className={finalTaskId ? "border-b bg-muted/30 px-3 pt-3" : "border-b bg-muted/30 p-3"}
             role="status"
             aria-live="polite"
           >
@@ -126,10 +140,23 @@ export function ProjectVideoList() {
                 onClick={() => {
                   setSelectedId(completed!);
                   setMobileTab("reader");
+                  setDismissedTaskId(task.task!.taskId);
                 }}
               >
                 Abrir resultado
               </Button>
+            )}
+            {finalTaskId && (
+              <div className="mt-3 h-1 overflow-hidden rounded-full bg-primary/15">
+                <div
+                  key={`${finalTaskId}:${task.task.status}`}
+                  className="h-full w-full origin-left bg-primary motion-reduce:hidden"
+                  style={{
+                    animation: "video-task-countdown 10s linear forwards",
+                  }}
+                  aria-hidden="true"
+                />
+              </div>
             )}
           </div>
         )}

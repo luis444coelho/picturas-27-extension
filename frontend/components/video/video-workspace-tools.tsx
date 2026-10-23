@@ -3,6 +3,21 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import {
+  Clapperboard,
+  Combine,
+  FileVideo,
+  Gauge,
+  Layers3,
+  Palette,
+  RotateCw,
+  Scaling,
+  Scissors,
+  SlidersHorizontal,
+  Stamp,
+  VolumeX,
+  type LucideIcon,
+} from "lucide-react";
 import { useCanEditProject } from "@/providers/project-provider";
 import { useSession } from "@/providers/session-provider";
 import { isFinalStatus } from "@/lib/video-task-state";
@@ -37,6 +52,20 @@ const specialLabels: Record<string, string> = {
   multi: "Aplicar várias operações",
   concat: "Juntar vídeos",
   movie: "Movie Maker",
+};
+const actionIcons: Record<Action, LucideIcon> = {
+  trim: Scissors,
+  speed: Gauge,
+  remove_audio: VolumeX,
+  adjust: SlidersHorizontal,
+  filter: Palette,
+  resize: Scaling,
+  orient: RotateCw,
+  watermark: Stamp,
+  convert: FileVideo,
+  multi: Layers3,
+  concat: Combine,
+  movie: Clapperboard,
 };
 
 export function VideoWorkspaceTools({
@@ -81,6 +110,7 @@ export function VideoWorkspaceTools({
             <h3 className="mb-2 text-sm font-medium">{group.title}</h3>
             <div className="flex flex-wrap gap-1">
               {group.actions.map((item) => {
+                const Icon = actionIcons[item];
                 const needsVideo = item !== "concat" && item !== "movie";
                 const noAudio =
                   item === "remove_audio" && meta?.audioCodec === null;
@@ -101,6 +131,7 @@ export function VideoWorkspaceTools({
                     }
                     onClick={() => choose(item)}
                   >
+                    <Icon aria-hidden="true" />
                     {label(item)}
                   </Button>
                 );
