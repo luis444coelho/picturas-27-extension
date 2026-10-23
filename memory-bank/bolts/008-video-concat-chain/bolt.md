@@ -3,19 +3,19 @@ id: 008-video-concat-chain
 unit: 003-video-composition
 intent: 001-video-processing-support
 type: ddd-construction-bolt
-status: planned
+status: in-progress
 stories: [ST-VID-013, ST-VID-014]
 created: 2026-10-19T17:31:16Z
-started: null
+started: 2026-10-23T00:31:55Z
 completed: null
-current_stage: null
+current_stage: model
 stages_completed: []
 requires_bolts: [004-video-basic-edits, 005-video-visual-edits, 007-video-format-conversion]
 enables_bolts: [009-video-batch]
 requires_units: [001-video-lifecycle, 002-video-transformations]
 blocks: true
 # avg_complexity: maior esforço do ADD no bolt (S=1, M=2, L=3); os outros campos são preenchidos no início do bolt na Construção (specsDuvidas D-01)
-complexity: {avg_complexity: 3, avg_uncertainty: null, max_dependencies: null, testing_scope: null}
+complexity: {avg_complexity: 3, avg_uncertainty: 3, max_dependencies: 3, testing_scope: 3}
 ---
 
 # Bolt: 008-video-concat-chain
@@ -40,7 +40,7 @@ Implementar a operação `concat` com sub-cadeias por clip, a validação em tr�
 
 ## Etapas
 
-- [ ] **1. Domain Model**: Pending → `ddd-01-domain-model.md`
+- [ ] **1. Domain Model**: In progress → `ddd-01-domain-model.md`
 - [ ] **2. Technical Design**: Pending → `ddd-02-technical-design.md`
 - [ ] **3. ADR Analysis** (opcional): Pending → `adr-{n}-{slug}.md`
 - [ ] **4. Implement**: Pending → código nos componentes indicados em "Saídas esperadas"

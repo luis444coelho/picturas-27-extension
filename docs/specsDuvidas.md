@@ -811,3 +811,86 @@
   - **(c)** Criar o ramo a partir da B005, incorporando a B007 no próprio ramo da correção.
 - **Recomendação:** (a), para respeitar a base pedida e permitir atribuir o numstat da correção apenas a esta intervenção.
 - **Resposta:** **(a), resolvida pela equipa.** A B007 foi integrada e enviada para `origin/main` (`69dc977`); o ramo `fix/video-result-name` foi criado a partir desse commit. As alterações de documentação foram transportadas para o ramo.
+
+## D-78 — Posição da junção numa cadeia e rotas com e sem `:video`
+
+- **Onde:** B008, etapa 1 (`ddd-01-domain-model.md`, EstruturaCadeia, AceitacaoOperacao); `POST …/videos/operations` (com e sem `:video`) e `POST …/videos/validate`.
+- **Dúvida:** Numa cadeia com junção, a junção tem de ser o primeiro passo de topo? Se não for, a que vídeo se aplicam os passos de topo que vêm antes dela? E que rota recebe cada pedido: a junção usa a rota sem `:video` (4.8), mas uma cadeia com junção tem um vídeo selecionado no editor (UC-VID-014, passo 1)?
+- **O que as fontes dizem:** ADD T-01: a junção é um passo com `parameters.clips: [{videoId, steps}]`, ou seja, todos os clips, incluindo o primeiro, vêm dentro da junção com a sua sub-cadeia. ADD 4.8: uma junção isolada usa `POST …/videos/operations` sem `:video`. ADD 4.9 e UC-VID-014 FA1: "sub-cadeias por clip → junção → passos finais"; o utilizador começa por selecionar um vídeo e, ao acrescentar a junção, junta outros vídeos como clips. REQ-VID-CHAIN-005/006: sub-cadeias antes da junção e passos depois dela. Nenhuma fonte diz o que acontece a passos de topo antes da junção nem que rota recebe uma cadeia com junção.
+- **Opções:**
+  - **(a)** Quando há junção, é o **primeiro passo de topo**; o que se faz a cada clip antes dela vai na sua sub-cadeia. Junção noutra posição → 422 `INVALID_CHAIN` com `{rule: "concat_not_first"}`. No editor, o vídeo selecionado passa a ser o clip 1 e os passos que já tinha passam para a sua sub-cadeia. Uma cadeia com junção (isolada ou não) usa as rotas **sem** `:video` (`POST …/videos/operations` e `POST …/videos/validate` sem `videoId`); uma cadeia sem junção usa as rotas com `:video`. Um pedido sem `:video` cujo primeiro passo não é uma junção, ou com `:video` e uma junção, → 422 `INVALID_REQUEST` com `{field: "steps"}` (D-23).
+  - **(b)** A junção pode estar em qualquer posição; os passos de topo antes dela aplicam-se ao vídeo da rota com `:video`, que tem de ser o clip 1. Há duas formas de escrever a mesma composição (passos antes da junção ou na sub-cadeia do clip 1), o que complica a contagem, a `recipe` e as predefinições.
+  - **(c)** Outra regra definida pela equipa.
+- **Recomendação:** (a). Uma só forma de exprimir a composição, igual à do T-01 (`clips` com as sub-cadeias) e à do exemplo da FA1, e uma só rota para pedidos com várias entradas.
+- **Resposta:** _pendente._
+
+## D-79 — Regras do `INVALID_CHAIN`, restrições das sub-cadeias e extração de fotogramas sem operação
+
+- **Onde:** B008, etapa 1 (`ddd-01-domain-model.md`, EstruturaCadeia, ValidadorCadeia); `projects/video/errors.js` (detalhes do `INVALID_CHAIN`).
+- **Dúvida:** Que valores leva o `{rule}` do `INVALID_CHAIN`? As sub-cadeias dos clips podem ter `convert` ou outra junção? E como se rejeita a extração de fotogramas com `INVALID_CHAIN` (CHAIN-018) se a operação não existe no registo (D-05, D-06)?
+- **O que as fontes dizem:** ADD 4.9: `INVALID_CHAIN` com `{rule}` a indicar a regra violada (cadeia vazia, mais de uma `concat`, `convert` só no fim, sem extração de fotogramas) e `CHAIN_TOO_LONG`; T-10: `{rule}` nos detalhes. REQ-VID-CHAIN-007, 016, 017 e 018. UC-VID-013 RN13 e UC-VID-014 RN3: no máximo uma junção por cadeia; conversão só no último passo da cadeia. D-42: operação desconhecida → `INVALID_STEP_PARAMS` com `{index, errors}`. D-05/D-06: a extração não é implementada e não tem nome de operação. Nenhuma fonte dá os nomes das regras nem fala de `convert` ou junção dentro de uma sub-cadeia.
+- **Opções:**
+  - **(a)** `{rule}` ∈ `empty_chain`, `convert_not_last`, `multiple_concat`, `frame_extraction` e `concat_not_first` (D-78), com `{index}` do passo de topo e, dentro de um clip, `{clipIndex, stepIndex}`. Numa sub-cadeia, `convert` dá `convert_not_last` (a junção vem depois e o resultado é MP4) e uma junção dá `multiple_concat`. O validador de estrutura reconhece o nome reservado `extract_frames` antes de consultar o registo, e dá `frame_extraction` em vez de operação desconhecida. As sub-cadeias podem ser vazias (UC-VID-014 FA1).
+  - **(b)** Como (a), mas `convert` e junção dentro de um clip dão `INVALID_STEP_PARAMS` desse passo, e a extração de fotogramas fica como operação desconhecida (`INVALID_STEP_PARAMS`, D-42); a CHAIN-018 ficaria por verificar com o seu código.
+  - **(c)** Outros nomes.
+- **Recomendação:** (a). Cumpre o código da CHAIN-018 sem construir a extração, e os nomes descrevem a regra para o editor os traduzir.
+- **Resposta:** _pendente._
+
+## D-80 — Ordem das três fases da validação e endereço dos erros nas sub-cadeias
+
+- **Onde:** B008, etapa 1 (`ddd-01-domain-model.md`, ValidadorCadeia, ErroCadeia); resposta de `POST …/videos/validate` e da aceitação.
+- **Dúvida:** (1) Por que ordem correm as fases (passos, estrutura, limites) e o que se devolve quando falham várias? (2) Como se indica um erro num passo dentro da sub-cadeia de um clip, e num clip não elegível (vídeo inexistente, não `completed`, formato não suportado, acima do limite)?
+- **O que as fontes dizem:** ADD 4.9 numera as fases 1. por passo, 2. estrutura, 3. limites do perfil, sem dizer se é uma ordem de precedência. ADD 4.8: as verificações dos passos 4 e 5 da aceitação são feitas por clip e o erro indica o clip (`videoId` e posição na linha temporal). D-42: `INVALID_STEP_PARAMS` com `{index, errors}`. T-10: `{total, limit}` no `LIMIT_EXCEEDED`. CHAIN-008: o 11.º passo é bloqueado com `CHAIN_TOO_LONG` logo ao ser acrescentado. Nenhuma fonte define o endereço de um passo de uma sub-cadeia.
+- **Opções:**
+  - **(a)** Ordem **estrutura → passos → limites**, a parar na primeira fase que falha: a estrutura não precisa de propriedades nem de leituras, e validar passos numa cadeia sem estrutura válida (por exemplo com 12 passos ou duas junções) daria erros enganadores. Os erros seguem a forma de resposta da B003. Endereço: passo de topo `{index}`; passo de um clip `{index, clipIndex, stepIndex}` (o `index` é o da junção); clip não elegível com o código do passo 4 ou 5 da aceitação (`NOT_FOUND`, `RESOURCE_NOT_READY`, `UNSUPPORTED_FORMAT`, `LIMIT_EXCEEDED`) e `{videoId, clipIndex}`; `LIMIT_EXCEEDED` da fase 3 com `{total, limit}` e `{clipIndex}` quando é a saída de um clip; `CHAIN_TOO_LONG` com `{total, limit: 10}`. `clipIndex` conta as ocorrências (um clip repetido tem dois índices).
+  - **(b)** A ordem literal do ADD (passos → estrutura → limites), com os mesmos endereços.
+  - **(c)** Endereço plano: um índice único na contagem total dos passos (o 4.º passo da cadeia, contando os dos clips).
+- **Recomendação:** (a).
+- **Resposta:** _pendente._
+
+## D-81 — Limites de duração nas saídas intermédias de uma cadeia
+
+- **Onde:** B008, etapa 1 (`ddd-01-domain-model.md`, ValidadorCadeia, fase 3).
+- **Dúvida:** A fase 3 verifica a duração estimada só nos pontos que o ADD nomeia, ou depois de cada passo? Por exemplo: um vídeo de 4 min abrandado para 0,5× (8 min) e depois recortado para 1 min, num perfil Registado (5 min).
+- **O que as fontes dizem:** ADD 4.9, fase 3: "a duração estimada de cada clip e a do resultado final" não podem exceder o limite do perfil (`LIMIT_EXCEEDED` com `{total, limit}`, exceção 5 do UC-VID-014). ADD 4.8 e CONCAT-007: a soma das durações dos clips na junção. T-03 passo 5: limites de duração e tamanho de cada vídeo de entrada. Nenhuma fonte fala das saídas intermédias.
+- **Opções:**
+  - **(a)** Só os pontos das fontes: cada vídeo de entrada (passo 5 da aceitação), a saída da sub-cadeia de cada clip, a soma na junção (`validate` da `concat`, CONCAT-007) e o resultado final. As saídas intermédias não são limitadas; o exemplo é aceite.
+  - **(b)** Também a saída de cada passo; o exemplo é rejeitado no abrandamento.
+- **Recomendação:** (a). É o que o ADD escreve; o trabalho do worker depende das entradas, que já são limitadas, e (b) rejeitaria cadeias cujo resultado cumpre o limite.
+- **Resposta:** _pendente._
+
+## D-82 — Fase da falha de uma tarefa (Q-ADD-16, parte da falha)
+
+- **Onde:** B008, etapa 1 (`ddd-01-domain-model.md`, FaseFalha, ErroTarefa); `VideoTask.error`, `GET …/videos/tasks/:taskId`, `video-task-update`, resposta `failed` do worker.
+- **Dúvida:** A ST-VID-014 (AC4) e a exceção 7 do UC-VID-014 pedem que o erro indique a fase (descarregamento, codificação ou *upload*) em vez do passo. A D-40 deixou esta parte da Q-ADD-16 para a B008. Onde e com que valores vai a fase, e para que tarefas?
+- **O que as fontes dizem:** UC-VID-014, exceção 7; ADD 4.9 (riscos) e Q-ADD-16. B003: `ErroTarefa {code, message}` com `PROCESSING_ERROR` (D-21); a causa técnica fica só nos logs (ERROR-002, T-10). Nenhuma fonte dá o nome nem os valores do campo.
+- **Opções:**
+  - **(a)** Campo novo `error.phase` ∈ `download` (URLs e descarregamento das entradas, incluindo as marcas de água), `encode` (FFmpeg, FFprobe, miniatura e fotograma 0) e `upload` (URLs de escrita e envio). Vai no `VideoTask.error`, no `GET …/tasks/:taskId` e no `video-task-update`, em **qualquer** tarefa (uma operação isolada também ganha a fase), por acréscimo. O worker indica a fase na resposta `failed`. As falhas sem fase observável (esgotamento das entregas, rotina de manutenção, falha antes de começar) ficam sem `phase`. O `code` continua `PROCESSING_ERROR`; a interface mostra a fase na mensagem.
+  - **(b)** Como (a), mas só nas tarefas `chain` e `concat`.
+  - **(c)** Códigos diferentes por fase (`DOWNLOAD_ERROR`, `ENCODE_ERROR`, `UPLOAD_ERROR`) no lugar de `PROCESSING_ERROR`, o que muda o código das falhas das B003 a B007.
+- **Recomendação:** (a). O código estável da ERROR-001 não muda, a fase é um detalhe a mais e a interface comum da B003 pode mostrá-la sem distinguir o tipo de tarefa.
+- **Resposta:** _pendente._
+
+## D-83 — Regras das predefinições de cadeia de vídeo que as fontes não fixam
+
+- **Onde:** B008, etapa 1 (`ddd-01-domain-model.md`, PredefinicaoVideo, ServicoPredefinicoesVideo); `users/models/videoPreset.js`, `users/routes/videoPresets.js`, `apiGateway/routes/videoPresets.js` e o editor de cadeia.
+- **Dúvida:** Que limites tem o nome, que erros dão um nome repetido e uma cadeia inválida, que operações há (listar, criar, mudar, apagar), o que se valida ao guardar e como se carrega uma predefinição no editor?
+- **O que as fontes dizem:** ADD 4.9: `{owner_id, name, steps: [{operation, version, parameters}]}`, nome único por dono, sem partilha, sem junção; recusa do `anonymous` com 403; `videoAuth` no gateway; "repete o padrão de `users/routes/presets.js` (CRUD, nome único), sem a partilha". REQ-VID-CHAIN-014 e UC-VID-014 FA3: guardar com um nome e reutilizar numa nova cadeia (num lote fica de fora, D-06). T-01: a `version` serve para migrar ou rejeitar receitas guardadas. Os parâmetros de vários passos dependem do vídeo (por exemplo os instantes do recorte), por isso não se podem validar sem ele.
+- **Opções:**
+  - **(a)** Nome com `trim()`, de 1 a 50 caracteres, único por dono sem distinguir maiúsculas de minúsculas; repetido → 409 `PRESET_NAME_TAKEN`. Rotas `GET /users/:user/video-presets`, `POST`, `PUT /…/:id` (muda o nome e/ou os passos) e `DELETE /…/:id`; sem limite de número. Ao guardar valida-se só a estrutura (operações e versões conhecidas, sem junção, sem `extract_frames`, `convert` só no fim, 1 a 10 passos), com os códigos da D-79 e o `CHAIN_TOO_LONG`, e retiram-se os campos que o servidor grava (`_mark`, `_input`). Os parâmetros são validados quando a predefinição é carregada numa cadeia, pelo `POST …/videos/validate`. Carregar **substitui** os passos da cadeia principal (sem junção) ou da sub-cadeia de um clip, com confirmação quando a lista não está vazia.
+  - **(b)** Como (a), mas carregar **acrescenta** os passos aos que já existem, até 10.
+  - **(c)** Copiar as regras exatas de `users/routes/presets.js` (a verificar no código na etapa 2), sem a partilha.
+- **Recomendação:** (a); na etapa 2 regista-se onde o padrão das predefinições de imagem difere.
+- **Resposta:** _pendente._
+
+## D-84 — Marcas de água de imagem nas predefinições (ADR-010, D-60, D-61)
+
+- **Onde:** B008, etapa 1 (`ddd-01-domain-model.md`, PredefinicaoVideo); `parameters.watermarkId` das predefinições de vídeo.
+- **Dúvida:** Uma marca de água de imagem guarda o `watermarkId` de um registo de `video_watermarks` do projeto onde foi carregada. Uma predefinição pertence ao utilizador e pode ser usada noutro projeto, onde esse `watermarkId` dá `INVALID_WATERMARK_CONTENT` (D-61: "`watermarkId` inexistente ou noutro projeto"). O que se guarda e o que acontece ao carregar?
+- **O que as fontes dizem:** D-60: as marcas ficam enquanto alguma `recipe` ou `VideoTask` as referir, "para as predefinições de cadeia da B008". D-61: `watermarkId` de outro projeto é inválido. ADR-010: o `_mark` é sempre gravado pelo servidor. ADD 4.9: as predefinições não são partilhadas.
+- **Opções:**
+  - **(a)** Guarda-se o passo tal como está (com o `watermarkId`, sem o `_mark`). No mesmo projeto funciona; noutro projeto, a validação dá `INVALID_WATERMARK_CONTENT {field: "watermarkId"}` nesse passo e o painel pede outra imagem. As marcas de texto funcionam em qualquer projeto.
+  - **(b)** Ao guardar retira-se o `watermarkId`, e a imagem tem de ser escolhida sempre que a predefinição é carregada.
+  - **(c)** Aceitar marcas de outro projeto do mesmo dono, o que muda a regra da D-61 e o código da B005 (regra 2.6).
+- **Recomendação:** (a). Não muda a B005, mantém a predefinição reproduzível no projeto de origem e dá um erro claro nos outros.
+- **Resposta:** _pendente._
