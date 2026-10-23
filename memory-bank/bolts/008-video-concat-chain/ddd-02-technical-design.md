@@ -2,15 +2,15 @@
 unit: 003-video-composition
 bolt: 008-video-concat-chain
 stage: design
-status: checkpoint
-updated: 2026-10-23T00:43:53Z
+status: complete
+updated: 2026-10-23T00:47:57Z
 ---
 
 # Technical Design - Junção de vídeos, cadeias de operações e predefinições de vídeo
 
 Fontes, por ordem de precedência: `docs/add.md` (ADD v1.1, mestre: 2.6, T-00 a T-06, T-08, T-10, 4.8, 4.9, Q-ADD-13, Q-ADD-16, Q-ADD-25), `docs/specsDuvidas.md` (D-23, D-35, D-39, D-40, D-42 a D-45, D-47, D-49, D-60, D-61, D-68, D-75, D-78 a D-85), `memory-bank/standards/decision-index.md` (ADR-004, ADR-005, ADR-007 a ADR-011, ADR-013 a ADR-015), `bolt.md` e as stories ST-VID-013 e 014, `docs/requirements/REQ-VID-CONCAT.md`, `REQ-VID-CHAIN.md`, `REQ-VID-NFR.md`, `docs/use-cases/UC-VID-013.md` e `014.md`. Base: `ddd-01-domain-model.md` (aprovado com as D-78 a D-84). Os componentes das B001 a B007 que este bolt estende são descritos a partir dos seus artefactos (`ddd-02-technical-design.md` da B003 e da B004, `implementation-walkthrough.md` da B005 e da B007, ADR-007 a ADR-014). Não se leu código (restrição do estágio); o que depende do código está em "Verificações a fazer no Estágio 4".
 
-Uma dúvida nova surgiu neste estágio e fica pendente para o checkpoint: **D-85** (código de uma predefinição com junção). O desenho usa a opção recomendada, (a).
+Uma dúvida nova surgiu neste estágio, **D-85** (código de uma predefinição com junção), respondida (a) pela equipa no checkpoint.
 
 ## Architecture Pattern
 
@@ -155,11 +155,11 @@ Para cada pedido de `…/validate` e de `…/operations` (com ou sem `:video`), 
 1. **Forma e rota (D-78):** `steps` lista não vazia de objetos, senão `INVALID_REQUEST {field: "steps"}`; junção no início ⇔ rota sem `:video` (ou `validate` sem `videoId`).
 2. **Fase 1, estrutura:** `chainStructure.checkStructure(steps)`, por esta ordem de regras: `empty_chain`; `frame_extraction` (topo e clips); `multiple_concat` (mais de uma junção no topo, ou junção num clip); `concat_not_first`; `convert_not_last` (topo, ou qualquer `convert` num clip); `CHAIN_TOO_LONG` com N > 10. 422 e fim.
 3. **Entradas:** com junção, os `videoId` distintos dos clips são lidos de uma vez (`videos.meta`) e verificados como nos passos 4 e 5 da aceitação: `NOT_FOUND`, `RESOURCE_NOT_READY`, `UNSUPPORTED_FORMAT`, `LIMIT_EXCEEDED` de entrada, com `{videoId, clipIndex}` do primeiro clip em que aparece (D-80). Sem junção, estas verificações ficam para a B003.
-4. **Fase 2, passos:** cada sub-cadeia com o `chain.validateChain(clip.steps, clip.input, profile)` da B003, com os erros reendereçados para `{index: 0, clipIndex, stepIndex}` (V2); depois o `_clips` é gravado com o `estimate` final de cada sub-cadeia, e a cadeia de topo é validada com o `validateChain` (a junção e os passos finais), com os erros em `{index}`. Sem junção, a fase 2 é a da B003, no router seguinte.
-5. **Fase 3, limites (D-81):** saída de cada clip (`LIMIT_EXCEEDED {total, limit, clipIndex}`) e resultado final (`LIMIT_EXCEEDED {total, limit}`); a soma na junção já foi verificada pelo `validate` da `concat`. Sem junção, só o resultado final, calculado aqui com o `estimate` dos passos (o mesmo cálculo que a B003 faz a seguir).
+4. **Fase 2, passos:** cada sub-cadeia com o `chain.validateChain(clip.steps, clip.input, profile)` da B003, com os erros reendereçados para `{index: 0, clipIndex, stepIndex}` (V2); depois o `_clips` é gravado com o `estimate` final de cada sub-cadeia, e a cadeia de topo é validada com o `validateChain` (a junção e os passos finais), com os erros em `{index}`. **Sem junção**, o router corre também o `chain.validateChain(steps, inputProps, profile)` em memória, com os `videos.meta` do vídeo da rota; se a fase 2 falhar, faz `next()` sem responder, e é a B003 que devolve o `INVALID_STEP_PARAMS` (ou o erro de entrada do vídeo, se o vídeo não existir ou não estiver pronto). Só com a fase 2 válida se passa à fase 3.
+5. **Fase 3, limites (D-81):** só depois de a fase 2 passar. Saída de cada clip (`LIMIT_EXCEEDED {total, limit, clipIndex}`) e resultado final (`LIMIT_EXCEEDED {total, limit}`); a soma na junção já foi verificada pelo `validate` da `concat`. Sem junção, só o resultado final, com o `estimate` dos passos já calculado na fase 2.
 6. Sem junção e sem erros: `next()`, e o pedido segue sem mudanças pelo router de vídeo e pelo `tasks.js` da B003 (fase 2 e aceitação). Com junção: `validate` responde 200 aqui; `operations` segue para a aceitação com junção.
 
-As fases 1 e 3 de uma cadeia sem junção ficam assim antes da fase 2 da B003, pela ordem da D-80, sem tocar no código da B003. A fase 2 repetida no router seguinte é um cálculo em memória.
+Assim a ordem estrutura → passos → limites da D-80 vale também sem junção, sem tocar no código da B003: uma cadeia sem junção com parâmetros inválidos que também excederia o limite recebe `INVALID_STEP_PARAMS` (da B003) e não `LIMIT_EXCEEDED`. A fase 2 repetida no router seguinte é um cálculo em memória.
 
 ### Aceitação com junção
 
@@ -323,7 +323,7 @@ Sem dependências novas. O `@dnd-kit/core` e o `@dnd-kit/sortable` já estão no
 
 ## Testes previstos (Estágio 5)
 
-- **Unitários do serviço de projetos:** `chainStructure` (cada regra, sub-cadeias, `extract_frames`, N = 10 e 11, preset com junção); `concat.js` (limites por perfil com repetições, `estimate` com rotação, dimensões ímpares, áudio misto, fps do primeiro clip à saída da sua sub-cadeia); `composition.js` (ordem das fases, endereços, `_clips` por cima do cliente, limites da D-81); `planExtrasComposition` (ficheiros distintos, ocorrências, extras nas sub-cadeias).
+- **Unitários do serviço de projetos:** `chainStructure` (cada regra, sub-cadeias, `extract_frames`, N = 10 e 11, preset com junção → `concat_in_preset`); `concat.js` (limites por perfil com repetições, `estimate` com rotação, dimensões ímpares, áudio misto, fps do primeiro clip à saída da sua sub-cadeia); `composition.js` (ordem das fases, endereços, `_clips` por cima do cliente, limites da D-81; **cadeia sem junção com parâmetros inválidos que também excederia o limite → o router faz `next()` e a resposta final é `INVALID_STEP_PARAMS`, não `LIMIT_EXCEEDED`**, pedido da equipa no checkpoint do Estágio 2); `planExtrasComposition` (ficheiros distintos, ocorrências, extras nas sub-cadeias).
 - **Unitários do worker com FFmpeg 5.1 real:** junção de clips heterogéneos (16:9 e 9:16, 25 e 30 fps, com e sem áudio, mono e estéreo, rotação), clip repetido, sem áudio em nenhum clip, dimensão ímpar no primeiro clip; sub-cadeias com recorte, velocidade e filtro; cadeia terminada em `convert` para MOV e AVI com a cópia MP4; fase em falhas simuladas de descarregamento, codificação e envio.
 - **E2E pela pilha:** junção isolada e composição da CHAIN-009 (custo 5) com o FFprobe do resultado; rejeições sem tarefa e sem quota (cada `rule`, `CHAIN_TOO_LONG`, `INSUFFICIENT_INPUTS`, `TOO_MANY_INPUTS`, `LIMIT_EXCEEDED`, `UNSUPPORTED_FORMAT` de um clip); cancelamento e falha com devolução de N créditos; `source_video_ids` com repetições; uma única invocação de codificação; predefinições (CRUD, nome repetido, `anonymous`, outro utilizador, junção).
 - **Frontend:** unitários do `lib/video-chain.ts`; no navegador, o editor, a linha temporal com o dnd-kit e as predefinições.
@@ -336,7 +336,7 @@ Sem dependências novas. O `@dnd-kit/core` e o `@dnd-kit/sortable` já estão no
 3. **V3 (`plan.js`):** como monta `plan.inputs` a partir de `input_video_ids` (repetições), o `audio: none` a partir do `estimate` final, o contentor e os codecs de saída a partir de um `convert` no fim de uma cadeia, e o `expectedDurationMs`.
 4. **V4 (extras do plano):** se o `applyPlanExtras` (B004), o `applyVisualPlanExtras` (B005) e os extras da B007 podem ser aplicados a um plano parcial de uma sub-cadeia; em que condições o `previewInSameInvocation` é acrescentado (só com um passo, ou também no fim de uma cadeia); onde acrescentar a linha do `applyCompositionPlanExtras`.
 5. **V5 (worker; ponto 2 da etapa 1, cadeia terminada em `convert` para AVI):** o ponto do `task.py` para o desvio, depois do da B007; se o `convert_task.py` expõe os argumentos de saída AVI e a saída dupla de forma reutilizável; se o `executor` expõe `run`, a leitura do progresso e a tradução dos filtros de um passo; se o `visual_input.py` e o `keyframe.py` ignoram um plano com `composition`. Confirmar também que não existe `Tools/video/compiler.py` (o `bolt.md` cita-o; o desenho da B003 só tem o `executor.py`): se existir, o `composition_task` usa-o.
-6. **V6 (D-82, pedida pela equipa):** que a fase entra na resposta `failed` do worker (`task.py`, `_reply` e os ramos da B007) e no `VideoTask` (esquema do `error`, tratamento de `failed` no `tasks.js`, GET da tarefa, evento `video-task-update` e `wsGateway/video.js`) **só com linhas novas**. Se algum destes pontos exigir mudar uma linha existente, regista-se uma dúvida nova e para-se, como a resposta à D-82 manda.
+6. **V6 (D-82, pedida pela equipa; ADR-019):** que a fase entra na resposta `failed` do worker (`task.py`, `_reply` e os ramos da B007) e no `VideoTask` (esquema do `error`, tratamento de `failed` no `tasks.js`, GET da tarefa, evento `video-task-update` e `wsGateway/video.js`) **só com linhas novas**. Em particular, se a fase não puder entrar na resposta `failed` sem mudar a linha existente do `_reply` em `task.py`, regista-se uma dúvida nova e para-se, como a resposta à D-82 e o checkpoint do Estágio 2 mandam.
 7. **V7 (rotas):** a ordem e os padrões das rotas do router de vídeo no gateway e no serviço de projetos (`…/videos/operations` sem `:video` não pode ser apanhada por uma rota com parâmetro), o corpo aceite pelo `…/validate` sem `videoId`, e onde montar o router de composição antes do router de vídeo e do da B005, em `projects/app.js` e `apiGateway/app.js`.
 8. **V8 (limites por perfil):** o que o `profiles.js` da B001 exporta (duração e tamanho por perfil; clips e passos?).
 9. **V9 (D-83, pedida pela equipa; ponto 5 da etapa 1):** o padrão do `users/routes/presets.js` e do `users/models/preset.js`: verificação do dono e do `anonymous`, forma das respostas e dos erros, regra do nome único (maiúsculas, `trim`, comprimento), semântica do `PATCH`, limite de 4 e partilha. Regista-se no relatório da etapa 4 onde as predefinições de vídeo diferem e porquê (sem limite de número, sem partilha, formato de erro do vídeo). Também: como o gateway encaminha para o serviço de utilizadores e onde montar o `videoPresets` antes do `usersRouter`.
@@ -355,6 +355,11 @@ Se alguma verificação mostrar que a extensão não é possível só com linhas
 3. **Validação da estrutura das predefinições delegada pelo gateway ao serviço de projetos:** uma só implementação das regras (T-01), sem catálogo de operações no serviço de utilizadores.
 4. **`error.phase` em todas as tarefas (D-82):** campo novo no contrato da resposta `failed`, no `VideoTask` e no evento.
 
-## Questões abertas no checkpoint do Estágio 2
+## Decisões tomadas no checkpoint do Estágio 2
 
-1. **D-85:** código de uma predefinição com junção (recomendação (a): `INVALID_CHAIN {rule: "concat_in_preset"}`).
+Respondidas pela equipa em 2026-10-23T00:47:57Z:
+
+1. Desenho técnico aprovado, com uma correção: numa cadeia sem junção, o router de composição corre a fase 2 (`chain.validateChain` em memória) antes da fase 3; se a fase 2 falhar, faz `next()` sem responder e a B003 devolve o `INVALID_STEP_PARAMS`; só com a fase 2 válida a fase 3 pode dar `LIMIT_EXCEEDED`. Atualizada a secção "Validação em três fases" e acrescentado o teste unitário correspondente.
+2. **D-85 (a):** predefinição com junção → 422 `INVALID_CHAIN {rule: "concat_in_preset", index}`.
+3. Estágio 3: os quatro ADR propostos, ADR-016 (router de composição e `_clips`), ADR-017 (`composition_task.py`), ADR-018 (validação da estrutura das predefinições delegada ao serviço de projetos) e ADR-019 (`error.phase`, condicionado à V6), acrescentados ao `decision-index.md`.
+4. V6: se a fase não puder entrar na resposta `failed` sem mudar a linha existente do `_reply` em `task.py`, regista-se a dúvida e para-se.

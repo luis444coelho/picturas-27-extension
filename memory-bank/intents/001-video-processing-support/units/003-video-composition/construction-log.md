@@ -2,7 +2,7 @@
 unit: 003-video-composition
 intent: 001-video-processing-support
 created: 2026-10-23T00:31:55Z
-last_updated: 2026-10-23T00:43:53Z
+last_updated: 2026-10-23T00:47:57Z
 ---
 
 # Construction Log: 003-video-composition
@@ -35,6 +35,7 @@ last_updated: 2026-10-23T00:43:53Z
 |------|------|-------|---------|
 | 2026-10-23T00:31:55Z | 008-video-concat-chain | started | Stage 1: Domain Model |
 | 2026-10-23T00:39:08Z | 008-video-concat-chain | stage-complete | Domain Model → Technical Design (D-78 a D-84) |
+| 2026-10-23T00:47:57Z | 008-video-concat-chain | stage-complete | Technical Design → ADR Analysis (D-85; fase 2 antes da fase 3 sem junção) |
 
 ## Execution Summary
 
@@ -52,3 +53,4 @@ last_updated: 2026-10-23T00:43:53Z
 - 2026-10-23T00:31:55Z: B008 iniciada no ramo `bolt/008-video-concat-chain` (a partir da `main` com a B007 e a correção D-75). Complexidade preenchida no início do bolt (D-01): `avg_uncertainty` 3 (regra da junção dentro da cadeia, endereçamento dos erros nas sub-cadeias, fase da falha, predefinições com marcas de água e cadeias que terminam em `convert` por decidir), `max_dependencies` 3 (B004, B005, B007 e as Units 001 e 002), `testing_scope` 3 (grafo FFmpeg real com vários clips, integração pela pilha, serviço de utilizadores e editor no navegador). Regras da equipa: fontes por ordem `docs/add.md` (2.6, T-01 a T-05, T-10, 4.8, 4.9, Q-ADD-13, 16, 25), `docs/specsDuvidas.md` (D-01 a D-77), `decision-index.md` (ADR-001 a ADR-015), o bolt e as stories, `docs/requirements/` e `docs/use-cases/`, sem o `docs/merge.md`; regra 2.6 também para o código das B001 a B007; dúvidas novas a partir da D-78 e ADR a partir do ADR-016; commit e push por etapa, sem merge para a `main`.
 - 2026-10-23T00:39:08Z: B008 Estágio 1 aprovado (`ddd-01-domain-model.md`) com D-78 a D-81 (a), D-82 (a) condicionada a uma verificação V da fase só com linhas novas, D-83 (a) com `PATCH` e sem limite de número, e D-84 (a).
 - 2026-10-23T00:43:53Z: B008 Estágio 2 escrito (`ddd-02-technical-design.md`), à espera do checkpoint: router de composição antes do router de vídeo (fases 1 e 3, `_clips` gravado pelo servidor), `concat.js`, `planExtrasComposition.js`, ramo `composition_task.py` no worker para junções e cadeias terminadas em `convert` (incluindo AVI), `error.phase` (D-82), predefinições com `PATCH` e validação da estrutura delegada pelo gateway ao serviço de projetos. Verificações V1 a V14 para o Estágio 4, incluindo os cinco pontos da etapa 1 (V5 para a cadeia terminada em `convert` para AVI), a V6 da D-82 e a V9 da D-83. D-85 (código de uma predefinição com junção) registada e pendente.
+- 2026-10-23T00:47:57Z: B008 Estágio 2 aprovado com uma correção da equipa (sem junção, o router de composição corre a fase 2 em memória antes da fase 3 e, se falhar, faz `next()` para a B003 devolver o `INVALID_STEP_PARAMS`; teste unitário acrescentado) e a D-85 (a): `INVALID_CHAIN {rule: "concat_in_preset", index}`. Estágio 3 escrito, à espera do checkpoint: ADR-016 (router de composição e `_clips`), ADR-017 (`composition_task.py`), ADR-018 (estrutura das predefinições validada pelo serviço de projetos) e ADR-019 (`error.phase`, condicionado à V6; paragem se o `_reply` do `task.py` tiver de mudar), acrescentados ao `decision-index.md`.

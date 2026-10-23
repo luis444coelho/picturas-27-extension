@@ -902,4 +902,4 @@
 - **O que as fontes dizem:** ADD 4.9 e UC-VID-014 FA3: "Cadeias com junção não podem ser guardadas"; REQ-VID-CHAIN-014: "guardar uma cadeia sem junção". D-79: `{rule}` ∈ `empty_chain`, `convert_not_last`, `multiple_concat`, `frame_extraction`, `concat_not_first`. Nenhuma fonte dá o código.
 - **Opções:** (a) 422 `INVALID_CHAIN` com `{rule: "concat_in_preset", index}`, uma sexta regra só usada pelas predefinições; (b) 422 `INVALID_CHAIN` com `{rule: "multiple_concat"}`, que descreve mal o caso; (c) 422 `INVALID_REQUEST` com `{field: "steps"}` (D-23).
 - **Recomendação:** (a). O editor já traduz o `{rule}` e a mensagem diz exatamente porque a cadeia não pode ser guardada; o botão "Guardar como predefinição" fica desativado no editor quando há junção, por isso o código só aparece a quem chama a API diretamente.
-- **Resposta:** _pendente._
+- **Resposta:** **(a), aprovada pela equipa.** Predefinição com junção → 422 `INVALID_CHAIN` com `{rule: "concat_in_preset", index}`.
