@@ -17,7 +17,7 @@ skinparam nodesep 55
 skinparam ranksep 60
 top to bottom direction
 
-title Máquina de Estados — Trabalho de Processamento de Vídeo\nModelo proposto: operação isolada, junção ou cadeia
+title Máquina de Estados — Trabalho de Processamento de Vídeo\nVideoTask implementada; reutilização na composição prevista no Bolt 008
 
 state "queued" as Queued
 state "processing" as Processing
@@ -27,7 +27,8 @@ state "cancelled" as Cancelled
 
 Queued : VideoTask persistida
 Queued : Lugar adquirido; reserva se aplicável
-Processing : Passo aproximado e progresso global
+Queued : Publicação pode estar pendente (D-41)
+Processing : Passo estimado pelo progresso global
 Completed : Novo vídeo publicado com proveniência
 Completed : Reserva definitiva; libertar lugar
 Failed : Devolver reserva e libertar lugar
@@ -36,8 +37,9 @@ Cancelled : Devolver reserva e libertar lugar
 Cancelled : Sinalizar worker; limpar saídas tardias
 
 [*] --> Queued : Pedido admitido
+Queued --> Queued : Falha de publicação / republicar
 Queued --> Processing : started
-Queued --> Failed : Erro antes de executar\nou na publicação
+Queued --> Failed : Erro não recuperável\nantes de executar
 Queued --> Cancelled : Cancelamento autorizado
 Processing --> Processing : Queda / reentrega\nRecomeço do zero\nAté duas entregas
 Processing --> Completed : Resultado válido\nRecurso e estado persistidos

@@ -19,13 +19,13 @@ skinparam nodesep 40
 skinparam ranksep 55
 top to bottom direction
 
-title Arquitetura de Componentes — PictuRAS (Baseline + Vídeo)\nDesenho proposto para o MVP
+title Arquitetura de Componentes — PictuRAS (Baseline + Vídeo)\nEstado implementado: Bolts 001 a 005 e 007; composição prevista no Bolt 008
 
 component "Frontend\nInterface de vídeo" as UI
 component "Nginx\nHTTPS / proxy" as Nginx #D9D9D9
 component "API Gateway\nRotas de vídeo / videoAuth" as API
 component "Projetos\nOrquestração / validação\nTarefas / recuperação" as Projects
-component "Utilizadores\nQuota existente\nPredefinições de vídeo" as Users
+component "Utilizadores\nQuota existente" as Users
 package "RabbitMQ existente" {
   component "Filas de vídeo\nPedidos / respostas / progresso\nControlo video_control" as MQ
 }
@@ -40,10 +40,9 @@ Nginx -down-> API : HTTP
 Nginx --> WS : WebSocket
 Nginx --> S3 : /s3-video/ / Range
 API -down-> Projects : Identidade / correlationId
-API --> Users : Predefinições
 Projects -right-> Users : Perfil / reserva / devolução
 Projects --> DB : Recursos / tarefas / locks
-Users --> DB : Contas / configurações
+Users --> DB : Contas / quota
 Projects <--> MQ : Pedidos / respostas\nCancelamento / estados
 MQ <--> Worker : Pedido / resposta\nProgresso / cancelamento
 MQ --> WS : Eventos
@@ -52,10 +51,15 @@ Worker -right-> Storage : URLs internos
 Worker --> S3 : Binários por blocos
 Storage --> S3 : Assinar / gerir objetos
 
+component "Predefinições de vídeo\nprevistas no Bolt 008" as Presets #FFE6A6
+UI ..> Presets : Previsto
+Presets ..> Users : Persistência prevista
+
 legend bottom
   |= Cor |= Significado |
   |<#D9D9D9> Cinzento | Serviço ou infraestrutura da baseline reutilizado |
   |<#55C8EC> Azul | Módulos de vídeo nos serviços indicados; worker novo |
+  |<#FFE6A6> Amarelo | Componente planeado; sem implementação nesta versão |
   | MongoDB | Agrega as instâncias existentes; cada serviço mantém a sua base |
   | Transferências | Worker e navegador usam o S3; os binários de saída não atravessam o API Gateway |
 endlegend

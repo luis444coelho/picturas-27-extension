@@ -17,13 +17,15 @@
 ]
 
 
+A arquitetura descrita corresponde à implementação dos Bolts 001 a 005 e 007. As predefinições e a composição de UC-VID-012/013 são extensões planeadas para o Bolt 008 e são assinaladas como tal. A fundação já admite listas simples de passos, sem assegurar todas as regras e interações desses casos de uso.
+
 A extensão mantém a topologia de serviços da baseline: frontend Next.js, API Gateway, serviços de Projetos e Utilizadores, WS Gateway, MongoDB, RabbitMQ e armazenamento SeaweedFS/S3 atrás de Nginx. O novo serviço de execução é o worker de vídeo em `Tools/video/`. Nos serviços existentes acrescentam-se módulos e pontos de ligação, de modo a preservar o comportamento dos fluxos de imagem e reutilizar os contratos existentes que servem a extensão.
 
 O serviço de Projetos concentra a autorização de projeto, os metadados, o planeamento, a admissão das tarefas e a publicação dos resultados. O worker executa o plano e devolve as chaves e os metadados reais; não escreve diretamente no MongoDB. O serviço de Utilizadores continua responsável pela identidade e pelos créditos. RabbitMQ transporta pedidos, respostas, progresso e cancelamento em contratos próprios de vídeo.
 
 #figure(
   image("../images/arquitetura_componentes.png", width: 100%, height: 21cm, fit: "contain"),
-  caption: [Arquitetura de componentes proposta: infraestrutura da baseline a cinzento e módulos de vídeo a azul],
+  caption: [Arquitetura de componentes: infraestrutura da baseline a cinzento e módulos de vídeo a azul],
 )
 
 Os componentes azuis identificam o worker novo e a lógica de vídeo acrescentada aos serviços indicados; não propõem um serviço independente para cada ferramenta. A dependência de MongoDB agrega as instâncias existentes, mantendo bases próprias por serviço e acrescentando as coleções necessárias. O navegador obtém o vídeo por URL de leitura através de Nginx/S3, e o worker transfere os objetos diretamente com URLs internos.
@@ -33,16 +35,16 @@ Os componentes azuis identificam o worker novo e a lógica de vídeo acrescentad
     colunas: (3.2cm, 1.8cm, 1fr, 3cm),
     tamanho: 7.5pt,
     [#text("Componente / serviço")], [#text("Estado")], [#text("Responsabilidade / alteração")], [#text("Requisitos")],
-    [#text("Frontend")], [#text("Alterado")], [#text("Componentes de vídeo novos. Carregamento, leitor, consulta, ferramentas, predefinições, linha temporal de junção e editor de cadeias; custo, progresso e cancelamento.")], [#text("REQ-VID-UPLOAD-001/002/015; REQ-VID-DOWNLOAD-001; REQ-VID-INFO-001; REQ-VID-CHAIN-001/009/012.")],
+    [#text("Frontend")], [#text("Alterado")], [#text("Componentes de vídeo implementados: carregamento, leitor, consulta e ferramentas isoladas; custo, progresso e cancelamento. Predefinições, linha temporal de junção e editor de cadeias: planeados no Bolt 008.")], [#text("REQ-VID-UPLOAD-001/002/015; REQ-VID-DOWNLOAD-001; REQ-VID-INFO-001; REQ-VID-CHAIN-001/009/012.")],
     [#text("API Gateway")], [#text("Alterado")], [#text("Router e middleware novos, montados por acréscimo. Validar JWT e identidade; encaminhar rotas de vídeo; propagar X-Caller-Id e X-Correlation-Id sem modificar as rotas de imagem.")], [#text("REQ-VID-AUTH-001 a REQ-VID-AUTH-003; REQ-VID-NFR-001/002/015.")],
-    [#text("Projetos e MongoDB de Projetos")], [#text("Alterado")], [#text("Módulos e coleções novos. Criar as coleções videos, VideoTask e video_project_locks. Orquestrar tarefas, recuperar falhas, conservar originais e registar proveniência. Reutilizar permissões e projeto sem acrescentar o bloqueio ao documento do projeto.")], [#text("REQ-VID-STORAGE-001 a REQ-VID-STORAGE-005; REQ-VID-TASK-001 a REQ-VID-TASK-007; REQ-VID-NFR-006/017.")],
+    [#text("Projetos e MongoDB de Projetos")], [#text("Alterado")], [#text("Módulos e coleções novos. Criar as coleções videos, videotasks (modelo VideoTask) e video_project_locks. Orquestrar tarefas, recuperar falhas, conservar originais e registar proveniência. Reutilizar permissões e projeto sem acrescentar o bloqueio ao documento do projeto.")], [#text("REQ-VID-STORAGE-001 a REQ-VID-STORAGE-005; REQ-VID-TASK-001 a REQ-VID-TASK-007; REQ-VID-NFR-006/017.")],
     [#text("Registo de operações em Projetos")], [#text("Novo")], [#text("Módulo novo. Contrato versionado {operation, version, parameters}; validate, estimate, cost e copyable. Construir o plano com base nos metadados persistidos, sem confiar em propriedades enviadas pelo cliente.")], [#text("REQ-VID-COM-004/005/006; REQ-VID-CHAIN-003; REQ-VID-QUOTA-008.")],
-    [#text("Utilizadores e MongoDB de Utilizadores")], [#text("Alterado")], [#text("Quota existente reutilizada; predefinições em módulo e coleção novos. Consultar perfil; reservar/devolver créditos do executor. Guardar configurações de vídeo separadas dos presets de imagem, sem partilha e sem junção.")], [#text("REQ-VID-QUOTA-001 a REQ-VID-QUOTA-008; REQ-VID-CHAIN-014.")],
+    [#text("Utilizadores e MongoDB de Utilizadores")], [#text("Alterado")], [#text("Quota existente reutilizada para consultar perfil e reservar/devolver créditos do executor. Módulo e coleção de predefinições de vídeo previstos no Bolt 008, separados dos presets de imagem, sem partilha e sem junção.")], [#text("REQ-VID-QUOTA-001 a REQ-VID-QUOTA-008; REQ-VID-CHAIN-014.")],
     [#text("RabbitMQ")], [#text("Alterado")], [#text("Filas, bindings e exchange novos. Criar as filas video_operations_queue, video_project_queue e video_ws_queue e o exchange video_control. Pedidos duráveis com confirmação manual e reentrega limitada.")], [#text("REQ-VID-TASK-001/003/004/005; REQ-VID-NFR-005/006/010.")],
     [#text("Worker Tools/video/")], [#text("Novo")], [#text("Serviço Docker novo; utilitários existentes reutilizados. Ingestão com FFprobe/FFmpeg; execução de operações e cadeias; geração de pré-visualização e miniaturas; temporários próprios e interrupção do processo.")], [#text("REQ-VID-UPLOAD-008/013/014/016/017; REQ-VID-NFR-009/011/012/016/022.")],
     [#text("imageStorageService e SeaweedFS/S3")], [#text("Alterado")], [#text("Módulo de vídeo e estágios novos; storage existente reutilizado. Gerar URLs GET/PUT, gerir objetos nos estágios video_src, video_out, video_preview e video_thumb. Servir os binários e manter originais e derivados distintos.")], [#text("REQ-VID-UPLOAD-007; REQ-VID-DOWNLOAD-002/006/007; REQ-VID-STORAGE-001/002.")],
     [#text("WS Gateway")], [#text("Alterado")], [#text("Módulo wsGateway/video.js novo. Consumir video_ws_queue e emitir video-task-update para as salas existentes, com estado, passo e progresso. Recuperação de estado pela API ao reabrir a página.")], [#text("REQ-VID-TASK-002/003/007; REQ-VID-CHAIN-012; REQ-VID-NFR-008.")],
-    [#text("Nginx")], [#text("Alterado")], [#text("Locations e log_format novos. Encaminhar leitura assinada em /s3-video/ com Range e sem buffering. Configurar a rota de upload depois da decisão respetiva; não registar assinaturas nas query strings dos logs.")], [#text("REQ-VID-NFR-014/021; REQ-VID-DOWNLOAD-007/009.")],
+    [#text("Nginx")], [#text("Alterado")], [#text("Locations e log_format novos. Encaminhar leitura assinada em /s3-video/ com Range e sem buffering. A rota assinada de upload admite até 2 GB e desativa buffering; não registar assinaturas nas query strings dos logs.")], [#text("REQ-VID-NFR-014/021; REQ-VID-DOWNLOAD-007/009.")],
   ),
 )
 
@@ -75,26 +77,26 @@ Os componentes azuis identificam o worker novo e a lógica de vídeo acrescentad
 
 == Máquina de estados do processamento
 
-A máquina representa `VideoTask` e aplica-se a transformações, junções e cadeias. Os pedidos rejeitados por autenticação, permissão, parâmetros, limite de concorrência ou saldo ficam fora da máquina: não chegam a ser admitidos como tarefas.
+A máquina representa `VideoTask`: está implementada para as operações isoladas e listas de passos da fundação e será reutilizada na junção e no editor de cadeias do Bolt 008. Não representa o ciclo de ingestão de `Video`. Os pedidos rejeitados por autenticação, permissão, parâmetros, limite de concorrência ou saldo ficam fora da máquina: não chegam a ser admitidos como tarefas.
 
 
 #figure(
   image("../images/maquina_estados_video.png", width: 100%, height: 14.5cm, fit: "contain"),
-  caption: [Máquina de estados proposta para as tarefas de processamento de vídeo],
+  caption: [Máquina de estados das tarefas de transformação de vídeo],
 )
 
 
-A admissão adquire o lugar do projeto, reserva os créditos quando aplicável, persiste a tarefa e publica o pedido. O estado passa a `processing` quando o worker comunica o início. O sucesso exige um resultado válido e a publicação do novo recurso, com proveniência. Progresso percentual e passo corrente são informação da execução, sem criar estados adicionais.
+A admissão adquire o lugar do projeto, reserva os créditos quando aplicável, persiste a tarefa e tenta publicar o pedido, mantendo evidência para recuperação em caso de falha. O estado passa a `processing` quando o worker comunica o início. O sucesso exige um resultado válido e a publicação do novo recurso, com proveniência. Progresso percentual e passo corrente são informação da execução, sem criar estados adicionais.
 
-O desenho da arquitetura prevê confirmação manual, uma fila de pedidos de tipo quorum e um máximo de duas entregas. Se o worker cair, a tarefa pode recomeçar do zero; não se propõe retoma a partir de checkpoints. Ao esgotar as entregas, a mensagem é encaminhada para tratamento de falha, com devolução de créditos, limpeza e libertação do lugar. O estado da tarefa permanece a fonte de verdade para ignorar mensagens tardias ou repetidas.
+A implementação usa confirmação manual, uma fila de pedidos de tipo quorum e um máximo de duas entregas. Se o worker cair, a tarefa pode recomeçar do zero; não se propõe retoma a partir de checkpoints. Ao esgotar as entregas, a mensagem é encaminhada para tratamento de falha, com devolução de créditos, limpeza e libertação do lugar. O estado da tarefa permanece a fonte de verdade para ignorar mensagens tardias ou repetidas.
 
 O cancelamento exige permissão de edição e a identidade de quem submeteu a tarefa. O orquestrador marca `cancelled` e publica em `video_control`; o worker interrompe FFmpeg e limpa os temporários. A transição lógica pode anteceder a conclusão dessa limpeza. Se um `completed` chegar depois, o recurso não é publicado e o objeto enviado é eliminado.
 
 
 == Fluxo de processamento de vídeo
-#preencher[Explicação do fluxo: pedido, encaminhamento, processamento, armazenamento, notificação de progresso/resultado, falhas.]
 
-O diagrama de sequência apresenta o caminho de sucesso de uma operação ou cadeia em três partes, mantendo os participantes e a numeração das mensagens: admissão, execução e publicação do resultado. Nginx é o ponto de entrada externo; a lifeline do API Gateway representa esse encaminhamento HTTP. A lifeline de armazenamento agrega o módulo de vídeo que emite os URLs e o S3 que transfere os binários. Não representa encaminhamento do ficheiro pelo gateway.
+
+O diagrama de sequência apresenta o caminho de sucesso de uma transformação; a composição completa reutilizará este fluxo no Bolt 008. A sequência é organizada em três partes, mantendo os participantes e a numeração das mensagens: admissão, execução e publicação do resultado. Nginx é o ponto de entrada externo; a lifeline do API Gateway representa esse encaminhamento HTTP. A lifeline de armazenamento agrega o módulo de vídeo que emite os URLs e o S3 que transfere os binários. Não representa encaminhamento do ficheiro pelo gateway.
 
 
 #figure(
@@ -113,13 +115,19 @@ O diagrama de sequência apresenta o caminho de sucesso de uma operação ou cad
 )
 
 
-O gateway valida a identidade e transmite o executor e o identificador de correlação. Projetos verifica a permissão, o perfil e os vídeos de entrada, lê os seus metadados e valida cada passo antes de calcular o plano e o custo. Uma cadeia inclui as sub-cadeias dos clips e, quando aplicável, a junção. Um lock exclusivo impede uma segunda tarefa de vídeo no mesmo projeto. A resposta de quota insuficiente liberta o lugar e rejeita a admissão; falhas posteriores à reserva exigem compensação. A operação só responde com `202` após criar a tarefa e publicar o pedido.
+O gateway valida a identidade e transmite o executor e o identificador de correlação. Projetos verifica a permissão, o perfil e os vídeos de entrada, lê os seus metadados e valida cada passo antes de calcular o plano e o custo. Uma cadeia inclui as sub-cadeias dos clips e, quando aplicável, a junção. Um lock exclusivo impede uma segunda tarefa de vídeo no mesmo projeto. A resposta de quota insuficiente liberta o lugar e rejeita a admissão; falhas posteriores à reserva exigem compensação. A operação responde com `202` após persistir a tarefa e tentar publicar o pedido. Se RabbitMQ estiver indisponível, a tarefa permanece `queued`, com `published_at` nulo, e a rotina de recuperação repete a publicação (D-41/ADR-004). Assim, `queued` significa aceitação persistida; não garante que o broker já recebeu a mensagem em caso de falha.
 
-O worker descarrega as entradas por blocos, executa o plano num diretório da tarefa e publica progresso em `video_ws_queue`, sem escrever no MongoDB a cada atualização. A réplica do WS Gateway emite os eventos para as salas existentes. O resultado é inspecionado por FFprobe; os ficheiros de saída, a miniatura e a cópia de reprodução, quando necessária, são enviados para o storage. Projetos recebe a resposta, verifica se a tarefa ainda está ativa, cria o novo vídeo e persiste o estado terminal antes de confirmar a mensagem. No sucesso, o débito já reservado é mantido.
+O worker descarrega as entradas por blocos, executa o plano num diretório da tarefa e publica progresso em `video_ws_queue`, sem escrever no MongoDB a cada atualização. A réplica do WS Gateway emite os eventos para as salas existentes. O resultado é inspecionado por FFprobe; os ficheiros de saída, a miniatura e a cópia de reprodução, quando necessária, são enviados para o storage. Projetos recebe a resposta e verifica o estado da tarefa. A implementação persiste completed antes de criar o vídeo com ID igual ao taskId; a resposta só é confirmada e a conclusão notificada após tratar o resultado. A reentrega permite repetir a criação sem duplicar o recurso. Esta sequência não é uma transação distribuída e pode produzir um intervalo entre o estado terminal e a disponibilidade do recurso. No sucesso, o débito já reservado é mantido.
 
-Os casos de erro e cancelamento seguem a máquina de estados: preservar os originais, não publicar resultados parciais, devolver os créditos de trabalho não entregue, limpar temporários e libertar o lugar. Os eventos transportam identificadores, estado e progresso, sem nomes de ficheiros nem URLs.
+Os casos de erro e cancelamento seguem a máquina de estados: preservar os originais, não publicar resultados parciais, devolver os créditos de trabalho não entregue, limpar temporários e libertar o lugar. Os eventos de tarefa transportam identificadores, estado e progresso; as chaves e os metadados técnicos circulam nas respostas internas. Os URLs assinados não são persistidos no plano nem incluídos nas notificações de tarefa.
 
 == Impacto na instalação e execução
 
-#preencher[Novos serviços/contentores, dependências externas (e.g., binários de processamento de vídeo), volumes, variáveis de configuração. Instruções completas de execução no Anexo A.]
+O ficheiro docker-compose.yaml acrescenta o serviço video_worker, construído com contexto Tools e Dockerfile video/Dockerfile. A imagem inclui Python, FFmpeg e FFprobe; o anfitrião necessita de Docker Compose, sem instalar esses binários para executar a aplicação. O worker usa o volume video_tmp em /tmp/video, a rede elk e as variáveis RABBITMQ_HOST, RABBITMQ_PORT, RABBITMQ_USERNAME, RABBITMQ_PASSWORD e VIDEO_STORAGE_URL. VIDEO_TMP_ROOT permite ajustar o diretório de trabalho.
+
+O SeaweedFS 4.47 e os volumes de MongoDB/RabbitMQ são persistentes; eliminar recursos da aplicação não equivale a remover esses volumes. O limite configurado por volume SeaweedFS (1024 MiB) é uma unidade de armazenamento e não o limite total de um objeto, que pode ser distribuído. A capacidade depende também dos espaços de volume disponíveis e do disco do ambiente. Os episódios de saturação de armazenamento não demonstram, por si só, conformidade com o limite de ficheiros de 2 GB.
+
+O ponto de entrada local é https://localhost:8080, servido por Nginx com certificado local. A reconstrução dos componentes de vídeo pode ser efetuada com `docker compose up -d --build projects video_worker frontend`; o arranque integral usa `docker compose up -d --build`. A configuração de assinatura S3 usa S3_ACCESS_KEY e S3_SECRET_KEY; S3_KEK_PASSPHRASE configura a proteção de chaves do armazenamento. Os segredos não integram os logs nem os exemplos do relatório. A emissão de JWT mantém atualmente sete dias de validade, em divergência com a hora exigida pela ERS; este desvio permanece explícito no Capítulo 10.
+
+A proveniência é persistida em source_video_ids e a receita em recipe. Nos novos resultados, o nome apresentado adota a extensão do contentor real (D-75/ADR-015), mantendo o nome base; o nome sugerido para descarregamento acrescenta os sufixos das operações. Os resultados antigos não são migrados por esta regra.
 

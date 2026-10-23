@@ -23,7 +23,7 @@ skinparam BoxPadding 10
 hide footbox
 autonumber
 
-title Sequência — Processar um Vídeo no Projeto\nCaminho de sucesso proposto para uma operação ou cadeia
+title Sequência — Processar um Vídeo no Projeto\nTransformação implementada; composição completa prevista no Bolt 008
 
 actor "Utilizador\nFrontend" as UI
 participant "API Gateway\n(via Nginx)" as API
@@ -45,6 +45,10 @@ group Admissão e resposta assíncrona
   end
   Projects -> Projects : Persistir VideoTask com estado queued
   Projects ->> MQ : video_operations_queue\n{taskId, correlationId, plano, chaves}
+  note right of Projects
+    Se a publicação falhar, a tarefa persiste queued
+    com published_at nulo; recuperação republica (D-41).
+  end note
   Projects --> API : 202 {taskId, status: queued}
   API --> UI : Pedido aceite; taskId
 end
@@ -63,7 +67,7 @@ group Execução fora do pedido HTTP
   Worker -> Storage : Pedir URL GET interno
   Storage --> Worker : URL assinado
   Worker -> Storage : GET S3 por blocos
-  Worker -> Worker : Executar plano FFmpeg\nNo máximo uma recodificação
+  Worker -> Worker : Executar plano FFmpeg\nNo máximo uma codificação do vídeo final
   loop Progresso pelo menos 1 vez por segundo
     Worker ->> MQ : video_ws_queue\n{taskId, step, totalSteps, progress}
     MQ ->> WS : Evento de progresso
@@ -79,7 +83,7 @@ newpage Publicação do resultado
 
 group Publicação do resultado
   MQ ->> Projects : completed(taskId, meta, chaves)
-  Projects -> Projects : Criar vídeo com proveniência\nPersistir completed; libertar lugar\nSem novo débito de quota
+  Projects -> Projects : Persistir completed\nCriar vídeo com proveniência (ID = taskId)\nLibertar lugar; sem novo débito de quota
   Projects -> MQ : ACK da resposta após persistência
   Projects ->> MQ : video_ws_queue: completed\n{taskId, resultVideoId, status}
   MQ ->> WS : Evento de conclusão
@@ -89,7 +93,8 @@ end
 note over Projects, Worker
   MongoDB é atualizado pelo serviço de Projetos.
   O worker devolve metadados reais e chaves de objetos.
-  As respostas terminais repetidas não duplicam recursos ou débitos.
+  O ID determinístico evita duplicar o recurso em reentrega.
+  Não existe transação distribuída entre MongoDB, quota e S3.
 end note
 note over UI, Projects
   Falhas, cancelamento e reentrega seguem a máquina de estados.

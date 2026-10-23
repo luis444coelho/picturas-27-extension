@@ -28,6 +28,8 @@ O Codex foi utilizado como assistente com acesso ao repositório, permitindo con
   ),
 )
 
+A assistência abrangeu também construção e testes: os Bolts 001 a 005 e 007 contêm planos, percursos de implementação, relatórios de execução e decisões revistas pela equipa. O Bolt 006 foi excluído do âmbito e o Bolt 008 permanece planeado. A simples disponibilidade de uma skill não prova a sua utilização em cada sessão.
+
 O contexto fornecido ao agente compreende os casos de uso, a ERS, o ADD e as decisões registadas pela equipa. A consulta conjunta destes documentos reduz a possibilidade de uma proposta se basear apenas numa descrição parcial do problema. Na adaptação ao relatório, os identificadores seguem a numeração dos Capítulos 4 a 7; os artefactos de origem podem conservar identificadores anteriores. As alterações devem, por isso, ser verificadas pelo significado e pela origem de cada requisito, para além da correspondência numérica.
 
 == Tarefas apoiadas e validação
@@ -40,7 +42,7 @@ A tabela seguinte distingue a contribuição do agente da verificação que sust
     tamanho: 8pt,
     [#text("Ferramenta / skill")], [#text("Caso de uso")], [#text("Tarefa apoiada")], [#text("Validação realizada pela equipa")], [#text("Evidência")],
     [#text("Codex / Inception")], [#text("UC-VID-000 a UC-VID-013")], [#text("Revisão de fluxos, exceções, regras de negócio e critérios de aceitação.")], [#text("Confronto entre casos de uso e requisitos; manutenção das origens e das fronteiras de leitura e edição.")], [#text("E-01; E-02")],
-    [#text("Codex / Inception")], [#text("Transversal")], [#text("Refinamento da ERS e organização das tabelas de requisitos.")], [#text("Registo original/refinado de 18 requisitos; controlo dos 202 IDs e das referências; correção da duplicação de classificação identificada na revisão humana.")], [#text("E-03")],
+    [#text("Codex / Inception")], [#text("Transversal")], [#text("Refinamento da ERS e organização das tabelas de requisitos.")], [#text("Registo original/refinado da revisão de requisitos; controlo dos 202 IDs e das referências; correção da duplicação de classificação identificada na revisão humana.")], [#text("E-03")],
     [#text("Codex / Inception")], [#text("UC-VID-001, UC-VID-002 e UC-VID-013")], [#text("Clarificação do recorte, da remoção de áudio e do custo de cadeias.")], [#text("Comparação com o ADD: cópia condicionada por keyframes, ausência de áudio no resultado e reserva/devolução do custo total, sem segundo débito.")], [#text("E-02; E-03")],
     [#text("Codex / Inception")], [#text("Transversal")], [#text("Organização de Units, Stories, dependências e responsabilidades dos Bolts.")], [#text("Questões D-01 a D-10 respondidas e aplicadas aos artefactos; inspeção das responsabilidades atribuídas à fundação e ao executor.")], [#text("E-04")],
     [#text("Codex / Inception")], [#text("UC-VID-000 a UC-VID-013")], [#text("Revisão de perfis, stakeholders, técnicas de elicitação e assunções.")], [#text("Separação entre decisões documentais e dados empíricos; indicação das fontes e das atividades de validação adequadas a cada assunção.")], [#text("E-05")],
@@ -49,6 +51,8 @@ A tabela seguinte distingue a contribuição do agente da verificação que sust
     [#text("Codex / Inception; verificações estruturais")], [#text("Transversal")], [#text("Preparação de critérios de teste e condições de verificação dos requisitos de qualidade.")], [#text("Verificação da ligação entre requisito, alvo e condição; distinção entre aceitação HTTP, processamento e pré-visualização. Os critérios fundamentam a estratégia do Capítulo 10.")], [#text("E-03")],
   ),
 )
+
+No código, o caso D-67 exemplifica a revisão do agente: a pré-visualização e o resultado divergiam no contraste e na saturação. As medições levaram à decisão aprovada de usar fórmulas RGB equivalentes nos dois motores (ADR-012). Os testes não foram interpretados como prova universal: a regressão B004 conserva a falha da imagem de ensaio em ARM, e a matriz de reprodução B007 não cobre todos os percursos no leitor integrado. A revisão D-75 corrigiu a extensão dos novos resultados e atualizou a expectativa de teste correspondente. Evidência: E-07 e Capítulo 10.
 
 As evidências são identificadas abaixo para permitir a consulta das alterações e do respetivo contexto. Os _commits_ documentam o conteúdo alterado; por si só, não demonstram qual o modelo utilizado nem a aceitação de cada proposta. Essa interpretação exige o confronto com as configurações, os registos de decisões e os artefactos resultantes.
 
@@ -59,10 +63,11 @@ As evidências são identificadas abaixo para permitir a consulta das alteraçõ
     [#text("ID")], [#text("Artefacto / alteração verificável")],
     [#text("E-01")], [#text("Configuração dos agentes: .codex/skills/specsmd-inception-agent/SKILL.md; .specsmd/aidlc/agents/inception-agent.md; .specsmd/aidlc/memory-bank.yaml e context-config.yaml.")],
     [#text("E-02")], [#text("Fontes de especificação: docs/use-cases/, docs/requirements/, docs/requirements/quality-review.md e docs/add.md. A versão do relatório é consultável nos Capítulos 4 a 7.")],
-    [#text("E-03")], [#text("Commit f9c316a — alterações aos capítulos da ERS, impacto, rastreabilidade e histórico. Capítulo 5: registo dos 18 requisitos refinados, alvos e condições de verificação. A correção posterior da coluna de classificação está documentada no próprio catálogo.")],
+    [#text("E-03")], [#text("Commit f9c316a — alterações aos capítulos da ERS, impacto, rastreabilidade e histórico. Capítulo 5: registo dos requisitos refinados, alvos e condições de verificação. A correção posterior da coluna de classificação está documentada no próprio catálogo.")],
     [#text("E-04")], [#text("Commits d3ab0e2, c386114 e 1a701cc — aplicação das respostas de docs/specsDuvidas.md. Registos em memory-bank/intents/001-video-processing-support/inception-log.md, traceability.md e ficheiros de Bolt.")],
     [#text("E-05")], [#text("Commit 8fa814f — revisão do Capítulo 2: perfis, stakeholders, técnicas de elicitação, assunções e ações de validação.")],
     [#text("E-06")], [#text("Commit 815599a — Capítulo 8 e ficheiros arquitetura_componentes.puml, maquina_estados_video.puml e sequencia_processamento.puml, com os PNG correspondentes, em images/ do relatório.")],
+    [#text("E-07")], [#text("Construção e testes: memory-bank/bolts/001-video-lifecycle/ a 005-video-visual-edits/ e 007-video-format-conversion/. A conversão consta dos commits 8f1b821 e 95236c4 e do fecho 204c4b9; a correção do nome do resultado consta de 86bbe4c (D-75/ADR-015). Estes registos identificam alterações e validações, sem permitir atribuir um modelo exato a todas as sessões.")],
   ),
 )
 
