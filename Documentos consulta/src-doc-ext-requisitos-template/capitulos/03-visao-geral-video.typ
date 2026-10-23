@@ -4,9 +4,9 @@
 
 == Objetivos e funcionalidades do MVP
 
-A Fase 1 tem como objetivo alargar o espaço de trabalho do PictuRAS, originalmente orientado para imagens, para que um projeto possa integrar imagens e vídeos e suportar operações de vídeo com resultados persistidos no próprio projeto. A extensão cobre o ciclo que vai da entrada e consulta do vídeo à edição, composição, acompanhamento do processamento e obtenção do resultado. O diagrama de casos de uso representa os 14 objetivos funcionais identificados; os requisitos associados especificam as validações, limites, exceções e comportamento partilhado. No código analisado não foi identificada implementação destas funcionalidades; o estado do incremento é, portanto, especificado, com implementação por realizar.
+A Fase 1 tem como objetivo alargar o espaço de trabalho do PictuRAS, originalmente orientado para imagens, para que um projeto possa integrar imagens e vídeos e suportar operações de vídeo com resultados persistidos no próprio projeto. A extensão cobre o ciclo que vai da entrada e consulta do vídeo à edição, composição, acompanhamento do processamento e obtenção do resultado. O diagrama de casos de uso representa os 14 objetivos funcionais identificados. Os requisitos associados especificam as validações, limites, exceções e comportamento partilhado.
 
-Os casos de uso de consulta e descarregamento são distinguíveis das operações que submetem processamento: consultar informações e descarregar não consomem quota; o carregamento e a reprodução também não. A edição requer permissão de edição no projeto, enquanto a consulta e o descarregamento admitem permissão de leitura. Os perfis Registado e Premium podem executar os casos de uso de vídeo, sujeitos aos limites e à política de quota correspondentes. A tabela resume cada objetivo e as suas dependências funcionais; os prefixos indicam os requisitos específicos, complementados pelos requisitos transversais `COM`, `AUTH`, `TASK`, `QUOTA`, `STORAGE`, `ERROR` e `NFR` quando aplicáveis.
+Os casos de uso de consulta e descarregamento são distinguíveis das operações que submetem processamento: consultar informações e descarregar não consomem quota. O carregamento e a reprodução também não. A edição requer permissão de edição no projeto, enquanto a consulta e o descarregamento admitem permissão de leitura. Os perfis Registado e Premium podem executar os casos de uso de vídeo, sujeitos aos limites e à política de quota correspondentes. A tabela resume cada objetivo e as suas dependências funcionais; os prefixos indicam os requisitos específicos, complementados pelos requisitos transversais `COM`, `AUTH`, `TASK`, `QUOTA`, `STORAGE`, `ERROR` e `NFR` quando aplicáveis.
 
 #tab([Objetivos funcionais de vídeo do MVP e respetivos casos de uso],
  tabela(
@@ -30,29 +30,33 @@ Os casos de uso de consulta e descarregamento são distinguíveis das operaçõe
  ),
 )
 
-*Nota sobre convidados.* Um utilizador autenticado que acede através de uma partilha: a permissão de leitura permite consultar ou descarregar; a permissão de edição permite carregar ou transformar. Os limites e a quota seguem o perfil da conta executora, e não o proprietário do projeto (REQ-VID-QUOTA-006).
+*Nota sobre convidados* 
 
-*Justificação dos objetivos no contexto do MVP.* `UC-VID-000` estabelece a entrada e reprodução do vídeo no projeto. `UC-VID-001` a `UC-VID-004` abrangem recorte temporal, áudio, velocidade e marca de água. `UC-VID-005` e `UC-VID-006` permitem obter o ficheiro e consultar os seus dados. `UC-VID-007` a `UC-VID-011` cobrem ajustes, filtros, dimensões, orientação e conversão de formato. `UC-VID-012` combina clips num vídeo e `UC-VID-013` organiza operações numa cadeia validada, incluindo sub-cadeias por clip e operações sobre o resultado da junção. As tarefas assíncronas, validação, quota e tratamento de falhas são preocupações transversais especificadas uma vez nos requisitos comuns.
+Um utilizador autenticado que acede através de uma partilha: a permissão de leitura permite consultar ou descarregar; a permissão de edição permite carregar ou transformar. Os limites e a quota seguem o perfil da conta executora, e não o proprietário do projeto.
+
+*Justificação dos objetivos no contexto do MVP* 
+
+O `UC-VID-000` estabelece a entrada e reprodução do vídeo no projeto. `UC-VID-001` a `UC-VID-004` abrangem recorte temporal, áudio, velocidade e marca de água. `UC-VID-005` e `UC-VID-006` permitem obter o ficheiro e consultar os seus dados. `UC-VID-007` a `UC-VID-011` cobrem ajustes, filtros, dimensões, orientação e conversão de formato. `UC-VID-012` combina clips num vídeo e `UC-VID-013` organiza operações numa cadeia validada, incluindo sub-cadeias por clip e operações sobre o resultado da junção. As tarefas assíncronas, validação, quota e tratamento de falhas são preocupações transversais especificadas uma vez nos requisitos comuns.
 
 == Diagrama de casos de uso
 
 #figure(
- image("../images/diagrama_casos_uso.png", width: 100%),
+ image("../images/diagrama_casos_uso.png", width: 50%),
  caption: [Diagrama consolidado de casos de uso: funcionalidades da baseline e extensão de vídeo],
 )
 
 O diagrama mantém em cinzento os casos de uso da baseline e identifica a azul os novos casos de uso `UC-VID-000` a `UC-VID-013`. `Utilizador Convidado` e `Premium` especializam o ator `Utilizador` e herdam as associações representadas. O ator base corresponde ao utilizador autenticado Registado. Um convidado autenticado herda as associações, mas só pode consultar ou descarregar com permissão de leitura e carregar ou transformar com permissão de edição. O perfil da conta define limites e quota, debitada à identidade que executa a operação. O diagrama mostra uma única associação do ator base a cada caso de uso de vídeo.
 
-As associações do diagrama indicam os perfis que podem iniciar os casos de uso, sujeitas à autorização do projeto. O carregamento exige permissão de edição; consulta de informações e descarregamento exigem permissão de leitura; as restantes operações alteram ou acrescentam recursos e exigem permissão de edição. O carregamento e a reprodução não debitam quota; consulta e descarregamento são operações de leitura sem custo; transformações e cadeias seguem os custos definidos nas regras transversais e nos casos correspondentes. O diagrama representa o acesso dos atores aos casos de uso; os pormenores de autorização, sequência e custo são especificados nos requisitos e nos casos de uso, não através de relações UML implícitas entre elipses.
+As associações do diagrama indicam os perfis que podem iniciar os casos de uso, sujeitas à autorização do projeto. O carregamento exige permissão de edição; consulta de informações e descarregamento exigem permissão de leitura; as restantes operações alteram ou acrescentam recursos e exigem permissão de edição. O carregamento e a reprodução não debitam quota; consulta e descarregamento são operações de leitura sem custo; transformações e cadeias seguem os custos definidos nas regras transversais e nos casos correspondentes. O diagrama representa o acesso dos atores aos casos de uso; os pormenores de autorização, sequência e custo são especificados nos requisitos e nos casos de uso.
 
 == Modelo de domínio
 
 #figure(
- image("../images/modelo_dominio.png", width: 100%),
+ image("../images/modelo_dominio.png", width: 80%),
  caption: [Modelo de domínio da baseline atualizado com os conceitos da extensão de vídeo],
 )
 
-O modelo de domínio alarga a baseline, centrada na edição de imagens, para integrar recursos e operações de vídeo. Mantém as entidades existentes, incluindo os perfis de utilizador, `Projeto`, `Imagem`, `Preset`, a hierarquia de ferramentas e os conceitos de assistência por IA. Acrescenta cinco conceitos: `Recurso multimédia`, `Vídeo`, `Ferramenta de vídeo`, `Trabalho de processamento` e `Predefinição de vídeo`. A extensão generaliza as associações de carregamento e pertença ao projeto e introduz relações para representar a execução das operações, a proveniência dos resultados e a reutilização de configurações. O diagrama é conceptual, apresenta entidades e relações, enquanto atributos, estados e regras de execução são especificados nos requisitos e casos de uso.
+O modelo de domínio alarga a baseline, centrada na edição de imagens, para integrar recursos e operações de vídeo. Mantém as entidades existentes, incluindo os perfis de utilizador, `Projeto`, `Imagem`, `Preset`, a hierarquia de ferramentas e os conceitos de assistência por IA. Acrescenta cinco conceitos: `Recurso multimédia`, `Vídeo`, `Ferramenta de vídeo`, `Trabalho de processamento` e `Predefinição de vídeo`. A extensão generaliza as associações de carregamento e pertença ao projeto e introduz relações para representar a execução das operações, a proveniência dos resultados e a reutilização de configurações.
 
 *Recursos multimédia e projetos mistos*
 

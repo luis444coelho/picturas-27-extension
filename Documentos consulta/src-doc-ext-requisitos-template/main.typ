@@ -3,8 +3,8 @@
 //  Compilar:  typst compile --font-path fonts main.typ doc-ext-requisitos.pdf
 //  Pré-visualizar ao gravar:  typst watch --font-path fonts main.typ doc-ext-requisitos.pdf
 // =============================================================================
-#import "cover.typ": cover
 #import "template.typ": *
+#import "cover.typ": cover
 
 #show: project
 
@@ -14,13 +14,12 @@
 #cover(
   title: "Fase 1 — Suporte a Vídeo",
   subtitle: "Requisitos, Arquitetura, Implementação e Validação do MVP",
-  group: "Grupo 27",   // Grupo PictuRAS-27
+  group: "Grupo PL2-G4",   // e.g., "Grupo PL3-G2"
   authors: (
-    (name: "Nome Apelido", number: "pg00000"),
-    (name: "Nome Apelido", number: "pg00000"),
-    (name: "Nome Apelido", number: "pg00000"),
-    (name: "Nome Apelido", number: "pg00000"),
-    (name: "Nome Apelido", number: "pg00000"),
+    (name: "Luís Miguel Coelho", number: "PG64000"),
+    (name: "Alexandre de Oliveira Monsanto", number: "PG65397"),
+    (name: "Diogo Alexandre Gomes Silva", number: "PG63941"),
+    (name: "José Miguel da Silva Santos", number: "PG63522"),
   ),
   "Outubro, 2026",
 )

@@ -31,7 +31,7 @@
 
 == Conflitos e decisões de compatibilidade
 
-O confronto considera a tabela anterior, a baseline v27.1 e os contratos descritos no ADD v1.1. Distingue conflitos resolvidos por acréscimo de módulos das limitações expressamente aceites ou ainda pendentes. A existência de uma decisão não constitui prova de ausência de regressões.
+O confronto considera a tabela anterior. Distingue conflitos resolvidos por acréscimo de módulos das limitações expressamente aceites ou ainda pendentes. A existência de uma decisão não constitui prova de ausência de regressões.
 
 #tab([Conflitos com a baseline e decisões de compatibilidade],
  tabela(
@@ -47,3 +47,4 @@ O confronto considera a tabela anterior, a baseline v27.1 e os contratos descrit
     [#text("REQ-VID-ADJUST-001/008; REQ-VID-FILTER-001/006")], [#text("Ferramentas de imagem com fatores multiplicativos e contraste ImageEnhance.")], [#text("eq=brightness é aditivo; um contraste de pivô fixo não reproduz exatamente o pivô da imagem. Os nomes de filtros não definem matrizes.")], [#text("Manter a intenção funcional e confrontar a implementação de imagem com ADD 4.3/4.4. Q-03/Q-04 no Capítulo 2 registam as definições/equivalências por resolver; não declarar equivalência validada.")],
  ),
 )
+

@@ -8,9 +8,6 @@
   solução na Fase 2. Cada alteração deve estar ligada aos requisitos que a motivam.
 ]
 
-Este capítulo apresenta a arquitetura proposta para construir o suporte a vídeo no PictuRAS.  Os diagramas descrevem o comportamento pretendido e não uma solução já executada ou validada.
-
-
 
 == Visão geral das alterações
 
@@ -105,14 +102,10 @@ O diagrama de sequência apresenta o caminho de sucesso de uma operação ou cad
   caption: [Sequência de processamento — parte 1: admissão, reserva e resposta assíncrona],
 )
 
-
-
 #figure(
   image("../images/sequencia_processamento_001.png", width: 100%, height: 14.5cm, fit: "contain"),
   caption: [Sequência de processamento — parte 2: execução e progresso do worker],
 )
-
-
 
 #figure(
   image("../images/sequencia_processamento_002.png", width: 100%, height: 14.5cm, fit: "contain"),

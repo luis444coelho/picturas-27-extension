@@ -3,14 +3,10 @@
 = Especificação de Requisitos do Sistema (ERS)
 
 #orientacao[
- Catálogo revisto segundo o guião e o template do Exercício 3. A coluna *Origem* mantém os casos de uso e decisões; a prioridade usa MoSCoW. A tabela funcional mantém uma única classificação Novo/Alt, além do Estado de refinamento. Os alvos e condições dos requisitos de qualidade são apresentados numa tabela complementar por ID.
+ Catálogo dos requisitos das funcionalidades de vídeo. A coluna *Origem* mantém o caso de uso e o elemento de origem; requisitos transversais mantêm todas as origens declaradas. A prioridade usa MoSCoW. Os campos que não têm coluna própria no modelo são apresentados junto do requisito (Evolução) ou no campo Alvo (MVP e produção), sem omitir dados da fonte.
 ]
 
-O catálogo do âmbito revisto contém *180 requisitos funcionais* e *22 requisitos não funcionais*, num total de *202 requisitos*.
-
-A referência desta revisão é o catálogo do relatório v1.4 imediatamente anterior a este refinamento, e não a baseline de imagem v27.1. Os documentos do Exercício 3 orientam a revisão de qualidade; os valores dos seus exemplos não constituem requisitos. Mantêm-se o âmbito e os IDs atuais do relatório, cuja numeração pode diferir dos documentos em `docs/`.
-
-Nos requisitos não funcionais, *Evolução* conserva a classificação histórica declarada na fonte (Mantido, Refinado ou Novo). Na tabela funcional, *Novo/Alt* é a única coluna de classificação relativamente à baseline de imagem. *Estado* indica a alteração nesta revisão: Inalterado ou Refinado. Não foram acrescentados, divididos nem eliminados requisitos nesta revisão. As decomposições anteriores estão documentadas em `docs/requirements/quality-review.md`; os novos IDs então criados não são reutilizados. A comparação no final deste capítulo reproduz o texto anterior a esta revisão, sem o apresentar como uma versão do Exercício 2 que não foi identificada autonomamente.
+O catálogo do âmbito contém *180 requisitos funcionais* e *22 requisitos não funcionais*, num total de *202 requisitos*.
 
 == Requisitos Funcionais
 
@@ -202,7 +198,6 @@ Nos requisitos não funcionais, *Evolução* conserva a classificação históri
  ),
 )
 
-
 == Requisitos Não Funcionais e de Qualidade
 
 #orientacao[
@@ -241,7 +236,7 @@ Nos requisitos não funcionais, *Evolução* conserva a classificação históri
 
 === Alvos e condições de medição
 
-Os alvos seguintes são metas, não resultados medidos. Para preservar a leitura em orientação vertical, os alvos MVP, os alvos de produção e as condições de verificação ficam numa tabela complementar ligada pelo mesmo ID. Para ensaios temporais, o registo deverá identificar o ficheiro (contentor, codecs, resolução, fps, duração e bytes), versões dos serviços/leitores, CPU, memória, disco, rede, carga concorrente e amostra de pedidos. Ainda não existe uma máquina nem um corpus de benchmark aprovados: a dependência está registada em Q-07 no Capítulo 2. Não se adota a configuração de 2 vCPU ou os tempos dos exemplos do exercício como dados do projeto.
+Os alvos seguintes são metas, não resultados medidos.  Ainda não existe uma máquina nem um corpus de benchmark aprovados: a dependência está registada em Q-07 no Capítulo 2. Não se adota a configuração de 2 vCPU ou os tempos dos exemplos do exercício como dados do projeto.
 
 #tab([Alvos e condições de verificação dos requisitos de qualidade],
  tabela(
@@ -384,7 +379,7 @@ A tabela inclui todos os 18 requisitos cujo enunciado, alvo ou critério foi alt
   colunas: (1.2fr, 3fr, 3fr, 1.4fr, 2.4fr),
   tamanho: 7pt,
     [#text("ID")], [#text("Requisito original / campo anterior")], [#text("Requisito refinado / campo atual")], [#text("Problema detetado")], [#text("Ambiguidade resolvida / justificação")],
-    [#text("REQ-VID-COM-006")], [#text("Enunciado: O sistema deve expor todas as operações de transformação de vídeo através de um contrato uniforme de tipo de operação e parâmetros, que permita executá-las isoladamente ou como passo de uma cadeia. Critério: Dado o contrato {operation, parameters} de um filtro, Quando submetido isoladamente ou como passo de cadeia, Então é validado pelas mesmas regras e produz o mesmo efeito.")], [#text("Enunciado: O sistema deve expor as transformações de vídeo por um contrato uniforme {operation, version, parameters}, utilizável numa operação isolada ou num passo de cadeia. Critério: Dado um filtro descrito por {operation, version: 1, parameters}, Quando validado isoladamente ou numa cadeia, Então são aplicadas as mesmas regras; a receita persistida conserva a versão dos parâmetros.")], [#text("Interpretável / inconsistente")], [#text("Contrato incompleto: falta de versão na receita. Fonte: ADD T-01 e requisito homónimo em docs/requirements/REQ-VID-COM.md.")],
+    [#text("REQ-VID-COM-006")], [#text("Enunciado: O sistema deve expor todas as operações de transformação de vídeo através de um contrato uniforme de tipo de operação e parâmetros, que permita executá-las isoladamente ou como passo de uma cadeia. Critério: Dado o contrato {operation, parameters} de um filtro, Quando submetido isoladamente ou como passo de cadeia, Então é validado pelas mesmas regras e produz o mesmo efeito.")], [#text("Enunciado: O sistema deve expor as transformações de vídeo por um contrato uniforme {operation, version, parameters}, utilizável numa operação isolada ou num passo de cadeia. Critério: Dado um filtro descrito por {operation, version: 1, parameters}, Quando validado isoladamente ou numa cadeia, Então são aplicadas as mesmas regras; a receita persistida conserva a versão dos parâmetros.")], [#text("Interpretável / inconsistente")], [#text("Contrato incompleto: falta de versão na receita. Fonte: requisito homónimo em docs/requirements/REQ-VID-COM.md.")],
     [#text("REQ-VID-QUOTA-002")], [#text("Enunciado: O sistema deve reservar exatamente 1 operação da quota diária do utilizador registado no momento da aceitação da tarefa de vídeo no estado queued. Critério: Dado um utilizador registado com saldo de 5 créditos, Quando a tarefa de vídeo é aceite em fila, Então o seu saldo transitório é decrementado para 4 créditos.")], [#text("Enunciado: O sistema deve reservar 1 crédito ao aceitar uma operação isolada ou uma junção do utilizador Registado no estado queued; a reserva de uma cadeia segue o custo total definido em REQ-VID-QUOTA-007/008. Critério: Dado um Registado com 5 créditos, Quando uma operação isolada é aceite, Então o saldo passa a 4; quando é aceite uma cadeia de 3 passos, Então passa de 5 a 2.")], [#text("Interpretável / inconsistente")], [#text("Regra de 1 crédito sem distinguir uma operação de uma cadeia. Fontes: REQ-VID-QUOTA-007/008 e DQ-013.")],
     [#text("REQ-VID-QUOTA-003")], [#text("Enunciado: O sistema deve confirmar o débito definitivo da operação de quota reservada apenas quando a tarefa atinge o estado de conclusão com sucesso (completed). Critério: Dado um processamento com crédito previamente reservado, Quando a tarefa atinge completed, Então o débito é consolidado sem decrementos adicionais.")], [#text("Enunciado: O sistema deve considerar definitivo o débito efetuado na reserva quando a tarefa atinge completed, sem novo débito nem chamada de confirmação separada. Critério: Dado um custo já reservado, Quando a tarefa conclui com sucesso, Então o saldo não sofre nova alteração e não existe chamada de commit ou confirmação.")], [#text("Interpretável / inconsistente")], [#text("Confirmação interpretável como novo endpoint ou segundo débito. Fonte: ADD T-04 e Q-ADD-03.")],
     [#text("REQ-VID-QUOTA-004")], [#text("Enunciado: O sistema deve devolver o crédito de quota reservado ao saldo do utilizador registado em caso de cancelamento voluntário, rejeição ou falha de processamento. Critério: Dado um processamento que falha nos workers, Quando a tarefa transita para o estado failed, Então o saldo do utilizador registado é incrementado em 1 unidade de imediato.")], [#text("Enunciado: O sistema deve devolver o total dos créditos reservados quando a tarefa do utilizador Registado falha ou é cancelada; uma rejeição anterior à reserva não altera o saldo. Critério: Dado uma cadeia de 3 passos com 3 créditos reservados, Quando termina em failed ou cancelled, Então são devolvidos os 3 créditos, sem publicação de resultado; dado um pedido rejeitado antes da reserva, Então o saldo permanece igual.")], [#text("Interpretável / inconsistente")], [#text("Critério de devolução de 1 crédito contradiz o reembolso integral de cadeias. Fontes: REQ-VID-CHAIN-013 e ADD T-04.")],
@@ -405,9 +400,6 @@ A tabela inclui todos os 18 requisitos cujo enunciado, alvo ou critério foi alt
  ),
 )
 
-=== Conflitos com o sistema existente
-
-O confronto com a baseline, os contratos atuais e a tabela de impacto é registado no Capítulo 6, na secção “Conflitos e decisões de compatibilidade”. Os mecanismos de imagem são preservados; as exceções de vídeo e as limitações aceites são explícitas.
 
 === Assunções dos valores fixados
 
