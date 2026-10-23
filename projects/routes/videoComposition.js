@@ -18,6 +18,7 @@ const preview = require("../video/preview");
 const storage = require("../video/storage");
 const { markBox } = require("../video/watermarkGeometry");
 const { createFrameCache } = require("../video/frameCache");
+const { browserFrame } = require("../video/browserFrame");
 const log = require("../video/log");
 const files = require("../video/visualStorage");
 const { registry } = require("../video/operations");
@@ -303,7 +304,8 @@ router.post(
     const errors = registry.get("watermark").validate(parameters, props) || [];
     if (errors.length) throw stepError(steps.length - 1, errors);
 
-    const frame = await preview.render(await firstFrame(video), applied);
+    const sourceFrame = await browserFrame(req.body?.frameJpeg, await firstFrame(video));
+    const frame = await preview.render(sourceFrame, applied);
     const image = await preview.watermark(
       frame,
       await marks.markPng(req.videoProject, parameters),

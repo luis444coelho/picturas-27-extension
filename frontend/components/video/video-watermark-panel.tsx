@@ -24,6 +24,8 @@ import {
 import { useVideoEditValidation, type VideoEditSession } from "./use-video-edit";
 import { useVideoPreview } from "./use-video-preview";
 import { VideoPreviewImage } from "./video-preview-image";
+import { VideoPreviewFrameSlider } from "./video-preview-frame-slider";
+import { useVideoFrameSelection } from "./use-video-frame-selection";
 import { VideoVisualValidation } from "./video-visual-validation";
 import { initialParam, simpleSource, useReportStep, type OperationConfigProps } from "./operation-config";
 import { fetchChainWatermarkPreview } from "@/lib/video-chain-api";
@@ -57,11 +59,14 @@ export function WatermarkConfig({
   const manual = !("preset" in values.position);
   const step = watermarkStep(values);
   const inChain = !source.isSource || source.previewSteps.length > 0;
+  const frame = useVideoFrameSelection(target, source);
   const preview = useVideoPreview(
     target,
     videoId,
     step,
-    inChain ? (t, v, s) => fetchChainWatermarkPreview(t, v, [...source.previewSteps, s]) : fetchWatermarkPreview,
+    inChain ? (t, v, s, jpeg) => fetchChainWatermarkPreview(t, v, [...source.previewSteps, s], jpeg) : fetchWatermarkPreview,
+    200,
+    frame,
   );
   const ownValidation = useVideoEditValidation(target, videoId, chainValidation ? null : step);
   const validation = chainValidation ?? ownValidation;
@@ -90,12 +95,13 @@ export function WatermarkConfig({
   return (
     <div className="flex flex-col gap-3">
       {step ? (
-        <VideoPreviewImage preview={preview} alt="Primeiro fotograma com a marca de água" />
+        <VideoPreviewImage preview={preview} alt="Pré-visualização com a marca de água" />
       ) : (
         <p className="text-sm text-muted-foreground">
           Escreve o texto ou escolhe a imagem para ver a pré-visualização.
         </p>
       )}
+      {step && <VideoPreviewFrameSlider selection={frame} disabled={disabled || uploading} />}
       <Tabs
         value={values.type}
         onValueChange={(type) => set({ type: type as WatermarkValues["type"] })}

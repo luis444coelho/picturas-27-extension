@@ -32,8 +32,8 @@ export interface PreviewImage {
   height: number | null;
 }
 
-async function previewRequest(path: string, target: VideoTarget, steps: VideoRecipeStep[]) {
-  const response = await api.post<Blob>(path, { steps }, {
+async function previewRequest(path: string, target: VideoTarget, steps: VideoRecipeStep[], frameJpeg?: string) {
+  const response = await api.post<Blob>(path, { steps, ...(frameJpeg ? { frameJpeg } : {}) }, {
     ...requestConfig(target),
     responseType: "blob",
   });
@@ -50,14 +50,16 @@ export const fetchVideoPreview = (
   target: VideoTarget,
   videoId: string,
   steps: VideoRecipeStep[],
-) => previewRequest(`${videosPath(target)}/${videoId}/preview`, target, steps);
+  frameJpeg?: string,
+) => previewRequest(`${videosPath(target)}/${videoId}/preview`, target, steps, frameJpeg);
 
 export const fetchWatermarkPreview = (
   target: VideoTarget,
   videoId: string,
   step: VideoRecipeStep,
+  frameJpeg?: string,
 ) =>
-  previewRequest(`${videosPath(target)}/${videoId}/watermark-preview`, target, [step]);
+  previewRequest(`${videosPath(target)}/${videoId}/watermark-preview`, target, [step], frameJpeg);
 
 export const fetchFilterThumbnails = async (target: VideoTarget, videoId: string) => {
   const response = await api.get<{ thumbnails: FilterThumbnail[] }>(

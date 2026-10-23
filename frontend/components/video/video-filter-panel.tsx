@@ -18,6 +18,8 @@ import {
 import { useVideoEditValidation, type VideoEditSession } from "./use-video-edit";
 import { useVideoPreview } from "./use-video-preview";
 import { VideoPreviewImage } from "./video-preview-image";
+import { VideoPreviewFrameSlider } from "./video-preview-frame-slider";
+import { useVideoFrameSelection } from "./use-video-frame-selection";
 import { VideoVisualValidation } from "./video-visual-validation";
 import { initialParam, simpleSource, useReportStep, type OperationConfigProps } from "./operation-config";
 
@@ -41,7 +43,8 @@ export function FilterConfig({
     staleTime: 5 * 60 * 1000,
   });
   const step = filter ? filterStep(filter) : null;
-  const preview = useVideoPreview(target, videoId, step, (t, v, s) => fetchVideoPreview(t, v, [...source.previewSteps, s]), 0);
+  const frame = useVideoFrameSelection(target, source);
+  const preview = useVideoPreview(target, videoId, step, (t, v, s, jpeg) => fetchVideoPreview(t, v, [...source.previewSteps, s], jpeg), 0, frame);
   const ownValidation = useVideoEditValidation(target, videoId, chainValidation ? null : step);
   const validation = chainValidation ?? ownValidation;
   useReportStep(step, onStepChange);
@@ -86,7 +89,8 @@ export function FilterConfig({
           Não foi possível carregar as miniaturas dos filtros.
         </p>
       )}
-      {step && <VideoPreviewImage preview={preview} alt="Primeiro fotograma com o filtro" />}
+      {step && <VideoPreviewImage preview={preview} alt="Pré-visualização com o filtro" />}
+      {step && <VideoPreviewFrameSlider selection={frame} disabled={disabled} />}
       <VideoVisualValidation validation={validation} />
       {renderActions({ step, validation, busy: disabled, beforeSubmit: () => undefined })}
     </div>

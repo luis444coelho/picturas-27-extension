@@ -17,6 +17,8 @@ import {
 import { useVideoEditValidation, type VideoEditSession } from "./use-video-edit";
 import { useVideoPreview } from "./use-video-preview";
 import { VideoPreviewImage } from "./video-preview-image";
+import { VideoPreviewFrameSlider } from "./video-preview-frame-slider";
+import { useVideoFrameSelection } from "./use-video-frame-selection";
 import { VideoVisualValidation } from "./video-visual-validation";
 import { initialParam, simpleSource, useReportStep, type OperationConfigProps } from "./operation-config";
 
@@ -45,14 +47,16 @@ export function AdjustConfig({
     saturationFactor: initialParam(initial, "saturationFactor", NEUTRAL_ADJUST.saturationFactor),
   });
   const step = adjustStep(values);
-  const preview = useVideoPreview(target, videoId, step, (t, v, s) => fetchVideoPreview(t, v, [...source.previewSteps, s]));
+  const frame = useVideoFrameSelection(target, source);
+  const preview = useVideoPreview(target, videoId, step, (t, v, s, jpeg) => fetchVideoPreview(t, v, [...source.previewSteps, s], jpeg), 200, frame);
   const ownValidation = useVideoEditValidation(target, videoId, chainValidation ? null : step);
   const validation = chainValidation ?? ownValidation;
   useReportStep(step, onStepChange);
   const neutral = CONTROLS.every(({ field }) => values[field] === 1);
   return (
     <div className="flex flex-col gap-3">
-      <VideoPreviewImage preview={preview} alt="Primeiro fotograma com o ajuste" />
+      <VideoPreviewImage preview={preview} alt="Pré-visualização com o ajuste" />
+      <VideoPreviewFrameSlider selection={frame} disabled={disabled} />
       {CONTROLS.map(({ field, label }) => (
         <div key={field} className="flex flex-col gap-1">
           <div className="flex justify-between">

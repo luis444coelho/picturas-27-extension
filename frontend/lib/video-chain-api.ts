@@ -75,10 +75,11 @@ export const fetchChainWatermarkPreview = async (
   target: VideoTarget,
   videoId: string,
   steps: VideoRecipeStep[],
+  frameJpeg?: string,
 ): Promise<PreviewImage> => {
   const response = await api.post<Blob>(
     `${videosPath(target)}/${videoId}/chain/watermark-preview`,
-    { steps },
+    { steps, ...(frameJpeg ? { frameJpeg } : {}) },
     { ...requestConfig(target), responseType: "blob" },
   );
   return { blob: response.data, width: null, height: null };

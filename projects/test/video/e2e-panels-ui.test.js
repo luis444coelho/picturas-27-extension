@@ -508,7 +508,7 @@ test(
       workspace.browser = spawn(BROWSER, [
         "--headless=new", `--remote-debugging-port=${PORT}`,
         `--user-data-dir=${workspace.profile}`, "--ignore-certificate-errors",
-        "--no-first-run", "--window-size=1600,1100", "about:blank",
+        "--no-first-run", "--window-size=1280,720", "about:blank",
       ], { stdio: "ignore" });
       workspace.cdp = await devtools();
       const { send, evaluate } = workspace.cdp;
@@ -546,12 +546,32 @@ test(
         watermark: "Marca de água", adjust: "Ajustar imagem", filter: "Filtro",
         resize: "Redimensionar", orient: "Rodar e espelhar", convert: "Converter formato",
       };
+      assert.ok(await evaluate(click("button", "Ajustar imagem", `document.querySelector('[aria-label="Ferramentas de vídeo"]')`)), "adjust slider panel");
+      await until(() => evaluate(`Boolean(document.querySelector('[aria-label="Momento da pré-visualização"]'))`), "original frame slider");
+      await until(() => evaluate(`Number(document.querySelector('[aria-label="Momento da pré-visualização"] [role=slider]')?.getAttribute('aria-valuemax')) > 0`), "slider duration");
+      const firstPreview = await until(() => evaluate(`${region}?.querySelector('img[alt="Pré-visualização com o ajuste"]')?.src`), "first frame preview");
+      const firstBytes = await evaluate(`(async () => [...new Uint8Array(await (await fetch(${JSON.stringify(firstPreview)})).arrayBuffer())].reduce((sum, byte) => (sum + byte) >>> 0, 0))()`);
+      await evaluate(`document.querySelector('[aria-label="Momento da pré-visualização"] [role=slider]').focus()`);
+      await send("Input.dispatchKeyEvent", { type: "keyDown", key: "End", code: "End", windowsVirtualKeyCode: 35 });
+      await send("Input.dispatchKeyEvent", { type: "keyUp", key: "End", code: "End", windowsVirtualKeyCode: 35 });
+      await until(() => evaluate(`Number(document.querySelector('[aria-label="Momento da pré-visualização"] [role=slider]')?.getAttribute('aria-valuenow')) > 0`), "seeked frame");
+      await until(() => evaluate(`Boolean(${region}?.querySelector('img[alt="Pré-visualização com o ajuste"]')?.src && ${region}.querySelector('img[alt="Pré-visualização com o ajuste"]').src !== ${JSON.stringify(firstPreview)})`), "selected frame preview");
+      const selectedBytes = await evaluate(`(async () => [...new Uint8Array(await (await fetch(${region}.querySelector('img[alt="Pré-visualização com o ajuste"]').src)).arrayBuffer())].reduce((sum, byte) => (sum + byte) >>> 0, 0))()`);
+      assert.notEqual(selectedBytes, firstBytes, "the selected moment changes the preview JPEG");
+      assert.equal(await evaluate(`${region}?.innerText.includes('Não foi possível obter este fotograma')`), false, "selected frame has no capture error");
       for (const panel of PANELS) {
         assert.ok(await until(() => evaluate(click("button", actions[panel.id], `document.querySelector('[aria-label="Ferramentas de vídeo"]')`)), `${panel.id} choice`));
         await until(() => evaluate(`Boolean(${region} && !${region}.innerText.includes('A validar') && !${region}.innerText.includes('A carregar'))`), `${panel.id} ready`);
         assert.ok(await evaluate(`Boolean(${region}.querySelector('button'))`), `${panel.id} controls`);
-        const adapted = panel.act.map((action) => action.replaceAll(DIALOG, region));
+        const adapted = panel.id === "adjust"
+          ? [`(() => { const thumb = ${region}?.querySelector('#adjust-brightness [role=slider]'); if (!thumb) return false; thumb.focus(); thumb.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })); return true; })()`]
+          : panel.act.map((action) => action.replaceAll(DIALOG, region));
         for (const action of adapted) assert.ok(await evaluate(action), `${panel.id} interaction`);
+        if (["watermark", "adjust", "filter", "resize", "orient"].includes(panel.id)) {
+          await until(() => evaluate(`Boolean(${region}?.querySelector('[aria-label="Momento da pré-visualização"]'))`), `${panel.id} frame slider`);
+        } else {
+          assert.equal(await evaluate(`Boolean(${region}?.querySelector('[aria-label="Momento da pré-visualização"]'))`), false, `${panel.id} has no frame slider`);
+        }
         if (panel.alert) {
           await until(() => evaluate(`Boolean(document.querySelector('[role=alertdialog]'))`), "audio confirmation");
           await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
@@ -562,6 +582,29 @@ test(
         assert.ok(await evaluate(click("button", label, `document.querySelector('[aria-label="Ferramentas de vídeo"]')`)), label);
         await until(() => evaluate(`${region}?.innerText.includes(${JSON.stringify(label)})`), `${label} region`);
       }
+      await until(() => evaluate(`Boolean(${region}?.querySelector('button img'))`), "movie maker clip picker");
+      assert.ok(await evaluate(`(() => { const button = ${region}?.querySelector('button:has(img)'); if (!button) return false; button.click(); return true; })()`), "add movie maker clip");
+      await until(() => evaluate(`${region}?.innerText.includes('Operações do vídeo 1')`), "clip operations");
+      for (const operation of ["adjust", "filter", "resize", "orient", "watermark"]) {
+        assert.ok(await evaluate(`(() => { const select = ${region}?.querySelector('select'); if (!select) return false; select.value = ${JSON.stringify(operation)}; select.dispatchEvent(new Event('change', { bubbles: true })); return true; })()`), `select clip ${operation}`);
+        assert.ok(await evaluate(click("button", "Acrescentar operação", region)), `configure first clip ${operation}`);
+        if (operation === "filter") assert.ok(await evaluate(click("[role=radio]", "Sépia", DIALOG)), "select clip filter");
+        if (operation === "watermark") assert.ok(await evaluate(setValue("#watermark-text", "Teste")), "set clip watermark");
+        await until(() => evaluate(`Boolean(${DIALOG}?.querySelector('[aria-label="Momento da pré-visualização"]'))`), `movie maker ${operation} frame slider`);
+        const sliderGeometry = await evaluate(`(() => { const dialog = ${DIALOG}; const slider = dialog?.querySelector('[aria-label="Momento da pré-visualização"]'); if (!slider) return null; const rect = slider.getBoundingClientRect(); return { top: rect.top, bottom: rect.bottom, viewport: innerHeight, dialogScroll: dialog.scrollHeight, dialogHeight: dialog.clientHeight }; })()`);
+        assert.ok(sliderGeometry?.top >= 0 && sliderGeometry.bottom <= sliderGeometry.viewport, `${operation} slider visible without scrolling: ${JSON.stringify(sliderGeometry)}`);
+        await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+        await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+        await until(() => evaluate(`!${DIALOG}`), `close clip ${operation} dialog`);
+      }
+      assert.ok(await evaluate(`(() => { const button = ${region}?.querySelector('button:has(img)'); if (!button) return false; button.click(); return true; })()`), "add second movie maker clip");
+      const secondClip = `([...${region}.querySelectorAll('h3')].find((heading) => heading.innerText === 'Operações do vídeo 2')?.closest('section'))`;
+      await until(() => evaluate(`Boolean(${secondClip})`), "second clip operations");
+      assert.ok(await evaluate(`(() => { const select = ${secondClip}?.querySelector('select'); if (!select) return false; select.value = 'adjust'; select.dispatchEvent(new Event('change', { bubbles: true })); return true; })()`), "select second clip adjustment");
+      assert.ok(await evaluate(click("button", "Acrescentar operação", secondClip)), "configure second clip first step");
+      await until(() => evaluate(`Boolean(${DIALOG}?.querySelector('[aria-label="Momento da pré-visualização"]'))`), "second clip frame slider");
+      await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+      await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
       assert.ok(await evaluate(`[...document.querySelectorAll('[aria-label="Ferramentas de vídeo"] button')].filter((button) => button.querySelector('svg')).length >= 12`), "icons for all operations");
       assert.ok(await evaluate(`Boolean([...document.querySelectorAll('[aria-label="Ferramentas de vídeo"] button')].find((button) => button.innerText.includes('Marca de água'))?.querySelector('svg.lucide-droplet'))`), "watermark uses Droplet");
       const videoRoute = `/projects/${workspace.user.id}/${workspace.project}/videos`;

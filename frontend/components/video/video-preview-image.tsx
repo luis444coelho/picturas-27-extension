@@ -3,7 +3,7 @@
 import { LoaderCircle } from "lucide-react";
 import type { VideoPreviewState } from "./use-video-preview";
 
-// First-frame preview of a visual edit (ADD T-07), with its final dimensions.
+// Preview of a visual edit (ADD T-07), with its final dimensions.
 export function VideoPreviewImage({
   preview,
   alt,

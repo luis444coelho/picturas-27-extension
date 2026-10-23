@@ -7,12 +7,14 @@ import type { VideoApiError, VideoTarget } from "@/lib/videos";
 import type {
   PreviewImage,
 } from "@/lib/video-visual-api";
+import type { VideoFrameSelection } from "./use-video-frame-selection";
 import { fieldLabel, visualStepErrorMessage } from "@/lib/video-visual";
 
 type Fetcher = (
   target: VideoTarget,
   videoId: string,
   step: VideoRecipeStep,
+  frameJpeg?: string,
 ) => Promise<PreviewImage>;
 
 // Errors of a preview answered as a blob: the JSON body must be read first.
@@ -34,7 +36,7 @@ async function previewError(cause: unknown): Promise<string> {
   return "Não foi possível gerar a pré-visualização.";
 }
 
-// Static preview of the first frame (ADD T-07): debounced, the newest request
+// Static preview (ADD T-07): debounced, the newest request
 // wins, and the object URL is released when replaced or unmounted.
 export function useVideoPreview(
   target: VideoTarget,
@@ -42,8 +44,9 @@ export function useVideoPreview(
   step: VideoRecipeStep | null,
   fetcher: Fetcher,
   delayMs = 200,
+  frame?: VideoFrameSelection,
 ) {
-  const key = JSON.stringify([target, videoId, step]);
+  const key = JSON.stringify([target, videoId, step, frame?.atMs ?? 0, frame?.jpeg?.length ?? 0]);
   const [state, setState] = useState<{
     key: string;
     url?: string;
@@ -52,11 +55,11 @@ export function useVideoPreview(
     error?: string;
   } | null>(null);
   useEffect(() => {
-    if (!step) return;
+    if (!step || frame?.pending || frame?.error || (frame?.atMs && !frame.jpeg)) return;
     let disposed = false;
     let url: string | undefined;
     const timer = setTimeout(() => {
-      fetcher(target, videoId, step).then(
+      fetcher(target, videoId, step, frame?.jpeg).then(
         (image) => {
           if (disposed) return;
           url = URL.createObjectURL(image.blob);
@@ -75,14 +78,14 @@ export function useVideoPreview(
     };
     // key includes every request argument; object identities change on render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
+  }, [key, frame?.jpeg, frame?.pending, frame?.error]);
   const current = state?.key === key ? state : null;
   return {
     url: current?.url,
     width: current?.width ?? null,
     height: current?.height ?? null,
     error: current?.error,
-    pending: Boolean(step && !current),
+    pending: Boolean(step && !frame?.error && (frame?.pending || !current)),
   };
 }
 

@@ -22,6 +22,7 @@ const preview = require("../video/preview");
 const files = require("../video/visualStorage");
 const { registry } = require("../video/operations");
 const { createFrameCache } = require("../video/frameCache");
+const { browserFrame } = require("../video/browserFrame");
 const { createWatermarks, MAX_BYTES } = require("../video/watermarks");
 const { markBox } = require("../video/watermarkGeometry");
 const { VideoError, sendError } = require("../video/errors");
@@ -225,7 +226,8 @@ router.post(
       chain.propsFromMeta(req.video.meta),
       req.callerType,
     );
-    const image = await preview.render(await firstFrame(req.video), applied);
+    const frame = await browserFrame(req.body?.frameJpeg, await firstFrame(req.video));
+    const image = await preview.render(frame, applied);
     res
       .status(200)
       .set("Cache-Control", "no-store")
@@ -280,8 +282,9 @@ router.post(
     const props = chain.propsFromMeta(req.video.meta);
     const errors = op.validate(parameters, props) || [];
     if (errors.length) throw stepError(0, errors);
+    const frame = await browserFrame(req.body?.frameJpeg, await firstFrame(req.video));
     const image = await preview.watermark(
-      await firstFrame(req.video),
+      frame,
       await marks.markPng(req.videoProject, parameters),
       markBox(parameters, props),
       parameters.opacity,

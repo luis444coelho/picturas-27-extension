@@ -21,6 +21,9 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "jade");
 
 app.use(logger("dev"));
+// Only visual video previews accept a bounded JPEG frame in JSON.
+for (const suffix of ["preview", "watermark-preview", "chain/watermark-preview"])
+  app.use(`/projects/:user/:project/videos/:video/${suffix}`, express.json({ limit: "3mb" }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
