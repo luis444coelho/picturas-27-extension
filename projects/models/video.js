@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const formats = require("../video/formats");
 
 // Video resources live in their own collection, apart from project.imgs (ADD T-00).
 // queued/processing/failed only apply to ingestion; failed is short-lived (D-12).
@@ -54,5 +55,15 @@ const videoSchema = new mongoose.Schema(
 
 videoSchema.index({ project_id: 1, status: 1, createdAt: -1 });
 videoSchema.index({ status: 1, updatedAt: 1 });
+
+// Result names reflect the stored container; ingestion and saved records keep theirs (D-75).
+videoSchema.pre("validate", function () {
+  if (!this.isNew || !this.task_id) return;
+  const extension = formats.CONTAINERS[this.meta?.container]?.extension;
+  if (!extension || !this.original_name) return;
+  const name = this.original_name;
+  const dot = name.lastIndexOf(".");
+  this.original_name = `${dot > 0 ? name.slice(0, dot) : name}${extension}`;
+});
 
 module.exports = mongoose.model("video", videoSchema);

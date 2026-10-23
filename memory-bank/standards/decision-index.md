@@ -1,6 +1,6 @@
 ---
-last_updated: 2026-10-22T23:34:11Z
-total_decisions: 14
+last_updated: 2026-10-23
+total_decisions: 15
 ---
 
 # Decision Index
@@ -19,6 +19,14 @@ Use this to find relevant prior decisions when working on related features.
 ## Decisions
 
 <!-- Entries are appended below in reverse chronological order (newest first) -->
+
+### ADR-015: Nome apresentado dos resultados de vídeo acompanha o contentor real
+- **Status**: accepted
+- **Date**: 2026-10-23
+- **Bolt**: nenhum (correção pontual após B007)
+- **Path**: `standards/adr-015-video-result-name.md`
+- **Summary**: D-75: um hook `pre("validate")` apenas para novos resultados com `task_id` substitui a extensão de `original_name` pela de `meta.container`, sem sufixo de operações; os resultados existentes e os originais da ingestão permanecem como estão. D-76 esclarece que o teste da B003 usa uma coleção falsa; D-77 ficou resolvida com o merge da B007 na main.
+- **Read when**: Working on result video names, `original_name`, video schema validation, video gallery or download naming.
 
 ### ADR-014: Modos de stream na validação apenas de `convert`
 - **Status**: accepted

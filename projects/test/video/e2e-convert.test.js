@@ -241,6 +241,16 @@ test.describe("B007 real stack", { skip, timeout: 900000 }, () => {
       assert.equal(check.status, 200, JSON.stringify([name, target, check.data]));
       assert.deepEqual([check.data.output.videoMode, check.data.output.audioMode], [videoMode, audioMode]);
       const { done, task, output } = await runOperation(s, name);
+      if (name === "base.mp4" && ["avi", "mov"].includes(target)) {
+        assert.equal(output.original_name, `base.${target}`);
+        const info = await api("GET", `${videos(user, p)}/${output._id}`, user);
+        assert.equal(info.status, 200, JSON.stringify(info.data));
+        assert.equal(info.data.originalName, `base.${target}`);
+        assert.equal(info.data.downloadFileName, `base_convert.${target}`);
+        const gallery = await api("GET", videos(user, p), user);
+        assert.equal(gallery.status, 200, JSON.stringify(gallery.data));
+        assert.equal(gallery.data.videos.find((v) => v.id === String(output._id))?.originalName, `base.${target}`);
+      }
       assert.deepEqual([output.meta.container, output.meta.video_codec, output.meta.audio_codec], [target, video, audio]);
       assert.deepEqual(output.recipe.map(({ operation, version, parameters }) => ({ operation, version, parameters })), [s]);
       assert.equal(task.plan.convert.previewInSameInvocation, target === "avi");
