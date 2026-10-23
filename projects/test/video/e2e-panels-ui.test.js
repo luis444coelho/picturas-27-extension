@@ -483,3 +483,164 @@ test.describe(
     );
   },
 );
+
+// D-91/D-92: the configuration components now live in the project workspace.
+// Run this case with --test-name-pattern="UI workspace"; the historical B008
+// snapshot cases above remain available for the old baseline.
+test(
+  "UI workspace: nine configurations, three compositions and image switch",
+  { skip, timeout: 600000 },
+  async () => {
+    const workspace = {};
+    try {
+      const email = `ui-workspace-${Date.now()}-${Math.random().toString(16).slice(2)}@test.local`;
+      const user = await api("POST", "/users", null, {
+        name: "UI workspace test", email, password: "ui-workspace-password", type: "free",
+      });
+      assert.equal(user.status, 201, JSON.stringify(user.data));
+      workspace.user = { id: user.data.user._id, token: user.data.jwt, doc: user.data.user };
+      const project = await api("POST", `/projects/${workspace.user.id}`, workspace.user.token, { name: "UI workspace test" });
+      assert.equal(project.status, 201);
+      workspace.project = project.data._id;
+      state.project = workspace.project;
+      workspace.video = await upload(workspace.user, "wide.mp4");
+      workspace.profile = fs.mkdtempSync(path.join(os.tmpdir(), "ui-workspace-profile-"));
+      workspace.browser = spawn(BROWSER, [
+        "--headless=new", `--remote-debugging-port=${PORT}`,
+        `--user-data-dir=${workspace.profile}`, "--ignore-certificate-errors",
+        "--no-first-run", "--window-size=1600,1100", "about:blank",
+      ], { stdio: "ignore" });
+      workspace.cdp = await devtools();
+      const { send, evaluate } = workspace.cdp;
+      await send("Page.enable");
+      await send("Page.navigate", { url: `${BASE}/login` });
+      await sleep(1200);
+      const doc = workspace.user.doc;
+      const session = { user: {
+        _id: doc._id, name: doc.name, email: doc.email, type: doc.type,
+        operations: doc.operations, remaining_operations: doc.remaining_operations,
+      }, token: workspace.user.token };
+      await evaluate(`localStorage.setItem("session", ${JSON.stringify(JSON.stringify(session))}); true`);
+      await send("Page.navigate", { url: `${BASE}/dashboard/${workspace.project}` });
+      await until(() => evaluate(`Boolean(document.querySelector('.video-workspace-root'))`), "video workspace");
+      await until(() => evaluate(`Boolean(document.querySelector('[aria-label="Ferramentas de vídeo"]'))`), "tools");
+      assert.equal(await evaluate(`document.querySelector('.video-workspace-root')?.dataset.active`), "true");
+
+      const region = `document.querySelector('[role=region][aria-label^="Parâmetros:"]')`;
+      const actions = {
+        trim: "Recortar", remove_audio: "Remover áudio", speed: "Velocidade",
+        watermark: "Marca de água", adjust: "Ajustar imagem", filter: "Filtro",
+        resize: "Redimensionar", orient: "Rodar e espelhar", convert: "Converter formato",
+      };
+      for (const panel of PANELS) {
+        assert.ok(await until(() => evaluate(click("button", actions[panel.id], `document.querySelector('[aria-label="Ferramentas de vídeo"]')`)), `${panel.id} choice`));
+        await until(() => evaluate(`Boolean(${region} && !${region}.innerText.includes('A validar') && !${region}.innerText.includes('A carregar'))`), `${panel.id} ready`);
+        assert.ok(await evaluate(`Boolean(${region}.querySelector('button'))`), `${panel.id} controls`);
+        const adapted = panel.act.map((action) => action.replaceAll(DIALOG, region));
+        for (const action of adapted) assert.ok(await evaluate(action), `${panel.id} interaction`);
+        if (panel.alert) {
+          await until(() => evaluate(`Boolean(document.querySelector('[role=alertdialog]'))`), "audio confirmation");
+          await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+          await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+        }
+      }
+      for (const label of ["Aplicar várias operações", "Juntar vídeos", "Movie Maker"]) {
+        assert.ok(await evaluate(click("button", label, `document.querySelector('[aria-label="Ferramentas de vídeo"]')`)), label);
+        await until(() => evaluate(`${region}?.innerText.includes(${JSON.stringify(label)})`), `${label} region`);
+      }
+      const videoRoute = `/projects/${workspace.user.id}/${workspace.project}/videos`;
+      const trimmed = await api("POST", `${videoRoute}/${workspace.video}/operations`, workspace.user.token, {
+        steps: [{ operation: "trim", version: 1, parameters: { startMs: 0, endMs: 2000 } }],
+      });
+      assert.equal(trimmed.status, 202, JSON.stringify(trimmed.data));
+      const trimTask = await until(async () => {
+        const response = await api("GET", `${videoRoute}/tasks/${trimmed.data.taskId}`, workspace.user.token);
+        return ["completed", "failed"].includes(response.data.status) ? response.data : null;
+      }, "trim result", 120000);
+      assert.equal(trimTask.status, "completed", JSON.stringify(trimTask));
+      await until(() => evaluate(`document.body.innerText.includes('Abrir resultado')`), "result offered without reload", 20000);
+      assert.ok(await evaluate(`document.querySelector('button[aria-current=true]')?.getAttribute('aria-label')?.includes('Original')`), "original stays selected");
+      assert.ok(await evaluate(click("button", "Abrir resultado")), "open result");
+      await until(() => evaluate(`document.querySelector('button[aria-current=true]')?.getAttribute('aria-label')?.includes('Recortado')`), "result selected");
+      const joined = await api("POST", `${videoRoute}/operations`, workspace.user.token, {
+        steps: [{ operation: "concat", version: 1, parameters: { clips: [
+          { videoId: workspace.video, steps: [] }, { videoId: workspace.video, steps: [] },
+        ] } }],
+      });
+      assert.equal(joined.status, 202, JSON.stringify(joined.data));
+      const joinTask = await until(async () => {
+        const response = await api("GET", `${videoRoute}/tasks/${joined.data.taskId}`, workspace.user.token);
+        return ["completed", "failed"].includes(response.data.status) ? response.data : null;
+      }, "join result", 120000);
+      assert.equal(joinTask.status, "completed", JSON.stringify(joinTask));
+      const movie = await api("POST", `${videoRoute}/operations`, workspace.user.token, {
+        steps: [{ operation: "concat", version: 1, parameters: { clips: [
+          { videoId: workspace.video, steps: [{ operation: "trim", version: 1, parameters: { startMs: 0, endMs: 2000 } }] },
+          { videoId: workspace.video, steps: [] },
+        ] } }],
+      });
+      assert.equal(movie.status, 202, JSON.stringify(movie.data));
+      const movieTask = await until(async () => {
+        const response = await api("GET", `${videoRoute}/tasks/${movie.data.taskId}`, workspace.user.token);
+        return ["completed", "failed"].includes(response.data.status) ? response.data : null;
+      }, "movie maker result", 120000);
+      assert.equal(movieTask.status, "completed", JSON.stringify(movieTask));
+      const lineage = await api("GET", `${videoRoute}/lineage`, workspace.user.token);
+      assert.equal(lineage.status, 200, JSON.stringify(lineage.data));
+      assert.deepEqual(lineage.data.videos.find((video) => video.id === trimTask.resultVideoId).sourceVideoIds, [workspace.video]);
+      assert.deepEqual(lineage.data.videos.find((video) => video.id === joinTask.resultVideoId).sourceVideoIds, [workspace.video, workspace.video]);
+      assert.equal(lineage.data.videos.find((video) => video.id === movieTask.resultVideoId).hasClipOperations, true);
+      const expectedRemaining = workspace.user.doc.remaining_operations - 4;
+      await until(() => evaluate(`(() => {
+        const counter = [...document.querySelectorAll('span')].find((item) => item.innerText === 'Operações diárias restantes');
+        return counter?.parentElement?.innerText.includes(${JSON.stringify(String(expectedRemaining))});
+      })()`), "video quota counter", 15000);
+      await send("Page.reload");
+      await until(() => evaluate(`document.body.innerText.includes('Junção de 2 clips')`), "join mini group");
+      assert.ok(await evaluate(`document.body.innerText.includes('Mini grupo · Movie Maker')`), "movie maker mini group");
+      assert.ok(await evaluate(`document.body.innerText.includes('V1 · Recortado')`), "trim version");
+      const image = fs.readFileSync(path.join(FIXTURES, "image.png"));
+      const beforeImage = await api("GET", `/projects/${workspace.user.id}/${workspace.project}`, workspace.user.token);
+      const form = new FormData();
+      form.append("image", new Blob([image], { type: "image/png" }), "ui-workspace-image.png");
+      const imageUpload = await fetch(`${BASE}/api-gateway/projects/${workspace.user.id}/${workspace.project}/img`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${workspace.user.token}`, "X-Project-Version": String(beforeImage.data.version) },
+        body: form,
+      });
+      assert.equal(imageUpload.status, 204, await imageUpload.text());
+      await until(async () => (await api("GET", `/projects/${workspace.user.id}/${workspace.project}`, workspace.user.token)).data.imgs.length === 1, "image saved");
+      assert.ok(await evaluate(click("button", "Imagens", `document.querySelector('[aria-label="Tipo de recurso"]')`)));
+      await until(() => evaluate(`!document.querySelector('.video-workspace-root')`), "image view");
+      await send("Page.reload");
+      await until(() => evaluate(`document.body.innerText.includes('To start editing, select an image from the grid.')`), "image grid", 15000);
+      assert.ok(await evaluate(`[...document.querySelectorAll('button')].some((button) => button.innerText.trim() === 'Apply')`), "image Apply stays present");
+      const imageRoute = `/projects/${workspace.user.id}/${workspace.project}`;
+      const toolVersion = await api("GET", imageRoute, workspace.user.token);
+      const tool = await api("POST", `${imageRoute}/tool`, workspace.user.token,
+        { procedure: "brightness", params: { brightness: 0.5 } },
+        { "X-Project-Version": String(toolVersion.data.version) });
+      assert.equal(tool.status, 201, JSON.stringify(tool.data));
+      const processVersion = await api("GET", imageRoute, workspace.user.token);
+      const process = await api("POST", `${imageRoute}/process`, workspace.user.token,
+        {}, { "X-Project-Version": String(processVersion.data.version) });
+      assert.equal(process.status, 201, JSON.stringify(process.data));
+      const imageResult = await until(async () => {
+        const response = await api("GET", `${imageRoute}/process/url`, workspace.user.token);
+        return response.status === 200 && response.data?.imgs?.length ? response.data : null;
+      }, "image processing result", 120000);
+      assert.ok(imageResult.imgs[0].url, "image result downloadable");
+      assert.ok(await evaluate(click("button", "Vídeos", `document.querySelector('[aria-label="Tipo de recurso"]')`)));
+      await until(() => evaluate(`Boolean(document.querySelector('.video-workspace-root'))`), "return to videos");
+    } finally {
+      workspace.cdp?.socket.close();
+      workspace.browser?.kill();
+      if (workspace.project && workspace.user) {
+        const info = await api("GET", `/projects/${workspace.user.id}/${workspace.project}`, workspace.user.token);
+        await api("DELETE", `/projects/${workspace.user.id}/${workspace.project}`, workspace.user.token, null, { "X-Project-Version": String(info.data?.version ?? 0) });
+      }
+      if (workspace.user) await api("DELETE", `/users/${workspace.user.id}`, workspace.user.token);
+      if (workspace.profile) fs.rmSync(workspace.profile, { recursive: true, force: true });
+    }
+  },
+);
