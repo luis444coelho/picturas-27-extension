@@ -13,6 +13,11 @@ const enforcePresenceLimit = require("../middleware/enforcePresenceLimit");
 const { getCallerId } = require("../utils/caller");
 
 const users = require("../video/users");
+const chain = require("../video/chain");
+const preview = require("../video/preview");
+const storage = require("../video/storage");
+const { markBox } = require("../video/watermarkGeometry");
+const { createFrameCache } = require("../video/frameCache");
 const log = require("../video/log");
 const files = require("../video/visualStorage");
 const { registry } = require("../video/operations");
@@ -30,10 +35,12 @@ const { VideoError, sendError } = require("../video/errors");
 const router = express.Router();
 
 const VIDEOS = "/:user/:project/videos";
+const cache = createFrameCache();
+const marks = createWatermarks({ VideoWatermark, files, cache });
 const composition = createComposition({
   Video,
   registry,
-  watermarks: createWatermarks({ VideoWatermark, files }),
+  watermarks: marks,
 });
 
 router.use(VIDEOS, (req, res, next) => {
@@ -193,6 +200,121 @@ router.post(
       correlationId: req.correlationId,
     });
     res.status(202).json(result);
+  }),
+);
+
+// POST …/videos/chain/validate (revision of B008, ADR-020): the answer of
+// …/validate plus the properties at the input of every step.
+router.post(
+  `${VIDEOS}/chain/validate`,
+  ...canEdit,
+  wrap(async (req, res) => {
+    const steps = req.body?.steps;
+    if (!Array.isArray(steps))
+      throw new VideoError(422, "INVALID_REQUEST", { field: "steps" });
+    let video = null;
+    if (req.body?.videoId !== undefined) {
+      if (!mongoose.isValidObjectId(req.body.videoId))
+        throw new VideoError(422, "INVALID_REQUEST", { field: "videoId" });
+      video = await Video.findOne({
+        _id: req.body.videoId,
+        project_id: req.videoProject._id,
+      }).lean();
+      if (!video) throw new VideoError(404, "NOT_FOUND");
+    }
+    const result = await composition.validateWithInputs({
+      tasks,
+      project: req.videoProject,
+      callerId: req.callerId,
+      profile: req.callerType,
+      steps,
+      video,
+    });
+    res.status(200).json(result);
+  }),
+);
+
+// First frame of a video for the previews (ADD T-07), as in the B005 router.
+async function firstFrame(video) {
+  const key = `frame:${video._id}:${video.storage.first_frame_key}`;
+  const cached = cache.get(key);
+  if (cached) return cached;
+  const frame = await files.readBytes(
+    storage.parseKey(video.owner_id, video.storage.first_frame_key),
+  );
+  cache.set(key, frame);
+  return frame;
+}
+
+const isPlainObject = (value) =>
+  value !== null && typeof value === "object" && !Array.isArray(value);
+const stepError = (index, errors) =>
+  new VideoError(422, "INVALID_STEP_PARAMS", { index, errors });
+
+// POST …/videos/:video/chain/watermark-preview {steps: [...previous, watermark]}
+// (D-89, preflight V17): the static steps before the mark are applied to frame
+// 0 and the mark is placed with the properties estimated after them. The
+// …/watermark-preview of B005 takes one step on the original and is unchanged.
+router.post(
+  `${VIDEOS}/:video/chain/watermark-preview`,
+  ...canEdit,
+  wrap(async (req, res) => {
+    if (!mongoose.isValidObjectId(req.params.video))
+      throw new VideoError(404, "NOT_FOUND");
+    const video = await Video.findOne({
+      _id: req.params.video,
+      project_id: req.videoProject._id,
+    }).lean();
+    if (!video) throw new VideoError(404, "NOT_FOUND");
+    if (video.status !== "completed" || !video.storage?.first_frame_key)
+      throw new VideoError(409, "RESOURCE_NOT_READY", {
+        videoId: String(video._id),
+      });
+    const steps = req.body?.steps;
+    const mark = Array.isArray(steps) ? steps[steps.length - 1] : null;
+    if (
+      !isPlainObject(mark) ||
+      mark.operation !== "watermark" ||
+      !isPlainObject(mark.parameters)
+    )
+      throw new VideoError(422, "INVALID_REQUEST", { field: "steps" });
+
+    let props = chain.propsFromMeta(video.meta);
+    const applied = [];
+    for (const [index, step] of steps.slice(0, -1).entries()) {
+      if (!isPlainObject(step) || !preview.STATIC.includes(step.operation))
+        continue;
+      const op = registry.get(step.operation);
+      const parameters = isPlainObject(step.parameters) ? step.parameters : {};
+      const errors = (
+        op.validate(parameters, props, req.callerType) || []
+      ).filter((error) => error.code !== "NO_CHANGES");
+      if (errors.length) throw stepError(index, errors);
+      applied.push({ operation: step.operation, parameters });
+      props = op.estimate(props, parameters);
+    }
+
+    const parameters = { ...mark.parameters };
+    delete parameters._mark;
+    const resolved = await marks.resolve(req.videoProject, parameters, {
+      store: false,
+    });
+    if (resolved) parameters._mark = resolved;
+    const errors = registry.get("watermark").validate(parameters, props) || [];
+    if (errors.length) throw stepError(steps.length - 1, errors);
+
+    const frame = await preview.render(await firstFrame(video), applied);
+    const image = await preview.watermark(
+      frame,
+      await marks.markPng(req.videoProject, parameters),
+      markBox(parameters, props),
+      parameters.opacity,
+    );
+    res
+      .status(200)
+      .set("Cache-Control", "no-store")
+      .type("image/jpeg")
+      .send(image);
   }),
 );
 

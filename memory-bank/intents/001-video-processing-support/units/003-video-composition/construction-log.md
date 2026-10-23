@@ -2,7 +2,7 @@
 unit: 003-video-composition
 intent: 001-video-processing-support
 created: 2026-10-23T00:31:55Z
-last_updated: 2026-10-23T14:07:43Z
+last_updated: 2026-10-23T14:19:12Z
 ---
 
 # Construction Log: 003-video-composition
@@ -69,3 +69,4 @@ last_updated: 2026-10-23T14:07:43Z
 - 2026-10-23T14:03:00Z: B008 revisão da etapa 2 aprovada (D-88 a, D-89 a); prompt retirado do ramo. Etapa 3 da revisão: ADR-020 e nota da D-86 no ADR-016, à espera do checkpoint.
 - 2026-10-23T14:05:26Z: B008 etapa 3 da revisão aprovada; etapa 4 da revisão iniciada pelo preflight V15–V24.
 - 2026-10-23T14:07:43Z: B008 preflight da revisão: V15 a V24 confirmadas; sem dúvida nova; commit e push antes do código.
+- 2026-10-23T14:19:12Z: B008 etapa 4 da revisão implementada (três ações, componentes de configuração D-87, sem limites D-86); D-87: +559/−213 em 9 ficheiros listados; resto: +6300/−0. À espera do checkpoint.

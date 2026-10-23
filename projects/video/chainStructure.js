@@ -1,5 +1,3 @@
-const { MAX_STEPS } = require("./compositionLimits");
-
 // Phase 1 of the chain validation (ADD 4.9, D-78, D-79, D-80, D-85): the
 // structure of the chain, before any read. Pure: no videos, no registry.
 const FRAME_EXTRACTION = "extract_frames"; // reserved name (D-05, D-06, D-79)
@@ -24,7 +22,7 @@ function clipSteps(clip) {
 }
 
 // N: top-level steps (the concat counts 1) plus the steps of every clip
-// (UC-VID-014 RN5, CHAIN-008, CHAIN-009).
+// (UC-VID-014 RN5, CHAIN-009); not limited (D-86).
 function countSteps(steps) {
   if (!Array.isArray(steps)) return 0;
   return steps.reduce(
@@ -85,9 +83,7 @@ function checkStructure(steps, { preset = false } = {}) {
   );
   if (misplaced) return invalid("convert_not_last", misplaced.at);
 
-  const total = countSteps(steps);
-  if (total > MAX_STEPS)
-    return { code: "CHAIN_TOO_LONG", details: { total, limit: MAX_STEPS } };
+  // No fixed number of steps (D-86): N is only the cost and totalSteps.
   return null;
 }
 

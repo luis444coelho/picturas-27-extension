@@ -4,7 +4,6 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   addressLabel,
-  canAddStep,
   canSaveAsPreset,
   canSubmitConcat,
   chainCost,
@@ -46,8 +45,8 @@ test("N counts sub-chains, concat and final steps; cost = N (CHAIN-009)", () => 
   assert.equal(countSteps(chain), 5);
   assert.equal(chainCost(chain), 5);
   assert.equal(isConcatChain(chain), true);
-  assert.equal(canAddStep(Array(9).fill(step("trim"))), true);
-  assert.equal(canAddStep(Array(10).fill(step("trim"))), false);
+  // No fixed number of steps (D-86).
+  assert.equal(countSteps(Array(40).fill(step("trim"))), 40);
 });
 
 test("move, remove and add a concat (CHAIN-004, CHAIN-015, D-78)", () => {
@@ -79,8 +78,9 @@ test("presets: only chains without concat; server fields removed; name 1 to 50 (
 test("messages of the rules, codes and addresses (D-79, D-80, D-85)", () => {
   for (const rule of ["empty_chain", "convert_not_last", "multiple_concat", "frame_extraction", "concat_not_first", "concat_in_preset"])
     assert.equal(chainErrorMessage("INVALID_CHAIN", { rule }), RULE_MESSAGES[rule]);
-  assert.match(chainErrorMessage("CHAIN_TOO_LONG", { total: 11, limit: 10 })!, /10 passos \(tem 11\)/);
-  assert.match(chainErrorMessage("TOO_MANY_INPUTS", { limit: 10 })!, /10 vídeos/);
+  // CHAIN_TOO_LONG and TOO_MANY_INPUTS no longer exist (D-86).
+  assert.equal(chainErrorMessage("CHAIN_TOO_LONG", { total: 11, limit: 10 }), null);
+  assert.equal(chainErrorMessage("TOO_MANY_INPUTS", { limit: 10 }), null);
   assert.match(chainErrorMessage("LIMIT_EXCEEDED", { total: 360000, limit: 300000 })!, /6 min.*5 min/);
   assert.equal(chainErrorMessage("UNKNOWN"), null);
   assert.equal(addressLabel({ index: 0, clipIndex: 1, stepIndex: 2 }), "Clip 2, passo 3");

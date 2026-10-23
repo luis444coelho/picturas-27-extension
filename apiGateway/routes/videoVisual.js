@@ -104,6 +104,8 @@ const readImage = (req, res, next) =>
 router.post(`${VIDEOS}/watermarks`, checkVideoToken, readImage, forward("post"));
 router.post(`${VIDEOS}/:video/preview`, checkVideoToken, forward("post", { binary: true }));
 router.post(`${VIDEOS}/:video/watermark-preview`, checkVideoToken, forward("post", { binary: true }));
+// B008 (D-89): watermark preview after the static steps of a chain.
+router.post(`${VIDEOS}/:video/chain/watermark-preview`, checkVideoToken, forward("post", { binary: true }));
 router.get(`${VIDEOS}/:video/filters/thumbnails`, checkVideoToken, forward("get"));
 
 module.exports = router;

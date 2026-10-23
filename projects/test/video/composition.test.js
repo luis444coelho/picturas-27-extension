@@ -195,12 +195,10 @@ test("INVALID_CHAIN rules of D-79 with their addresses", () => {
   );
 });
 
-test("CHAIN_TOO_LONG with 11 steps counting sub-chains, concat and final steps (NFR-023, CHAIN-008)", () => {
-  assert.equal(structure.checkStructure(Array(10).fill(step("trim"))), null);
-  assert.deepEqual(structure.checkStructure(Array(11).fill(step("trim"))), {
-    code: "CHAIN_TOO_LONG",
-    details: { total: 11, limit: 10 },
-  });
+test("no fixed number of steps (D-86): 11 and 40 steps, counted with sub-chains, concat and final steps", () => {
+  assert.equal(structure.checkStructure(Array(11).fill(step("trim"))), null);
+  assert.equal(structure.checkStructure(Array(40).fill(step("trim"))), null);
+  assert.equal(structure.countSteps(Array(40).fill(step("trim"))), 40);
   // 3 + 4 in the clips + concat + 3 final steps = 11.
   const composed = [
     concatOf(
@@ -212,7 +210,7 @@ test("CHAIN_TOO_LONG with 11 steps counting sub-chains, concat and final steps (
     step("orient"),
   ];
   assert.equal(structure.countSteps(composed), 11);
-  assert.equal(structure.checkStructure(composed).code, "CHAIN_TOO_LONG");
+  assert.equal(structure.checkStructure(composed), null);
   // CHAIN-009 example: (V1 + filter) + (V2 + remove audio) + (V3 + speed) → concat + watermark = 5.
   assert.equal(
     structure.countSteps([
@@ -229,7 +227,7 @@ test("CHAIN_TOO_LONG with 11 steps counting sub-chains, concat and final steps (
 
 // ---- concat operation (ADD 4.8) -------------------------------------------
 
-test("concat: INSUFFICIENT_INPUTS, TOO_MANY_INPUTS 10/50 counting repetitions, cost 1 + clip steps", () => {
+test("concat: INSUFFICIENT_INPUTS, no maximum of clips (D-86), cost 1 + clip steps", () => {
   assert.deepEqual(concat.checkClips({ clips: [clip(A)] }, "free"), {
     code: "INSUFFICIENT_INPUTS",
     min: 2,
@@ -238,20 +236,17 @@ test("concat: INSUFFICIENT_INPUTS, TOO_MANY_INPUTS 10/50 counting repetitions, c
     concat.checkClips({ clips: Array(10).fill(clip(A)) }, "free"),
     null,
   );
-  assert.deepEqual(
+  assert.equal(
     concat.checkClips({ clips: Array(11).fill(clip(A)) }, "free"),
-    {
-      code: "TOO_MANY_INPUTS",
-      limit: 10,
-    },
+    null,
   );
   assert.equal(
     concat.checkClips({ clips: Array(50).fill(clip(A)) }, "premium"),
     null,
   );
   assert.equal(
-    concat.checkClips({ clips: Array(51).fill(clip(A)) }, "premium").code,
-    "TOO_MANY_INPUTS",
+    concat.checkClips({ clips: Array(120).fill(clip(A)) }, "premium"),
+    null,
   );
   assert.equal(
     concat.checkClips({ clips: [clip(A), { videoId: B }] }, "free").code,
@@ -571,10 +566,7 @@ test("preset structure: concat_in_preset, unknown operation or version, server f
       err.code === "INVALID_STEP_PARAMS" &&
       err.details.errors[0].field === "version",
   );
-  assert.throws(
-    () => comp.presetStructure(Array(11).fill(step("trim"))),
-    (err) => err.code === "CHAIN_TOO_LONG",
-  );
+  assert.equal(comp.presetStructure(Array(11).fill(step("trim"))).length, 11); // D-86
   assert.deepEqual(
     comp.presetStructure([
       step("watermark", {

@@ -5,6 +5,19 @@ import type { VideoRecipeStep } from "./video-access";
 // tests; the API calls are in video-chain-api.ts. The rules belong to the
 // projects service: the editor only counts, moves and explains.
 
+// Properties at the input (or output) of a step: of the video in the simple
+// edit, or estimated by the server inside a chain (…/chain/validate, CHAIN-003).
+export interface StepInputProps {
+  durationMs?: number;
+  displayWidth?: number;
+  displayHeight?: number;
+  fpsNum?: number;
+  fpsDen?: number;
+  container?: string;
+  videoCodec?: string;
+  audioCodec?: string | null;
+}
+
 export interface VideoClip {
   videoId: string;
   steps: VideoRecipeStep[];
@@ -34,8 +47,7 @@ export const CHAIN_OPERATIONS: { id: ChainOperation; label: string }[] = [
   { id: "convert", label: "Converter formato" },
 ];
 
-export const MAX_STEPS = 10; // NFR-023
-export const MAX_CLIPS: Record<string, number> = { free: 10, premium: 50 };
+// No fixed number of steps nor of clips (D-86); at least two clips in a concat.
 export const MIN_CLIPS = 2;
 export const FREE_DAILY_OPERATIONS = 5; // DQ-025
 
@@ -76,10 +88,6 @@ export function countSteps(steps: VideoRecipeStep[]): number {
 }
 
 export const chainCost = countSteps;
-
-export function canAddStep(steps: VideoRecipeStep[]): boolean {
-  return countSteps(steps) < MAX_STEPS; // CHAIN-008
-}
 
 export function moveItem<T>(items: T[], from: number, to: number): T[] {
   if (
@@ -176,12 +184,8 @@ export function chainErrorMessage(
         RULE_MESSAGES[String(details.rule)] ??
         "A cadeia de operações não é válida."
       );
-    case "CHAIN_TOO_LONG":
-      return `Uma cadeia pode ter no máximo ${details.limit ?? MAX_STEPS} passos (tem ${details.total}).`;
     case "INSUFFICIENT_INPUTS":
       return "Escolhe pelo menos dois vídeos para juntar.";
-    case "TOO_MANY_INPUTS":
-      return `O teu perfil permite juntar no máximo ${details.limit} vídeos.`;
     case "LIMIT_EXCEEDED":
       return details.total !== undefined && details.limit !== undefined
         ? `A duração (${minutes(details.total)}) excede o limite do teu perfil (${minutes(details.limit)}).`

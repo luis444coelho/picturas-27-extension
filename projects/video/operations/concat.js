@@ -10,9 +10,9 @@ const isPlainObject = (value) =>
 
 const even = (n) => n - (n % 2);
 
-// Shape and count of the clips (CONCAT-005, CONCAT-006, NFR-022), without
+// Shape and minimum of the clips (CONCAT-005; no maximum, D-86), without
 // the clip properties: used before the videos are read.
-function checkClips(parameters, profile) {
+function checkClips(parameters) {
   const clips = parameters?.clips;
   if (!Array.isArray(clips)) return { code: "INVALID_REQUEST", field: "clips" };
   const bad = clips.findIndex(
@@ -25,9 +25,6 @@ function checkClips(parameters, profile) {
     return { code: "INVALID_REQUEST", field: "clips", clipIndex: bad };
   if (clips.length < limits.MIN_CLIPS)
     return { code: "INSUFFICIENT_INPUTS", min: limits.MIN_CLIPS };
-  const max = limits.maxClips(profile);
-  if (max !== null && clips.length > max)
-    return { code: "TOO_MANY_INPUTS", limit: max };
   return null;
 }
 

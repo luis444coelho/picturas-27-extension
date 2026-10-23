@@ -903,7 +903,10 @@ test.describe("B008 real stack", { skip, timeout: 1800000 }, () => {
     // A concat of 3 steps on the long video, cancelled after progress: 3 credits back.
     const before = await remaining(user);
     // concat (1) + one clip step (1) + one final step (1) = 3.
-    const steps = [concat(clip(long, [ADJUST]), clip(wide)), step("filter", { filter: "bw" })];
+    const steps = [
+      concat(clip(long, [ADJUST]), clip(wide)),
+      step("filter", { filter: "bw" }),
+    ];
     const r = await submit(user, p, steps, null);
     assert.equal(r.status, 202, JSON.stringify(r.data));
     assert.equal(await remaining(user), before - 3);

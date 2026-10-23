@@ -19,7 +19,7 @@ import { useVideoTarget } from "./use-video-target";
 import { VideoUpload } from "./video-upload";
 import { VideoGallery } from "./video-gallery";
 import { VideoPlayer } from "./video-player";
-import { VideoConcatAction } from "./video-chain-actions";
+import { VideoCompositionActions } from "./video-composition-actions";
 
 // Video entry point of the project page (D-16): upload for users with edit
 // permission, gallery and integrated player for everyone with access.
@@ -64,7 +64,7 @@ export function VideoSection() {
         ) : (
           <div className="flex flex-col gap-4">
             {canEdit && <VideoUpload target={target} />}
-            {canEdit && <VideoConcatAction target={target} />}
+            {canEdit && <VideoCompositionActions target={target} />}
             {selected && <VideoPlayer target={target} video={selected} />}
             <VideoGallery
               target={target}

@@ -2,6 +2,8 @@ import { api } from "./axios";
 import type { VideoTarget } from "./videos";
 import type { VideoRecipeStep } from "./video-access";
 import type { VideoTaskAccepted, VideoValidation } from "./video-tasks";
+import type { PreviewImage } from "./video-visual-api";
+import type { StepInputProps } from "./video-chain";
 
 // API of the chains, concats and video presets of B008 (ADD 4.8, 4.9, D-78,
 // D-83). Same path and share handling as lib/video-tasks.ts.
@@ -26,6 +28,13 @@ export interface ChainErrorEntry {
 
 export interface ChainValidation extends Omit<VideoValidation, "errors"> {
   errors: ChainErrorEntry[];
+  // Properties at the input of every step (…/chain/validate, revision of B008).
+  inputs?: {
+    steps: (StepInputProps | null)[];
+    clips: (StepInputProps | null)[][];
+    clipOutputs: (StepInputProps | null)[];
+    output: StepInputProps | null;
+  };
 }
 
 const isConcat = (steps: VideoRecipeStep[]) => steps[0]?.operation === "concat";
@@ -43,6 +52,36 @@ export const validateChain = async (
     requestConfig(target),
   );
   return response.data;
+};
+
+// Validation with the input properties of every step, for the configuration
+// components of the compositions (ADR-020, CHAIN-003).
+export const validateChainWithInputs = async (
+  target: VideoTarget,
+  videoId: string | null,
+  steps: VideoRecipeStep[],
+) => {
+  const body = isConcat(steps) ? { steps } : { videoId, steps };
+  const response = await api.post<ChainValidation>(
+    `${videosPath(target)}/chain/validate`,
+    body,
+    requestConfig(target),
+  );
+  return response.data;
+};
+
+// Watermark preview after the static steps of a chain (D-89).
+export const fetchChainWatermarkPreview = async (
+  target: VideoTarget,
+  videoId: string,
+  steps: VideoRecipeStep[],
+): Promise<PreviewImage> => {
+  const response = await api.post<Blob>(
+    `${videosPath(target)}/${videoId}/chain/watermark-preview`,
+    { steps },
+    { ...requestConfig(target), responseType: "blob" },
+  );
+  return { blob: response.data, width: null, height: null };
 };
 
 export const submitChain = async (

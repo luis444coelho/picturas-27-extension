@@ -16,7 +16,6 @@ const { VideoError } = require("./errors");
 const CONCAT_CODES = [
   "INVALID_REQUEST",
   "INSUFFICIENT_INPUTS",
-  "TOO_MANY_INPUTS",
   "LIMIT_EXCEEDED",
 ];
 
@@ -26,7 +25,7 @@ const isConcatChain = (steps) =>
 const hasConcat = (steps) =>
   Array.isArray(steps) && steps.some((step) => step?.operation === "concat");
 
-// Structure errors are 422 with their own code (INVALID_CHAIN, CHAIN_TOO_LONG).
+// Structure errors are 422 with their own code (INVALID_CHAIN).
 function fail(found) {
   return new VideoError(422, found.code, found.details);
 }
@@ -54,6 +53,15 @@ function watermarkSteps(steps, { topLevel }) {
       step.parameters !== null &&
       typeof step.parameters === "object" &&
       !Array.isArray(step.parameters),
+  );
+}
+
+// Estimated properties at the input of each of `count` steps (chain/validate):
+// the input of the chain, then the estimate after each step; null after a
+// step with errors (CHAIN-003).
+function stepInputs(input, checked, count) {
+  return Array.from({ length: count }, (_, k) =>
+    k === 0 ? input : (checked.estimates[k - 1] ?? null),
   );
 }
 
@@ -134,11 +142,19 @@ function createComposition({ Video, registry, watermarks }) {
     // Phase 2: steps; every sub-chain from the properties of its clip, then
     // the concat and the final steps (CHAIN-003, CHAIN-005, CHAIN-006).
     const known = [];
+    const inputs = {
+      steps: [],
+      clips: clips.map((clip) => clip.steps.map(() => null)),
+      clipOutputs: clips.map(() => null),
+      output: null,
+    };
     for (const [clipIndex, clip] of clips.entries()) {
       const input = chain.propsFromMeta(videos[clipIndex].meta);
       const checked = chain.validateChain(clip.steps, input, profile, registry);
+      inputs.clips[clipIndex] = stepInputs(input, checked, clip.steps.length);
       if (checked.error)
         return {
+          inputs,
           stepError: {
             index: 0,
             clipIndex,
@@ -147,12 +163,15 @@ function createComposition({ Video, registry, watermarks }) {
           },
         };
       known.push({ videoId: clip.videoId, input, output: checked.props });
+      inputs.clipOutputs[clipIndex] = checked.props;
     }
     parameters._clips = known;
     steps[0].parameters = parameters;
 
     const first = chain.propsFromMeta(videos[0].meta);
     const checked = chain.validateChain(steps, first, profile, registry);
+    inputs.steps = stepInputs(first, checked, steps.length);
+    if (!checked.error) inputs.output = checked.props;
     if (checked.error) {
       const own = checked.error.errors[0];
       // Errors of the concat itself keep their own code (CONCAT-005 to 007).
@@ -160,7 +179,7 @@ function createComposition({ Video, registry, watermarks }) {
         const { code, ...details } = own;
         throw new VideoError(422, code, details);
       }
-      return { stepError: checked.error };
+      return { inputs, stepError: checked.error };
     }
 
     // Phase 3: limits of every clip and of the result (D-81).
@@ -182,6 +201,7 @@ function createComposition({ Video, registry, watermarks }) {
 
     const cost = chain.chainCost(steps, registry);
     return {
+      inputs,
       stepError: null,
       inputVideos: videos,
       finalProps: checked.props,
@@ -209,7 +229,13 @@ function createComposition({ Video, registry, watermarks }) {
     return output;
   }
 
-  async function validateConcat({ project, callerId, profile, steps }) {
+  async function validateConcat({
+    project,
+    callerId,
+    profile,
+    steps,
+    withInputs = false,
+  }) {
     const result = await evaluateConcat({
       project,
       callerId,
@@ -217,6 +243,7 @@ function createComposition({ Video, registry, watermarks }) {
       steps,
       store: false,
     });
+    const extra = withInputs ? { inputs: result.inputs } : {};
     if (result.stepError)
       return {
         valid: false,
@@ -224,6 +251,7 @@ function createComposition({ Video, registry, watermarks }) {
         totalSteps: structure.countSteps(steps),
         output: null,
         errors: [result.stepError],
+        ...extra,
       };
     return {
       valid: true,
@@ -231,7 +259,61 @@ function createComposition({ Video, registry, watermarks }) {
       totalSteps: result.totalSteps,
       output: concatOutput(steps, result.inputVideos, result.finalProps),
       errors: [],
+      ...extra,
     };
+  }
+
+  // POST …/videos/chain/validate (revision of B008): the answer of …/validate
+  // plus the estimated properties at the input of every step, for the
+  // configuration components of the compositions (ADR-020, CHAIN-003).
+  async function validateWithInputs({
+    tasks,
+    project,
+    callerId,
+    profile,
+    steps,
+    video,
+  }) {
+    if (isConcatChain(steps))
+      return validateConcat({
+        project,
+        callerId,
+        profile,
+        steps,
+        withInputs: true,
+      });
+    const broken = structure.checkStructure(steps);
+    if (broken) throw fail(broken);
+    if (hasConcat(steps))
+      throw new VideoError(422, "INVALID_REQUEST", { field: "steps" });
+    if (!video)
+      throw new VideoError(422, "INVALID_REQUEST", { field: "videoId" });
+    // The B005 middleware only serves …/validate: the top-level marks are resolved here.
+    await resolveMarks(project, callerId, steps, {
+      store: false,
+      topLevel: true,
+    });
+    const answer = await tasks.validate({
+      callerId,
+      inputVideos: [video],
+      steps,
+    });
+    const input = chain.propsFromMeta(video.meta);
+    const checked = chain.validateChain(steps, input, profile, registry);
+    const inputs = {
+      steps: stepInputs(input, checked, steps.length),
+      clips: [],
+      clipOutputs: [],
+      output: checked.error ? null : checked.props,
+    };
+    if (!answer.valid || checked.error) return { ...answer, inputs };
+    const limit = limits.maxDurationMs(profile);
+    if (limit !== null && checked.props.durationMs > limit)
+      throw new VideoError(422, "LIMIT_EXCEEDED", {
+        total: checked.props.durationMs,
+        limit,
+      });
+    return { ...answer, inputs };
   }
 
   // POST …/videos/operations without :video: the acceptance of B003 with one
@@ -305,6 +387,7 @@ function createComposition({ Video, registry, watermarks }) {
     hasConcat,
     evaluateConcat,
     validateConcat,
+    validateWithInputs,
     submitConcat,
     precheckChain,
     structureError,
@@ -312,4 +395,4 @@ function createComposition({ Video, registry, watermarks }) {
   };
 }
 
-module.exports = { createComposition, isConcatChain, hasConcat };
+module.exports = { createComposition, isConcatChain, hasConcat, stepInputs };

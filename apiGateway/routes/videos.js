@@ -133,6 +133,8 @@ router.post(`${VIDEOS}/validate`, checkVideoToken, forward("post"));
 router.post(`${VIDEOS}/:video/operations`, checkVideoToken, forward("post"));
 // B008 (ADD 4.8, D-78): chains whose first step is a concat, without :video.
 router.post(`${VIDEOS}/operations`, checkVideoToken, forward("post"));
+// B008 revision (ADR-020): validation with the input properties of every step.
+router.post(`${VIDEOS}/chain/validate`, checkVideoToken, forward("post"));
 router.get(`${VIDEOS}/tasks/:taskId`, checkVideoToken, forward("get"));
 router.delete(`${VIDEOS}/tasks/:taskId`, checkVideoToken, forward("delete"));
 
