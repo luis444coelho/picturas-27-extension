@@ -174,3 +174,15 @@ Esta secção especifica os dados de teste necessários; **não foram geradas no
 A implementação só deve ser considerada concluída depois de validar os cenários aplicáveis no navegador, testar a formação das famílias e comprovar que os fluxos de imagem, vídeo, partilha e download continuam a funcionar. Reutilizar as suites existentes e acrescentar verificações dos comportamentos novos, sem presumir aprovação a partir desta análise.
 
 **Entregável desta intervenção:** apenas este documento. Nenhum código da aplicação, dado, serviço ou configuração foi alterado.
+
+## Estado da implementação
+
+As melhorias UI-VID-01 a UI-VID-12 estão implementadas e os testes manuais foram aprovados pela equipa. A área principal alterna entre Imagens e Vídeos; no espaço de vídeo, o leitor, as versões e as ferramentas aparecem lado a lado ou por separadores em ecrãs pequenos. O estado vazio das imagens não aparece na vista de vídeo. As operações foram agrupadas por finalidade, incluindo «Aplicar várias operações», «Juntar vídeos» e «Movie Maker» da B008, com os respetivos parâmetros da D-87. Cada operação tem um ícone; «Marca de água» usa Droplet, e «Adicionar vídeo» é o botão azul principal com Plus.
+
+Os originais e resultados são organizados por `source_video_ids`, obtidos pela rota complementar `GET …/videos/lineage`. A lista distingue fontes removidas, fontes sem ID, junções com a ordem e as repetições dos clips, e os mini grupos de junção e Movie Maker. A seleção, as mensagens, os estados de carregamento e erro, a adaptação ao ecrã, o progresso por projeto e a atualização visual da quota foram verificados sem alterar as regras do servidor. A barra de tarefa concluída, falhada ou cancelada mostra uma linha azul decrescente e desaparece após 10 segundos; «Abrir resultado» abre a versão e fecha a barra imediatamente.
+
+A barra lateral tem um único «New Project». O diálogo abre em «Imagem» por omissão e conserva o fluxo de imagem. «Vídeo» mostra diretamente o formulário partilhado da D-30, com os limites do perfil, progresso e cancelamento; a escuta da ingestão e o aviso de falha continuam após o fecho do diálogo. As decisões e exceções estão registadas na D-91 (código de vídeo), D-92 (apresentação da área central e das D-31/D-32) e D-93 (criação de projetos).
+
+Commits de implementação no ramo `bolt/010-video-workspace-ui`: `29dda5a` (área de vídeo e proveniência), `784ccc4` (avisos, ícones e criação de projetos) e `3a61a7f` (formulário integrado e escuta persistente). O commit de fecho acrescenta este estado e atualiza a D-93. A intervenção fica fechada neste ramo, sem merge.
+
+Fica para outro ramo o slider para escolher outro momento na pré-visualização do vídeo.
