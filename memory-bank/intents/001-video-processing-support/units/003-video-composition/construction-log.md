@@ -2,7 +2,7 @@
 unit: 003-video-composition
 intent: 001-video-processing-support
 created: 2026-10-23T00:31:55Z
-last_updated: 2026-10-23T00:47:57Z
+last_updated: 2026-10-23T00:58:42Z
 ---
 
 # Construction Log: 003-video-composition
@@ -36,6 +36,7 @@ last_updated: 2026-10-23T00:47:57Z
 | 2026-10-23T00:31:55Z | 008-video-concat-chain | started | Stage 1: Domain Model |
 | 2026-10-23T00:39:08Z | 008-video-concat-chain | stage-complete | Domain Model → Technical Design (D-78 a D-84) |
 | 2026-10-23T00:47:57Z | 008-video-concat-chain | stage-complete | Technical Design → ADR Analysis (D-85; fase 2 antes da fase 3 sem junção) |
+| 2026-10-23T00:53:52Z | 008-video-concat-chain | stage-complete | ADR Analysis → Implement (ADR-016 a ADR-019; ADR-019 dependente da V6) |
 
 ## Execution Summary
 
@@ -54,3 +55,5 @@ last_updated: 2026-10-23T00:47:57Z
 - 2026-10-23T00:39:08Z: B008 Estágio 1 aprovado (`ddd-01-domain-model.md`) com D-78 a D-81 (a), D-82 (a) condicionada a uma verificação V da fase só com linhas novas, D-83 (a) com `PATCH` e sem limite de número, e D-84 (a).
 - 2026-10-23T00:43:53Z: B008 Estágio 2 escrito (`ddd-02-technical-design.md`), à espera do checkpoint: router de composição antes do router de vídeo (fases 1 e 3, `_clips` gravado pelo servidor), `concat.js`, `planExtrasComposition.js`, ramo `composition_task.py` no worker para junções e cadeias terminadas em `convert` (incluindo AVI), `error.phase` (D-82), predefinições com `PATCH` e validação da estrutura delegada pelo gateway ao serviço de projetos. Verificações V1 a V14 para o Estágio 4, incluindo os cinco pontos da etapa 1 (V5 para a cadeia terminada em `convert` para AVI), a V6 da D-82 e a V9 da D-83. D-85 (código de uma predefinição com junção) registada e pendente.
 - 2026-10-23T00:47:57Z: B008 Estágio 2 aprovado com uma correção da equipa (sem junção, o router de composição corre a fase 2 em memória antes da fase 3 e, se falhar, faz `next()` para a B003 devolver o `INVALID_STEP_PARAMS`; teste unitário acrescentado) e a D-85 (a): `INVALID_CHAIN {rule: "concat_in_preset", index}`. Estágio 3 escrito, à espera do checkpoint: ADR-016 (router de composição e `_clips`), ADR-017 (`composition_task.py`), ADR-018 (estrutura das predefinições validada pelo serviço de projetos) e ADR-019 (`error.phase`, condicionado à V6; paragem se o `_reply` do `task.py` tiver de mudar), acrescentados ao `decision-index.md`.
+- 2026-10-23T00:53:52Z: B008 Estágio 3 aprovado (ADR-016 a ADR-019; ADR-019 dependente da V6). Estágio 4 iniciado pelo preflight V1–V14.
+- 2026-10-23T00:58:42Z: B008 preflight da etapa 4: V1 a V14 confirmadas no código (ficheiro e linha de cada acréscimo); V6 passa e o ADR-019 continua `accepted`; sem dúvida nova; quatro ajustes por acréscimo registados no preflight e uma nota no ADR-017. Commit e push do preflight antes de qualquer código.

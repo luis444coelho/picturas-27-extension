@@ -55,3 +55,7 @@ Repete a decisão do ADR-013 (um ramo aditivo que partilha os serviços de execu
 - **Standards**: regra 2.6; T-02, T-05, T-06, 4.8, 4.9; NFR-013
 - **Previous ADRs**: ADR-009, ADR-011, ADR-013
 - **Dúvidas**: D-39, D-68; verificações V3, V4, V5
+
+## Nota do preflight (V5)
+
+A verificação V5 mostrou que as cadeias de vários passos terminadas em `convert` para **MOV** já correm no caminho genérico da B003 (`libx264` com `-preset`/`-crf`, `+faststart` e cópia MP4 posterior pelo `plan.preview`). O desvio para o `composition_task.py` fica restrito ao que o construtor genérico não faz: planos com `plan.composition` (junção) e cadeias de vários passos terminadas em `convert` para **AVI** (`plan.convert.previewInSameInvocation`, acrescentado pelo `planExtrasComposition.js`).

@@ -8,7 +8,7 @@ stories: [ST-VID-013, ST-VID-014]
 created: 2026-10-19T17:31:16Z
 started: 2026-10-23T00:31:55Z
 completed: null
-current_stage: adr
+current_stage: implement
 stages_completed:
   - name: model
     completed: 2026-10-23T00:39:08Z
@@ -16,6 +16,9 @@ stages_completed:
   - name: design
     completed: 2026-10-23T00:47:57Z
     artifact: ddd-02-technical-design.md
+  - name: adr
+    completed: 2026-10-23T00:53:52Z
+    artifact: adr-016-composition-router.md, adr-017-composition-worker-path.md, adr-018-preset-structure-validation.md, adr-019-task-error-phase.md
 requires_bolts: [004-video-basic-edits, 005-video-visual-edits, 007-video-format-conversion]
 enables_bolts: [009-video-batch]
 requires_units: [001-video-lifecycle, 002-video-transformations]
@@ -48,8 +51,8 @@ Implementar a operação `concat` com sub-cadeias por clip, a validação em tr�
 
 - [x] **1. Domain Model**: Complete (D-78 a D-84) → `ddd-01-domain-model.md`
 - [x] **2. Technical Design**: Complete (D-85; fase 2 antes da fase 3 sem junção) → `ddd-02-technical-design.md` → `ddd-02-technical-design.md`
-- [ ] **3. ADR Analysis** (opcional): Checkpoint → `adr-016-composition-router.md`, `adr-017-composition-worker-path.md`, `adr-018-preset-structure-validation.md`, `adr-019-task-error-phase.md`
-- [ ] **4. Implement**: Pending → código nos componentes indicados em "Saídas esperadas"
+- [x] **3. ADR Analysis**: Complete (ADR-019 dependente da V6) → `adr-016-composition-router.md`, `adr-017-composition-worker-path.md`, `adr-018-preset-structure-validation.md`, `adr-019-task-error-phase.md`
+- [ ] **4. Implement**: In progress (preflight V1–V14 primeiro) → código nos componentes indicados em "Saídas esperadas"
 - [ ] **5. Test**: Pending → `ddd-03-test-report.md`
 
 ## Requisitos rastreados
@@ -111,3 +114,5 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 - 2026-10-23T00:39:08Z: Estágio 1 aprovado pela equipa com as respostas D-78 (a), D-79 (a), D-80 (a), D-81 (a), D-82 (a) condicionada a uma verificação V (fase na resposta `failed` e no `VideoTask` só com linhas novas), D-83 (a) com `PATCH` em vez de `PUT` e sem limite de número de predefinições, e D-84 (a). Estágio 2 em curso, com a lista das verificações V que a etapa 4 confirma no código.
 - 2026-10-23T00:43:53Z: Estágio 2 escrito (`ddd-02-technical-design.md`) com as verificações V1 a V14 para o Estágio 4; D-85 pendente; paragem no checkpoint.
 - 2026-10-23T00:47:57Z: Estágio 2 aprovado com uma correção (sem junção, a fase 2 corre no router antes da fase 3 e, se falhar, `next()` para a B003 devolver o `INVALID_STEP_PARAMS`) e a D-85 (a). Estágio 3: ADR-016 a ADR-019 escritos e acrescentados ao `decision-index.md`; paragem no checkpoint.
+- 2026-10-23T00:53:52Z: Estágio 3 aprovado (ADR-016 a ADR-019). O ADR-019 depende da V6: se falhar, dúvida nova a partir da D-86, ADR-019 marcado `proposed` no ficheiro e no `decision-index.md` e paragem antes de escrever código. Estágio 4 em curso: `implementation-preflight.md` com as V1 a V14 confirmadas no código, commit e push do preflight antes de qualquer código.
+- 2026-10-23T00:58:42Z: Preflight da etapa 4 (`implementation-preflight.md`): V1 a V14 confirmadas no código, todas com pontos de acréscimo; V6 passa (fase só com linhas novas, incluindo uma linha nova no `_reply` do `task.py`), ADR-019 continua `accepted`; sem dúvida nova. Quatro ajustes por acréscimo: `totalSteps` da junção, áudio e entradas distintas da junção, montagem do router de composição depois do da B005, desvio do `composition_task` só para junções e cadeias terminadas em AVI (nota no ADR-017). `Tools/video/compiler.py` não existe.
