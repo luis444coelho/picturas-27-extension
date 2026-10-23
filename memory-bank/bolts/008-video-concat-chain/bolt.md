@@ -8,8 +8,11 @@ stories: [ST-VID-013, ST-VID-014]
 created: 2026-10-19T17:31:16Z
 started: 2026-10-23T00:31:55Z
 completed: null
-current_stage: model
-stages_completed: []
+current_stage: design
+stages_completed:
+  - name: model
+    completed: 2026-10-23T00:39:08Z
+    artifact: ddd-01-domain-model.md
 requires_bolts: [004-video-basic-edits, 005-video-visual-edits, 007-video-format-conversion]
 enables_bolts: [009-video-batch]
 requires_units: [001-video-lifecycle, 002-video-transformations]
@@ -40,8 +43,8 @@ Implementar a operação `concat` com sub-cadeias por clip, a validação em tr�
 
 ## Etapas
 
-- [ ] **1. Domain Model**: In progress → `ddd-01-domain-model.md`
-- [ ] **2. Technical Design**: Pending → `ddd-02-technical-design.md`
+- [x] **1. Domain Model**: Complete (D-78 a D-84) → `ddd-01-domain-model.md`
+- [ ] **2. Technical Design**: Checkpoint (D-85 pendente) → `ddd-02-technical-design.md`
 - [ ] **3. ADR Analysis** (opcional): Pending → `adr-{n}-{slug}.md`
 - [ ] **4. Implement**: Pending → código nos componentes indicados em "Saídas esperadas"
 - [ ] **5. Test**: Pending → `ddd-03-test-report.md`
@@ -102,3 +105,5 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 
 - Esforço no ADD: UC-VID-013 = L, UC-VID-014 = L. `avg_complexity` = 3 (maior esforço do ADD no bolt, com S=1, M=2, L=3); `avg_uncertainty`, `max_dependencies` e `testing_scope` são preenchidos no início do bolt na Construção (specsDuvidas D-01).
 - Para o Registado, cadeias acima de 5 passos falham sempre por quota (DQ-025); a interface deve avisar antes (ADD 4.9, riscos).
+- 2026-10-23T00:39:08Z: Estágio 1 aprovado pela equipa com as respostas D-78 (a), D-79 (a), D-80 (a), D-81 (a), D-82 (a) condicionada a uma verificação V (fase na resposta `failed` e no `VideoTask` só com linhas novas), D-83 (a) com `PATCH` em vez de `PUT` e sem limite de número de predefinições, e D-84 (a). Estágio 2 em curso, com a lista das verificações V que a etapa 4 confirma no código.
+- 2026-10-23T00:43:53Z: Estágio 2 escrito (`ddd-02-technical-design.md`) com as verificações V1 a V14 para o Estágio 4; D-85 pendente; paragem no checkpoint.

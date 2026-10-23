@@ -822,7 +822,7 @@
   - **(b)** A junção pode estar em qualquer posição; os passos de topo antes dela aplicam-se ao vídeo da rota com `:video`, que tem de ser o clip 1. Há duas formas de escrever a mesma composição (passos antes da junção ou na sub-cadeia do clip 1), o que complica a contagem, a `recipe` e as predefinições.
   - **(c)** Outra regra definida pela equipa.
 - **Recomendação:** (a). Uma só forma de exprimir a composição, igual à do T-01 (`clips` com as sub-cadeias) e à do exemplo da FA1, e uma só rota para pedidos com várias entradas.
-- **Resposta:** _pendente._
+- **Resposta:** **(a), aprovada pela equipa.** A junção, quando existe, é o primeiro passo de topo; noutra posição → `INVALID_CHAIN {rule: "concat_not_first"}`. Cadeias com junção usam as rotas sem `:video`; sem `:video` e sem junção no início, ou com `:video` e uma junção → 422 `INVALID_REQUEST {field: "steps"}`.
 
 ## D-79 — Regras do `INVALID_CHAIN`, restrições das sub-cadeias e extração de fotogramas sem operação
 
@@ -834,7 +834,7 @@
   - **(b)** Como (a), mas `convert` e junção dentro de um clip dão `INVALID_STEP_PARAMS` desse passo, e a extração de fotogramas fica como operação desconhecida (`INVALID_STEP_PARAMS`, D-42); a CHAIN-018 ficaria por verificar com o seu código.
   - **(c)** Outros nomes.
 - **Recomendação:** (a). Cumpre o código da CHAIN-018 sem construir a extração, e os nomes descrevem a regra para o editor os traduzir.
-- **Resposta:** _pendente._
+- **Resposta:** **(a), aprovada pela equipa.** `{rule}` ∈ `empty_chain`, `convert_not_last`, `multiple_concat`, `frame_extraction`, `concat_not_first`, com `{index}` e, dentro de um clip, `{clipIndex, stepIndex}`; `convert` numa sub-cadeia → `convert_not_last`, junção numa sub-cadeia → `multiple_concat`; `extract_frames` é um nome reservado reconhecido antes do registo; sub-cadeias vazias permitidas.
 
 ## D-80 — Ordem das três fases da validação e endereço dos erros nas sub-cadeias
 
@@ -846,7 +846,7 @@
   - **(b)** A ordem literal do ADD (passos → estrutura → limites), com os mesmos endereços.
   - **(c)** Endereço plano: um índice único na contagem total dos passos (o 4.º passo da cadeia, contando os dos clips).
 - **Recomendação:** (a).
-- **Resposta:** _pendente._
+- **Resposta:** **(a), aprovada pela equipa.** A numeração do ADD 4.9 não fixa a precedência; validar primeiro a estrutura evita erros enganadores. Ordem estrutura → passos → limites, a parar na primeira fase que falha, com os endereços da opção (a).
 
 ## D-81 — Limites de duração nas saídas intermédias de uma cadeia
 
@@ -857,7 +857,7 @@
   - **(a)** Só os pontos das fontes: cada vídeo de entrada (passo 5 da aceitação), a saída da sub-cadeia de cada clip, a soma na junção (`validate` da `concat`, CONCAT-007) e o resultado final. As saídas intermédias não são limitadas; o exemplo é aceite.
   - **(b)** Também a saída de cada passo; o exemplo é rejeitado no abrandamento.
 - **Recomendação:** (a). É o que o ADD escreve; o trabalho do worker depende das entradas, que já são limitadas, e (b) rejeitaria cadeias cujo resultado cumpre o limite.
-- **Resposta:** _pendente._
+- **Resposta:** **(a), aprovada pela equipa.** Limites só na entrada de cada vídeo, na saída de cada sub-cadeia, na soma da junção e no resultado final; as saídas intermédias não são limitadas.
 
 ## D-82 — Fase da falha de uma tarefa (Q-ADD-16, parte da falha)
 
@@ -869,7 +869,7 @@
   - **(b)** Como (a), mas só nas tarefas `chain` e `concat`.
   - **(c)** Códigos diferentes por fase (`DOWNLOAD_ERROR`, `ENCODE_ERROR`, `UPLOAD_ERROR`) no lugar de `PROCESSING_ERROR`, o que muda o código das falhas das B003 a B007.
 - **Recomendação:** (a). O código estável da ERROR-001 não muda, a fase é um detalhe a mais e a interface comum da B003 pode mostrá-la sem distinguir o tipo de tarefa.
-- **Resposta:** _pendente._
+- **Resposta:** **(a), aprovada com uma condição.** `error.phase` ∈ `download`, `encode`, `upload` em qualquer tarefa, com o `code` `PROCESSING_ERROR`. A etapa 2 acrescenta uma verificação V, confirmada na etapa 4, de que a fase entra na resposta `failed` do worker e no `VideoTask` só com linhas novas (regra 2.6); se não for possível, regista-se uma dúvida nova e pára-se.
 
 ## D-83 — Regras das predefinições de cadeia de vídeo que as fontes não fixam
 
@@ -881,7 +881,7 @@
   - **(b)** Como (a), mas carregar **acrescenta** os passos aos que já existem, até 10.
   - **(c)** Copiar as regras exatas de `users/routes/presets.js` (a verificar no código na etapa 2), sem a partilha.
 - **Recomendação:** (a); na etapa 2 regista-se onde o padrão das predefinições de imagem difere.
-- **Resposta:** _pendente._
+- **Resposta:** **(a), com uma alteração da equipa.** A mudança de nome e de passos usa `PATCH /users/:user/video-presets/:id`, como o `users/routes/presets.js`, e não `PUT`. Sem limite de número de predefinições: o limite de 4 é das predefinições de imagem e não está nas fontes de vídeo. A etapa 2 prevê uma verificação V que regista onde o padrão de `presets.js` difere.
 
 ## D-84 — Marcas de água de imagem nas predefinições (ADR-010, D-60, D-61)
 
@@ -893,4 +893,13 @@
   - **(b)** Ao guardar retira-se o `watermarkId`, e a imagem tem de ser escolhida sempre que a predefinição é carregada.
   - **(c)** Aceitar marcas de outro projeto do mesmo dono, o que muda a regra da D-61 e o código da B005 (regra 2.6).
 - **Recomendação:** (a). Não muda a B005, mantém a predefinição reproduzível no projeto de origem e dá um erro claro nos outros.
+- **Resposta:** **(a), aprovada pela equipa.**
+
+## D-85 — Código de uma predefinição de vídeo com junção
+
+- **Onde:** B008, etapa 2 (`ddd-02-technical-design.md`, API das predefinições); `POST` e `PATCH /users/:user/video-presets…`.
+- **Dúvida:** A D-83 manda validar a estrutura ao guardar "com os códigos da D-79", mas nenhuma regra da D-79 cobre uma predefinição com uma junção: numa cadeia, uma junção é permitida. Que código e que `{rule}` recebe?
+- **O que as fontes dizem:** ADD 4.9 e UC-VID-014 FA3: "Cadeias com junção não podem ser guardadas"; REQ-VID-CHAIN-014: "guardar uma cadeia sem junção". D-79: `{rule}` ∈ `empty_chain`, `convert_not_last`, `multiple_concat`, `frame_extraction`, `concat_not_first`. Nenhuma fonte dá o código.
+- **Opções:** (a) 422 `INVALID_CHAIN` com `{rule: "concat_in_preset", index}`, uma sexta regra só usada pelas predefinições; (b) 422 `INVALID_CHAIN` com `{rule: "multiple_concat"}`, que descreve mal o caso; (c) 422 `INVALID_REQUEST` com `{field: "steps"}` (D-23).
+- **Recomendação:** (a). O editor já traduz o `{rule}` e a mensagem diz exatamente porque a cadeia não pode ser guardada; o botão "Guardar como predefinição" fica desativado no editor quando há junção, por isso o código só aparece a quem chama a API diretamente.
 - **Resposta:** _pendente._

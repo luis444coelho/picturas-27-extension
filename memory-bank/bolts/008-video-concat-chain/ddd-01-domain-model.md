@@ -2,15 +2,15 @@
 unit: 003-video-composition
 bolt: 008-video-concat-chain
 stage: model
-status: checkpoint
-updated: 2026-10-23T00:31:55Z
+status: complete
+updated: 2026-10-23T00:39:08Z
 ---
 
 # Static Model - Junção de vídeos, cadeias de operações e predefinições de vídeo
 
 Fontes, por ordem de precedência: `docs/add.md` (ADD v1.1, mestre: 2.6, T-01 a T-05, T-10, 4.8, 4.9, Q-ADD-13, Q-ADD-16, Q-ADD-25), `docs/specsDuvidas.md` (D-03, D-06, D-07, D-10, D-35, D-40, D-42 a D-45, D-49, D-50, D-60, D-61, D-75), `memory-bank/standards/decision-index.md` (ADR-004, ADR-005, ADR-007, ADR-008, ADR-010, ADR-011, ADR-013 e ADR-015), `bolt.md` e as stories ST-VID-013 e ST-VID-014, `docs/requirements/REQ-VID-CONCAT.md`, `REQ-VID-CHAIN.md` e `REQ-VID-NFR.md` (NFR-013, 014, 022 a 024), `docs/use-cases/UC-VID-013.md` e `UC-VID-014.md`. Base: o modelo de domínio da B003 (`ddd-01-domain-model.md`), que este contexto estende, e os das B004, B005 e B007 para as operações elegíveis como passo. Modelo estático, sem leitura de código (restrição do estágio).
 
-Os pontos que as fontes não decidem foram registados em `docs/specsDuvidas.md` como D-78 a D-84, com resposta pendente; o modelo usa a opção recomendada de cada uma e cita-a como (D-xx). Se a equipa escolher outra opção, as secções que a citam mudam antes da etapa 2.
+Os pontos que as fontes não decidem foram registados em `docs/specsDuvidas.md` como D-78 a D-84 e respondidos pela equipa no checkpoint deste estágio; o modelo cita-os como (D-xx).
 
 ## Bounded Context
 
@@ -85,7 +85,7 @@ Os eventos da tarefa são os da B003 (`TarefaAceite`, `TarefaIniciada`, `Progres
 | **ClipAdicionado** / **ClipRemovido** / **ClipReordenado** (só interface) | Seleção, remoção ou arrasto na linha temporal | linha temporal nova → revalidação (CONCAT-002, 003, 013) |
 | **PassoAdicionado** / **PassoRemovido** / **PassoReordenado** (só interface) | Alteração no editor, na cadeia principal ou na sub-cadeia de um clip | cadeia nova → revalidação dos passos afetados e do custo (CHAIN-004, CHAIN-015, FA2); com `N = 10`, acrescentar fica bloqueado (CHAIN-008) |
 | **AvisoQuotaRegistado** (só interface) | Registado com `N > 5` ou `N` acima das operações restantes | aviso antes de confirmar (DQ-025, ADD 4.9 riscos) |
-| **PredefinicaoGuardada** / **Alterada** / **Apagada** | `POST`, `PUT` ou `DELETE /users/:user/video-presets…` | `presetId`, `ownerId`, `name` |
+| **PredefinicaoGuardada** / **Alterada** / **Apagada** | `POST`, `PATCH` ou `DELETE /users/:user/video-presets…` | `presetId`, `ownerId`, `name` |
 | **PredefinicaoCarregada** (só interface) | O utilizador escolhe uma predefinição numa nova cadeia | `presetId` → os passos substituem os da lista escolhida e são validados contra o vídeo (D-83, D-84) |
 
 ## Domain Services
@@ -98,7 +98,7 @@ Os eventos da tarefa são os da B003 (`TarefaAceite`, `TarefaIniciada`, `Progres
 | **PlaneadorExecucao** (B003, estendido por acréscimo, padrão do ADR-008) | Para uma junção: PlanoJuncao. Para uma cadeia sem junção: o plano da B003 com os extras de cada operação (ADR-007, ADR-008, ADR-011). Uma cadeia que termina em `convert` escolhe o contentor e os codecs de saída e a cópia de pré-visualização do T-06; o ADR-013 só cobre a conversão isolada, por isso a etapa 2 decide como uma cadeia chega a uma saída AVI | RegistoOperacoes, PoliticaFormatos (B001), extras do plano das B004, B005 e B007 |
 | **CompiladorJuncao** (worker, `Tools/video/ops/concat.py`) | Sub-grafo de cada clip (os filtros da sua sub-cadeia) → NormalizacaoClip → `concat=n=N:v=1:a=1` (ou `a=0`) → passos finais → codificação única (T-02, 4.8) | ExecutorCadeias e compilador de cadeias (B003), módulos `ops/<op>.py` |
 | **ExecutorCadeias** (B003, worker, por acréscimo) | Descarrega cada ficheiro distinto uma vez e passa-o como uma entrada por ocorrência; indica a FaseFalha na resposta `failed` (D-82) | FFmpeg/FFprobe, ArmazenamentoVideo |
-| **ServicoPredefinicoesVideo** (serviço de utilizadores, novo) | `listar(ownerId)`, `criar(ownerId, name, steps)`, `alterar(id, name?, steps?)`, `apagar(id)` (D-83); recusa o `anonymous` com 403 (RN1); validação só da estrutura ao guardar (D-79, D-83) | RepositorioPredefinicoesVideo, GatewayPerfis |
+| **ServicoPredefinicoesVideo** (serviço de utilizadores, novo) | `listar(ownerId)`, `criar(ownerId, name, steps)`, `alterar(id, name?, steps?)` por `PATCH`, `apagar(id)`, sem limite de número (D-83); recusa o `anonymous` com 403 (RN1); validação só da estrutura ao guardar (D-79, D-83) | RepositorioPredefinicoesVideo, GatewayPerfis |
 | **AutorizacaoPredefinicoes** (gateway, router novo) | `videoAuth` em `/users/:user/video-presets…`: 401 sem JWT válido, 403 se o utilizador do token não for o `:user` (T-00, 4.9) | `videoAuth` (B001) |
 | **EditorCadeia** (frontend, novo) | Compor, configurar, reordenar e remover passos (CHAIN-001 a 006, 015) com a configuração dos painéis das B004, B005 e B007; sub-cadeias por clip; contador de créditos e duração estimada pelo `CadeiaValidada`; bloquear o 11.º passo; aviso de quota do Registado; guardar e carregar predefinições; acompanhar a tarefa com as peças comuns da B003 (D-47) | `lib/video-tasks.ts`, `use-video-task.ts`, `video-task-progress.tsx` (B003), dnd-kit |
 | **LinhaTemporalJuncao** (frontend, novo) | Escolher clips (com repetições), reordenar, remover, mostrar a duração total e `W×H` a `F` fps estimados (CONCAT-001 a 004, 012, 013) | EditorCadeia, dnd-kit |
@@ -172,14 +172,14 @@ Não são dúvidas sobre o domínio: dependem do código, que esta etapa não l�
 4. Se a regra do TipoTarefa (`concat` quando há junção) está no código da B003 como o modelo da B003 a descreve.
 5. Onde o padrão das predefinições de imagem (`users/routes/presets.js`) difere da D-83.
 
-## Questões abertas no checkpoint do Estágio 1
+## Decisões tomadas no checkpoint do Estágio 1
 
-Registadas em `docs/specsDuvidas.md`, com resposta pendente:
+Respondidas pela equipa em 2026-10-23T00:39:08Z e registadas em `docs/specsDuvidas.md`:
 
-1. **D-78:** posição da junção numa cadeia (primeiro passo de topo) e rotas com e sem `:video`.
-2. **D-79:** nomes das regras do `INVALID_CHAIN`, `convert` e junção dentro das sub-cadeias, e `extract_frames` como nome reservado.
-3. **D-80:** ordem das três fases (estrutura → passos → limites) e endereço dos erros nas sub-cadeias e nos clips.
-4. **D-81:** limites de duração só nos pontos do ADD, não nas saídas intermédias.
-5. **D-82:** `error.phase` (`download`, `encode`, `upload`) em todas as tarefas, com o `code` `PROCESSING_ERROR`.
-6. **D-83:** nome, rotas, validação ao guardar e carregamento das predefinições de vídeo.
-7. **D-84:** marcas de água de imagem nas predefinições usadas noutro projeto.
+1. **D-78 (a):** a junção, quando existe, é o primeiro passo de topo (`concat_not_first` noutra posição); cadeias com junção usam as rotas sem `:video`; a rota errada dá `INVALID_REQUEST {field: "steps"}`.
+2. **D-79 (a):** `{rule}` ∈ `empty_chain`, `convert_not_last`, `multiple_concat`, `frame_extraction`, `concat_not_first`; `convert` e junção proibidos nas sub-cadeias; `extract_frames` como nome reservado.
+3. **D-80 (a):** estrutura → passos → limites, a parar na primeira fase que falha (a numeração do ADD 4.9 não fixa a precedência); endereços `{index, clipIndex, stepIndex}` e `{videoId, clipIndex}`.
+4. **D-81 (a):** limites de duração só nos pontos do ADD, não nas saídas intermédias.
+5. **D-82 (a), condicionada:** `error.phase` em todas as tarefas, com `PROCESSING_ERROR`; a etapa 2 acrescenta uma verificação V, confirmada na etapa 4, de que a fase entra na resposta `failed` do worker e no `VideoTask` só com linhas novas; se não der, dúvida nova e paragem.
+6. **D-83 (a), alterada:** mudança de nome e de passos por `PATCH /users/:user/video-presets/:id`, como o `presets.js`; sem limite de número (o limite de 4 é das predefinições de imagem); uma verificação V na etapa 2 regista onde o padrão de `presets.js` difere.
+7. **D-84 (a):** a marca de imagem fica na predefinição com o `watermarkId`; noutro projeto dá `INVALID_WATERMARK_CONTENT` e o painel pede outra imagem.
