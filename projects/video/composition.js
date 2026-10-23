@@ -285,6 +285,12 @@ function createComposition({ Video, registry, watermarks }) {
     return null;
   }
 
+  // Phase 1 alone, as a VideoError or null.
+  function structureError(steps) {
+    const broken = structure.checkStructure(steps);
+    return broken ? fail(broken) : null;
+  }
+
   // Internal structure check of the presets (ADR-018, D-83, D-85).
   function presetStructure(steps) {
     const broken =
@@ -301,6 +307,7 @@ function createComposition({ Video, registry, watermarks }) {
     validateConcat,
     submitConcat,
     precheckChain,
+    structureError,
     presetStructure,
   };
 }

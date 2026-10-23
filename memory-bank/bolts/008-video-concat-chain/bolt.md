@@ -8,7 +8,7 @@ stories: [ST-VID-013, ST-VID-014]
 created: 2026-10-19T17:31:16Z
 started: 2026-10-23T00:31:55Z
 completed: null
-current_stage: implement
+current_stage: test
 stages_completed:
   - name: model
     completed: 2026-10-23T00:39:08Z
@@ -19,6 +19,9 @@ stages_completed:
   - name: adr
     completed: 2026-10-23T00:53:52Z
     artifact: adr-016-composition-router.md, adr-017-composition-worker-path.md, adr-018-preset-structure-validation.md, adr-019-task-error-phase.md
+  - name: implement
+    completed: 2026-10-23T01:15:27Z
+    artifact: implementation-report.md
 requires_bolts: [004-video-basic-edits, 005-video-visual-edits, 007-video-format-conversion]
 enables_bolts: [009-video-batch]
 requires_units: [001-video-lifecycle, 002-video-transformations]
@@ -52,8 +55,8 @@ Implementar a operação `concat` com sub-cadeias por clip, a validação em tr�
 - [x] **1. Domain Model**: Complete (D-78 a D-84) → `ddd-01-domain-model.md`
 - [x] **2. Technical Design**: Complete (D-85; fase 2 antes da fase 3 sem junção) → `ddd-02-technical-design.md` → `ddd-02-technical-design.md`
 - [x] **3. ADR Analysis**: Complete (ADR-019 dependente da V6) → `adr-016-composition-router.md`, `adr-017-composition-worker-path.md`, `adr-018-preset-structure-validation.md`, `adr-019-task-error-phase.md`
-- [ ] **4. Implement**: Checkpoint → `implementation-preflight.md`, `implementation-report.md` → código nos componentes indicados em "Saídas esperadas"
-- [ ] **5. Test**: Pending → `ddd-03-test-report.md`
+- [x] **4. Implement**: Aprovado pela equipa → `implementation-preflight.md`, `implementation-report.md` → código nos componentes indicados em "Saídas esperadas"
+- [ ] **5. Test**: Checkpoint (testes manuais pendentes) → `ddd-03-test-report.md`, `manual-test-checklist.md` → `ddd-03-test-report.md`
 
 ## Requisitos rastreados
 
@@ -117,3 +120,5 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 - 2026-10-23T00:53:52Z: Estágio 3 aprovado (ADR-016 a ADR-019). O ADR-019 depende da V6: se falhar, dúvida nova a partir da D-86, ADR-019 marcado `proposed` no ficheiro e no `decision-index.md` e paragem antes de escrever código. Estágio 4 em curso: `implementation-preflight.md` com as V1 a V14 confirmadas no código, commit e push do preflight antes de qualquer código.
 - 2026-10-23T00:58:42Z: Preflight da etapa 4 (`implementation-preflight.md`): V1 a V14 confirmadas no código, todas com pontos de acréscimo; V6 passa (fase só com linhas novas, incluindo uma linha nova no `_reply` do `task.py`), ADR-019 continua `accepted`; sem dúvida nova. Quatro ajustes por acréscimo: `totalSteps` da junção, áudio e entradas distintas da junção, montagem do router de composição depois do da B005, desvio do `composition_task` só para junções e cadeias terminadas em AVI (nota no ADR-017). `Tools/video/compiler.py` não existe.
 - 2026-10-23T01:10:39Z: Etapa 4 implementada, à espera do checkpoint (`implementation-report.md`). Código: 36 ficheiros, +3370, 0 removidas face à `origin/main`; 20 ficheiros CRLF intactos. TypeScript, ESLint e Prettier passaram; testes unitários do serviço de projetos 263/263 (uma linha nova no teste de registo da D-37, como nas B004, B005 e B007). Sondagens isoladas do grafo da junção, da cadeia AVI e do domínio passaram. Testes do worker no contentor, integração e navegador ficam para a etapa 5.
+- 2026-10-23T01:15:27Z: Etapa 4 aprovada pela equipa. Etapa 5 em curso, com o âmbito pedido: junções heterogéneas e clip repetido, sub-cadeias e passos finais, cadeia genérica com recorte, marca e filtro, cadeias terminadas em MP4/MOV/AVI, regras D-79/D-85, CHAIN_TOO_LONG, ordem D-80, LIMIT_EXCEEDED D-81, custo N, cancelamento, passo k de N, `error.phase` em falhas simuladas, predefinições (incluindo D-84), nomes D-35/D-75, regressões B001–B007 e imagem, checklist manual.
+- 2026-10-23T01:34:26Z: Etapa 5 executada, à espera do checkpoint (`ddd-03-test-report.md`). JS 282/282 (19 novos), worker 80/80 com FFmpeg 5.1.9 (8 novos), frontend 68/68 no Node (6 novos) mais 8/8 com o Bun, tsc ok; integração B008 9/9, B007 3/3, B005 16/16, B004 14/15 (falha conhecida de Brilho em ARM); 10/10 ficheiros publicados descodificados e reproduzidos no VLC; uma invocação do FFmpeg por tarefa. Dois defeitos corrigidos por acréscimo no router de composição: `empty_chain` com `:video` (CHAIN-007) e `concat_not_first` antes da verificação da rota (D-80). Checklist manual pendente (`manual-test-checklist.md`).

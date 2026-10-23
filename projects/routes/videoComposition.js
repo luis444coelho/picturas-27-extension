@@ -118,9 +118,13 @@ const wrongRoute = () =>
 // Chain without concat on one video: phases 1 and 3 before B003 (D-80).
 async function precheck(req, videoId) {
   const steps = req.body?.steps;
-  if (!Array.isArray(steps) || !steps.length) return null; // B003 answers
+  if (!Array.isArray(steps)) return null; // B003 answers INVALID_REQUEST
   const context = await silentContext(req);
   if (!context) return null;
+  // Structure first (D-80): empty_chain (CHAIN-007) and concat_not_first
+  // before the route check of D-78.
+  const broken = composition.structureError(steps);
+  if (broken) return broken;
   if (videoId === undefined || composition.hasConcat(steps))
     return wrongRoute(); // D-78
   const video = mongoose.isValidObjectId(videoId)
@@ -175,7 +179,11 @@ router.post(
   ...canEdit,
   wrap(async (req, res) => {
     const steps = req.body?.steps;
-    if (!composition.isConcatChain(steps)) throw wrongRoute();
+    if (!composition.isConcatChain(steps))
+      throw (
+        (Array.isArray(steps) && composition.structureError(steps)) ||
+        wrongRoute()
+      );
     const result = await composition.submitConcat({
       tasks,
       project: req.videoProject,

@@ -2,7 +2,7 @@
 unit: 003-video-composition
 intent: 001-video-processing-support
 created: 2026-10-23T00:31:55Z
-last_updated: 2026-10-23T01:10:39Z
+last_updated: 2026-10-23T01:34:26Z
 ---
 
 # Construction Log: 003-video-composition
@@ -37,6 +37,7 @@ last_updated: 2026-10-23T01:10:39Z
 | 2026-10-23T00:39:08Z | 008-video-concat-chain | stage-complete | Domain Model → Technical Design (D-78 a D-84) |
 | 2026-10-23T00:47:57Z | 008-video-concat-chain | stage-complete | Technical Design → ADR Analysis (D-85; fase 2 antes da fase 3 sem junção) |
 | 2026-10-23T00:53:52Z | 008-video-concat-chain | stage-complete | ADR Analysis → Implement (ADR-016 a ADR-019; ADR-019 dependente da V6) |
+| 2026-10-23T01:15:27Z | 008-video-concat-chain | stage-complete | Implement → Test (preflight V1–V14; 36 ficheiros, +3370, 0 removidas) |
 
 ## Execution Summary
 
@@ -58,3 +59,5 @@ last_updated: 2026-10-23T01:10:39Z
 - 2026-10-23T00:53:52Z: B008 Estágio 3 aprovado (ADR-016 a ADR-019; ADR-019 dependente da V6). Estágio 4 iniciado pelo preflight V1–V14.
 - 2026-10-23T00:58:42Z: B008 preflight da etapa 4: V1 a V14 confirmadas no código (ficheiro e linha de cada acréscimo); V6 passa e o ADR-019 continua `accepted`; sem dúvida nova; quatro ajustes por acréscimo registados no preflight e uma nota no ADR-017. Commit e push do preflight antes de qualquer código.
 - 2026-10-23T01:10:39Z: B008 etapa 4 implementada, à espera do checkpoint: router de composição, `concat`, validação em três fases, `_clips`, extras do plano, `composition_task.py`, `error.phase`, predefinições (serviço de utilizadores e gateway) e editor de cadeia e linha temporal no frontend. `git diff --numstat origin/main` no código: 36 ficheiros, +3370, 0 removidas; CRLF intacto; TypeScript, ESLint e Prettier passaram; unitários do serviço de projetos 263/263. Testes do worker no contentor, integração e navegador na etapa 5.
+- 2026-10-23T01:15:27Z: B008 etapa 4 aprovada pela equipa; etapa 5 (Test) em curso.
+- 2026-10-23T01:34:26Z: B008 etapa 5 executada, à espera do checkpoint: JS 282/282, worker 80/80 (FFmpeg 5.1.9), frontend 68/68 + 8/8 (Bun), integração B008 9/9, B007 3/3, B005 16/16, B004 14/15 (Brilho em ARM, conhecida); resultados reproduzidos no VLC; NFR-013 verificada nos logs. Corrigidos `empty_chain` com `:video` e `concat_not_first` (estrutura antes da rota). Testes manuais pendentes.
