@@ -1,30 +1,25 @@
 #import "../template.typ": *
 
-= Manutenção Corretiva da Solução de Base
+= Manutenção Corretiva e Problemas Encontrados
 
 #orientacao[
-  Problemas encontrados na solução de base durante o estudo e a integração do vídeo (erros, incoerências com o
-  documento de requisitos, dificuldades de execução). Indiquem se foram corrigidos nesta fase. Capítulo
-  recomendado; removam-no se não houver nada a registar.
+  Registem problemas concretos encontrados durante a integração e validação do suporte a vídeo. Não incluam aqui
+  decisões arquiteturais ou componentes simplesmente acrescentados; esses elementos são descritos no Capítulo 8.
+  Para cada problema, indiquem o impacto, a prioridade, o requisito relacionado, o estado e a evidência.
 ]
+
+A integração de vídeo exigiu distinguir três tipos de intervenção: a extensão funcional da plataforma, a correção de defeitos introduzidos no incremento e o tratamento de limitações herdadas da solução de base. A criação de coleções de vídeo, de filas específicas, de mecanismos de exclusão por projeto e de um worker com FFmpeg constitui evolução arquitetural, descrita no Capítulo 8. Esses elementos não são apresentados como correções de funcionalidades que a solução de base já devesse disponibilizar.
+
+A manutenção corretiva aqui registada incide nos problemas encontrados ao reutilizar autenticação, mensageria e processamento de imagens. Os estados distinguem a correção efetiva, a mitigação limitada ao vídeo e a necessidade de confirmação ou intervenção posterior. Uma ocorrência descrita num relatório de testes não demonstra que o problema persista em todas as condições; do mesmo modo, uma solução específica de vídeo não prova a correção do mecanismo original de imagem. As prioridades indicadas orientam o trabalho remanescente, considerando o impacto e a evidência disponível.
 
 #tab([Tarefas de manutenção corretiva],
   tabela(
     colunas: (1.2cm, 1fr, 2.4cm, 1.6cm, 2cm, 1.8cm),
     tamanho: 8.5pt,
     [ID], [Descrição do problema], [Impacto], [Prioridade], [Rel. Req.], [Estado],
-    [T-01], [A integração de vídeo precisava de coleções próprias, locks por projeto e limpeza de recursos abandonados, sem alterar o documento de projeto da baseline.], [Funcional / integridade], [Alta], [REQ-VID-STORAGE-001; NFR-006/017], [Corrigido],
-    [T-02], [Os contratos de mensagens e os estados assíncronos precisavam de confirmação manual, reentrega limitada, idempotência e cancelamento separado da limpeza física.], [Funcional / fiabilidade], [Alta], [REQ-VID-TASK-001 a 007], [Corrigido],
-    [T-03], [A execução de vídeo precisava de um worker com FFmpeg/FFprobe e de transferência direta para o storage, evitando transportar binários pelo gateway.], [Arquitetura / desempenho], [Alta], [REQ-VID-NFR-009/014], [Corrigido],
-    [T-04], [A pré-visualização visual e as fórmulas de ajuste tinham de permanecer coerentes entre sharp no servidor e FFmpeg no worker.], [Funcional / consistência], [Média], [REQ-VID-NFR-013], [Corrigido],
-    [T-05], [A expectativa histórica 126/127 da ferramenta de brilho varia entre arquiteturas; a diferença foi isolada como falha da baseline e não como regressão do vídeo.], [Teste de regressão], [Baixa], [Baseline], [Pendente na baseline],
+    [T-01], [A emissão de JWT herdada da solução de base mantém uma validade de sete dias, enquanto a ERS da extensão fixa uma hora. Existe, assim, um desvio face ao alvo aprovado.], [Segurança e conformidade], [Alta], [REQ-VID-NFR-001], [Pendente],
+    [T-02], [O consumidor RabbitMQ original do WS Gateway não assegura religação automática após perda de ligação. O vídeo dispõe de ligação própria com recuperação; essa solução não foi generalizada ao fluxo de imagem.], [Fiabilidade e disponibilidade de eventos], [Média], [REQ-VID-NFR-006/010; solução de base], [Mitigado no vídeo; pendente na base],
+    [T-03], [A regressão de Brilho de imagem espera o píxel 127, mas a imagem de ensaio gerada em aarch64 pode produzir 126 após a transformação. A expectativa fixa não considera o valor efetivo da origem; não foi demonstrado um defeito no algoritmo de produção.], [Portabilidade e fiabilidade dos testes], [Baixa], [Regressão de imagem; REQ-VID-NFR-010], [Teste histórico por rever],
   ),
 )
 
-== Retificação
-
-As linhas T-01 a T-03 descrevem decisões de arquitetura e implementação do incremento, não problemas corretivos da solução de base. Para manutenção corretiva devem ser consideradas apenas as situações seguintes:
-
-
-
-As correções foram acompanhadas por testes unitários, de integração e E2E. A equipa não alterou o comportamento original de imagem para mascarar a falha dependente de arquitetura.
