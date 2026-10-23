@@ -246,6 +246,21 @@ async function rejected(user, p, steps, videoId, status, code, details) {
   }
   assert.equal(await taskCount(p), before, "no task created");
 }
+// D-86 + quota: valid on validation, refused with QUOTA_EXCEEDED before any
+// task for a Registered user whose daily credits do not cover N.
+async function validButOverQuota(user, p, steps, videoId, cost) {
+  const before = await taskCount(p);
+  const credits = await remaining(user);
+  const check = await validate(user, p, steps, videoId);
+  assert.equal(check.status, 200, JSON.stringify(check.data));
+  assert.deepEqual([check.data.valid, check.data.cost], [true, cost]);
+  const r = await submit(user, p, steps, videoId);
+  assert.equal(r.status, 429, JSON.stringify(r.data));
+  assert.equal(r.data.error.code, "QUOTA_EXCEEDED");
+  assert.equal(r.data.error.details.cost, cost);
+  assert.equal(await taskCount(p), before, "no task created");
+  assert.equal(await remaining(user), credits, "no credit used");
+}
 async function deleteOwnBucket(user) {
   const bucket = `user-${user.id}`;
   const endpoint = process.env.VIDEO_E2E_S3 || "http://seaweedfs:9000";
@@ -652,7 +667,7 @@ test.describe("B008 real stack", { skip, timeout: 1800000 }, () => {
     assert.equal(same.data.error.details.errors[0].code, "SAME_FORMAT");
   });
 
-  test("INVALID_CHAIN rules (D-79), CHAIN_TOO_LONG, routes (D-78), concat errors: no task and no quota", async () => {
+  test("INVALID_CHAIN rules (D-79), no fixed limits (D-86) with the quota before the task, routes (D-78), concat errors", async () => {
     const user = state.free.user,
       p = state.free.project,
       video = state.free["wide.mp4"];
@@ -682,15 +697,9 @@ test.describe("B008 real stack", { skip, timeout: 1800000 }, () => {
       "INVALID_CHAIN",
       { rule: "frame_extraction", index: 1 },
     );
-    await rejected(
-      user,
-      p,
-      Array(11).fill(ADJUST),
-      video,
-      422,
-      "CHAIN_TOO_LONG",
-      { total: 11, limit: 10 },
-    );
+    // No fixed number of steps (D-86): 11 steps are valid; the Registered
+    // quota (5 a day) refuses them before any task (QUOTA_EXCEEDED, 429).
+    await validButOverQuota(user, p, Array(11).fill(ADJUST), video, 11);
     // With :video and a concat (D-78).
     await rejected(
       user,
@@ -729,14 +738,12 @@ test.describe("B008 real stack", { skip, timeout: 1800000 }, () => {
       "INVALID_CHAIN",
       { rule: "convert_not_last", clipIndex: 0 },
     );
-    await rejected(
+    await validButOverQuota(
       user,
       p,
       [concat(clip(video), clip(video, Array(10).fill(ADJUST)))],
       null,
-      422,
-      "CHAIN_TOO_LONG",
-      { total: 11, limit: 10 },
+      11,
     );
     await rejected(
       user,
@@ -746,15 +753,12 @@ test.describe("B008 real stack", { skip, timeout: 1800000 }, () => {
       422,
       "INSUFFICIENT_INPUTS",
     );
-    await rejected(
-      user,
-      p,
-      [concat(...Array(11).fill(clip(video)))],
-      null,
-      422,
-      "TOO_MANY_INPUTS",
-      { limit: 10 },
-    );
+    // No fixed number of clips (D-86): 11 clips for a Registered user, cost 1.
+    const eleven = await validate(user, p, [
+      concat(...Array(11).fill(clip(video))),
+    ]);
+    assert.equal(eleven.status, 200, JSON.stringify(eleven.data));
+    assert.deepEqual([eleven.data.valid, eleven.data.cost], [true, 1]);
     const missing = "64b0000000000000000000ff";
     await rejected(
       user,
@@ -808,14 +812,19 @@ test.describe("B008 real stack", { skip, timeout: 1800000 }, () => {
       long = state.free["long.mp4"],
       wide = state.free["wide.mp4"];
     const before = await remaining(user);
-    // Structure before steps: invalid parameters inside a chain that is too long → CHAIN_TOO_LONG.
+    // Structure before steps: invalid parameters in a chain with a misplaced convert → INVALID_CHAIN.
     await rejected(
       user,
       p,
-      [step("speed", { factor: 9 }), ...Array(10).fill(ADJUST)],
+      [
+        step("speed", { factor: 9 }),
+        step("convert", { target: "mov" }),
+        ADJUST,
+      ],
       wide,
       422,
-      "CHAIN_TOO_LONG",
+      "INVALID_CHAIN",
+      { rule: "convert_not_last", index: 1 },
     );
     // Without concat, invalid parameters that would also exceed 5 min → INVALID_STEP_PARAMS (B003).
     const invalid = await submit(
@@ -1153,4 +1162,355 @@ test.describe("B008 real stack", { skip, timeout: 1800000 }, () => {
       404,
     );
   });
+
+  // ---- revision of B008 (D-86, D-87): the three actions -----------------------
+
+  const chainValidate = (user, p, steps, videoId) =>
+    api(
+      "POST",
+      `${videos(user, p)}/chain/validate`,
+      user,
+      videoId ? { videoId, steps } : { steps },
+    );
+  const completedReplies = (taskId) =>
+    state.replies.filter((m) => m.taskId === taskId && m.status === "completed")
+      .length;
+
+  test('"Aplicar várias operações": 12 steps on one video of a Premium user, one task, inputs of every step', async () => {
+    const user = state.owner,
+      p = state.project,
+      video = state.sources["wide.mp4"];
+    const steps = [
+      step("trim", { startMs: 0, endMs: 2500 }),
+      ADJUST,
+      step("filter", { filter: "sepia" }),
+      step("orient", { rotation: 90, flipH: false, flipV: false }),
+      step("resize", { width: 180, height: 320 }),
+      step("watermark", {
+        type: "text",
+        text: "B008",
+        position: { preset: "bottom-right" },
+        scale: 0.3,
+        opacity: 0.8,
+      }),
+      step("speed", { factor: 2 }),
+      step("adjust", {
+        brightness: 1,
+        contrastFactor: 1.3,
+        saturationFactor: 1,
+      }),
+      step("orient", { rotation: 0, flipH: true, flipV: false }),
+      step("filter", { filter: "bw" }),
+      step("remove_audio"),
+      step("convert", { target: "mov" }),
+    ];
+    const check = await chainValidate(user, p, steps, video);
+    assert.equal(check.status, 200, JSON.stringify(check.data));
+    assert.deepEqual(
+      [check.data.valid, check.data.cost, check.data.totalSteps],
+      [true, 12, 12],
+    );
+    assert.equal(check.data.inputs.steps.length, 12);
+    assert.equal(check.data.inputs.steps[0].durationMs, 3000);
+    assert.equal(check.data.inputs.steps[1].durationMs, 2500);
+    assert.equal(
+      check.data.inputs.steps[7].durationMs,
+      1250,
+      "after the speed",
+    );
+    assert.deepEqual(
+      [
+        check.data.inputs.steps[5].displayWidth,
+        check.data.inputs.steps[5].displayHeight,
+      ],
+      [180, 320],
+    );
+    const { task, output, info } = await run(
+      user,
+      p,
+      steps,
+      video,
+      "multi-12-steps",
+    );
+    assert.deepEqual(
+      [task.kind, task.cost, task.total_steps, task.reserved_credits],
+      ["chain", 12, 12, 0],
+    );
+    assert.deepEqual(
+      [output.meta.container, output.meta.video_codec, output.meta.audio_codec],
+      ["mov", "h264", null],
+    );
+    assert.deepEqual([output.meta.width, output.meta.height], [180, 320]);
+    assert.ok(
+      Math.abs(output.meta.duration_ms - 1250) <= 100,
+      String(output.meta.duration_ms),
+    );
+    assert.equal(completedReplies(String(task._id)), 1);
+    assert.equal(
+      info.downloadFileName,
+      "wide_trim_adjust_filter_orient_resize_watermark_speed_adjust_orient_filter_remove_audio_convert.mov",
+    );
+  });
+
+  test('"Juntar vídeos": 13 clips with repetitions and no operations on a Premium user, cost 1', async () => {
+    const user = state.owner,
+      p = state.project,
+      s = state.sources;
+    const order = ["odd.mp4", "wide.mp4", "tall.mp4", "phone.mp4"];
+    const ids = Array.from({ length: 13 }, (_, i) => s[order[i % 4]]);
+    const durations = {
+      "odd.mp4": 2000,
+      "wide.mp4": 3000,
+      "tall.mp4": 2000,
+      "phone.mp4": 2000,
+    };
+    const expected = Array.from(
+      { length: 13 },
+      (_, i) => durations[order[i % 4]],
+    ).reduce((a, b) => a + b, 0);
+    const steps = [concat(...ids.map((id) => clip(id)))];
+    const check = await chainValidate(user, p, steps);
+    assert.equal(check.status, 200, JSON.stringify(check.data));
+    assert.deepEqual(
+      [check.data.valid, check.data.cost, check.data.totalSteps],
+      [true, 1, 1],
+    );
+    assert.equal(check.data.output.durationMs, expected);
+    const { task, output } = await run(user, p, steps, null, "concat-13-clips");
+    assert.deepEqual([task.kind, task.cost], ["concat", 1]);
+    assert.deepEqual(output.source_video_ids.map(String), ids);
+    assert.deepEqual(
+      task.plan.inputs.map((i) => i.videoId),
+      order.map((n) => s[n]),
+    );
+    assert.ok(
+      output.recipe[0].parameters.clips.every((c) => c.steps.length === 0),
+    );
+    assert.ok(
+      Math.abs(output.meta.duration_ms - expected) <= 300,
+      `${output.meta.duration_ms} vs ${expected}`,
+    );
+    assert.deepEqual([output.meta.width, output.meta.height], [320, 240]);
+  });
+
+  test("Movie Maker: 3 videos with different chains (one empty) and 3 operations after the concat", async () => {
+    const user = state.owner,
+      p = state.project,
+      s = state.sources;
+    const steps = [
+      concat(
+        clip(s["wide.mp4"], [
+          step("trim", { startMs: 0, endMs: 2000 }),
+          step("filter", { filter: "sepia" }),
+        ]),
+        clip(s["tall.mp4"]),
+        clip(s["phone.mp4"], [step("speed", { factor: 2 }), ADJUST]),
+      ),
+      step("orient", { rotation: 90, flipH: false, flipV: false }),
+      step("watermark", {
+        type: "text",
+        text: "Movie Maker",
+        position: { preset: "center" },
+        scale: 0.4,
+        opacity: 0.7,
+      }),
+      step("adjust", {
+        brightness: 1,
+        contrastFactor: 1,
+        saturationFactor: 1.4,
+      }),
+    ];
+    const check = await chainValidate(user, p, steps);
+    assert.equal(check.status, 200, JSON.stringify(check.data));
+    assert.deepEqual([check.data.valid, check.data.cost], [true, 8]);
+    assert.deepEqual(
+      check.data.inputs.clips.map((c) => c.length),
+      [2, 0, 2],
+    );
+    assert.deepEqual(
+      check.data.inputs.clipOutputs.map((o) => o.durationMs),
+      [2000, 2000, 1000],
+    );
+    assert.deepEqual(
+      [
+        check.data.inputs.steps[1].displayWidth,
+        check.data.inputs.steps[1].displayHeight,
+      ],
+      [640, 360],
+      "input of the first final step",
+    );
+    const { task, output, info } = await run(
+      user,
+      p,
+      steps,
+      null,
+      "movie-maker-3",
+    );
+    assert.deepEqual(
+      [task.kind, task.cost, task.total_steps],
+      ["concat", 8, 8],
+    );
+    assert.deepEqual([output.meta.width, output.meta.height], [360, 640]);
+    assert.ok(
+      Math.abs(output.meta.duration_ms - 5000) <= 150,
+      String(output.meta.duration_ms),
+    );
+    assert.equal(
+      info.downloadFileName,
+      "wide_concat_orient_watermark_adjust.mp4",
+    );
+    assert.equal(completedReplies(String(task._id)), 1);
+  });
+
+  test("anonymous user refused on validation, chain validation and acceptance (RN1)", async () => {
+    const anonymous = await register("anonymous");
+    const created = await api("POST", `/projects/${anonymous.id}`, anonymous, {
+      name: "B008 anonymous",
+    });
+    assert.equal(created.status, 201, JSON.stringify(created.data));
+    state.projects.push({ id: created.data._id, user: anonymous });
+    const p = created.data._id,
+      fake = "64b0000000000000000000fe";
+    for (const r of [
+      await chainValidate(anonymous, p, [ADJUST], fake),
+      await chainValidate(anonymous, p, [concat(clip(fake), clip(fake))]),
+      await submit(anonymous, p, [ADJUST], fake),
+      await submit(anonymous, p, [concat(clip(fake), clip(fake))], null),
+    ]) {
+      assert.equal(r.status, 403, JSON.stringify(r.data));
+      assert.equal(r.data.error.code, "FORBIDDEN");
+    }
+    assert.equal(await taskCount(p), 0);
+  });
+
+  test("Registered: a failure in the middle leaves no result and gives the credits back (CHAIN-013)", async () => {
+    const user = await register("free");
+    const p = await project(user);
+    const video = await upload(user, p, "wide.mp4", "broken.mp4");
+    const doc = await state.db
+      .collection("videos")
+      .findOne({ _id: oid(video) });
+    const [projectId, stage, name] = doc.storage.original_key.split("/");
+    const put = await fetch(
+      await storageUrl("put", {
+        userId: user.id,
+        projectId,
+        stage,
+        name,
+        contentType: "video/mp4",
+        public: false,
+      }),
+      {
+        method: "PUT",
+        headers: { "Content-Type": "video/mp4" },
+        body: crypto.randomBytes(8192),
+      },
+    );
+    assert.equal(put.status, 200);
+    const before = await remaining(user);
+    const r = await submit(
+      user,
+      p,
+      [
+        ADJUST,
+        step("filter", { filter: "bw" }),
+        step("orient", { rotation: 180, flipH: false, flipV: false }),
+      ],
+      video,
+    );
+    assert.equal(r.status, 202, JSON.stringify(r.data));
+    const done = await finish(user, p, r.data.taskId);
+    assert.deepEqual(
+      [done.status, done.error.code, done.error.phase],
+      ["failed", "PROCESSING_ERROR", "encode"],
+    );
+    await until(
+      async () => (await remaining(user)) === before,
+      "3 credits back",
+    );
+    assert.equal(
+      await state.db
+        .collection("videos")
+        .countDocuments({ _id: oid(r.data.taskId) }),
+      0,
+      "no result",
+    );
+    const task = await state.db
+      .collection("videotasks")
+      .findOne({ _id: oid(r.data.taskId) });
+    assert.deepEqual([task.reserved_credits, task.refund.state], [3, "done"]);
+    for (const target of Object.values(task.plan.targets))
+      assert.equal(
+        await objectStatus(
+          user.id,
+          `${target.projectId}/${target.stage}/${target.name}`,
+        ),
+        404,
+      );
+  });
+
+  // D-88 (a): measured, no limit. Opt in with VIDEO_E2E_D88=1 (long); the
+  // timings go to VIDEO_E2E_OUTPUTS/d88.json, the memory is sampled on the host.
+  test(
+    "D-88 measurements: concat of 100 short clips and a long chain on a Premium user",
+    { skip: process.env.VIDEO_E2E_D88 ? false : "set VIDEO_E2E_D88=1" },
+    async () => {
+      const user = state.owner,
+        p = state.project;
+      const shortId = await upload(user, p, "short.mp4");
+      const results = {};
+      const timed = async (label, steps, videoId) => {
+        const at = Date.now();
+        const r = await submit(user, p, steps, videoId);
+        assert.equal(r.status, 202, JSON.stringify(r.data));
+        const done = await finish(user, p, r.data.taskId);
+        const started = state.replies.find(
+          (m) => m.taskId === r.data.taskId && m.status === "started",
+        );
+        const completed = state.replies.find(
+          (m) => m.taskId === r.data.taskId && m.status === "completed",
+        );
+        results[label] = {
+          taskId: r.data.taskId,
+          status: done.status,
+          requestBytes: JSON.stringify({ steps }).length,
+          acceptToFinalMs: Date.now() - at,
+          workerMs:
+            started && completed
+              ? Date.parse(completed.timestamp) - Date.parse(started.timestamp)
+              : null,
+          resultDurationMs:
+            (
+              await state.db
+                .collection("videos")
+                .findOne({ _id: oid(r.data.taskId) })
+            )?.meta?.duration_ms ?? null,
+        };
+        assert.equal(done.status, "completed", JSON.stringify(done));
+      };
+      await timed(
+        "concat-100-short-clips",
+        [concat(...Array(100).fill(clip(shortId)))],
+        null,
+      );
+      const long = Array.from({ length: 60 }, (_, i) =>
+        i % 3 === 0
+          ? step("adjust", {
+              brightness: i % 2 ? 1.05 : 0.95,
+              contrastFactor: 1,
+              saturationFactor: 1,
+            })
+          : i % 3 === 1
+            ? step("filter", { filter: i % 2 ? "warm" : "cold" })
+            : step("orient", { rotation: 0, flipH: true, flipV: false }),
+      );
+      await timed("chain-60-steps-on-90s", long, state.sources["long.mp4"]);
+      if (OUTPUTS)
+        fs.writeFileSync(
+          path.join(OUTPUTS, "d88.json"),
+          JSON.stringify(results, null, 2),
+        );
+      console.log(JSON.stringify(results));
+    },
+  );
 });

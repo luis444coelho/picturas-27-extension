@@ -8,6 +8,7 @@ tall.mp4: 360x640, 30 fps, no audio, 2 s (9:16)
 phone.mp4: coded 640x360 with a rotation tag, displayed 360x640, 30 fps, audio, 2 s
 long.mp4: 640x360, 25 fps, audio, 90 s (limits of the Registered profile, cancellation)
 mark.png: 64x32 red image for the image watermark
+short.mp4: 320x240, 25 fps, audio, 0.5 s (D-88 measurement: 100 short clips)
 
 The caller owns removal of the directory.
 """
@@ -43,6 +44,9 @@ def main(directory):
            '-f', 'lavfi', '-i', 'sine=frequency=440:sample_rate=48000:duration=90',
            *h264, '-c:a', 'aac', d('long.mp4'))
     ffmpeg('-f', 'lavfi', '-i', 'color=c=red:size=64x32', '-frames:v', '1', d('mark.png'))
+    ffmpeg('-f', 'lavfi', '-i', 'testsrc2=size=320x240:rate=25:duration=0.5',
+           '-f', 'lavfi', '-i', 'sine=frequency=550:sample_rate=48000:duration=0.5',
+           *h264, '-c:a', 'aac', d('short.mp4'))
 
 
 if __name__ == '__main__':
