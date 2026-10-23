@@ -401,10 +401,6 @@ A tabela compara as formulações originais dos 18 requisitos selecionados na re
 )
 
 
-=== Clarificações da revisão de entrega
-
-Esta revisão preserva os 202 identificadores e acrescenta clarificações motivadas por decisões de construção já aprovadas: duration_ms e source_video_ids uniformes (STORAGE-001/002); débito sem confirmação adicional; persistência e republicação após indisponibilidade do broker (TASK-001/NFR-004, D-41); passo corrente estimado no grafo único (CHAIN-012, D-40); cópia por codec de saída da matriz (CONVERT-006, D-70); corte condicionado de um píxel (CONVERT-007, D-71); URL de transferência como credencial portadora (DOWNLOAD-002); e descodificação integral, para além da inspeção FFprobe (NFR-011). O exemplo de CHAIN-009 foi corrigido para um passo em cada um de três clips, mais junção e marca de água, totalizando cinco créditos. Estas clarificações não convertem testes pendentes em resultados favoráveis.
-
 === Assunções dos valores fixados
 
 As decisões documentais não são medições de capacidade. A tabela seguinte classifica os grupos de valores do catálogo e remete para as assunções e validações do Capítulo 2; os intervalos e opções de uma operação são verificados pelos critérios dessa operação.

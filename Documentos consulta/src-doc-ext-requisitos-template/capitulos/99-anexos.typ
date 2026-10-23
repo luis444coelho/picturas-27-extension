@@ -26,7 +26,7 @@ Abrir `https://localhost:8080` e aceitar o certificado autoassinado.
 
 == Credenciais e vídeos de exemplo
 
-- *Contas:* são gerados os perfis Registado (`free`) e Premium. Consultar os endereços, palavras-passe e JWT em `artifacts/mvp/environment/accounts.json`. As contas válidas são reutilizadas. O JWT permite testar a API; o login conserva a limitação descrita no Capítulo 11.
+- *Contas:* são gerados os perfis Registado (`free`) e Premium. Consultar os endereços, palavras-passe e JWT em `artifacts/mvp/environment/accounts.json`. As contas válidas são reutilizadas.
 - *Vídeos:* disponíveis em `artifacts/mvp/environment/fixtures/<identificador>/`, nos conjuntos `b004`, `b005`, `b007` e `b008`. Incluem MP4, MOV e AVI. Para testes manuais, podem usar-se `b008/wide.mp4` (3 s, com áudio), `b008/tall.mp4` (2 s, sem áudio) e `b008/short.mp4` (cerca de 0,5 s). Os tamanhos efetivos constam de `.generated.json` em cada conjunto.
 
 == Executar os testes automáticos
