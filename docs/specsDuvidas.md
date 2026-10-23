@@ -957,3 +957,17 @@
   - **(c)** Nas composições, o recorte só tem os campos, sem leitor, mesmo no primeiro passo.
 - **Recomendação:** (a). Mantém a interface da edição simples onde ela é exata, e não mostra posições que não correspondem ao que vai ser recortado.
 - **Resposta:** **(a), aprovada pela equipa.** O leitor, o *scrubbing* e o *loop preview* do recorte só ficam ativos quando o passo recebe o vídeo original (primeiro passo da cadeia de um vídeo ou clip); nos outros passos ficam os campos, a duração prevista e a validação, com os limites do intermédio estimado. As pré-visualizações estáticas usam o fotograma 0 da origem com os passos estáticos anteriores da mesma cadeia (T-07); depois da junção, o primeiro clip depois da sua cadeia.
+
+## D-90 — Memória do FFmpeg numa junção com muitos clips (risco da D-88)
+
+- **Onde:** B008, etapa 5 da revisão (medições da D-88, `ddd-03-test-report-revision.md`); `Tools/video/composition_task.py` (uma entrada `-i` e um descodificador por clip, ADD 4.8).
+- **Dúvida:** Sem limite fixo de clips (D-86), a memória do FFmpeg numa junção cresce com o número de clips e com a resolução. Acrescenta-se uma proteção?
+- **O que as fontes dizem:**
+  - ADD 4.8 (alternativas): "Todas as entradas ficam abertas ao mesmo tempo (um descodificador por clip): a memória cresce com N".
+  - D-86: sem limites fixos de quantidade. D-88 (a): nenhum limite novo; medir.
+  - **Medido:** 100 clips de 320×240 com cerca de 2,0 GB de pico; 100 clips de 640×360 com cerca de 2,9 GB de pico. Worker com 12 núcleos e 8 GB.
+  - **Não medido:** 1080p. Supõe-se que 100 clips nessa resolução passariam os 8 GB.
+  - Uma falha do FFmpeg (incluindo falta de memória) termina em `PROCESSING_ERROR`, sem resultado e com os créditos devolvidos (T-03, D-45).
+- **Opções:** (a) aceitar como risco, sem teto e sem mudar os *threads*; (b) teto configurável de clips ou de resolução × clips (opção (b) da D-88); (c) limitar os *threads* de descodificação por entrada.
+- **Recomendação:** decisão da equipa.
+- **Resposta:** **(a), risco aceite pela equipa.** Não se acrescenta teto nem se mudam os *threads*, por respeito à D-86. Uma junção que esgote a memória do worker falha com `PROCESSING_ERROR`, sem resultado e com os créditos devolvidos.

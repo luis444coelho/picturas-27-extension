@@ -2,10 +2,11 @@
 bolt: 008-video-concat-chain
 stage: test
 created: 2026-10-23T15:16:41Z
-status: pending
+status: complete
+completed: 2026-10-23T15:47:05Z
 ---
 
-# Testes manuais no browser — B008 depois da revisão (a executar pela equipa)
+# Testes manuais no browser — B008 depois da revisão (executados pela equipa)
 
 Esta checklist substitui a da primeira etapa 5, que a equipa não aprovou.
 
@@ -17,48 +18,48 @@ O teste automático `e2e-panels-ui.test.js` já comparou o DOM dos nove painéis
 
 Em cada painel, abrir o leitor de `wide.mp4`, usar o painel como antes da B008 e executar uma vez:
 
-- [ ] **Recortar:** campos `hh:mm:ss.mmm`, "Definir início/fim" com o leitor, "Pré-visualizar corte" em ciclo, duração prevista, "Recortar · 1 crédito".
-- [ ] **Remover áudio:** texto, janela de confirmação "Confirmar remoção do áudio", "Voltar"/"Confirmar"; num vídeo sem áudio, o botão fica desativado com a indicação.
-- [ ] **Velocidade:** botões 0.25× a 4×, campo do fator, mensagens para 1.0, 0.1 e vazio, duração prevista.
-- [ ] **Marca de água:** separadores Texto/Imagem, ficheiro e galeria, posições predefinidas e coordenadas, escala e opacidade, pré-visualização no fotograma.
-- [ ] **Ajustar:** três *sliders* com passo 0.05 e valor visível, "Repor", pré-visualização.
-- [ ] **Filtros:** grelha de seis miniaturas, seleção única, pré-visualização.
-- [ ] **Redimensionar:** largura/altura, cadeado de proporção, predefinições 1080p/720p/480p/360p, avisos de distorção e de ampliação, dimensões finais.
-- [ ] **Rodar / espelhar:** 90°/180°/270°, espelhos, dimensões finais, mensagem sem alteração.
-- [ ] **Converter formato:** formato atual, destinos, "Cópia direta"/"Recodificação", "Converter · 1 crédito".
+- [x] **Recortar:** campos `hh:mm:ss.mmm`, "Definir início/fim" com o leitor, "Pré-visualizar corte" em ciclo, duração prevista, "Recortar · 1 crédito".
+- [x] **Remover áudio:** texto, janela de confirmação "Confirmar remoção do áudio", "Voltar"/"Confirmar"; num vídeo sem áudio, o botão fica desativado com a indicação.
+- [x] **Velocidade:** botões 0.25× a 4×, campo do fator, mensagens para 1.0, 0.1 e vazio, duração prevista.
+- [x] **Marca de água:** separadores Texto/Imagem, ficheiro e galeria, posições predefinidas e coordenadas, escala e opacidade, pré-visualização no fotograma.
+- [x] **Ajustar:** três *sliders* com passo 0.05 e valor visível, "Repor", pré-visualização.
+- [x] **Filtros:** grelha de seis miniaturas, seleção única, pré-visualização.
+- [x] **Redimensionar:** largura/altura, cadeado de proporção, predefinições 1080p/720p/480p/360p, avisos de distorção e de ampliação, dimensões finais.
+- [x] **Rodar / espelhar:** 90°/180°/270°, espelhos, dimensões finais, mensagem sem alteração.
+- [x] **Converter formato:** formato atual, destinos, "Cópia direta"/"Recodificação", "Converter · 1 crédito".
 
 ## 2. Aplicar várias operações (botão no leitor)
 
-- [ ] O botão aparece para quem edita e não aparece para o `anonymous` nem para quem só tem leitura.
-- [ ] Acrescentar pelo menos 12 operações (conta Premium), cada uma configurada com o **mesmo** painel da edição simples. Reordenar por arrasto e com as setas, e remover uma.
-- [ ] Um recorte depois de uma velocidade mostra os campos, sem leitor, com a indicação "O recorte aplica-se ao resultado do passo anterior", e os limites da duração estimada (D-89).
-- [ ] Custo "N créditos (sem débito no Premium)", duração estimada e erros no passo indicado.
-- [ ] Executar: "Passo k de N" a avançar, um só vídeo final na galeria e o original igual.
-- [ ] Predefinições: guardar a lista, carregá-la noutro vídeo e mudar-lhe o nome; um nome repetido mostra o erro.
-- [ ] Conta Registada com 6 ou mais passos: aviso dos 5 créditos diários; Executar mostra o erro de quota e não cria tarefa.
+- [x] O botão aparece para quem edita e não aparece para o `anonymous` nem para quem só tem leitura.
+- [x] Acrescentar pelo menos 12 operações (conta Premium), cada uma configurada com o **mesmo** painel da edição simples. Reordenar por arrasto e com as setas, e remover uma.
+- [x] Um recorte depois de uma velocidade mostra os campos, sem leitor, com a indicação "O recorte aplica-se ao resultado do passo anterior", e os limites da duração estimada (D-89).
+- [x] Custo "N créditos (sem débito no Premium)", duração estimada e erros no passo indicado.
+- [x] Executar: "Passo k de N" a avançar, um só vídeo final na galeria e o original igual.
+- [x] Predefinições: guardar a lista, carregá-la noutro vídeo e mudar-lhe o nome; um nome repetido mostra o erro.
+- [x] Conta Registada com 6 ou mais passos: aviso dos 5 créditos diários; Executar mostra o erro de quota e não cria tarefa.
 
 ## 3. Juntar vídeos (botão na janela "Vídeos")
 
-- [ ] Escolher 12 ou mais vídeos (Premium), com repetições; reordenar e remover. A linha temporal mostra a duração total, e o resumo mostra a resolução e os fps do primeiro.
-- [ ] Não há operações neste fluxo; o custo é 1 crédito, qualquer que seja o número de vídeos.
-- [ ] Com menos de 2 vídeos, "Executar" fica desativado.
-- [ ] Executar e reproduzir: ordem certa, barras pretas no 9:16 e no vídeo rodado, silêncio no vídeo sem áudio, nome `odd.mp4` (primeiro) e descarregamento `odd_concat.mp4`.
+- [x] Escolher 12 ou mais vídeos (Premium), com repetições; reordenar e remover. A linha temporal mostra a duração total, e o resumo mostra a resolução e os fps do primeiro.
+- [x] Não há operações neste fluxo; o custo é 1 crédito, qualquer que seja o número de vídeos.
+- [x] Com menos de 2 vídeos, "Executar" fica desativado.
+- [x] Executar e reproduzir: ordem certa, barras pretas no 9:16 e no vídeo rodado, silêncio no vídeo sem áudio, nome `odd.mp4` (primeiro) e descarregamento `odd_concat.mp4`.
 
 ## 4. Movie Maker (botão na janela "Vídeos")
 
-- [ ] Acrescentar 3 vídeos: dar cadeias diferentes a dois (por exemplo, Recortar + Filtro e Velocidade + Ajustar) e deixar um vazio. Reordenar os vídeos.
-- [ ] Acrescentar 2 ou mais operações em "Operações depois da junção" (por exemplo, Rodar + Marca de água); a conversão só é possível nessa lista.
-- [ ] Custo = 1 + operações dos vídeos + operações finais; a duração e a resolução estimadas atualizam-se.
-- [ ] Executar: uma só tarefa e um só vídeo final, com cada clip editado à sua maneira e as operações finais no vídeo inteiro.
-- [ ] Cancelar durante o progresso: sem resultado, com os créditos devolvidos na conta Registada.
+- [x] Acrescentar 3 vídeos: dar cadeias diferentes a dois (por exemplo, Recortar + Filtro e Velocidade + Ajustar) e deixar um vazio. Reordenar os vídeos.
+- [x] Acrescentar 2 ou mais operações em "Operações depois da junção" (por exemplo, Rodar + Marca de água); a conversão só é possível nessa lista.
+- [x] Custo = 1 + operações dos vídeos + operações finais; a duração e a resolução estimadas atualizam-se.
+- [x] Executar: uma só tarefa e um só vídeo final, com cada clip editado à sua maneira e as operações finais no vídeo inteiro.
+- [x] Cancelar durante o progresso: sem resultado, com os créditos devolvidos na conta Registada.
 
 ## 5. Recusas e falhas
 
-- [ ] Conta anónima: nenhum dos três botões aparece; pela API, as rotas respondem 403.
-- [ ] Forçar uma falha (por exemplo, apagar o ficheiro original no storage antes de executar): mensagem com a fase e o código de suporte, sem resultado, créditos devolvidos.
+- [x] Conta anónima: nenhum dos três botões aparece; pela API, as rotas respondem 403.
+- [x] Forçar uma falha (por exemplo, apagar o ficheiro original no storage antes de executar): mensagem com a fase e o código de suporte, sem resultado, créditos devolvidos.
 
 ## 6. Regressão de imagem
 
-- [ ] Abrir uma imagem do projeto e usar o fluxo habitual de ferramentas, pré-visualização, processamento e resultado. O diálogo de predefinições de imagem não mostra as predefinições de vídeo.
+- [x] Abrir uma imagem do projeto e usar o fluxo habitual de ferramentas, pré-visualização, processamento e resultado. O diálogo de predefinições de imagem não mostra as predefinições de vídeo.
 
-Após a execução, comunicar os itens aprovados e os que falharam. O bolt continua `in-progress`, na etapa 5, até estes resultados e a aprovação explícita da equipa.
+**Execução:** 2026-10-23, pela equipa. Todos os itens aprovados (comunicado no checkpoint final da etapa 5 da revisão). Browser: não indicado pela equipa no checkpoint.

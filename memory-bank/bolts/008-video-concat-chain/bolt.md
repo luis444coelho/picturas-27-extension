@@ -3,31 +3,45 @@ id: 008-video-concat-chain
 unit: 003-video-composition
 intent: 001-video-processing-support
 type: ddd-construction-bolt
-status: in-progress
-stories: [ST-VID-013, ST-VID-014]
-created: 2026-10-19T17:31:16Z
-started: 2026-10-23T00:31:55Z
-completed: null
-current_stage: test
+status: complete
+stories:
+  - ST-VID-013
+  - ST-VID-014
+created: 2026-10-19T17:31:16.000Z
+started: 2026-10-23T00:31:55.000Z
+completed: "2026-10-23T15:47:09Z"
+current_stage: null
 stages_completed:
   - name: model
-    completed: 2026-10-23T00:39:08Z
+    completed: 2026-10-23T00:39:08.000Z
     artifact: ddd-01-domain-model.md
   - name: design
-    completed: 2026-10-23T00:47:57Z
+    completed: 2026-10-23T00:47:57.000Z
     artifact: ddd-02-technical-design.md
   - name: adr
-    completed: 2026-10-23T00:53:52Z
+    completed: 2026-10-23T00:53:52.000Z
     artifact: adr-016-composition-router.md, adr-017-composition-worker-path.md, adr-018-preset-structure-validation.md, adr-019-task-error-phase.md
   - name: implement
-    completed: 2026-10-23T01:15:27Z
+    completed: 2026-10-23T01:15:27.000Z
     artifact: implementation-report.md
-requires_bolts: [004-video-basic-edits, 005-video-visual-edits, 007-video-format-conversion]
-enables_bolts: [009-video-batch]
-requires_units: [001-video-lifecycle, 002-video-transformations]
+  - name: test
+    completed: 2026-10-23T15:47:09Z
+    artifact: ddd-03-test-report.md, ddd-03-test-report-revision.md, manual-test-checklist.md
+requires_bolts:
+  - 004-video-basic-edits
+  - 005-video-visual-edits
+  - 007-video-format-conversion
+enables_bolts:
+  - 009-video-batch
+requires_units:
+  - 001-video-lifecycle
+  - 002-video-transformations
 blocks: true
-# avg_complexity: maior esforço do ADD no bolt (S=1, M=2, L=3); os outros campos são preenchidos no início do bolt na Construção (specsDuvidas D-01)
-complexity: {avg_complexity: 3, avg_uncertainty: 3, max_dependencies: 3, testing_scope: 3}
+complexity:
+  avg_complexity: 3
+  avg_uncertainty: 3
+  max_dependencies: 3
+  testing_scope: 3
 ---
 
 # Bolt: 008-video-concat-chain
@@ -56,7 +70,7 @@ Implementar a operação `concat` com sub-cadeias por clip, a validação em tr�
 - [x] **2. Technical Design**: Revisão aprovada (D-86 a D-89) → `ddd-02-technical-design.md`, secção "Revisão da etapa 2" → `ddd-02-technical-design.md`
 - [x] **3. ADR Analysis**: Complete (ADR-016 a ADR-019; revisão: ADR-020 e nota da D-86 no ADR-016) → `adr-016-composition-router.md`, `adr-017-composition-worker-path.md`, `adr-018-preset-structure-validation.md`, `adr-019-task-error-phase.md`
 - [x] **4. Implement**: Revisão aprovada → `implementation-preflight-revision.md`, `implementation-report-revision.md`; antes aprovado → `implementation-preflight.md`, `implementation-report.md` → código nos componentes indicados em "Saídas esperadas"
-- [ ] **5. Test**: Revisão no checkpoint (testes manuais pendentes) → `ddd-03-test-report-revision.md`, `manual-test-checklist.md`; antes não aprovada → `ddd-03-test-report.md`, `manual-test-checklist.md` → `ddd-03-test-report.md`
+- [x] **5. Test**: Complete (revisão aprovada; testes manuais aprovados) → `ddd-03-test-report-revision.md`, `manual-test-checklist.md`; antes não aprovada → `ddd-03-test-report.md`, `manual-test-checklist.md` → `ddd-03-test-report.md`
 
 ## Requisitos rastreados
 
@@ -129,3 +143,4 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 - 2026-10-23T14:19:12Z: Etapa 4 da revisão implementada, à espera do checkpoint (`implementation-report-revision.md`). Três ações independentes, nove componentes de configuração extraídos dos painéis (D-87), D-86 no backend, rotas `…/chain/validate` e `…/:video/chain/watermark-preview`, 413 no gateway (D-88 a). Auditoria: ficheiros da D-87 com 9 ficheiros, +559, −213 (linhas listadas no anexo do relatório); resto do código com 52 ficheiros, +6300, −0. tsc e ESLint ok; JS 282/282, frontend 68/68; sondagem pela pilha ok. Etapa 5 por fazer.
 - 2026-10-23T14:21:23Z: Etapa 4 da revisão aprovada. Etapa 5 da revisão em curso: regressão dos nove painéis (automática e manual), 12+ passos e 12+ vídeos num Premium, Movie Maker com 3 vídeos, quota, anónimo, falha com devolução, medições da D-88, regressões B001–B007 e imagem, limpeza dos dados de teste.
 - 2026-10-23T15:18:34Z: Etapa 5 da revisão executada, à espera do checkpoint (`ddd-03-test-report-revision.md`). Edição simples igual nos nove painéis (browser, DOM comparado com a `origin/main`, 9/9), integração B008 15/15 (12 passos, 13 vídeos, Movie Maker com 3 vídeos, quota antes da tarefa, anónimo, falha com devolução, D-88), JS 282/282, worker 80/80, frontend 68/68 + 8/8, B007 3/3, B005 16/16, B004 14/15 (Brilho em ARM, conhecida). D-88: junção de 100 clips curtos ok (≈2,0 GB de pico; 640×360 ≈2,9 GB), cadeia de 60 passos ok (146 MB). Dados de teste limpos. Checklist manual nova.
+- 2026-10-23T15:47:09Z: Checkpoint final aprovado pela equipa. Testes manuais da revisão todos aprovados (`manual-test-checklist.md`; browser não indicado). D-90 registada como risco aceite (memória do FFmpeg na junção, sem teto, por respeito à D-86). Apagados os 6 buckets vazios de 22/10. `bolt-complete.cjs` executado (com `NODE_PATH` para as dependências do specsmd): bolt `in-progress → complete`, ST-VID-013 e ST-VID-014 `ready → complete` com `implemented: true`; unit e intent sem alteração (B009 bloqueado). Entrada `test` de `stages_completed` acrescentada à mão. Ramo sem merge para a `main`.

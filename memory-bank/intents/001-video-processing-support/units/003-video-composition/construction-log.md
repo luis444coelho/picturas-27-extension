@@ -2,7 +2,7 @@
 unit: 003-video-composition
 intent: 001-video-processing-support
 created: 2026-10-23T00:31:55Z
-last_updated: 2026-10-23T15:18:34Z
+last_updated: 2026-10-23T15:47:09Z
 ---
 
 # Construction Log: 003-video-composition
@@ -27,7 +27,7 @@ last_updated: 2026-10-23T15:18:34Z
 
 | Bolt ID | Stories | Status | Changed |
 |---------|---------|--------|---------|
-| 008-video-concat-chain | ST-VID-013, ST-VID-014 | ⏳ in-progress | - |
+| 008-video-concat-chain | ST-VID-013, ST-VID-014 | ✅ complete | revisão (D-86, D-87) |
 | 009-video-batch | ST-VID-015 | 🚫 blocked (D-06) | - |
 
 ## Execution History
@@ -42,6 +42,8 @@ last_updated: 2026-10-23T15:18:34Z
 | 2026-10-23T13:19:44Z | 008-video-concat-chain | stage-reopened | Test → Technical Design (revisão da equipa: D-86 a D-89) |
 | 2026-10-23T14:03:00Z | 008-video-concat-chain | stage-complete | Technical Design (revisão) → ADR Analysis (D-88 a, D-89 a) |
 | 2026-10-23T14:05:26Z | 008-video-concat-chain | stage-complete | ADR Analysis (revisão) → Implement (ADR-020) |
+| 2026-10-23T15:47:09Z | 008-video-concat-chain | stage-complete | Test → complete (revisão; testes manuais aprovados; D-90) |
+| 2026-10-23T15:47:09Z | 008-video-concat-chain | completed | All 5 stages done (com a revisão das etapas 2 a 5) |
 
 ## Execution Summary
 
@@ -49,8 +51,8 @@ last_updated: 2026-10-23T15:18:34Z
 |--------|-------|
 | Original bolts planned | 2 |
 | Current bolt count | 2 |
-| Bolts completed | 0 |
-| Bolts in progress | 1 |
+| Bolts completed | 1 |
+| Bolts in progress | 0 |
 | Bolts remaining | 1 (blocked, D-06) |
 | Replanning events | 1 |
 
@@ -72,3 +74,4 @@ last_updated: 2026-10-23T15:18:34Z
 - 2026-10-23T14:19:12Z: B008 etapa 4 da revisão implementada (três ações, componentes de configuração D-87, sem limites D-86); D-87: +559/−213 em 9 ficheiros listados; resto: +6300/−0. À espera do checkpoint.
 - 2026-10-23T14:21:23Z: B008 etapa 4 da revisão aprovada; etapa 5 da revisão em curso.
 - 2026-10-23T15:18:34Z: B008 etapa 5 da revisão executada: edição simples igual (9/9 no browser), integração 15/15, regressões ok (B004 14/15 conhecida), D-88 medida sem falhas (junção de 100 clips ≈2–2,9 GB de pico). Testes manuais pendentes.
+- 2026-10-23T15:47:09Z: B008 concluída. Testes manuais da revisão aprovados; D-90 aceite como risco; buckets vazios de 22/10 apagados; `bolt-complete.cjs` executado (ST-VID-013 e ST-VID-014 `complete`, `implemented: true`); entrada `test` acrescentada à mão. Sem merge.
