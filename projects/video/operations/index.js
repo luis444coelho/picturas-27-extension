@@ -13,6 +13,7 @@ MODULES.push(require("./filter"));
 MODULES.push(require("./resize"));
 MODULES.push(require("./orient"));
 MODULES.push(require("./convert"));
+MODULES.push(require("./concat"));
 
 if (process.env.VIDEO_TEST_OPERATIONS === "1") {
   MODULES.push(require("./test_reencode"));

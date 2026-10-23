@@ -21,20 +21,33 @@ import {
   type VideoEditSession,
 } from "./use-video-edit";
 import { VideoEditValidation } from "./video-edit-validation";
+import {
+  initialParam,
+  simpleSource,
+  useReportStep,
+  type OperationConfigProps,
+} from "./operation-config";
 
-export function VideoTrimPanel({
+// Configuration of the trim (D-87, ADR-020): the controls of the simple edit,
+// also used by the compositions of B008. Without the original video at the
+// input of the step, there is no player, scrubbing or loop preview (D-89).
+export function TrimConfig({
   target,
-  videoId,
-  durationMs,
-  session,
-}: {
-  target: VideoTarget;
-  videoId: string;
-  durationMs: number;
-  session: VideoEditSession;
-}) {
-  const [start, setStart] = useState(formatTimecode(0));
-  const [end, setEnd] = useState(formatTimecode(durationMs));
+  source,
+  initial,
+  disabled,
+  chainValidation,
+  onStepChange,
+  renderActions,
+}: OperationConfigProps) {
+  const videoId = source.videoId;
+  const durationMs = source.inputProps.durationMs ?? 0;
+  const [start, setStart] = useState(
+    formatTimecode(initialParam(initial, "startMs", 0)),
+  );
+  const [end, setEnd] = useState(
+    formatTimecode(initialParam(initial, "endMs", durationMs)),
+  );
   const [url, setUrl] = useState<string | null>(null);
   const [playbackError, setPlaybackError] = useState<string | null>(null);
   const [looping, setLooping] = useState(false);
@@ -49,9 +62,16 @@ export function VideoTrimPanel({
     startMs < endMs &&
     endMs <= durationMs;
   const step = intervalValid ? trimStep(startMs, endMs) : null;
-  const validation = useVideoEditValidation(target, videoId, step);
+  const ownValidation = useVideoEditValidation(
+    target,
+    videoId,
+    chainValidation ? null : step,
+  );
+  const validation = chainValidation ?? ownValidation;
+  useReportStep(step, onStepChange);
 
   useEffect(() => {
+    if (!source.isSource) return;
     let disposed = false;
     fetchVideoPlayback(target, videoId).then(
       (playback) => {
@@ -142,13 +162,18 @@ export function VideoTrimPanel({
           {playbackError}
         </p>
       )}
+      {!source.isSource && (
+        <p className="text-sm text-muted-foreground">
+          O recorte aplica-se ao resultado do passo anterior.
+        </p>
+      )}
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-2">
           <Label htmlFor="trim-start">Início (hh:mm:ss.mmm)</Label>
           <Input
             id="trim-start"
             value={start}
-            disabled={session.busy}
+            disabled={disabled}
             onChange={(e) => {
               stop();
               setStart(e.target.value);
@@ -156,7 +181,7 @@ export function VideoTrimPanel({
           />
           <Button
             variant="outline"
-            disabled={session.busy || !url}
+            disabled={disabled || !url}
             onClick={() => mark("start")}
           >
             Definir início
@@ -167,7 +192,7 @@ export function VideoTrimPanel({
           <Input
             id="trim-end"
             value={end}
-            disabled={session.busy}
+            disabled={disabled}
             onChange={(e) => {
               stop();
               setEnd(e.target.value);
@@ -175,7 +200,7 @@ export function VideoTrimPanel({
           />
           <Button
             variant="outline"
-            disabled={session.busy || !url}
+            disabled={disabled || !url}
             onClick={() => mark("end")}
           >
             Definir fim
@@ -202,16 +227,44 @@ export function VideoTrimPanel({
         >
           {looping ? "Parar pré-visualização" : "Pré-visualizar corte"}
         </Button>
+        {renderActions({
+          step,
+          validation,
+          busy: disabled,
+          beforeSubmit: stop,
+        })}
+      </div>
+    </div>
+  );
+}
+
+export function VideoTrimPanel({
+  target,
+  videoId,
+  durationMs,
+  session,
+}: {
+  target: VideoTarget;
+  videoId: string;
+  durationMs: number;
+  session: VideoEditSession;
+}) {
+  return (
+    <TrimConfig
+      target={target}
+      source={simpleSource(videoId, { durationMs })}
+      disabled={session.busy}
+      renderActions={({ step, validation, beforeSubmit }) => (
         <Button
           disabled={!step || !validation.valid || session.busy}
           onClick={() => {
-            stop();
+            beforeSubmit();
             if (step) void session.submit(step);
           }}
         >
           Recortar · 1 crédito
         </Button>
-      </div>
-    </div>
+      )}
+    />
   );
 }

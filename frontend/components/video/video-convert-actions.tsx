@@ -28,28 +28,46 @@ import {
   type VideoEditSession,
 } from "./use-video-edit";
 import { VideoEditStatus } from "./video-edit-status";
+import {
+  initialParam,
+  simpleSource,
+  useReportStep,
+  type ConfigActions,
+  type OperationConfigProps,
+} from "./operation-config";
 
-function ConvertPanel({
+interface ConvertActions extends ConfigActions {
+  verdict: ReturnType<typeof conversionVerdict>;
+}
+
+// Configuration of the conversion (D-87, ADR-020), also used by the
+// compositions, where the source is the estimated input of the last step and
+// the copy/encode verdict (ADR-014) only exists for an isolated conversion.
+export function ConvertConfig({
   target,
-  videoId,
-  source,
-  videoCodec,
-  audioCodec,
-  session,
-}: {
-  target: VideoTarget;
-  videoId: string;
-  source: VideoContainer;
-  videoCodec: string;
-  audioCodec: string | null;
-  session: VideoEditSession;
-}) {
+  source: config,
+  initial,
+  disabled,
+  chainValidation,
+  onStepChange,
+  renderActions,
+}: OperationConfigProps<ConvertActions>) {
+  const videoId = config.videoId;
+  const source = config.inputProps.container as VideoContainer;
+  const videoCodec = config.inputProps.videoCodec ?? "";
+  const audioCodec = config.inputProps.audioCodec ?? null;
   const destinations = conversionTargets(source);
   const [destination, setDestination] = useState<VideoContainer>(
-    destinations[0],
+    initialParam(initial, "target", destinations[0]),
   );
   const step = convertStep(destination);
-  const validation = useVideoEditValidation(target, videoId, step);
+  const ownValidation = useVideoEditValidation(
+    target,
+    videoId,
+    chainValidation ? null : step,
+  );
+  const validation = chainValidation ?? ownValidation;
+  useReportStep(step, onStepChange);
   const verdict = validation.valid
     ? conversionVerdict(validation.output ?? null)
     : null;
@@ -62,7 +80,7 @@ function ConvertPanel({
           id="video-convert-target"
           className="rounded-md border bg-background p-2"
           value={destination}
-          disabled={session.busy}
+          disabled={disabled}
           onChange={(event) =>
             setDestination(event.target.value as VideoContainer)
           }
@@ -91,13 +109,52 @@ function ConvertPanel({
           <p>{verdict.mode}</p>
         </div>
       )}
-      <Button
-        disabled={!validation.valid || !verdict || session.busy}
-        onClick={() => void session.submit(step)}
-      >
-        Converter · 1 crédito
-      </Button>
+      {renderActions({
+        step,
+        validation,
+        busy: disabled,
+        beforeSubmit: () => undefined,
+        verdict,
+      })}
     </div>
+  );
+}
+
+function ConvertPanel({
+  target,
+  videoId,
+  source,
+  videoCodec,
+  audioCodec,
+  session,
+}: {
+  target: VideoTarget;
+  videoId: string;
+  source: VideoContainer;
+  videoCodec: string;
+  audioCodec: string | null;
+  session: VideoEditSession;
+}) {
+  return (
+    <ConvertConfig
+      target={target}
+      source={simpleSource(videoId, {
+        container: source,
+        videoCodec,
+        audioCodec,
+      })}
+      disabled={session.busy}
+      renderActions={({ step, validation, verdict }) => (
+        <Button
+          disabled={!validation.valid || !verdict || session.busy}
+          onClick={() => {
+            if (step) void session.submit(step);
+          }}
+        >
+          Converter · 1 crédito
+        </Button>
+      )}
+    />
   );
 }
 

@@ -16,22 +16,36 @@ import {
   type VideoEditSession,
 } from "./use-video-edit";
 import { VideoEditValidation } from "./video-edit-validation";
+import {
+  initialParam,
+  simpleSource,
+  useReportStep,
+  type OperationConfigProps,
+} from "./operation-config";
 
-export function VideoSpeedPanel({
+// Configuration of the speed (D-87, ADR-020).
+export function SpeedConfig({
   target,
-  videoId,
-  durationMs,
-  session,
-}: {
-  target: VideoTarget;
-  videoId: string;
-  durationMs: number;
-  session: VideoEditSession;
-}) {
-  const [value, setValue] = useState("2");
+  source,
+  initial,
+  disabled,
+  chainValidation,
+  onStepChange,
+  renderActions,
+}: OperationConfigProps) {
+  const durationMs = source.inputProps.durationMs ?? 0;
+  const [value, setValue] = useState(
+    String(initialParam(initial, "factor", 2)),
+  );
   const factor = value.trim() ? Number(value) : NaN;
   const step = Number.isFinite(factor) ? speedStep(factor) : null;
-  const validation = useVideoEditValidation(target, videoId, step);
+  const ownValidation = useVideoEditValidation(
+    target,
+    source.videoId,
+    chainValidation ? null : step,
+  );
+  const validation = chainValidation ?? ownValidation;
+  useReportStep(step, onStepChange);
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap gap-2">
@@ -40,7 +54,7 @@ export function VideoSpeedPanel({
             key={preset}
             size="sm"
             variant={factor === preset ? "default" : "outline"}
-            disabled={session.busy}
+            disabled={disabled}
             onClick={() => setValue(String(preset))}
           >
             {preset}×
@@ -55,7 +69,7 @@ export function VideoSpeedPanel({
         min="0.25"
         max="4"
         value={value}
-        disabled={session.busy}
+        disabled={disabled}
         onChange={(event) => setValue(event.target.value)}
       />
       {!step && (
@@ -70,14 +84,42 @@ export function VideoSpeedPanel({
         </p>
       )}
       <VideoEditValidation validation={validation} />
-      <Button
-        disabled={!step || !validation.valid || session.busy}
-        onClick={() => {
-          if (step) void session.submit(step);
-        }}
-      >
-        Alterar velocidade · 1 crédito
-      </Button>
+      {renderActions({
+        step,
+        validation,
+        busy: disabled,
+        beforeSubmit: () => undefined,
+      })}
     </div>
+  );
+}
+
+export function VideoSpeedPanel({
+  target,
+  videoId,
+  durationMs,
+  session,
+}: {
+  target: VideoTarget;
+  videoId: string;
+  durationMs: number;
+  session: VideoEditSession;
+}) {
+  return (
+    <SpeedConfig
+      target={target}
+      source={simpleSource(videoId, { durationMs })}
+      disabled={session.busy}
+      renderActions={({ step, validation }) => (
+        <Button
+          disabled={!step || !validation.valid || session.busy}
+          onClick={() => {
+            if (step) void session.submit(step);
+          }}
+        >
+          Alterar velocidade · 1 crédito
+        </Button>
+      )}
+    />
   );
 }

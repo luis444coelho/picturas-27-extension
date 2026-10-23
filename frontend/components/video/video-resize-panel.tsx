@@ -22,32 +22,35 @@ import { useVideoEditValidation, type VideoEditSession } from "./use-video-edit"
 import { useVideoPreview } from "./use-video-preview";
 import { VideoPreviewImage } from "./video-preview-image";
 import { VideoVisualValidation } from "./video-visual-validation";
+import { initialParam, simpleSource, useReportStep, type OperationConfigProps } from "./operation-config";
 
 // UC-VID-010: presentation dimensions (RESIZE-001), proportion lock with even
 // rounding (RESIZE-002), presets (RESIZE-003, D-64) and the distortion and
 // enlargement warnings (RESIZE-004/005). resize-tool.tsx is not used.
-export function VideoResizePanel({
+// Configuration of the resize (D-87, ADR-020), also used by the compositions.
+export function ResizeConfig({
   target,
-  videoId,
-  sourceWidth,
-  sourceHeight,
-  session,
-}: {
-  target: VideoTarget;
-  videoId: string;
-  sourceWidth: number;
-  sourceHeight: number;
-  session: VideoEditSession;
-}) {
+  source,
+  initial,
+  disabled,
+  chainValidation,
+  onStepChange,
+  renderActions,
+}: OperationConfigProps) {
+  const videoId = source.videoId;
+  const sourceWidth = source.inputProps.displayWidth ?? 0;
+  const sourceHeight = source.inputProps.displayHeight ?? 0;
   const [locked, setLocked] = useState(true);
-  const [width, setWidth] = useState(String(sourceWidth));
-  const [height, setHeight] = useState(String(sourceHeight));
+  const [width, setWidth] = useState(String(initialParam(initial, "width", sourceWidth)));
+  const [height, setHeight] = useState(String(initialParam(initial, "height", sourceHeight)));
   const w = Number(width);
   const h = Number(height);
   const numeric = Number.isInteger(w) && Number.isInteger(h) && w > 0 && h > 0;
   const step = numeric ? resizeStep(w, h) : null;
-  const preview = useVideoPreview(target, videoId, step, (t, v, s) => fetchVideoPreview(t, v, [s]));
-  const validation = useVideoEditValidation(target, videoId, step);
+  const preview = useVideoPreview(target, videoId, step, (t, v, s) => fetchVideoPreview(t, v, [...source.previewSteps, s]));
+  const ownValidation = useVideoEditValidation(target, videoId, chainValidation ? null : step);
+  const validation = chainValidation ?? ownValidation;
+  useReportStep(step, onStepChange);
   const warnings = numeric ? resizeWarnings(w, h, sourceWidth, sourceHeight) : null;
   const setBoth = (next: { width: number; height: number }) => {
     setWidth(String(next.width));
@@ -65,7 +68,7 @@ export function VideoResizePanel({
             key={preset}
             size="sm"
             variant="outline"
-            disabled={session.busy}
+            disabled={disabled}
             onClick={() => {
               setLocked(true);
               setBoth(presetSize(preset, sourceWidth, sourceHeight));
@@ -84,7 +87,7 @@ export function VideoResizePanel({
             min={RESIZE_MIN}
             step={2}
             value={width}
-            disabled={session.busy}
+            disabled={disabled}
             onChange={(event) => {
               setWidth(event.target.value);
               const value = Number(event.target.value);
@@ -97,7 +100,7 @@ export function VideoResizePanel({
           variant={locked ? "default" : "outline"}
           aria-label={locked ? "Desbloquear proporção" : "Bloquear proporção"}
           aria-pressed={locked}
-          disabled={session.busy}
+          disabled={disabled}
           onClick={() => {
             if (!locked) setHeight(String(lockedHeight(w, sourceWidth, sourceHeight)));
             setLocked(!locked);
@@ -113,7 +116,7 @@ export function VideoResizePanel({
             min={RESIZE_MIN}
             step={2}
             value={height}
-            disabled={session.busy}
+            disabled={disabled}
             onChange={(event) => {
               setHeight(event.target.value);
               const value = Number(event.target.value);
@@ -138,14 +141,39 @@ export function VideoResizePanel({
         </p>
       )}
       <VideoVisualValidation validation={validation} />
-      <Button
-        disabled={!step || !validation.valid || session.busy}
-        onClick={() => {
-          if (step) void session.submit(step);
-        }}
-      >
-        Redimensionar · 1 crédito
-      </Button>
+      {renderActions({ step, validation, busy: disabled, beforeSubmit: () => undefined })}
     </div>
+  );
+}
+
+export function VideoResizePanel({
+  target,
+  videoId,
+  sourceWidth,
+  sourceHeight,
+  session,
+}: {
+  target: VideoTarget;
+  videoId: string;
+  sourceWidth: number;
+  sourceHeight: number;
+  session: VideoEditSession;
+}) {
+  return (
+    <ResizeConfig
+      target={target}
+      source={simpleSource(videoId, { displayWidth: sourceWidth, displayHeight: sourceHeight })}
+      disabled={session.busy}
+      renderActions={({ step, validation }) => (
+        <Button
+          disabled={!step || !validation.valid || session.busy}
+          onClick={() => {
+            if (step) void session.submit(step);
+          }}
+        >
+          Redimensionar · 1 crédito
+        </Button>
+      )}
+    />
   );
 }

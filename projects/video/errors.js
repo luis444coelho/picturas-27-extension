@@ -28,6 +28,11 @@ const MESSAGES = {
   TASK_NOT_ACTIVE: "A tarefa já terminou e não pode ser cancelada.",
   QUOTA_EXCEEDED:
     "Atingiste o limite diário de operações. Tenta amanhã ou passa a Premium.",
+  INSUFFICIENT_INPUTS: "Escolhe pelo menos dois vídeos para juntar.",
+  INVALID_CHAIN:
+    "A cadeia de operações não é válida. Corrige a regra indicada e tenta novamente.",
+  PRESET_NAME_TAKEN:
+    "Já tens uma predefinição com esse nome. Escolhe outro nome.",
 };
 
 class VideoError extends Error {

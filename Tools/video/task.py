@@ -14,6 +14,8 @@ import keyframe
 import video_msg
 import visual_input
 import convert_task
+import composition_task
+import phase
 from control import ControlChannel
 from control_poll import ControlPoller
 from storage import StorageClient
@@ -121,6 +123,8 @@ class TaskRunner:
         reply = video_msg.build_reply(request, started_at, status, output=output, error=error)
         if status == 'completed' and getattr(self, '_video_mode', None) is not None:
             reply['metadata']['videoMode'] = self._video_mode
+        if status == 'failed' and isinstance(reply.get('error'), dict) and phase.current():
+            reply['error']['phase'] = phase.current()  # D-82, ADR-019
         reply['taskId'] = request.get('taskId')
         if redelivered is not None:
             reply['metadata']['redelivered'] = redelivered
@@ -130,6 +134,7 @@ class TaskRunner:
 
     def run(self, channel, method, request):
         self._video_mode = None
+        phase.reset()
         task_id = str(request.get('taskId', ''))
         correlation_id = request.get('correlationId')
         started_at = video_msg.now()
@@ -187,14 +192,19 @@ class TaskRunner:
         task_id = str(request['taskId'])
         pump = self._tick
 
+        phase.set('download')  # D-82
         input_paths = []
         for index, item in enumerate(plan['inputs']):
             path = os.path.join(work_dir, f'input{index}')
             self._storage.download(item['source'], path)
             input_paths.append(path)
+        phase.set('encode')
 
         if convert_task.applies(plan):
             return convert_task.execute(self, request, plan, input_paths, work_dir)
+        # B008 (ADR-017): concats and chains of several steps ending in AVI.
+        if composition_task.applies(plan):
+            return composition_task.execute(self, request, plan, input_paths, work_dir)
 
         if any(step['operation'] in ('trim', 'remove_audio', 'speed') for step in plan['steps']):
             plan, self._video_mode = keyframe.resolve_keyframe_copy(plan, input_paths[0], pump)
@@ -205,8 +215,10 @@ class TaskRunner:
                           keyframeMs=alternative['atMs'] if self._video_mode == 'copy' else None,
                           videoMode=self._video_mode)
 
+        phase.set('download')  # watermark images (D-82)
         if visual_input.needed(plan):
             plan = visual_input.resolve(plan, work_dir, self._storage)
+        phase.set('encode')
 
         container = plan['output']['container']
         result_path = os.path.join(work_dir, f'result.{container}')
@@ -237,6 +249,7 @@ class TaskRunner:
             preview_path = os.path.join(work_dir, 'preview.mp4')
             ingest.preview(result_path, preview_path, preview_plan, pump)
 
+        phase.set('upload')  # D-82
         # Write URLs are requested only now, after FFmpeg ends (ADD T-08).
         targets = plan['targets']
         original = targets['original']

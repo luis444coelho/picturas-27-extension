@@ -10,6 +10,7 @@ import os
 import config
 import executor
 import ingest
+import phase
 
 
 EVEN_CROP = executor.EVEN_CROP
@@ -153,6 +154,7 @@ def execute(runner, request, plan, input_paths, work_dir):
             preview_path = os.path.join(work_dir, 'preview.mp4')
             ingest.preview(result_path, preview_path, preview_plan, pump)
 
+    phase.set('upload')  # D-82
     targets = plan['targets']
     original = targets['original']
     keys = {
