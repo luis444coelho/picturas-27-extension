@@ -1,66 +1,54 @@
 @startuml arquitetura_componentes
-skinparam monochrome false
 skinparam shadowing false
 skinparam roundcorner 0
-skinparam linetype polyline
 skinparam defaultFontName Arial
-skinparam defaultFontSize 16
-skinparam componentFontSize 17
+skinparam defaultFontSize 17
+skinparam ArrowColor black
+skinparam actorBorderColor black
+skinparam sequenceLifeLineBorderColor #777777
+skinparam sequenceArrowColor black
+skinparam queueBorderColor black
+skinparam sequenceQueueBorderColor black
+skinparam ArrowThickness 1.2
+skinparam noteBackgroundColor #FFF4CF
+skinparam noteBorderColor #8A6D2B
+top to bottom direction
 skinparam componentStyle rectangle
 skinparam componentBackgroundColor #55C8EC
 skinparam componentBorderColor black
 skinparam databaseBackgroundColor #D9D9D9
-skinparam databaseBorderColor black
-skinparam packageBackgroundColor #F7FCFE
-skinparam packageBorderColor black
-skinparam ArrowColor black
-skinparam ArrowThickness 1.2
-skinparam nodesep 40
+skinparam nodesep 45
 skinparam ranksep 55
-top to bottom direction
-
-title Arquitetura de Componentes — PictuRAS (Baseline + Vídeo)\nEstado implementado: Bolts 001 a 005 e 007; composição prevista no Bolt 008
-
-component "Frontend\nInterface de vídeo" as UI
+title Componentes — suporte a vídeo implementado (incluindo Bolt 008)
+component "Frontend\nEdição simples / várias operações\nJunção / Movie Maker / predefinições" as UI
 component "Nginx\nHTTPS / proxy" as Nginx #D9D9D9
-component "API Gateway\nRotas de vídeo / videoAuth" as API
-component "Projetos\nOrquestração / validação\nTarefas / recuperação" as Projects
-component "Utilizadores\nQuota existente" as Users
-package "RabbitMQ existente" {
-  component "Filas de vídeo\nPedidos / respostas / progresso\nControlo video_control" as MQ
-}
-component "Novo worker de vídeo\nFFmpeg / FFprobe" as Worker
-component "imageStorageService\nURLs e estágios de vídeo" as Storage
-component "WS Gateway\nMódulo de vídeo" as WS
+component "API Gateway\nJWT / rotas de vídeo\nValidação de predefinições" as API
+component "Projetos\nAutorização / estrutura / estimativas\nPlano / tarefa / resultado" as Projects
+component "Utilizadores\nQuota / identidade\nPredefinições de vídeo" as Users
 database "MongoDB\nBases próprias por serviço" as DB
-component "SeaweedFS / S3\nOriginais e resultados\nPré-visualizações" as S3 #D9D9D9
-
-UI -down-> Nginx : HTTPS / WebSocket
-Nginx -down-> API : HTTP
+queue "RabbitMQ\nFilas de vídeo e video_control" as MQ #D9D9D9
+component "Worker de vídeo\nGenérico / conversão / composição\nFFmpeg / FFprobe" as Worker
+component "imageStorageService\nURLs e gestão de objetos" as Storage
+component "WS Gateway\nEventos de tarefa / ingestão" as WS
+cloud "SeaweedFS / S3\nOriginais / resultados\nMiniaturas / cópias MP4" as S3 #D9D9D9
+UI --> Nginx : HTTPS / WebSocket
+Nginx --> API : API
 Nginx --> WS : WebSocket
-Nginx --> S3 : /s3-video/ / Range
-API -down-> Projects : Identidade / correlationId
-Projects -right-> Users : Perfil / reserva / devolução
-Projects --> DB : Recursos / tarefas / locks
-Users --> DB : Contas / quota
-Projects <--> MQ : Pedidos / respostas\nCancelamento / estados
-MQ <--> Worker : Pedido / resposta\nProgresso / cancelamento
+Nginx --> S3 : Assinatura / Range
+API --> Projects : Vídeo / composição\nestrutura de predefinições
+API --> Users : CRUD de predefinições\napós validação em Projetos
+Projects --> Users : Perfil / reserva / devolução
+Projects --> DB : Vídeos / tarefas / locks
+Users --> DB : Contas / quotas / predefinições
+Projects <--> MQ : Pedidos / respostas\ncontrolo / estados
+MQ <--> Worker : Plano / progresso / resposta
 MQ --> WS : Eventos
-Projects --> Storage : Gerir objetos e URLs
-Worker -right-> Storage : URLs internos
-Worker --> S3 : Binários por blocos
+Projects --> Storage : Chaves / URLs / limpeza
+Worker --> Storage : URLs internos quando necessários
+Worker --> S3 : GET / PUT por blocos
 Storage --> S3 : Assinar / gerir objetos
-
-component "Predefinições de vídeo\nprevistas no Bolt 008" as Presets #FFE6A6
-UI ..> Presets : Previsto
-Presets ..> Users : Persistência prevista
-
 legend bottom
-  |= Cor |= Significado |
-  |<#D9D9D9> Cinzento | Serviço ou infraestrutura da baseline reutilizado |
-  |<#55C8EC> Azul | Módulos de vídeo nos serviços indicados; worker novo |
-  |<#FFE6A6> Amarelo | Componente planeado; sem implementação nesta versão |
-  | MongoDB | Agrega as instâncias existentes; cada serviço mantém a sua base |
-  | Transferências | Worker e navegador usam o S3; os binários de saída não atravessam o API Gateway |
+  Azul: módulos de vídeo acrescentados aos serviços; worker de vídeo.
+  Cinzento: infraestrutura existente reutilizada.
 endlegend
 @enduml

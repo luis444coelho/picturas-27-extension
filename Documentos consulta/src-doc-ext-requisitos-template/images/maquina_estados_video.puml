@@ -1,61 +1,62 @@
 @startuml maquina_estados_video
-skinparam monochrome false
 skinparam shadowing false
 skinparam roundcorner 0
-skinparam linetype polyline
 skinparam defaultFontName Arial
-skinparam defaultFontSize 16
-skinparam stateFontSize 17
+skinparam defaultFontSize 17
+skinparam ArrowColor black
+skinparam actorBorderColor black
+skinparam sequenceLifeLineBorderColor #777777
+skinparam sequenceArrowColor black
+skinparam queueBorderColor black
+skinparam sequenceQueueBorderColor black
+skinparam ArrowThickness 1.2
+skinparam noteBackgroundColor #FFF4CF
+skinparam noteBorderColor #8A6D2B
+top to bottom direction
 skinparam stateBackgroundColor #55C8EC
 skinparam stateBorderColor black
-skinparam stateArrowColor black
-skinparam ArrowColor black
-skinparam ArrowThickness 1.2
-skinparam noteBackgroundColor #F7FCFE
-skinparam noteBorderColor black
-skinparam nodesep 55
-skinparam ranksep 60
-top to bottom direction
-
-title Máquina de Estados — Trabalho de Processamento de Vídeo\nVideoTask implementada; reutilização na composição prevista no Bolt 008
-
-state "queued" as Queued
-state "processing" as Processing
-state "completed" as Completed
-state "failed" as Failed
-state "cancelled" as Cancelled
-
-Queued : VideoTask persistida
-Queued : Lugar adquirido; reserva se aplicável
-Queued : Publicação pode estar pendente (D-41)
-Processing : Passo estimado pelo progresso global
-Completed : Novo vídeo publicado com proveniência
-Completed : Reserva definitiva; libertar lugar
-Failed : Devolver reserva e libertar lugar
-Failed : Limpar temporários e objetos parciais
-Cancelled : Devolver reserva e libertar lugar
-Cancelled : Sinalizar worker; limpar saídas tardias
-
-[*] --> Queued : Pedido admitido
-Queued --> Queued : Falha de publicação / republicar
-Queued --> Processing : started
-Queued --> Failed : Erro não recuperável\nantes de executar
-Queued --> Cancelled : Cancelamento autorizado
-Processing --> Processing : Queda / reentrega\nRecomeço do zero\nAté duas entregas
-Processing --> Completed : Resultado válido\nRecurso e estado persistidos
-Processing --> Failed : Erro / entregas esgotadas
-Processing --> Cancelled : Cancelamento autorizado
-Completed --> [*]
-Failed --> [*]
-Cancelled --> [*]
-
-note top of Queued
-  Rejeições anteriores à admissão não criam tarefa.
-  Premium não reserva nem debita créditos.
+skinparam nodesep 50
+skinparam ranksep 55
+title VideoTask — operação isolada, cadeia ou junção
+state "queued" as Q
+state "processing" as P
+state "completed" as C
+state "failed" as F
+state "cancelled" as X
+Q : Tarefa e plano persistidos
+Q : Lugar adquirido; custo reservado se aplicável
+Q : Publicação pode estar pendente (D-41)
+P : Progresso global; passo estimado k/N
+C : Publicar apenas o vídeo final
+C : Manter débito; libertar lugar
+F : Registar código e fase quando conhecida
+F : Devolver reserva; limpar; libertar lugar
+X : Cancelamento lógico; difundir controlo
+X : Devolver reserva; descartar saídas tardias
+[*] --> Q : Pedido admitido
+Q --> Q : Falha de publicação / republicar
+Q --> P : started
+Q --> F : Falha não recuperável
+Q --> X : Cancelamento autorizado
+P --> P : Queda / reentrega\nRecomeço do zero; até duas entregas
+P --> C : Resultado final válido
+P --> F : Falha ou entregas esgotadas
+P --> X : Cancelamento autorizado
+C --> [*]
+F --> [*]
+X --> [*]
+note top of Q
+  Rejeição de estrutura, parâmetros, limites ou quota
+  antes da admissão não cria VideoTask.
+  Premium não reserva créditos.
 end note
-note bottom of Cancelled
-  cancelled é uma transição lógica.
-  A limpeza física pode terminar depois.
-  Respostas tardias não reativam a tarefa.
+note bottom of P
+  download, encode e upload são fases, não estados.
+  Os filtros correm num grafo; step é estimado.
+end note
+note bottom of X
+  A limpeza física pode terminar depois da transição.
+  Compensações são recuperáveis por refund persistido.
+  Não existe transação distribuída entre os serviços.
 end note
 @enduml

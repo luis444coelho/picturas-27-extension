@@ -1,103 +1,112 @@
 @startuml sequencia_processamento
-skinparam monochrome false
 skinparam shadowing false
 skinparam roundcorner 0
 skinparam defaultFontName Arial
-skinparam defaultFontSize 16
-skinparam sequenceParticipantFontSize 17
+skinparam defaultFontSize 17
+skinparam ArrowColor black
+skinparam actorBorderColor black
+skinparam sequenceLifeLineBorderColor #777777
+skinparam sequenceArrowColor black
+skinparam queueBorderColor black
+skinparam sequenceQueueBorderColor black
+skinparam ArrowThickness 1.2
+skinparam noteBackgroundColor #FFF4CF
+skinparam noteBorderColor #8A6D2B
+hide footbox
 skinparam participantBackgroundColor #55C8EC
 skinparam participantBorderColor black
-skinparam actorBackgroundColor #55C8EC
-skinparam actorBorderColor black
-skinparam sequenceArrowColor black
-skinparam sequenceLifeLineBorderColor black
-skinparam sequenceQueueBorderColor black
-skinparam sequenceGroupBorderColor black
-skinparam sequenceGroupBackgroundColor #F7FCFE
-skinparam sequenceGroupHeaderFontColor black
-skinparam noteBackgroundColor #F7FCFE
-skinparam noteBorderColor black
-skinparam ArrowThickness 1.2
-skinparam ParticipantPadding 15
-skinparam BoxPadding 10
-hide footbox
+skinparam sequenceParticipantFontSize 17
+skinparam ParticipantPadding 12
+skinparam BoxPadding 8
 autonumber
-
-title Sequência — Processar um Vídeo no Projeto\nTransformação implementada; composição completa prevista no Bolt 008
-
-actor "Utilizador\nFrontend" as UI
+title Processar vídeo — cadeia ou junção implementada
+actor "Frontend" as UI
 participant "API Gateway\n(via Nginx)" as API
-participant "Projetos\nOrquestrador" as Projects
-participant "Utilizadores\nQuota" as Users #D9D9D9
-participant "RabbitMQ\nFilas de vídeo" as MQ #D9D9D9
-participant "Worker\nFFmpeg / FFprobe" as Worker
-participant "Storage\nMódulo de vídeo + S3" as Storage #D9D9D9
-participant "WS Gateway\nMódulo de vídeo" as WS
+participant "Projetos" as PJ
+participant "Utilizadores" as US #D9D9D9
+queue "RabbitMQ" as MQ #D9D9D9
+participant "Worker\nFFmpeg" as WK
+participant "Storage\nURLs + S3" as ST #D9D9D9
+participant "WS Gateway" as WS
 
-group Admissão e resposta assíncrona
-  UI -> API : POST .../operations\n{steps}
-  API -> Projects : JWT validado; X-Caller-Id\nX-Correlation-Id
-  Projects -> Projects : Verificar permissão e perfil\nLer metadados; validar passos\nEstimar plano e custo
-  Projects -> Projects : Adquirir lugar por projeto\nPersistir lock (MongoDB)
-  opt Conta Registada (Premium não reserva quota)
-    Projects -> Users : Reservar N créditos\nGET /:user/process/:n
-    Users --> Projects : Reserva debitada
-  end
-  Projects -> Projects : Persistir VideoTask com estado queued
-  Projects ->> MQ : video_operations_queue\n{taskId, correlationId, plano, chaves}
-  note right of Projects
-    Se a publicação falhar, a tarefa persiste queued
-    com published_at nulo; recuperação republica (D-41).
-  end note
-  Projects --> API : 202 {taskId, status: queued}
-  API --> UI : Pedido aceite; taskId
+group Admissão e aceitação persistida
+UI -> API : POST .../operations {steps}
+API -> API : Validar JWT e identidade
+API -> PJ : Executor + correlationId
+PJ -> US : Consultar perfil
+US --> PJ : Registado / Premium
+PJ -> PJ : Autorizar projeto e vídeos\nEstrutura → passos → limites\nEstimar propriedades; construir plano; custo N
+PJ -> PJ : Adquirir lugar exclusivo do projeto
+opt Registado
+PJ -> US : Reservar N créditos (constitui débito)
+US --> PJ : Reserva aceite
 end
-
-newpage Execução fora do pedido HTTP
-
-group Execução fora do pedido HTTP
-  MQ ->> Worker : Entregar pedido (ack manual)
-  Worker ->> MQ : video_project_queue: started
-  MQ ->> Projects : started(taskId)
-  Projects -> Projects : Persistir processing
-  Projects -> MQ : ACK da resposta após persistência
-  Projects ->> MQ : video_ws_queue: processing
-  MQ ->> WS : Transição para processing
-  WS ->> UI : video-task-update (processing)
-  Worker -> Storage : Pedir URL GET interno
-  Storage --> Worker : URL assinado
-  Worker -> Storage : GET S3 por blocos
-  Worker -> Worker : Executar plano FFmpeg\nNo máximo uma codificação do vídeo final
-  loop Progresso pelo menos 1 vez por segundo
-    Worker ->> MQ : video_ws_queue\n{taskId, step, totalSteps, progress}
-    MQ ->> WS : Evento de progresso
-    WS ->> UI : video-task-update\nSala do executor e do projeto
-  end
-  Worker -> Worker : FFprobe; miniatura; fotograma 0\nCópia MP4 se necessária
-  Worker -> Storage : Pedir URLs PUT internos\nEnviar resultado e artefactos
-  Worker ->> MQ : video_project_queue: completed\n{taskId, meta, chaves}
-  Worker -> MQ : ACK do pedido após resposta
-end
-
-newpage Publicação do resultado
-
-group Publicação do resultado
-  MQ ->> Projects : completed(taskId, meta, chaves)
-  Projects -> Projects : Persistir completed\nCriar vídeo com proveniência (ID = taskId)\nLibertar lugar; sem novo débito de quota
-  Projects -> MQ : ACK da resposta após persistência
-  Projects ->> MQ : video_ws_queue: completed\n{taskId, resultVideoId, status}
-  MQ ->> WS : Evento de conclusão
-  WS ->> UI : video-task-update\nResultado disponível
-end
-
-note over Projects, Worker
-  MongoDB é atualizado pelo serviço de Projetos.
-  O worker devolve metadados reais e chaves de objetos.
-  O ID determinístico evita duplicar o recurso em reentrega.
-  Não existe transação distribuída entre MongoDB, quota e S3.
+PJ -> PJ : Persistir VideoTask queued e plano
+PJ ->> MQ : Tentar publicar plano com chaves de objetos
+note over PJ,MQ
+  Falha de publicação: queued com published_at nulo.
+  Recuperação republica; não perde a tarefa persistida.
 end note
-note over UI, Projects
-  Falhas, cancelamento e reentrega seguem a máquina de estados.
-  Pedidos rejeitados antes da admissão não entram nesta sequência.
+PJ --> API : 202 {taskId, status: queued}
+API --> UI : Aceitação
+end
+
+newpage Execução e progresso
+group Execução fora do pedido HTTP
+MQ ->> WK : Pedido (ACK manual)
+WK ->> MQ : started(taskId)
+MQ ->> PJ : started
+PJ -> PJ : Persistir processing
+PJ ->> MQ : Evento de estado
+MQ ->> WS : processing
+WS ->> UI : video-task-update
+WK -> ST : Pedir URLs; descarregar objetos distintos
+ST --> WK : Entradas por blocos
+WK -> WK : Uma entrada por ocorrência\nSubcadeias → normalização → concat → passos finais\nUm filtergraph; codificação da stream final no máximo uma vez
+loop Progresso durante a execução
+WK ->> MQ : progress, step estimado, totalSteps
+MQ ->> WS : Evento
+WS ->> UI : video-task-update
+end
+WK -> WK : FFprobe; miniatura; fotograma inicial\nCópia MP4 quando necessária
+WK -> ST : URLs PUT; enviar resultado e artefactos
+ST --> WK : Chaves de saída
+WK ->> MQ : completed {taskId, metadados, chaves}
+WK -> MQ : ACK do pedido após publicar resposta
+end
+
+newpage Publicação e tratamento terminal
+alt Sucesso
+MQ ->> PJ : completed
+PJ -> PJ : Persistir completed\nCriar vídeo (ID = taskId) com recipe e source_video_ids\nLibertar lugar; sem segundo débito
+PJ -> MQ : ACK da resposta após tratar resultado
+PJ ->> MQ : Evento completed / resultVideoId
+MQ ->> WS : Conclusão
+WS ->> UI : Um vídeo final disponível
+else Falha da execução
+WK ->> MQ : failed {error.code, error.phase}
+MQ ->> PJ : Resposta de falha
+PJ -> PJ : failed e refund pendente; limpar destinos
+PJ -> US : Devolver N créditos se reservados
+US --> PJ : Compensação confirmada
+PJ -> PJ : refund done; libertar lugar
+PJ ->> MQ : Evento de falha
+MQ ->> WS : failed
+WS ->> UI : Código de suporte e fase
+else Cancelamento autorizado
+UI -> API : Cancelar taskId
+API -> PJ : Executor autenticado
+PJ -> PJ : Validar executor/estado; persistir cancelled
+PJ ->> MQ : video_control {taskId}
+MQ ->> WK : Interromper e limpar
+PJ -> US : Devolver reserva quando aplicável
+note over PJ,WK
+  Limpeza e interrupção podem terminar depois de cancelled.
+  Resultado tardio é descartado; não reativa a tarefa.
+end note
+end
+note over PJ,ST
+  Não existe transação única entre estado, recurso, quota e S3.
+  O ID determinístico permite repetir a criação sem duplicar o vídeo.
 end note
 @enduml

@@ -2,37 +2,6 @@
 
 = Rastreabilidade
 
-O catálogo do relatório é a referência normativa desta entrega: 14 casos de uso e 202 requisitos. Os registos de construção conservam a numeração histórica, com extração de fotogramas e processamento em lote excluídos. Não se deve transpor um identificador entre catálogos sem verificar o seu significado.
-
-Os casos históricos UC-VID-000 a UC-VID-004 conservam os IDs. O histórico UC-VID-005 (extração) foi eliminado; os históricos UC-VID-006 a UC-VID-014 correspondem, respetivamente, aos atuais UC-VID-005 a UC-VID-013. O histórico UC-VID-015 (lote) também foi eliminado. TASK-007 corresponde a TASK-008 no catálogo de construção. Os restantes IDs funcionais mantidos conservam o significado; requisitos excluídos não são reintroduzidos.
-
-#tab([Correspondência dos requisitos de qualidade entre catálogos], tabela(
-  colunas: (2.8cm, 2.8cm, 1fr), tamanho: 7.5pt,
-  [ID no relatório], [ID na construção], [Significado],
-    [#text("REQ-VID-NFR-001")], [#text("REQ-VID-NFR-001")], [#text("O sistema deve validar o JWT nos endpoints de vídeo e antes de emitir URLs temporários de transferência; o acesso ao objeto por URL emitido é validado pela assinatura e expiração.")],
-    [#text("REQ-VID-NFR-002")], [#text("REQ-VID-NFR-002")], [#text("O sistema deve associar e propagar um identificador de correlação (correlationId) único em todos os eventos de log dos microserviços e mensagens RabbitMQ.")],
-    [#text("REQ-VID-NFR-003")], [#text("REQ-VID-NFR-003")], [#text("O sistema deve aceitar na entrada exclusivamente contentores MP4, MOV e AVI com codecs da matriz aprovada.")],
-    [#text("REQ-VID-NFR-004")], [#text("REQ-VID-NFR-005")], [#text("O sistema deve responder à submissão válida de uma transformação de vídeo em ≤ 1000 ms, desde a receção do pedido completo na API até à resposta com taskId e queued, incluindo a admissão e a tentativa de publicação na fila, sem incluir transferência do ficheiro nem processamento.")],
-    [#text("REQ-VID-NFR-005")], [#text("REQ-VID-NFR-006")], [#text("O sistema deve processar tarefas de vídeo de forma 100% assíncrona desacoplada através de workers especializados em fila RabbitMQ, sem bloquear a navegação do utilizador.")],
-    [#text("REQ-VID-NFR-006")], [#text("REQ-VID-NFR-007")], [#text("O sistema deve impedir a publicação de recursos parciais após falha; perante queda do worker, deve reiniciar a execução do zero por reentrega, até duas entregas no total, e registar failed se ambas falharem, devolvendo os créditos e limpando os temporários.")],
-    [#text("REQ-VID-NFR-007")], [#text("REQ-VID-NFR-008")], [#text("O sistema deve impor os limites de duração e tamanho de ficheiro aprovados para cada perfil.")],
-    [#text("REQ-VID-NFR-008")], [#text("REQ-VID-NFR-009")], [#text("O sistema deve transmitir atualizações contínuas de progresso numérico de 0% a 100% via WebSocket, pelo menos uma vez por segundo em todas as operações.")],
-    [#text("REQ-VID-NFR-009")], [#text("REQ-VID-NFR-010")], [#text("O processamento e descodificação de vídeo devem ser executados em contentores Docker isolados sem dependência de instalação local de binários no host do utilizador.")],
-    [#text("REQ-VID-NFR-010")], [#text("REQ-VID-NFR-011")], [#text("O módulo de processamento de vídeo deve ser desacoplado via contratos de mensagens AMQP, permitindo adicionar novas operações sem modificar as ferramentas de imagem existentes.")],
-    [#text("REQ-VID-NFR-011")], [#text("REQ-VID-NFR-012")], [#text("O sistema deve garantir que os vídeos produzidos pelas operações de conversão e transformação podem ser descodificados sem erros.")],
-    [#text("REQ-VID-NFR-012")], [#text("REQ-VID-NFR-013")], [#text("A execução de uma cadeia de operações deve recodificar a stream de vídeo no máximo uma vez, independentemente do número de passos.")],
-    [#text("REQ-VID-NFR-013")], [#text("REQ-VID-NFR-015")], [#text("O sistema deve apresentar a pré-visualização estática de ajustes, filtros, redimensionamento e orientação em ≤ 1 s em pelo menos 95% dos pedidos, medidos desde a alteração do controlo até à apresentação do fotograma transformado.")],
-    [#text("REQ-VID-NFR-014")], [#text("REQ-VID-NFR-016")], [#text("O sistema deve servir os descarregamentos de vídeo diretamente pelo armazenamento de objetos, sem encaminhar os dados do ficheiro pelo API Gateway.")],
-    [#text("REQ-VID-NFR-015")], [#text("REQ-VID-NFR-017")], [#text("O sistema deve autorizar o acesso a vídeos e URLs de transferência segundo as permissões do projeto.")],
-    [#text("REQ-VID-NFR-016")], [#text("REQ-VID-NFR-018")], [#text("O sistema deve gerar resultados em MP4 com vídeo H.264 e áudio AAC quando exista áudio, salvo conversão de formato; a remoção de áudio produz MP4/H.264 sem stream de áudio.")],
-    [#text("REQ-VID-NFR-017")], [#text("REQ-VID-NFR-021")], [#text("O sistema deve impor o limite de tarefas de vídeo ativas por projeto.")],
-    [#text("REQ-VID-NFR-018")], [#text("REQ-VID-NFR-022")], [#text("O sistema deve impor limites por perfil ao número de vídeos por junção.")],
-    [#text("REQ-VID-NFR-019")], [#text("REQ-VID-NFR-023")], [#text("O sistema deve impor o limite máximo de passos por cadeia de operações.")],
-    [#text("REQ-VID-NFR-020")], [#text("REQ-VID-NFR-024")], [#text("O sistema deve impor o limite de duração total por perfil à junção de vídeos.")],
-    [#text("REQ-VID-NFR-021")], [#text("REQ-VID-NFR-025")], [#text("O sistema deve suportar a retoma de transferências de vídeo interrompidas.")],
-    [#text("REQ-VID-NFR-022")], [#text("REQ-VID-NFR-026")], [#text("O sistema deve garantir que os vídeos produzidos pelas operações de conversão e transformação são reproduzíveis nos leitores de referência definidos.")],
-))
-
 == Casos de uso → requisitos
 
 #orientacao[
@@ -396,64 +365,71 @@ Os casos históricos UC-VID-000 a UC-VID-004 conservam os IDs. O histórico UC-V
 
 == Realização e verificação dos requisitos
 
-«Implementado» indica a existência do comportamento no código inspecionado, sem pressupor validação exaustiva; «Parcial» identifica uma realização incompleta face ao requisito; «Não implementado» identifica trabalho previsto. O resultado refere-se ao cenário TST do Capítulo 10 e conserva as respetivas limitações. As linhas agrupam apenas requisitos da mesma família com o mesmo estado e resultado; a coluna de testes mantém o mapeamento por sufixo numérico. A matriz individual dos 202 requisitos, com ficheiros de teste e registos, está em docs/matriz-rastreabilidade-relatorio.csv.
+#orientacao[
+ Fecha o ciclo *requisito → componente → teste → estado*. Uma linha por requisito da ERS (podem agrupar
+ requisitos com o mesmo destino). Deve ser possível responder a: "que requisitos estão implementados e
+ verificados?" e "que componentes foram tocados por cada funcionalidade?". Requisitos não implementados não se
+ apagam: ficam com estado "Não implementado" e justificação. Os detalhes estão nos capítulos de Arquitetura e de Testes.
+]
 
-#tab([Referências dos componentes da matriz de realização], tabela(
-  colunas: (1cm, 1fr), tamanho: 8pt,
-  [ID], [Componentes / ficheiros],
-  [#text("C01")], [#text("Frontend: components/video/ e lib/video-*.ts; componentes de projeto e de acesso ao vídeo.")],
-  [#text("C02")], [#text("API Gateway e autorização: apiGateway/routes/video*.js e projects/routes/video*.js; verificação JWT e permissões.")],
-  [#text("C03")], [#text("Orquestração: projects/video/tasks.js, chain.js, plan.js, operations/, quota.js, locks.js e maintenance.js; modelos video e videoTask.")],
-  [#text("C04")], [#text("Utilizadores e quotas: users/routes/users.js e projects/video/quota.js; reserva e devolução do executor.")],
-  [#text("C05")], [#text("Worker: Tools/video/ingest.py, executor.py, task.py, convert_task.py e ops/; FFmpeg/FFprobe.")],
-  [#text("C06")], [#text("Persistência e transferência: projects/models/video.js, projects/video/access.js e storage.js; imageStorageService/route/video.js e services/videoUrls.js; SeaweedFS/S3 e nginx/nginx.conf.")],
-  [#text("C07")], [#text("Mensagens e notificações: projects/video/amqp.js, Tools/video/video_rabbit.py, rabbitMQ/definitions.json e wsGateway/video.js.")],
-  [#text("C08")], [#text("Bolt 008 previsto: junção, editor de cadeias, regras estruturais e predefinições; sem realização integral nesta versão.")],
+
+#tab([Componentes de referência da realização], tabela(
+  colunas: (1cm, 1fr), tamanho: 8.2pt,
+    [#text("ID")], [#text("Localização e responsabilidade")],
+    [#text("C01")], [#text("frontend/components/video/ e frontend/lib/video-*.ts: leitor, painéis, três percursos de composição, configuração partilhada, predefinições e estado.")],
+    [#text("C02")], [#text("apiGateway/routes/videos.js, videoVisual.js, videoPresets.js e videoPayloadErrors.js; autorização e routers de vídeo em Projetos.")],
+    [#text("C03")], [#text("projects/video/: tasks.js, composition.js, chainStructure.js, operations/, plan*.js, quota.js, locks.js e maintenance.js.")],
+    [#text("C04")], [#text("users/routes/users.js, videoPresets.js e users/models/videoPreset.js; quota e persistência das predefinições.")],
+    [#text("C05")], [#text("Tools/video/: ingest.py, task.py, executor.py, convert_task.py, composition_task.py, phase.py e ops/.")],
+    [#text("C06")], [#text("Modelos de vídeo/tarefa, acesso e storage de Projetos; imageStorageService/route/video.js e services/videoUrls.js; SeaweedFS/S3 e Nginx.")],
+    [#text("C07")], [#text("projects/video/amqp.js, Tools/video/video_rabbit.py, rabbitMQ/definitions.json e wsGateway/video.js.")],
 ))
+
+As linhas agrupam apenas requisitos com o mesmo componente, estado, resultado e observação. O sufixo identifica a correspondência individual: por exemplo, REQ-VID-CHAIN-003 corresponde a TST-CHAIN-003. Os resultados completos e os ficheiros de teste são identificados no Capítulo 10.
 
 #paisagem[
-#tab([Realização e verificação dos 202 requisitos do relatório], tabela(
+
+#tab([Realização e verificação dos requisitos], tabela(
   colunas: (5cm, 3.2cm, 2.3cm, 4.5cm, 1fr), tamanho: 7.4pt,
-  [Requisito(s)], [Componente(s)], [Estado], [Teste(s)], [Resultado / observações],
-    [#text("REQ-VID-ADJUST: 001–004, 006–010")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-ADJUST: 001–004, 006–010")], [#text("Passa. Cenários e condições no Capítulo 10; não implica validação exaustiva.")],
-    [#text("REQ-VID-ADJUST: 005")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-ADJUST: 005")], [#text("Parcial. Implementação disponível; evidência parcial, especificada no Capítulo 10.")],
-    [#text("REQ-VID-AUDIO: 001–006")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-AUDIO: 001–006")], [#text("Passa. Cenários e condições no Capítulo 10; não implica validação exaustiva.")],
-    [#text("REQ-VID-AUTH: 001")], [#text("C02")], [#text("Implementado")], [#text("TST-AUTH: 001")], [#text("Parcial. Implementação disponível; evidência parcial, especificada no Capítulo 10.")],
-    [#text("REQ-VID-AUTH: 002–003")], [#text("C02")], [#text("Implementado")], [#text("TST-AUTH: 002–003")], [#text("Passa. Cenários e condições no Capítulo 10; não implica validação exaustiva.")],
-    [#text("REQ-VID-CHAIN: 001–002, 004–009, 014–017")], [#text("C03/C05; C08 (previsto)")], [#text("Não implementado")], [#text("TST-CHAIN: 001–002, 004–009, 014–017")], [#text("Bolt 008 planeado; resultado de teste em branco.")],
-    [#text("REQ-VID-CHAIN: 003, 010–013")], [#text("C03/C05; C08 (previsto)")], [#text("Parcial")], [#text("TST-CHAIN: 003, 010–013")], [#text("Fundação existente; composição completa e respetiva aceitação dependem do Bolt 008.")],
-    [#text("REQ-VID-COM: 001–006")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-COM: 001–006")], [#text("Passa. Cenários e condições no Capítulo 10; não implica validação exaustiva.")],
-    [#text("REQ-VID-CONCAT: 001–013")], [#text("C08 (previsto)")], [#text("Não implementado")], [#text("TST-CONCAT: 001–013")], [#text("Bolt 008 planeado; resultado de teste em branco.")],
-    [#text("REQ-VID-CONVERT: 001–003, 010")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-CONVERT: 001–003, 010")], [#text("Implementação identificada por inspeção; execução do cenário completo por registar.")],
-    [#text("REQ-VID-CONVERT: 004–006")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-CONVERT: 004–006")], [#text("Passa. Cenários e condições no Capítulo 10; não implica validação exaustiva.")],
-    [#text("REQ-VID-CONVERT: 007–008")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-CONVERT: 007–008")], [#text("Parcial. Implementação disponível; evidência parcial, especificada no Capítulo 10.")],
-    [#text("REQ-VID-CONVERT: 009")], [#text("C01/C03/C05")], [#text("Não implementado")], [#text("TST-CONVERT: 009")], [#text("Bolt 008 planeado; resultado de teste em branco.")],
-    [#text("REQ-VID-DOWNLOAD: 001–002, 004–006, 008–009")], [#text("C01/C02/C06")], [#text("Implementado")], [#text("TST-DOWNLOAD: 001–002, 004–006, 008–009")], [#text("Passa. Cenários e condições no Capítulo 10; não implica validação exaustiva.")],
-    [#text("REQ-VID-DOWNLOAD: 003")], [#text("C01/C02/C06")], [#text("Implementado")], [#text("TST-DOWNLOAD: 003")], [#text("Implementação identificada por inspeção; execução do cenário completo por registar.")],
-    [#text("REQ-VID-DOWNLOAD: 007")], [#text("C01/C02/C06")], [#text("Implementado")], [#text("TST-DOWNLOAD: 007")], [#text("Parcial. Implementação disponível; evidência parcial, especificada no Capítulo 10.")],
-    [#text("REQ-VID-ERROR: 001–003")], [#text("C02/C03/C05/C06")], [#text("Implementado")], [#text("TST-ERROR: 001–003")], [#text("Passa. Cenários e condições no Capítulo 10; não implica validação exaustiva.")],
-    [#text("REQ-VID-FILTER: 001–003, 005–007")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-FILTER: 001–003, 005–007")], [#text("Passa. Cenários e condições no Capítulo 10; não implica validação exaustiva.")],
-    [#text("REQ-VID-FILTER: 004")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-FILTER: 004")], [#text("Parcial. Implementação disponível; evidência parcial, especificada no Capítulo 10.")],
-    [#text("REQ-VID-INFO: 001–009")], [#text("C01/C02/C06")], [#text("Implementado")], [#text("TST-INFO: 001–009")], [#text("Passa. Cenários e condições no Capítulo 10; não implica validação exaustiva.")],
-    [#text("REQ-VID-NFR: 001")], [#text("C02/C03/C05/C06/C07")], [#text("Parcial")], [#text("TST-NFR: 001")], [#text("JWT emitido por sete dias; alvo de uma hora não cumprido. Validação completa pendente.")],
-    [#text("REQ-VID-NFR: 002–004, 006–007, 009–011, 015–017")], [#text("C02/C03/C05/C06/C07")], [#text("Implementado")], [#text("TST-NFR: 002–004, 006–007, 009–011, 015–017")], [#text("Passa. Cenários e condições no Capítulo 10; não implica validação exaustiva.")],
-    [#text("REQ-VID-NFR: 005, 013")], [#text("C02/C03/C05/C06/C07")], [#text("Implementado")], [#text("TST-NFR: 005, 013")], [#text("Implementação identificada por inspeção; execução do cenário completo por registar.")],
-    [#text("REQ-VID-NFR: 008, 014, 021–022")], [#text("C02/C03/C05/C06/C07")], [#text("Implementado")], [#text("TST-NFR: 008, 014, 021–022")], [#text("Parcial. Implementação disponível; evidência parcial, especificada no Capítulo 10.")],
-    [#text("REQ-VID-NFR: 012")], [#text("C02/C03/C05/C06/C07")], [#text("Parcial")], [#text("TST-NFR: 012")], [#text("Fundação existente; composição completa e respetiva aceitação dependem do Bolt 008.")],
-    [#text("REQ-VID-NFR: 018–020")], [#text("C02/C03/C05/C06/C07")], [#text("Não implementado")], [#text("TST-NFR: 018–020")], [#text("Bolt 008 planeado; resultado de teste em branco.")],
-    [#text("REQ-VID-ORIENT: 001–004, 006–009")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-ORIENT: 001–004, 006–009")], [#text("Passa. Cenários e condições no Capítulo 10; não implica validação exaustiva.")],
-    [#text("REQ-VID-ORIENT: 005")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-ORIENT: 005")], [#text("Parcial. Implementação disponível; evidência parcial, especificada no Capítulo 10.")],
-    [#text("REQ-VID-QUOTA: 001–008")], [#text("C03/C04")], [#text("Implementado")], [#text("TST-QUOTA: 001–008")], [#text("Passa. Cenários e condições no Capítulo 10; não implica validação exaustiva.")],
-    [#text("REQ-VID-RESIZE: 001–009")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-RESIZE: 001–009")], [#text("Passa. Cenários e condições no Capítulo 10; não implica validação exaustiva.")],
-    [#text("REQ-VID-SPEED: 001–008")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-SPEED: 001–008")], [#text("Passa. Cenários e condições no Capítulo 10; não implica validação exaustiva.")],
-    [#text("REQ-VID-STORAGE: 001, 003, 005")], [#text("C01/C03/C06")], [#text("Implementado")], [#text("TST-STORAGE: 001, 003, 005")], [#text("Passa. Cenários e condições no Capítulo 10; não implica validação exaustiva.")],
-    [#text("REQ-VID-STORAGE: 002")], [#text("C01/C03/C06")], [#text("Parcial")], [#text("TST-STORAGE: 002")], [#text("Parcial. Fundação existente; composição completa e respetiva aceitação dependem do Bolt 008.")],
-    [#text("REQ-VID-STORAGE: 004")], [#text("C01/C03/C06")], [#text("Parcial")], [#text("TST-STORAGE: 004")], [#text("Fundação existente; composição completa e respetiva aceitação dependem do Bolt 008.")],
-    [#text("REQ-VID-TASK: 001–007")], [#text("C03/C05/C07")], [#text("Implementado")], [#text("TST-TASK: 001–007")], [#text("Passa. Cenários e condições no Capítulo 10; não implica validação exaustiva.")],
-    [#text("REQ-VID-TRIM: 001–010")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-TRIM: 001–010")], [#text("Passa. Cenários e condições no Capítulo 10; não implica validação exaustiva.")],
-    [#text("REQ-VID-UPLOAD: 001, 004–014, 016–017, 019")], [#text("C01/C02/C05/C06")], [#text("Implementado")], [#text("TST-UPLOAD: 001, 004–014, 016–017, 019")], [#text("Passa. Cenários e condições no Capítulo 10; não implica validação exaustiva.")],
-    [#text("REQ-VID-UPLOAD: 002")], [#text("C01/C02/C05/C06")], [#text("Implementado")], [#text("TST-UPLOAD: 002")], [#text("Implementação identificada por inspeção; execução do cenário completo por registar.")],
-    [#text("REQ-VID-UPLOAD: 003, 015, 018, 020")], [#text("C01/C02/C05/C06")], [#text("Implementado")], [#text("TST-UPLOAD: 003, 015, 018, 020")], [#text("Parcial. Implementação disponível; evidência parcial, especificada no Capítulo 10.")],
-    [#text("REQ-VID-WATERMARK: 001–011")], [#text("C01/C03/C05/C06")], [#text("Implementado")], [#text("TST-WATERMARK: 001–011")], [#text("Passa. Cenários e condições no Capítulo 10; não implica validação exaustiva.")],
+    [#text("Requisito(s)")], [#text("Componente(s)")], [#text("Estado")], [#text("Teste(s)")], [#text("Resultado / observações")],
+    [#text("REQ-VID-ADJUST: 001–004, 006–010")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-ADJUST: 001–004, 006–010")], [#text("Passa. Cenário favorável; fontes e condições no Capítulo 10.")],
+    [#text("REQ-VID-ADJUST: 005")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-ADJUST: 005")], [#text("Parcial. Implementação disponível; validação parcial nos cenários do Capítulo 10.")],
+    [#text("REQ-VID-AUDIO: 001–006")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-AUDIO: 001–006")], [#text("Passa. Cenário favorável; fontes e condições no Capítulo 10.")],
+    [#text("REQ-VID-AUTH: 001")], [#text("C02")], [#text("Implementado")], [#text("TST-AUTH: 001")], [#text("Parcial. Implementação disponível; validação parcial nos cenários do Capítulo 10.")],
+    [#text("REQ-VID-AUTH: 002–003")], [#text("C02")], [#text("Implementado")], [#text("TST-AUTH: 002–003")], [#text("Passa. Cenário favorável; fontes e condições no Capítulo 10.")],
+    [#text("REQ-VID-CHAIN: 001–007, 009–013, 015–017")], [#text("C01/C03/C04/C05")], [#text("Implementado")], [#text("TST-CHAIN: 001–007, 009–013, 015–017")], [#text("Passa. Cenário favorável; fontes e condições no Capítulo 10.")],
+    [#text("REQ-VID-CHAIN: 008")], [#text("C01/C03/C04/C05")], [#text("Implementado")], [#text("TST-CHAIN: 008")], [#text("Passa.")],
+    [#text("REQ-VID-CHAIN: 014")], [#text("C01/C03/C04/C05")], [#text("Parcial")], [#text("TST-CHAIN: 014")], [#text("Passa. CRUD e reutilização ensaiados; persistência mantém dez passos. Teste de gravação longa pendente.")],
+    [#text("REQ-VID-COM: 001–006")], [#text("C01/C02/C03/C05")], [#text("Implementado")], [#text("TST-COM: 001–006")], [#text("Passa. Cenário favorável; fontes e condições no Capítulo 10.")],
+    [#text("REQ-VID-CONCAT: 001–005, 007–008, 010–013")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-CONCAT: 001–005, 007–008, 010–013")], [#text("Passa. Cenário favorável; fontes e condições no Capítulo 10.")],
+    [#text("REQ-VID-CONCAT: 006")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-CONCAT: 006")], [#text("Passa. Sem teto fixo de quantidade.")],
+    [#text("REQ-VID-CONCAT: 009")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-CONCAT: 009")], [#text("Passa. Silêncio introduzido quando há áudio noutro clip; todos silenciosos produzem saída sem áudio (D-78).")],
+    [#text("REQ-VID-CONVERT: 001–006, 009–010")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-CONVERT: 001–006, 009–010")], [#text("Passa. Cenário favorável; fontes e condições no Capítulo 10.")],
+    [#text("REQ-VID-CONVERT: 007–008")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-CONVERT: 007–008")], [#text("Parcial. Implementação disponível; validação parcial nos cenários do Capítulo 10.")],
+    [#text("REQ-VID-DOWNLOAD: 001–002, 004–006, 008–009")], [#text("C01/C02/C06")], [#text("Implementado")], [#text("TST-DOWNLOAD: 001–002, 004–006, 008–009")], [#text("Passa. Cenário favorável; fontes e condições no Capítulo 10.")],
+    [#text("REQ-VID-DOWNLOAD: 003")], [#text("C01/C02/C06")], [#text("Implementado")], [#text("TST-DOWNLOAD: 003")], [#text("Implementação disponível; Passa.")],
+    [#text("REQ-VID-DOWNLOAD: 007")], [#text("C01/C02/C06")], [#text("Implementado")], [#text("TST-DOWNLOAD: 007")], [#text("Parcial. Implementação disponível; validação parcial nos cenários do Capítulo 10.")],
+    [#text("REQ-VID-ERROR: 001–003")], [#text("C02/C03/C05/C06")], [#text("Implementado")], [#text("TST-ERROR: 001–003")], [#text("Passa. Cenário favorável; fontes e condições no Capítulo 10.")],
+    [#text("REQ-VID-FILTER: 001–003, 005–007")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-FILTER: 001–003, 005–007")], [#text("Passa. Cenário favorável; fontes e condições no Capítulo 10.")],
+    [#text("REQ-VID-FILTER: 004")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-FILTER: 004")], [#text("Parcial. Implementação disponível; validação parcial nos cenários do Capítulo 10.")],
+    [#text("REQ-VID-INFO: 001–009")], [#text("C01/C02/C06")], [#text("Implementado")], [#text("TST-INFO: 001–009")], [#text("Passa. Cenário favorável; fontes e condições no Capítulo 10.")],
+    [#text("REQ-VID-NFR: 001")], [#text("C02/C03/C05/C06/C07")], [#text("Parcial")], [#text("TST-NFR: 001")], [#text("JWT de sete dias face ao alvo de uma hora; validação do cenário completo por concluir.")],
+    [#text("REQ-VID-NFR: 002–004, 006–007, 009–012, 015–017, 020")], [#text("C02/C03/C05/C06/C07")], [#text("Implementado")], [#text("TST-NFR: 002–004, 006–007, 009–012, 015–017, 020")], [#text("Passa. Cenário favorável; fontes e condições no Capítulo 10.")],
+    [#text("REQ-VID-NFR: 005, 013")], [#text("C02/C03/C05/C06/C07")], [#text("Implementado")], [#text("TST-NFR: 005, 013")], [#text("Implementação disponível; sem resultado do cenário completo.")],
+    [#text("REQ-VID-NFR: 008, 014, 021–022")], [#text("C02/C03/C05/C06/C07")], [#text("Implementado")], [#text("TST-NFR: 008, 014, 021–022")], [#text("Parcial. Implementação disponível; validação parcial nos cenários do Capítulo 10.")],
+    [#text("REQ-VID-NFR: 018–019")], [#text("C02/C03/C05/C06/C07")], [#text("Implementado")], [#text("TST-NFR: 018–019")], [#text("Passa. Sem teto fixo de quantidade; teste segundo a decisão aprovada, não segundo a rejeição antiga.")],
+    [#text("REQ-VID-ORIENT: 001–004, 006–009")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-ORIENT: 001–004, 006–009")], [#text("Passa. Cenário favorável; fontes e condições no Capítulo 10.")],
+    [#text("REQ-VID-ORIENT: 005")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-ORIENT: 005")], [#text("Parcial. Implementação disponível; validação parcial nos cenários do Capítulo 10.")],
+    [#text("REQ-VID-QUOTA: 001–008")], [#text("C03/C04")], [#text("Implementado")], [#text("TST-QUOTA: 001–008")], [#text("Passa. Cenário favorável; fontes e condições no Capítulo 10.")],
+    [#text("REQ-VID-RESIZE: 001–009")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-RESIZE: 001–009")], [#text("Passa. Cenário favorável; fontes e condições no Capítulo 10.")],
+    [#text("REQ-VID-SPEED: 001–008")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-SPEED: 001–008")], [#text("Passa. Cenário favorável; fontes e condições no Capítulo 10.")],
+    [#text("REQ-VID-STORAGE: 001–005")], [#text("C03/C06")], [#text("Implementado")], [#text("TST-STORAGE: 001–005")], [#text("Passa. Cenário favorável; fontes e condições no Capítulo 10.")],
+    [#text("REQ-VID-TASK: 001–007")], [#text("C03/C05/C07")], [#text("Implementado")], [#text("TST-TASK: 001–007")], [#text("Passa. Cenário favorável; fontes e condições no Capítulo 10.")],
+    [#text("REQ-VID-TRIM: 001–010")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-TRIM: 001–010")], [#text("Passa. Cenário favorável; fontes e condições no Capítulo 10.")],
+    [#text("REQ-VID-UPLOAD: 001, 004–014, 016–017, 019")], [#text("C01/C02/C05/C06")], [#text("Implementado")], [#text("TST-UPLOAD: 001, 004–014, 016–017, 019")], [#text("Passa. Cenário favorável; fontes e condições no Capítulo 10.")],
+    [#text("REQ-VID-UPLOAD: 002")], [#text("C01/C02/C05/C06")], [#text("Implementado")], [#text("TST-UPLOAD: 002")], [#text("Implementação disponível; sem resultado do cenário completo.")],
+    [#text("REQ-VID-UPLOAD: 003, 015, 018, 020")], [#text("C01/C02/C05/C06")], [#text("Implementado")], [#text("TST-UPLOAD: 003, 015, 018, 020")], [#text("Parcial. Implementação disponível; validação parcial nos cenários do Capítulo 10.")],
+    [#text("REQ-VID-WATERMARK: 001–011")], [#text("C01/C03/C05")], [#text("Implementado")], [#text("TST-WATERMARK: 001–011")], [#text("Passa. Cenário favorável; fontes e condições no Capítulo 10.")],
 ))
+
 ]
