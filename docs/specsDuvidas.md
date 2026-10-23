@@ -7,11 +7,11 @@
 
 ## D-01 — Escala de complexidade dos bolts
 
-- **Onde:** `memory-bank/bolts/001-video-lifecycle/bolt.md` a `memory-bank/bolts/009-video-batch/bolt.md`, campo `complexity` (`avg_complexity`, `avg_uncertainty`, `max_dependencies`, `testing_scope`).
+- **Onde:** `memory-bank/bolts/001-video-lifecycle/bolt.md` a `memory-bank/bolts/008-video-concat-chain/bolt.md`, campo `complexity` (`avg_complexity`, `avg_uncertainty`, `max_dependencies`, `testing_scope`).
 - **Dúvida:** Que valores de 1 a 3 se atribuem aos quatro campos de complexidade de cada bolt?
-- **O que as fontes dizem:** o ADD v1.1 dá um esforço S/M/L por caso de uso (secções 4.1 a 4.10, "Esforço estimado", e tabela-resumo da secção 5: T-00 L; UC-VID-006, 007, 010 e 011 S; UC-VID-008, 009 e 012 M; UC-VID-013, 014 e 015 L). `docs/inception/artefactos-finais.md` §4 dá a complexidade por Unit (Unit 001 L, Unit 002 XL, Unit 003 XL). Nenhuma fonte dá valores para os UC-VID-000 a 005 isolados, nem para a incerteza, as dependências ou o âmbito de testes, nem uma conversão de S/M/L para a escala 1–3.
+- **O que as fontes dizem:** o ADD v1.1 dá um esforço S/M/L por caso de uso (secções 4.1 a 4.10, "Esforço estimado", e tabela-resumo da secção 5: T-00 L; UC-VID-005, 007, 010 e 011 S; UC-VID-007, 009 e 012 M; UC-VID-012, 014 e 015 L). `docs/inception/artefactos-finais.md` §4 dá a complexidade por Unit (Unit 001 L, Unit 002 XL, Unit 003 XL). Nenhuma fonte dá valores para os UC-VID-000, UC-VID-001, UC-VID-002, UC-VID-003, UC-VID-004 isolados, nem para a incerteza, as dependências ou o âmbito de testes, nem uma conversão de S/M/L para a escala 1–3.
 - **Opções:** (a) converter o esforço do ADD (S=1, M=2, L=3) em `avg_complexity` e deixar os outros três campos por preencher; (b) a equipa atribui os quatro valores por bolt; (c) deixar o bloco por preencher até à Construção.
-- **Resposta:** **(a), com o máximo do esforço do ADD por bolt.** Converte S=1, M=2, L=3 em `avg_complexity`, usando o maior esforço dos UC (ou do T-00) de cada bolt: B001 = 3 (T-00 L), B002 = 1 (UC-006 e 007 S), B005 = 2 (UC-008 e 009 M), B007 = 2 (UC-012 M), B008 = 3 e B009 = 3 (UC-013, 014 e 015 L). Na B003, B004 e B006 não há esforço no ADD, por isso o campo fica `null`. Os campos `avg_uncertainty`, `max_dependencies` e `testing_scope` ficam todos `null` e são preenchidos no início de cada bolt na Construção.
+- **Resposta:** **(a), com o máximo do esforço do ADD por bolt.** Converte S=1, M=2, L=3 em `avg_complexity`, usando o maior esforço dos UC (ou do T-00) de cada bolt: B001 = 3 (T-00 L), B002 = 1 (UC-006 e 007 S), B005 = 2 (UC-008 e 009 M), B007 = 2 (UC-012 M), B008 = 3 (junção e encadeamento L). Na B003 e B004 não há esforço no ADD, por isso o campo fica `null`. Os campos `avg_uncertainty`, `max_dependencies` e `testing_scope` ficam todos `null` e são preenchidos no início de cada bolt na Construção.
 
 ## D-02 — Componentes de fundação usados pela B001 e pela B002 mas atribuídos à B003
 
@@ -23,50 +23,16 @@
 
 ## D-03 — Propriedade dos requisitos realizados pelo executor de cadeias da B003
 
-- **Onde:** `traceability.md` (linhas `REQ-VID-NFR-010`, `REQ-VID-NFR-013` e `REQ-VID-NFR-018`); stories `units/002-video-transformations/stories/ST-VID-001-video-trim.md` e `units/003-video-composition/stories/ST-VID-014-video-chain.md`; bolts `003-video-task-foundation`, `004-video-basic-edits` e `008-video-concat-chain`.
-- **Dúvida:** Os requisitos NFR-010 (FFmpeg em Docker), NFR-013 (uma recodificação por cadeia) e NFR-018 (saída MP4 H.264/AAC) continuam a pertencer às stories ST-VID-001 (B004) e ST-VID-014 (B008), ou passam para a ST-VID-COM-001 (B003), que agora constrói o worker e o executor?
-- **O que as fontes dizem:** ADD T-02: o worker único `Tools/video/` e o executor com um único `-filter_complex` cumprem a NFR-010 e a NFR-013; a codificação de saída por omissão é `libx264` + `aac` (T-02) e o formato de trabalho é MP4 (T-05, DQ-013). `artefactos-finais.md` §5: o worker e o executor de cadeias estão na B003; a B008 fica com a junção e a validação de estrutura. A `traceability.md` atual atribui a NFR-010 e a NFR-018 à ST-VID-001 e a NFR-013 à ST-VID-014.
-- **Opções:** (a) manter a propriedade atual (a B003 fornece o componente e a B004/B008 verificam os requisitos); (b) passar os três NFR para a ST-VID-COM-001 e a B003; (c) passar só a NFR-010 e a NFR-013 para a B003 e manter a NFR-018 na B004.
-- **Resposta:** **Opção nova: cada requisito vai para o bolt que constrói o componente.** A NFR-010 (FFmpeg em Docker) passa para a B001, que cria o worker (ver D-02). A NFR-013 (uma recodificação por cadeia) e a NFR-018 (saída MP4 H.264/AAC por omissão) passam para a ST-VID-COM-001 e a B003, que constroem o executor e a codificação por omissão (T-02). A B004 e a B008 continuam a verificar estes três NFR nos seus critérios de aceitação, mas não são donas deles.
+- **Onde:** `traceability.md` (linhas `REQ-VID-NFR-009`, `REQ-VID-NFR-012` e `REQ-VID-NFR-016`); stories `units/002-video-transformations/stories/ST-VID-001-video-trim.md` e `units/003-video-composition/stories/ST-VID-014-video-chain.md`; bolts `003-video-task-foundation`, `004-video-basic-edits` e `008-video-concat-chain`.
+- **Dúvida:** Os requisitos NFR-009 (FFmpeg em Docker), NFR-012 (uma recodificação por cadeia) e NFR-016 (saída MP4 H.264/AAC) continuam a pertencer às stories ST-VID-001 (B004) e ST-VID-014 (B008), ou passam para a ST-VID-COM-001 (B003), que agora constrói o worker e o executor?
+- **O que as fontes dizem:** ADD T-02: o worker único `Tools/video/` e o executor com um único `-filter_complex` cumprem a NFR-009 e a NFR-012; a codificação de saída por omissão é `libx264` + `aac` (T-02) e o formato de trabalho é MP4 (T-05, DQ-012). `artefactos-finais.md` §5: o worker e o executor de cadeias estão na B003; a B008 fica com a junção e a validação de estrutura. A `traceability.md` atual atribui a NFR-009 e a NFR-016 à ST-VID-001 e a NFR-012 à ST-VID-014.
+- **Opções:** (a) manter a propriedade atual (a B003 fornece o componente e a B004/B008 verificam os requisitos); (b) passar os três NFR para a ST-VID-COM-001 e a B003; (c) passar só a NFR-009 e a NFR-012 para a B003 e manter a NFR-016 na B004.
+- **Resposta:** **Opção nova: cada requisito vai para o bolt que constrói o componente.** A NFR-009 (FFmpeg em Docker) passa para a B001, que cria o worker (ver D-02). A NFR-012 (uma recodificação por cadeia) e a NFR-016 (saída MP4 H.264/AAC por omissão) passam para a ST-VID-COM-001 e a B003, que constroem o executor e a codificação por omissão (T-02). A B004 e a B008 continuam a verificar estes três NFR nos seus critérios de aceitação, mas não são donas deles.
 
-## D-04 — Bolt da rotina periódica de recuperação e limpeza (Q-ADD-14)
+## D-04 — Rotina periódica de manutenção
 
-- **Onde:** `memory-bank/bolts/003-video-task-foundation/bolt.md` e `memory-bank/bolts/009-video-batch/bolt.md` ("Saídas esperadas"); `units/001-video-lifecycle/unit-brief.md`.
-- **Dúvida:** Em que bolt(s) se constrói a rotina periódica do serviço de projetos da Q-ADD-14?
-- **O que as fontes dizem:** ADD Q-ADD-14 (aceite): a rotina retoma ou fecha tarefas e lotes parados, liberta lugares de tarefa ativa sem dono, passa a `failed` os ZIP sem progresso e remove os recursos de vídeo de projetos apagados; é citada em T-00 (limpeza de projetos apagados), T-03 (lugares sem dono), T-09 (lotes parados) e 4.10 (ZIP). `artefactos-finais.md` §5 não a atribui a nenhum bolt.
-- **Opções:** (a) toda na B003; (b) a parte de tarefas, lugares e projetos apagados na B003 e a parte de lotes e ZIP na B009; (c) um bolt próprio, depois da B009.
-- **Resposta:** **(a), só com a parte que não depende de lotes.** A B003 cria a rotina periódica para as tarefas paradas, os lugares de tarefa ativa sem dono e a remoção dos recursos de vídeo de projetos apagados. A parte dos lotes parados e dos ZIP fica fora desta construção, porque a B009 não é implementada (ver D-06).
-
-## D-05 — Desenho da extração de fotogramas (UC-VID-005)
-
-- **Onde:** `memory-bank/bolts/006-video-frame-export/bolt.md` ("Objetivo", "Saídas esperadas"); story `units/002-video-transformations/stories/ST-VID-005-video-frame-export.md`.
-- **Dúvida:** A extração de fotogramas é um módulo do registo de operações e do worker único (T-01, T-02), e onde ficam guardadas as imagens extraídas (estágios de imagem existentes ou estágios de vídeo novos)?
-- **O que as fontes dizem:** o âmbito do ADD é UC-VID-006 a 015 (secção 1.2); a 2.5 diz só que a extração "tem de ser construída (T-00)". O ADD exclui a extração das cadeias e dos lotes (4.9, 4.10), e a tabela de composição do T-02 não a inclui. `artefactos-finais.md` §5: B006 é DDD, depende da B003 e de "integração imagem". A UC-VID-005 e a REQ-VID-FRAMES dizem que as imagens são recursos de imagem normais do projeto, mas não indicam o componente nem o estágio.
-- **Opções:** (a) módulo do worker único, com resposta pelo módulo AMQP de vídeo e imagens gravadas nos estágios de imagem existentes; (b) módulo do worker único com estágios próprios; (c) a equipa desenha a extração num complemento ao ADD antes da B006.
-- **Resposta:** **Não se aplica nesta construção.** A B006 não é implementada (ver D-06), por isso o desenho da extração fica por fazer. Se a B006 for retomada, a equipa escreve antes um complemento ao ADD, porque o ADD v1.1 não decide onde a extração corre nem onde ficam as imagens.
-
-## D-06 — Bolts B006 e B009 fora desta construção (decisão da equipa)
-
-- **Onde:** `memory-bank/bolts/006-video-frame-export/bolt.md`, `memory-bank/bolts/009-video-batch/bolt.md`, as stories `units/002-video-transformations/stories/ST-VID-005-video-frame-export.md` e `units/003-video-composition/stories/ST-VID-015-video-batch.md`, `units.md`, `unit-brief.md` das Units 002 e 003, `traceability.md`, `story-index.md` e as saídas esperadas da B001 e da B003.
-- **Dúvida:** A equipa decidiu não implementar a extração de fotogramas (UC-VID-005, B006) nem o processamento em lote (UC-VID-015, B009). Como ficam os artefactos?
-- **O que as fontes dizem:** na tabela de `artefactos-finais.md` §5, nenhum bolt depende da B006 nem da B009 (são folhas do grafo), por isso as B001 a B005, B007 e B008 não são afetadas. O ADD põe na fundação peças que só os lotes usam: o modelo `VideoBatch` (T-00, T-09), o estágio `video_zip` (T-08), o campo `batch_id` na coleção `videos`, o endpoint `POST …/videos/batch`, os itens `kind: "batch_item"` (T-03), a devolução por item (T-04) e a dependência `archiver` (secção 6). Os documentos `docs/` continuam a incluir o UC-VID-005 e o UC-VID-015 no MVP.
-- **Opções:** (a) apagar os dois bolts; (b) manter os bolts e as stories com `status: blocked` e o motivo; (c) manter como `planned`.
-- **Resposta:** **(b).**
-  - Os dois bolts e as duas stories ficam no memory-bank com `status: blocked` e o motivo "Fora do âmbito desta construção por decisão da equipa (specsDuvidas D-06)". Os bolts não são apagados, para a rastreabilidade não se perder.
-  - A B001 e a B003 **não** constroem o `VideoBatch`, o estágio `video_zip`, o endpoint de lote, os itens `batch_item`, a devolução por item, a rotina de lotes e ZIP, nem o `archiver`. O campo `batch_id` também não é criado.
-  - A extração de fotogramas também não entra no worker.
-  - Na `traceability.md`, os requisitos `REQ-VID-FRAMES-*`, `REQ-VID-BATCH-*`, `REQ-VID-TASK-007` e `REQ-VID-QUOTA-007` (só a parte de lotes) ficam marcados como "não cobertos nesta construção (D-06)".
-  - Nas Units 002 e 003, `units.md` e `unit-brief.md` registam que essa parte do âmbito fica de fora.
-  - A predefinição de cadeia (UC-VID-014 FA3) continua a poder ser guardada e usada numa nova cadeia; só deixa de poder ser carregada num lote.
-  - Os documentos em `docs/` não são alterados nesta interação.
-
-## D-07 — NFR usados só pela extração de fotogramas e pelos lotes
-
-- **Onde:** `memory-bank/intents/001-video-processing-support/traceability.md` (linhas `REQ-VID-NFR-004`, `019`, `020` e `014`); `memory-bank/bolts/006-video-frame-export/bolt.md` e `009-video-batch/bolt.md` ("Requisitos rastreados"); stories `units/002-video-transformations/stories/ST-VID-005-video-frame-export.md` e `units/003-video-composition/stories/ST-VID-015-video-batch.md`; `unit-brief.md` das Units 002 e 003.
-- **Dúvida:** A D-06 manda marcar como "não cobertos nesta construção" os `REQ-VID-FRAMES-*`, os `REQ-VID-BATCH-*`, a `REQ-VID-TASK-007` e a parte de lotes da `REQ-VID-QUOTA-007`, mas não diz nada sobre a NFR-004, a NFR-019 e a NFR-020 (donas: ST-VID-005, B006) nem sobre a NFR-014 (dona: ST-VID-015, B009). Também ficam marcadas como não cobertas?
-- **O que as fontes dizem:** ERS v2.4 (`docs/requirements/REQ-VID-NFR.md`): a NFR-004 (fotogramas em JPEG ou PNG), a NFR-019 (resolução das imagens extraídas) e a NFR-020 (limite de fotogramas por extração) têm origem só no UC-VID-005; a NFR-014 (limite de vídeos por lote) é sobre lotes, embora a origem cite também o UC-VID-013 e o UC-VID-014. Na `traceability.md`, as quatro pertencem a bolts agora `blocked`. Até à resposta, ficam com o estado "Especificado; implementação pendente".
-- **Opções:** (a) marcar as quatro como "não cobertas nesta construção (D-06)"; (b) marcar só a NFR-004, a NFR-019 e a NFR-020 e manter a NFR-014; (c) manter as quatro como estão.
-- **Resposta:** **A NFR-004, a NFR-019 e a NFR-020 ficam "Não coberto nesta construção (D-06)"**, porque só servem a extração. **A NFR-014 continua coberta na parte da junção e da cadeia** (UC-VID-013 RN2-RN3, UC-VID-014 RN5) e fica parcialmente não coberta só na parte de lotes (UC-VID-015 RN2), como a QUOTA-007. Princípio da equipa: só ficam de fora o UC-VID-005 (B006) e o UC-VID-015 (B009); tudo o resto é implementado.
+- **Âmbito:** recuperação de tarefas paradas, republicação de pedidos persistidos, libertação de lugares órfãos e limpeza de recursos de projetos eliminados.
+- **Resposta:** responsabilidade da B003, através da rotina de manutenção de Projetos. A periodicidade e os limiares são definidos na D-41 e na Q-ADD-14.
 
 ## D-08 — Componentes de fundação que a D-02 não distribui
 
@@ -74,31 +40,23 @@
 - **Dúvida:** A resposta à D-02 põe na B001 as filas, os URLs de escrita e o worker com a ingestão, e na B003 o `VideoTask`, os locks, o `video_control`, a quota, o cancelamento, o progresso, o registo de operações e o executor. Em que bolt se constroem estes componentes, que não aparecem em nenhuma das duas listas: (1) o módulo `projects/video/amqp.js`; (2) os URLs internos de leitura (GET) e a criação do `route/video.js` e do `services/videoUrls.js` do `imageStorageService`; (3) o volume `video_tmp`; (4) os argumentos da `video_operations_queue` (*quorum*, `x-delivery-limit: 1`, `x-consumer-timeout`, *dead-letter*)?
 - **O que as fontes dizem:** ADD T-03: o `amqp.js` publica em `video_operations_queue` e consome `video_project_queue` com confirmação manual, e é a única via de vídeo entre o serviço de projetos e o worker. A ingestão com o worker (B001) já troca mensagens por estas filas. ADD T-08: o worker pede ao módulo de vídeo do storage os URLs de leitura quando começa a tarefa e os de escrita quando o FFmpeg termina; o `services/videoUrls.js` gera os dois tipos de URL, e o `route/video.js` é montado com `app.use("/video", …)`. A B002 descreve a montagem do `route/video.js` e o URL de leitura com 900 s. ADD T-02: os temporários do worker ficam em `/tmp/video/<taskId>/`, no volume `video_tmp`. ADD T-03: os argumentos fazem parte da declaração da `video_operations_queue` em `rabbitMQ/definitions.json`, que a D-02 põe na B001. Pela regra 2.6, uma fila declarada não se altera depois.
 - **Opções:** (a) os quatro componentes vão para a B001, na medida em que a ingestão os usa, e a B002 e a B003 acrescentam o que lhes falta (URL de descarregamento de 900 s, tratamento das respostas de tarefa); (b) só o `amqp.js` e os argumentos da fila vão para a B001, e os URLs de leitura, o `route/video.js` e o `video_tmp` ficam onde estão; (c) a equipa distribui cada componente.
-- **Resposta:** **Os quatro componentes vão para a B001**, porque a ingestão precisa deles: o `projects/video/amqp.js`; os URLs internos de leitura e o `route/video.js` com o `videoUrls.js` do `imageStorageService` (T-08); o volume `video_tmp`; e a declaração completa da `video_operations_queue`, já com todos os argumentos do T-03 (*quorum*, `x-delivery-limit`, `x-consumer-timeout` e *dead-letter*), porque pela regra 2.6 não podem ser acrescentados depois. A B003 estende estes componentes por acréscimo, sem os alterar. **Nota (confirmada pela equipa):** o `route/video.js` e o `videoUrls.js` são criados pela B001, e o URL de descarregamento de 900 s continua no âmbito da B002, que usa esse módulo por acréscimo. Princípio da equipa: só ficam de fora o UC-VID-005 (B006) e o UC-VID-015 (B009); tudo o resto é implementado.
+- **Resposta:** **Os quatro componentes vão para a B001**, porque a ingestão precisa deles: o `projects/video/amqp.js`; os URLs internos de leitura e o `route/video.js` com o `videoUrls.js` do `imageStorageService` (T-08); o volume `video_tmp`; e a declaração completa da `video_operations_queue`, já com todos os argumentos do T-03 (*quorum*, `x-delivery-limit`, `x-consumer-timeout` e *dead-letter*), porque pela regra 2.6 não podem ser acrescentados depois. A B003 estende estes componentes por acréscimo, sem os alterar. **Nota (confirmada pela equipa):** o `route/video.js` e o `videoUrls.js` são criados pela B001, e o URL de descarregamento de 900 s continua no âmbito da B002, que usa esse módulo por acréscimo.
 
-## D-09 — Propriedade da NFR-011 depois da D-02
+## D-09 — Propriedade da NFR-010 depois da D-02
 
-- **Onde:** `memory-bank/intents/001-video-processing-support/traceability.md` (linha `REQ-VID-NFR-011`); `memory-bank/bolts/003-video-task-foundation/bolt.md` ("Requisitos rastreados"); story `units/001-video-lifecycle/stories/ST-VID-COM-001-video-task-quota-foundation.md`.
-- **Dúvida:** A NFR-011 (módulo de vídeo desacoplado por AMQP, com a fila independente `video_operations_queue`, sem alterar as ferramentas de imagem) continua a pertencer à ST-VID-COM-001 e à B003, ou passa para a ST-VID-000 e para a B001, que agora constrói as filas e o worker?
-- **O que as fontes dizem:** ADD T-00: as filas de vídeo e o worker cumprem a NFR-011. A D-02 põe as filas e o worker na B001, e a D-03 adota a regra "cada requisito vai para o bolt que constrói o componente", mas só para a NFR-010, a NFR-013 e a NFR-018. A `traceability.md` atribui a NFR-011 à ST-VID-COM-001 (B003), com as decisões T-00 e T-02. Até à resposta, a atribuição mantém-se.
-- **Opções:** (a) passar a NFR-011 para a ST-VID-000 e a B001; (b) manter na ST-VID-COM-001 e na B003, com a B001 a verificá-la.
-- **Resposta:** **(a), pela regra da D-03.** A NFR-011 passa para a B001, que cria as filas e o worker. A B003 continua a verificá-la nos critérios de passagem. Princípio da equipa: só ficam de fora o UC-VID-005 (B006) e o UC-VID-015 (B009); tudo o resto é implementado.
-
-## D-10 — Bolt que constrói a parte coberta da NFR-014
-
-- **Onde:** `memory-bank/intents/001-video-processing-support/traceability.md` (linha `REQ-VID-NFR-014`); `memory-bank/bolts/008-video-concat-chain/bolt.md` e `009-video-batch/bolt.md` ("Requisitos rastreados"); stories `units/003-video-composition/stories/ST-VID-013-video-concat.md`, `ST-VID-014-video-chain.md` e `ST-VID-015-video-batch.md`; `units/003-video-composition/unit-brief.md`.
-- **Dúvida:** A D-07 diz que a NFR-014 continua coberta na parte da junção e da cadeia (UC-VID-013 RN2-RN3, UC-VID-014 RN5) e só fica não coberta na parte de lotes. Mas a dona da NFR-014 é a ST-VID-015, no bolt B009, que está `blocked`, e a B008 não rastreia a NFR-014. Que story e que bolt constroem e verificam a parte coberta?
-- **O que as fontes dizem:** ERS v2.4 (`docs/requirements/REQ-VID-NFR.md`): a NFR-014 diz "limites por perfil ao número de vídeos por lote" (2–10 Registado, 2–50 Premium), com origem no UC-VID-013 (RN2-RN3), no UC-VID-014 (RN5), no UC-VID-015 (RN2) e na DQ-015. A NFR-022 (limite de vídeos por junção), a NFR-023 (passos por cadeia) e a NFR-024 (duração da junção) têm a mesma origem e pertencem à ST-VID-013/014 e à B008. A `traceability.md` atribui a NFR-014 à ST-VID-015 e à B009, com as decisões T-09 e 4.10. Até à resposta, a atribuição mantém-se, e a linha fica com a parte de lotes marcada como não coberta.
-- **Opções:** (a) a NFR-014 passa para a ST-VID-013 ou a ST-VID-014 e para a B008, que constrói a parte da junção e da cadeia; (b) a dona continua a ser a ST-VID-015 (B009), e a B008 verifica a parte coberta sem ser dona; (c) a equipa revê a D-07 para esta NFR.
-- **Resposta:** **(a).** A NFR-014 passa a pertencer à ST-VID-013 (junção) e à B008, para a parte da junção e da cadeia (UC-VID-013 RN2-RN3, UC-VID-014 RN5). A ST-VID-014 verifica-a nos seus critérios. A parte de lotes (UC-VID-015 RN2) continua "parcialmente não coberta (D-06)" na ST-VID-015 e na B009.
+- **Onde:** `memory-bank/intents/001-video-processing-support/traceability.md` (linha `REQ-VID-NFR-010`); `memory-bank/bolts/003-video-task-foundation/bolt.md` ("Requisitos rastreados"); story `units/001-video-lifecycle/stories/ST-VID-COM-001-video-task-quota-foundation.md`.
+- **Dúvida:** A NFR-010 (módulo de vídeo desacoplado por AMQP, com a fila independente `video_operations_queue`, sem alterar as ferramentas de imagem) continua a pertencer à ST-VID-COM-001 e à B003, ou passa para a ST-VID-000 e para a B001, que agora constrói as filas e o worker?
+- **O que as fontes dizem:** ADD T-00: as filas de vídeo e o worker cumprem a NFR-010. A D-02 põe as filas e o worker na B001, e a D-03 adota a regra "cada requisito vai para o bolt que constrói o componente", mas só para a NFR-009, a NFR-012 e a NFR-016. A `traceability.md` atribui a NFR-010 à ST-VID-COM-001 (B003), com as decisões T-00 e T-02. Até à resposta, a atribuição mantém-se.
+- **Opções:** (a) passar a NFR-010 para a ST-VID-000 e a B001; (b) manter na ST-VID-COM-001 e na B003, com a B001 a verificá-la.
+- **Resposta:** **(a), pela regra da D-03.** A NFR-010 passa para a B001, que cria as filas e o worker. A B003 continua a verificá-la nos critérios de passagem.
 
 ## D-11 — Estratégia de carregamento até 2 GB (Q-ADD-04)
 
 - **Onde:** `memory-bank/bolts/001-video-lifecycle/bolt.md` ("Decisões do ADD v1.1", Q-ADD-04); `ddd-01-domain-model.md` (agregado Carregamento, porta ArmazenamentoVideo).
 - **Dúvida:** O carregamento de vídeos até 2 GB faz-se por *streaming* pelo API Gateway e pelo serviço de projetos, ou por upload direto com URL pré-assinado PUT?
-- **O que as fontes dizem:** ADD Q-ADD-04 (pendente): o `multer.memoryStorage()` das rotas de imagem carrega o ficheiro inteiro em memória; em qualquer caso, a rota escolhida tem um `location` novo no nginx com `client_max_body_size 2g` e `proxy_request_buffering off` (T-08). O T-08 descreve o URL de escrita só para a rede interna (worker).
+- **O que as fontes dizem:** ADD Q-ADD-04 (pendente): o `multer.memoryStorage` das rotas de imagem carrega o ficheiro inteiro em memória; em qualquer caso, a rota escolhida tem um `location` novo no nginx com `client_max_body_size 2g` e `proxy_request_buffering off` (T-08). O T-08 descreve o URL de escrita só para a rede interna (worker).
 - **Opções:** (a) *streaming* pelos serviços; (b) PUT pré-assinado direto.
-- **Resposta:** **(b).** O cliente pede ao router de vídeo um URL de escrita, com o tamanho declarado validado face ao perfil (≤ 200 MB Registado, ≤ 2 GB Premium); envia o ficheiro por PUT através do `location /s3-video/` do nginx (com `client_max_body_size 2g` e `proxy_request_buffering off`, T-08); depois confirma o fim do envio numa rota do router de vídeo, que verifica o objeto com `headObject` e só então inicia a ingestão. Motivo: o `multer.memoryStorage()` não serve para 2 GB, o tráfego não passa pelo API Gateway (NFR-016) e nada do código existente muda (regra 2.6). Esta decisão alarga o URL de escrita do T-08, previsto só para a rede interna, ao carregamento pelo cliente.
+- **Resposta:** **(b).** O cliente pede ao router de vídeo um URL de escrita, com o tamanho declarado validado face ao perfil (≤ 200 MB Registado, ≤ 2 GB Premium); envia o ficheiro por PUT através do `location /s3-video/` do nginx (com `client_max_body_size 2g` e `proxy_request_buffering off`, T-08); depois confirma o fim do envio numa rota do router de vídeo, que verifica o objeto com `headObject` e só então inicia a ingestão. Motivo: o `multer.memoryStorage` não serve para 2 GB, o tráfego não passa pelo API Gateway (NFR-014) e nada do código existente muda (regra 2.6). Esta decisão alarga o URL de escrita do T-08, previsto só para a rede interna, ao carregamento pelo cliente.
 
 ## D-12 — Estado `failed` da ingestão e Garantia Mínima
 
@@ -120,7 +78,7 @@
 
 - **Onde:** `ddd-01-domain-model.md` (ErroVideo, evento VideoDisponivel); ADD T-03, T-10.
 - **Dúvida:** Que códigos de erro se usam para ficheiro corrompido e para transferência interrompida, que a ERS não fixa, e como se chama o evento WebSocket da ingestão, que o ADD não define?
-- **O que as fontes dizem:** REQ-VID-UPLOAD-012 e a exceção de rede do UC-VID-000 não dão código. ADD T-03 define só `video-task-update` e `video-batch-update`.
+- **O que as fontes dizem:** REQ-VID-UPLOAD-012 e a exceção de rede do UC-VID-000 não dão código. ADD T-03 define só `video-task-update`.
 - **Opções:** (a) `CORRUPTED_FILE`, `UPLOAD_ABORTED` e `video-ingest-update`; (b) outros nomes.
 - **Resposta:** **(a).** Aceitam-se `CORRUPTED_FILE` e `UPLOAD_ABORTED`. O evento WebSocket da ingestão chama-se `video-ingest-update`, ao lado do `video-task-update` do T-03.
 
@@ -144,7 +102,7 @@
 
 - **Onde:** `ddd-02-technical-design.md` (API Design: `GET …/videos` e `GET …/videos/:video/playback`).
 - **Dúvida:** Que rotas servem a galeria (passo 7 do UC-VID-000) e o leitor (passo 8), e com que URL o leitor reproduz o vídeo?
-- **O que as fontes dizem:** ADD 4.1 e 4.2 definem só `GET …/videos/:video` (informações) e `GET …/videos/:video/download` (B002). ADD T-06: o leitor usa `preview_key` quando existe e `original_key` nos restantes casos. NFR-017: URLs temporários assinados por 15 min. Nenhuma fonte define a listagem nem o URL de reprodução.
+- **O que as fontes dizem:** ADD 4.1 e 4.2 definem só `GET …/videos/:video` (informações) e `GET …/videos/:video/download` (B002). ADD T-06: o leitor usa `preview_key` quando existe e `original_key` nos restantes casos. NFR-015: URLs temporários assinados por 15 min. Nenhuma fonte define a listagem nem o URL de reprodução.
 - **Opções:** (a) `GET …/videos` (só `completed`, com URL assinado da miniatura) e `GET …/videos/:video/playback` (URL GET *inline* de 900 s pelo `/s3-video/`), ambas com permissão de leitura e recusa de `anonymous`, na B001; (b) a galeria usa o `GET …/videos/:video` da B002, e a B001 fica só com a listagem.
 - **Resposta:** **(a), aceite.** A B001 constrói `GET …/videos` (só `completed`, com URL assinado da miniatura) e `GET …/videos/:video/playback` (URL GET *inline* de 900 s pelo `/s3-video/`), com permissão de leitura e recusa de `anonymous`.
 
@@ -182,8 +140,8 @@
 
 ## D-22 — Unidade dos limites de tamanho por perfil
 
-- **Onde:** `ddd-02-technical-design.md` (NFR Implementation, NFR-008); `projects/video/profiles.js`.
-- **Dúvida:** Os limites "200 MB" e "2 GB" (RN4, NFR-008, UPLOAD-004) contam-se em base 1024 (200 × 1024² e 2 × 1024³ bytes) ou em base 1000?
+- **Onde:** `ddd-02-technical-design.md` (NFR Implementation, NFR-007); `projects/video/profiles.js`.
+- **Dúvida:** Os limites "200 MB" e "2 GB" (RN4, NFR-007, UPLOAD-004) contam-se em base 1024 (200 × 1024² e 2 × 1024³ bytes) ou em base 1000?
 - **O que as fontes dizem:** REQ-VID-INFO-005 define, para a apresentação do tamanho, 1 MB = 1024² bytes e 1 GB = 1024³ bytes. O `client_max_body_size 2g` do nginx (T-08) é 2 × 1024³ bytes. As regras de limite não dizem a base.
 - **Opções:** (a) base 1024, coerente com a INFO-005 e com o nginx; (b) base 1000.
 - **Resposta:** **(a), aceite.** Base 1024: 200 MB = 200 × 1024² bytes e 2 GB = 2 × 1024³ bytes, coerente com a INFO-005 e com o `client_max_body_size 2g` do nginx.
@@ -248,10 +206,10 @@
 
 - **Revisão:** Revisto pela D-93.
 
-- **Onde:** `docs/requirements/REQ-VID-UPLOAD.md` (REQ-VID-UPLOAD-021); `docs/use-cases/UC-VID-000.md` (FA6 e pré-condições); `frontend/components/video/new-video-project-dialog.tsx`; `frontend/components/dashboard-sidebar/dashboard-sidebar.tsx`.
+- **Onde:** `docs/requirements/REQ-VID-UPLOAD.md` (UC-VID-000/FA6); `docs/use-cases/UC-VID-000.md` (FA6 e pré-condições); `frontend/components/video/new-video-project-dialog.tsx`; `frontend/components/dashboard-sidebar/dashboard-sidebar.tsx`.
 - **Dúvida:** Hoje só se cria um projeto com imagens (`new-project-dialog.tsx` exige pelo menos uma). Como começa um utilizador que só tem um vídeo?
 - **O que as fontes dizem:** Nada; o UC-VID-000 parte de um projeto existente. A rota existente `POST /projects/:user` já aceita `imgs` vazio.
-- **Resposta:** **Requisito novo da equipa (REQ-VID-UPLOAD-021, UC-VID-000 FA6), construído na B001.** Componente novo `new-video-project-dialog.tsx` com o nome do projeto e o seletor de vídeo (MP4, MOV, AVI, com as validações do passo 2): cria o projeto com `POST /projects/:user`, carrega o vídeo pelo fluxo da B001 e abre o projeto. Fica ligado com uma linha nova na `dashboard-sidebar`, junto a "New Project"; o `new-project-dialog.tsx` não muda (regra 2.6). Se o carregamento falhar ou for cancelado, o projeto fica criado e vazio, e o utilizador pode carregar outro vídeo. Utilizadores anónimos não veem a opção (RN1).
+- **Resposta:** **Requisito novo da equipa (UC-VID-000/FA6, UC-VID-000 FA6), construído na B001.** Componente novo `new-video-project-dialog.tsx` com o nome do projeto e o seletor de vídeo (MP4, MOV, AVI, com as validações do passo 2): cria o projeto com `POST /projects/:user`, carrega o vídeo pelo fluxo da B001 e abre o projeto. Fica ligado com uma linha nova na `dashboard-sidebar`, junto a "New Project"; o `new-project-dialog.tsx` não muda (regra 2.6). Se o carregamento falhar ou for cancelado, o projeto fica criado e vazio, e o utilizador pode carregar outro vídeo. Utilizadores anónimos não veem a opção (RN1).
 
 ## D-31 — Vídeos concluídos na área principal do projeto (correção do UC-VID-000, passos 7 e 8)
 
@@ -278,7 +236,7 @@
 - **Dúvida:** Ao fechar a B001, o script marcou o bolt como `complete`, mas não atualizou a ST-VID-000 ("File not found"). O script procura `stories/ST-VID-000.md` ou `stories/ST-VID-000-*.md`, e a Inception gravou as stories como `001-video-ingestion.md`, com o ID só no *frontmatter*. Acontece o mesmo em todos os bolts. O script recusa correr outra vez num bolt `complete`, e as stories não se editam à mão. Como se fecha a ST-VID-000 e se evita o problema nos próximos bolts?
 - **O que as fontes dizem:** O bolt type manda usar o `bolt-complete.cjs` e não editar as stories à mão. Nenhuma fonte trata o nome dos ficheiros das stories.
 - **Opções:** (a) renomear os ficheiros das stories para `ST-VID-xxx-<nome>.md` (com `git mv` e atualização das ligações), e a equipa autoriza, só desta vez, pôr a ST-VID-000 em `status: complete` e `implemented: true` como o script faria; (b) manter os nomes e a equipa autoriza essa atualização manual em cada fecho de bolt; (c) manter a ST-VID-000 como está até haver uma correção do specsmd.
-- **Resposta:** **(a).** Os 17 ficheiros de stories passaram a `ST-VID-xxx-<nome>.md` (por exemplo, `ST-VID-000-video-ingestion.md` e `ST-VID-COM-001-video-task-quota-foundation.md`), com `git mv` para manter o histórico, e as ligações foram atualizadas (`story-index.md`, os `bolt.md` das B001 a B009 e as referências desta lista). Uma pesquisa às ligações relativas de `docs/` e `memory-bank/` confirmou 0 ligações partidas. A ST-VID-000 foi atualizada à mão, só desta vez, com o que o script faria: `status: complete` e `implemented: true`. Os bolts seguintes fecham com o `bolt-complete.cjs`, que passa a encontrar as stories. Ficam com o nome antigo só o registo histórico do *construction log* e a descrição desta dúvida.
+- **Resposta:** **(a).** Os ficheiros de Stories passaram a `ST-VID-xxx-<nome>.md` (por exemplo, `ST-VID-000-video-ingestion.md` e `ST-VID-COM-001-video-task-quota-foundation.md`), com `git mv` para manter o histórico, e as ligações foram atualizadas (`story-index.md`, os `bolt.md` das B001 a B005, B007 e B008 e as referências desta lista). Uma pesquisa às ligações relativas de `docs/` e `memory-bank/` confirmou 0 ligações partidas. A ST-VID-000 foi atualizada à mão, só desta vez, com o que o script faria: `status: complete` e `implemented: true`. Os bolts seguintes fecham com o `bolt-complete.cjs`, que passa a encontrar as stories. Ficam com o nome antigo só o registo histórico do *construction log* e a descrição desta dúvida.
 
 ## D-34 — Nome sugerido no descarregamento depois da verificação da D-29
 
@@ -293,7 +251,7 @@
 
 - **Onde:** `projects/video/fileName.js`.
 - **Dúvida:** O `fileName.js` é a função única do nome sugerido (ADD 4.1) e tem de tratar qualquer `recipe`. A Q-ADD-08 está pendente no ADD: que sufixo leva o resultado de uma cadeia ou de uma junção, e qual é o nome base de uma junção com várias origens? Na B002 só há originais (sem sufixo); os resultados de operações chegam a partir da B004 e as cadeias e junções na B008.
-- **O que as fontes dizem:** REQ-VID-DOWNLOAD-005: "nome original, um sufixo com a(s) operação(ões) aplicada(s) e a extensão do formato armazenado"; exemplo `ferias.mp4` recortado → `ferias_trim.mp4`. ADD 4.1: a função recebe `original_name`, `recipe` e `meta.container`. ADD Q-ADD-08: em aberto. Os lotes estão fora desta construção (D-06).
+- **O que as fontes dizem:** REQ-VID-DOWNLOAD-005: "nome original, um sufixo com a(s) operação(ões) aplicada(s) e a extensão do formato armazenado"; exemplo `ferias.mp4` recortado → `ferias_trim.mp4`. ADD 4.1: a função recebe `original_name`, `recipe` e `meta.container`. ADD Q-ADD-08: em aberto.
 - **Opções:** (a) os identificadores das operações do `recipe`, pela ordem, unidos por `_` (`ferias_trim_filter.mp4`); numa junção, o nome base é o `original_name` do resultado (o da primeira origem) e a junção entra no sufixo como `concat` (`ferias_concat.mp4`); (b) só a última operação no sufixo; (c) a B002 implementa só originais e operações isoladas, e a regra das cadeias e junções fica para a B008, que a acrescenta ao `fileName.js`.
 - **Recomendação:** (a).
 - **Resposta:** **(a), registada como resposta à Q-ADD-08 do ADD.** O sufixo são os identificadores das operações do `recipe`, pela ordem, unidos por `_` (`ferias_trim_filter.mp4`); numa junção, o nome base é o `original_name` do resultado (o da primeira origem) e a junção entra no sufixo como `concat` (`ferias_concat.mp4`).
@@ -319,7 +277,7 @@
 ## D-38 — O processamento de imagens conta como tarefa ativa? (Q-ADD-02)
 
 - **Onde:** `ddd-01-domain-model.md` (Lugar de tarefa ativa).
-- **Dúvida:** O limite de uma tarefa de vídeo ativa por projeto (NFR-021, DQ-016) também bloqueia, ou é bloqueado por, um processamento de imagens em curso no mesmo projeto (`activeToken`)?
+- **Dúvida:** O limite de uma tarefa de vídeo ativa por projeto (NFR-017, DQ-015) também bloqueia, ou é bloqueado por, um processamento de imagens em curso no mesmo projeto (`activeToken`)?
 - **O que as fontes dizem:** ADD T-03 e Q-ADD-02 (em aberto). A regra 2.6 impede que o fluxo de imagem passe a consultar o `video_project_locks`, por isso, na opção (b), o bloqueio só funcionaria num sentido.
 - **Opções:** (a) não conta: o lugar é só para tarefas de vídeo; (b) conta num só sentido: a aceitação de vídeo recusa (409) se o projeto tiver um processamento de imagens em curso, lido do documento do projeto, mas o processamento de imagens continua a não ver as tarefas de vídeo.
 - **Recomendação:** (a). A opção (b) seria assimétrica e dependeria de ler o estado interno do fluxo de imagem.
@@ -332,16 +290,16 @@
 - **O que as fontes dizem:** ADD T-02: `libx264` + `aac`, `yuv420p`, `+faststart`; "o CRF e o *preset* ficam por definir (Q-ADD-11)". D-19 fixou `-preset veryfast -crf 23` e AAC a 128 kb/s só para a cópia de pré-visualização da ingestão. D-18: uma réplica do worker.
 - **Opções:** (a) os mesmos valores da D-19 (`veryfast`, CRF 23, AAC 128 kb/s): um só conjunto de valores, codificação rápida com uma réplica; (b) `-preset medium -crf 20` e AAC a 160 kb/s: melhor qualidade, cerca de 2 a 3 vezes mais lento; (c) outros valores.
 - **Recomendação:** (a). O CRF 23 é o valor por omissão do `libx264` e, com uma só réplica, a rapidez reduz a espera dos outros projetos.
-- **Resposta:** **(a) para MP4 e MOV, registada como resposta parcial à Q-ADD-11 do ADD:** `-preset veryfast -crf 23` e AAC a 128 kb/s, os valores da D-19. O executor da B003 não gera AVI (o formato de trabalho é MP4, T-05/DQ-013, e a `test_reencode` da D-37 produz MP4; só a conversão, B007, escolhe outro contentor), por isso o `-q:v` do `mpeg4` e o bitrate do MP3 ficam para a B007.
+- **Resposta:** **(a) para MP4 e MOV, registada como resposta parcial à Q-ADD-11 do ADD:** `-preset veryfast -crf 23` e AAC a 128 kb/s, os valores da D-19. O executor da B003 não gera AVI (o formato de trabalho é MP4, T-05/DQ-012, e a `test_reencode` da D-37 produz MP4; só a conversão, B007, escolhe outro contentor), por isso o `-q:v` do `mpeg4` e o bitrate do MP3 ficam para a B007.
 
-## D-40 — Passo corrente (`step`) quando a cadeia corre num único *filtergraph* (TASK-008)
+## D-40 — Passo corrente (`step`) quando a cadeia corre num único *filtergraph* (TASK-007)
 
 - **Onde:** `ddd-01-domain-model.md` (ProgressoTarefa); evento `video-task-update` e `GET …/videos/tasks/:taskId`.
-- **Dúvida:** A REQ-VID-TASK-008 pede o passo corrente (exemplo: `step: 3`, `totalSteps: 4`). Com o T-02, todos os passos correm ao mesmo tempo numa única invocação FFmpeg, por isso não há um "passo em execução" observável. Que valor leva `step`?
-- **O que as fontes dizem:** REQ-VID-TASK-008; ADD T-02 (um único `-filter_complex`) e T-03 (eventos de progresso com `step`, `totalSteps` e `progress`). Nenhuma fonte trata a contradição.
+- **Dúvida:** A REQ-VID-TASK-007 pede o passo corrente (exemplo: `step: 3`, `totalSteps: 4`). Com o T-02, todos os passos correm ao mesmo tempo numa única invocação FFmpeg, por isso não há um "passo em execução" observável. Que valor leva `step`?
+- **O que as fontes dizem:** REQ-VID-TASK-007; ADD T-02 (um único `-filter_complex`) e T-03 (eventos de progresso com `step`, `totalSteps` e `progress`). Nenhuma fonte trata a contradição.
 - **Opções:** (a) `step` proporcional ao progresso: `step = min(totalSteps, floor(progress / 100 × totalSteps) + 1)`, monótono e coerente com o exemplo da ERS; (b) `step = totalSteps` durante toda a codificação (todos os passos em curso); (c) `step = 1` até ao fim e `totalSteps` só como informação.
-- **Recomendação:** (a). Cumpre o critério da TASK-008 e dá à UI um "passo k de N" que avança; fica documentado que é uma indicação derivada do progresso global.
-- **Resposta:** **(a), registada como resposta à Q-ADD-16 do ADD na parte do passo corrente:** `step = min(totalSteps, floor(progress / 100 × totalSteps) + 1)`, a aproximação "proporção do tempo" que a Q-ADD-16 propõe para um grafo FFmpeg único, sem execução passo a passo (NFR-013). A outra parte da Q-ADD-16 (indicar a fase em vez do passo numa falha, UC-VID-014 exceção 7) é da B008 e não é respondida aqui.
+- **Recomendação:** (a). Cumpre o critério da TASK-007 e dá à UI um "passo k de N" que avança; fica documentado que é uma indicação derivada do progresso global.
+- **Resposta:** **(a), registada como resposta à Q-ADD-16 do ADD na parte do passo corrente:** `step = min(totalSteps, floor(progress / 100 × totalSteps) + 1)`, a aproximação "proporção do tempo" que a Q-ADD-16 propõe para um grafo FFmpeg único, sem execução passo a passo (NFR-012). A outra parte da Q-ADD-16 (indicar a fase em vez do passo numa falha, UC-VID-013 exceção 7) é da B008 e não é respondida aqui.
 
 ## D-41 — Parâmetros da rotina de manutenção (Q-ADD-14, D-15)
 
@@ -350,7 +308,7 @@
 - **O que as fontes dizem:** ADD Q-ADD-14: tarefas "sem progresso há mais do que um *timeout* proporcional à duração" são retomadas (republicando) ou fechadas como `failed` com devolução; lugares órfãos ao fim de um minuto. O T-03 não grava o progresso no MongoDB (vai só para o WebSocket), por isso o serviço de projetos não vê o progresso de uma tarefa. As quedas do worker já são tratadas pela reentrega e pelo *dead-letter*, e as respostas só são confirmadas depois de gravadas; o caso que sobra é uma queda do serviço de projetos entre a criação da tarefa e a publicação. D-18: `x-consumer-timeout` de 3 h.
 - **Opções:** (a) período de 60 s; lugares órfãos ao fim de 60 s (ADD); a tarefa guarda o instante da publicação, e uma tarefa `queued` nunca publicada há mais de 60 s é **retomada** (republicada); uma tarefa ativa sem transição há mais de 3 h 10 min (o `x-consumer-timeout` mais uma margem) é **fechada** como `failed` (`PROCESSING_ERROR`), com devolução, cancelamento em `video_control` e lugar libertado; carregamentos abandonados com mais de 900 s + 300 s (20 min); projetos apagados verificados a cada 10 min; (b) a equipa indica outros valores.
 - **Recomendação:** (a). Os limites seguem os do ADD e da D-18, e o fecho por tempo só apanha tarefas que já não podem estar a correr.
-- **Resposta:** **(a), registada como resposta à Q-ADD-14 do ADD na parte que não depende de lotes (D-04).** Período de 60 s; lugares órfãos ao fim de 60 s; tarefa `queued` nunca publicada há mais de 60 s → republicada; tarefa ativa sem transição há mais de 3 h 10 min → `failed` (`PROCESSING_ERROR`) com devolução, cancelamento em `video_control` e lugar libertado; carregamentos abandonados (D-15) com mais de 900 s + 300 s; projetos apagados verificados a cada 10 min. **Porquê 3 h 10 min:** fica acima do `x-consumer-timeout` de 3 h da `video_operations_queue` (D-18). Uma entrega sem confirmação não dura mais de 3 h (o RabbitMQ devolve-a à fila e o novo `started` conta como transição), por isso, passados 3 h 10 min sem transição, a tarefa já não pode estar a correr. **Porquê um valor fixo e não o *timeout* proporcional à duração da Q-ADD-14:** o progresso não é gravado no MongoDB (T-03), pelo que o serviço de projetos não vê se uma tarefa avança; e um valor proporcional à duração do vídeo teria de estimar a velocidade de codificação de cada operação e resolução, e podia fechar como `failed` uma tarefa lenta (4K, junção longa) que ainda está a correr. O limite fixo só fecha tarefas que já não podem estar vivas.
+- **Resposta:** **(a), registada como resposta à Q-ADD-14 do ADD na recuperação de tarefas (D-04).** Período de 60 s; lugares órfãos ao fim de 60 s; tarefa `queued` nunca publicada há mais de 60 s → republicada; tarefa ativa sem transição há mais de 3 h 10 min → `failed` (`PROCESSING_ERROR`) com devolução, cancelamento em `video_control` e lugar libertado; carregamentos abandonados (D-15) com mais de 900 s + 300 s; projetos apagados verificados a cada 10 min. **Porquê 3 h 10 min:** fica acima do `x-consumer-timeout` de 3 h da `video_operations_queue` (D-18). Uma entrega sem confirmação não dura mais de 3 h (o RabbitMQ devolve-a à fila e o novo `started` conta como transição), por isso, passados 3 h 10 min sem transição, a tarefa já não pode estar a correr. **Porquê um valor fixo e não o *timeout* proporcional à duração da Q-ADD-14:** o progresso não é gravado no MongoDB (T-03), pelo que o serviço de projetos não vê se uma tarefa avança; e um valor proporcional à duração do vídeo teria de estimar a velocidade de codificação de cada operação e resolução, e podia fechar como `failed` uma tarefa lenta (4K, junção longa) que ainda está a correr. O limite fixo só fecha tarefas que já não podem estar vivas.
 
 ## D-42 — Códigos de erro da aceitação que as fontes não fixam
 
@@ -365,16 +323,16 @@
 
 - **Onde:** `ddd-01-domain-model.md` (RegistoOperacoes); `POST /projects/:user/:project/videos/validate`.
 - **Dúvida:** Há um limite de tempo para a resposta do endpoint de validação, que o editor chama com *debounce*?
-- **O que as fontes dizem:** ADD T-01 e Q-ADD-15 (em aberto: "≤ 1 s como em NFR-005?"). A validação é síncrona, lê `videos.meta` e não usa filas.
-- **Opções:** (a) ≤ 1 s, como a NFR-005, verificado nos testes; (b) ≤ 300 ms, para a UI parecer imediata; (c) sem orçamento.
+- **O que as fontes dizem:** ADD T-01 e Q-ADD-15 (em aberto: "≤ 1 s como em NFR-004?"). A validação é síncrona, lê `videos.meta` e não usa filas.
+- **Opções:** (a) ≤ 1 s, como a NFR-004, verificado nos testes; (b) ≤ 300 ms, para a UI parecer imediata; (c) sem orçamento.
 - **Recomendação:** (a). É o valor já usado para a aceitação e a validação só faz uma leitura ao MongoDB e cálculos em memória.
-- **Resposta:** **(a), registada como resposta à Q-ADD-15 do ADD.** O endpoint de validação responde em ≤ 1 s, como a NFR-005, e isso é verificado nos testes.
+- **Resposta:** **(a), registada como resposta à Q-ADD-15 do ADD.** O endpoint de validação responde em ≤ 1 s, como a NFR-004, e isso é verificado nos testes.
 
 ## D-44 — Nomes dos códigos novos da aceitação e do cancelamento, e estado HTTP do `QUOTA_EXCEEDED`
 
 - **Onde:** `memory-bank/bolts/003-video-task-foundation/ddd-02-technical-design.md` (API Design, Error Handling); `projects/video/errors.js` (fim do `MESSAGES`).
 - **Dúvida:** A D-42 decidiu não reutilizar o `INVALID_STATE` e deixou por nomear: (1) o código do 409 de cancelamento de uma tarefa fora de `queued`/`processing`; (2) o código do 409 de "o projeto já tem uma tarefa ativa", que, pela mesma razão, também não pode ser o `INVALID_STATE`. Falta ainda (3) o estado HTTP do `QUOTA_EXCEEDED`.
-- **O que as fontes dizem:** ADD T-03: 409 nos dois casos, sem código; `QUOTA_EXCEEDED` com `{cost, remaining}`, sem estado HTTP. UC-VID-001 a 011 (exceção "Quota diária esgotada"): o sistema informa e sugere o upgrade para Premium; a tarefa não é criada. D-23: o 429 já é o `TOO_MANY_EDITORS`. Nenhuma fonte dá estes nomes nem o estado.
+- **O que as fontes dizem:** ADD T-03: 409 nos dois casos, sem código; `QUOTA_EXCEEDED` com `{cost, remaining}`, sem estado HTTP. UC-VID-001, UC-VID-002, UC-VID-003, UC-VID-004, UC-VID-005, UC-VID-006, UC-VID-007, UC-VID-008, UC-VID-009, UC-VID-010 (exceção "Quota diária esgotada"): o sistema informa e sugere o upgrade para Premium; a tarefa não é criada. D-23: o 429 já é o `TOO_MANY_EDITORS`. Nenhuma fonte dá estes nomes nem o estado.
 - **Opções:** (a) (1) `TASK_NOT_ACTIVE`; (2) `TASK_ALREADY_ACTIVE` com `details: {taskId}` da tarefa ativa, para o cliente a poder acompanhar; (3) `QUOTA_EXCEEDED` com 429, o estado HTTP de limites de pedidos por período (RFC 6585); (b) como (a), mas (3) com 402, que sugere pagamento (upgrade); (c) como (a), mas (3) com 403; (d) outros nomes.
 - **Recomendação:** (a). O 429 já é usado por limites, o corpo distingue o `QUOTA_EXCEEDED` do `TOO_MANY_EDITORS`, e o 402 é um estado reservado e pouco usado.
 - **Resposta:** **(a).** `TASK_NOT_ACTIVE` (409) para cancelar uma tarefa fora de `queued`/`processing`; `TASK_ALREADY_ACTIVE` (409) com `details: {taskId}` da tarefa ativa; `QUOTA_EXCEEDED` com HTTP 429 e `details: {cost, remaining}`. Os dois códigos novos são acrescentados ao fim do `MESSAGES` de `projects/video/errors.js` (D-42).
@@ -419,7 +377,7 @@
 
 - **Onde:** `memory-bank/bolts/004-video-basic-edits/ddd-01-domain-model.md` (CopiaNoKeyframe, PlaneadorExecucao, R-T4); `projects/video/plan.js` e `Tools/video/executor.py` (B003).
 - **Dúvida:** A TRIM-010 manda copiar a stream de vídeo quando o instante inicial coincide com um *keyframe* e recodificá-la nos outros casos. O plano é calculado no serviço de projetos e o worker não volta a decidir (T-01), mas a posição dos *keyframes* só se conhece com o FFprobe ao ficheiro, que só o worker tem, e não está nos `videos.meta` da ingestão (B001, que não pode mudar). Quem decide a cópia, com que critério de coincidência, e o que acontece ao áudio?
-- **O que as fontes dizem:** ADD T-02: "a cópia com `-ss/-to` só é usada quando o instante inicial coincide com um *keyframe* (verificado com FFprobe); o áudio pode ser copiado". ADD T-01: o worker "executa o plano recebido, sem validar regras de negócio". REQ-VID-TRIM-010: "dado um instante inicial num *keyframe*, Então a stream de vídeo é copiada". A aceitação tem de responder em ≤ 1 s (NFR-005) e não fala com o worker. Nenhuma fonte diz quando dois instantes "coincidem" nem como se corta o áudio copiado.
+- **O que as fontes dizem:** ADD T-02: "a cópia com `-ss/-to` só é usada quando o instante inicial coincide com um *keyframe* (verificado com FFprobe); o áudio pode ser copiado". ADD T-01: o worker "executa o plano recebido, sem validar regras de negócio". REQ-VID-TRIM-010: "dado um instante inicial num *keyframe*, Então a stream de vídeo é copiada". A aceitação tem de responder em ≤ 1 s (NFR-004) e não fala com o worker. Nenhuma fonte diz quando dois instantes "coincidem" nem como se corta o áudio copiado.
 - **Opções:** (a) **cópia condicionada no plano:** o serviço de projetos decide se a cópia é permitida (recorte, codec de origem igual ao de saída, nenhum outro passo altera o vídeo) e, nesse caso, põe no plano `CopiaNoKeyframe {atMs: startMs}`; o worker só verifica o facto com o FFprobe (há um *keyframe* cujo instante, relativo ao primeiro fotograma e arredondado ao milissegundo, é igual a `startMs`), escolhe `copy` (`-ss/-to` à entrada) ou `encode` (`trim`) e indica o modo no `metadata` da resposta `completed`. O áudio segue o vídeo: com o vídeo copiado, o áudio AAC é copiado (MP3 de AVI é recodificado); com o vídeo recodificado, o áudio é cortado com `atrim` e recodificado, para ficar sincronizado ao milissegundo. (b) Como (a), mas com o áudio AAC sempre copiado, também quando o vídeo é recodificado (segunda entrada do mesmo ficheiro com `-ss/-to`); desfasamento até um pacote AAC (~21 ms). (c) Recodificar sempre o vídeo e o áudio; cumpre a precisão mas não a parte "dado um instante inicial num *keyframe*, a stream de vídeo é copiada" da TRIM-010.
 - **Recomendação:** (a). A regra (quando a cópia é permitida) fica no serviço de projetos e o worker só observa um facto que só ele pode ver, como o T-02 prevê ("verificado com FFprobe"); o "pode ser copiado" do áudio deixa usar a cópia só quando não custa sincronismo. O caso mais comum, cortar só o fim (`startMs = 0`), fica uma cópia.
 - **Resposta:** **(a).** O serviço de projetos decide se a cópia é permitida e põe `CopiaNoKeyframe {atMs: startMs}` no plano; o worker só verifica com o FFprobe se há um *keyframe* em `startMs` (relativo ao primeiro fotograma, arredondado ao milissegundo), escolhe `copy` ou `encode` e indica o modo no `metadata` da resposta `completed`. O áudio segue o vídeo: copiado (AAC) quando o vídeo é copiado; cortado com `atrim` e recodificado quando o vídeo é recodificado. Justificação da equipa: a TRIM-010 diz que o áudio "pode" ser copiado, não que tem de ser.
@@ -428,7 +386,7 @@
 
 - **Onde:** `ddd-01-domain-model.md` (Bounded Context, IntervaloRecorte, FatorVelocidade); `projects/video/operations/` e `Tools/video/ops/`.
 - **Dúvida:** Que nomes têm as três operações e os seus parâmetros, em que unidade vão os instantes, e que código recebe um parâmetro ausente ou de tipo errado?
-- **O que as fontes dizem:** ADD T-01: passo `{operation, version, parameters}`, `version` começa em 1, parâmetros em camelCase (`contrastFactor`, `flipH`); exemplos de nomes de operação `adjust`, `filter`, `convert`, `concat`; a B003 usa `test_reencode`. REQ-VID-TRIM-001/002: instantes em horas, minutos, segundos e milissegundos. UC-VID-001/003: `INVALID_INTERVAL`, `OUT_OF_BOUNDS`, `INVALID_SPEED_FACTOR` (fator "nulo"), `SPEED_FACTOR_OUT_OF_RANGE`; UC-VID-002: `NO_AUDIO_STREAM`. Nenhuma fonte dá os nomes nem trata parâmetros ausentes do recorte.
+- **O que as fontes dizem:** ADD T-01: passo `{operation, version, parameters}`, `version` começa em 1, parâmetros em camelCase (`contrastFactor`, `flipH`); exemplos de nomes de operação `adjust`, `filter`, `convert`, `concat`; a B003 usa `test_reencode`. REQ-VID-TRIM-001/002: instantes em horas, minutos, segundos e milissegundos. UC-VID-001, UC-VID-003: `INVALID_INTERVAL`, `OUT_OF_BOUNDS`, `INVALID_SPEED_FACTOR` (fator "nulo"), `SPEED_FACTOR_OUT_OF_RANGE`; UC-VID-002: `NO_AUDIO_STREAM`. Nenhuma fonte dá os nomes nem trata parâmetros ausentes do recorte.
 - **Opções:** (a) operações `trim`, `remove_audio` e `speed`, versão 1; `trim {startMs, endMs}` em milissegundos inteiros; `speed {factor}`; `remove_audio {}`. Instante ausente ou não inteiro → `INVALID_INTERVAL` com `{field}`; negativo ou acima da duração → `OUT_OF_BOUNDS` com `{field, durationMs}`; fator ausente ou não numérico → `INVALID_SPEED_FACTOR`; `SPEED_FACTOR_OUT_OF_RANGE` com `{min: 0.25, max: 4}`; campos a mais são ignorados. (b) Como (a), mas com os instantes em segundos decimais (`{start, end}`). (c) Outros nomes.
 - **Recomendação:** (a). Milissegundos inteiros evitam arredondamentos de vírgula flutuante e têm a mesma unidade de `durationMs`; o `snake_case` do nome da operação segue o da `test_reencode`.
 - **Resposta:** **(a).** Operações `trim`, `remove_audio` e `speed`, versão 1; `trim {startMs, endMs}` em milissegundos inteiros, `speed {factor}`, `remove_audio {}`. Instante ausente ou não inteiro → `INVALID_INTERVAL` com `{field}`; negativo ou acima da duração → `OUT_OF_BOUNDS` com `{field, durationMs}`; fator ausente ou não numérico → `INVALID_SPEED_FACTOR`; `SPEED_FACTOR_OUT_OF_RANGE` com `{min: 0.25, max: 4}`; campos a mais são ignorados.
@@ -463,13 +421,13 @@
 ## D-54 — Destino de pré-visualização da alternativa de cópia do recorte
 
 - **Onde:** B004, verificações V2(c), V3 e V5; `projects/video/plan.js:93-139`, `projects/video/tasks.js:330-357`, `Tools/video/task.py:208-223`; ADR-008, secção 3 ("Sem alterações a outros campos"). Evidência e ligações propostas em `memory-bank/bolts/004-video-basic-edits/implementation-preflight.md`.
-- **Dúvida:** O plano normal de `trim` recodifica para MP4 e, por isso, `buildPlan()` devolve `preview: null` e não cria `targets.preview`. A alternativa `keyframeCopy` pode copiar H.264 High 10/4:2:2/4:4:4; nesse caso, o T-06 exige uma pré-visualização compatível com o navegador. Acrescentar apenas `keyframeCopy.preview` não basta: o worker precisa de `plan.targets.preview` para o upload. O ADR-008 só autoriza os extras `input` e `keyframeCopy` e proíbe alterar os outros campos. Qual é o ponto autorizado para acrescentar o destino?
+- **Dúvida:** O plano normal de `trim` recodifica para MP4 e, por isso, `buildPlan` devolve `preview: null` e não cria `targets.preview`. A alternativa `keyframeCopy` pode copiar H.264 High 10/4:2:2/4:4:4; nesse caso, o T-06 exige uma pré-visualização compatível com o navegador. Acrescentar apenas `keyframeCopy.preview` não basta: o worker precisa de `plan.targets.preview` para o upload. O ADR-008 só autoriza os extras `input` e `keyframeCopy` e proíbe alterar os outros campos. Qual é o ponto autorizado para acrescentar o destino?
 - **O que as fontes dizem:** T-01/T-06: planos calculados no serviço de projetos; ADR-004: plano completo persistido antes de publicar, reutilizado na republicação; ADR-005: destino determinístico `video_preview/<taskId>.mp4`, com o mesmo proprietário/projeto dos restantes destinos. ADR-007 já prevê `keyframeCopy.preview`; falta ligar o destino. Regra 2.6: `plan.js` permanece intacto. `tasks.js` já elimina resultados tardios a partir da união das chaves recebidas com todos os `plan.targets` persistidos.
 - **Opções:**
-  - **(a) Estender pontualmente o ADR-008:** permitir que `applyPlanExtras(plan, steps, inputProps, registry)` acrescente também `plan.targets.preview`, apenas se estiver ausente e alguma alternativa puder precisar de pré-visualização. Para a B004, o destino é `{userId, projectId, stage: "video_preview", name: "<taskId>.mp4"}`, derivado do destino `original` já calculado no serviço de projetos. Mantêm-se `plan.preview`, `plan.output` e os destinos existentes. Não se muda a assinatura nem o único ponto de chamada após `buildPlan()`. Exige esclarecer documentalmente a excepção à secção 3 do ADR-008 antes de implementar.
-  - **(b) Manter o limite do ADR-008:** criar um helper novo de destinos no serviço de projetos, chamado por uma linha adicional em `submit()`, depois de `applyPlanExtras()` e antes de `VideoTask.create()`. Esse helper acrescenta o mesmo `targets.preview` quando necessário. Mantém os extras limitados a `input`/`keyframeCopy`, mas acrescenta um módulo e um segundo ponto de ligação a documentar no desenho.
+  - **(a) Estender pontualmente o ADR-008:** permitir que `applyPlanExtras(plan, steps, inputProps, registry)` acrescente também `plan.targets.preview`, apenas se estiver ausente e alguma alternativa puder precisar de pré-visualização. Para a B004, o destino é `{userId, projectId, stage: "video_preview", name: "<taskId>.mp4"}`, derivado do destino `original` já calculado no serviço de projetos. Mantêm-se `plan.preview`, `plan.output` e os destinos existentes. Não se muda a assinatura nem o único ponto de chamada após `buildPlan`. Exige esclarecer documentalmente a excepção à secção 3 do ADR-008 antes de implementar.
+  - **(b) Manter o limite do ADR-008:** criar um helper novo de destinos no serviço de projetos, chamado por uma linha adicional em `submit`, depois de `applyPlanExtras` e antes de `VideoTask.create`. Esse helper acrescenta o mesmo `targets.preview` quando necessário. Mantém os extras limitados a `input`/`keyframeCopy`, mas acrescenta um módulo e um segundo ponto de ligação a documentar no desenho.
 - **Recomendação:** **(a)**, pela extensão pequena e explícita do módulo já responsável pelas alternativas do plano. A pré-visualização continua a ser decidida no serviço de projetos: `keyframeCopy.preview` usa a matriz de `formats.js` para o resultado MP4 copiado (perfil compatível → sem pré-visualização; incompatível → recodificação H.264 `yuv420p`). O destino é persistido mesmo que o worker venha a escolher recodificação ou não precise de produzir a pré-visualização. O worker só seleciona a alternativa e usa o destino recebido; não inventa destinos. A limpeza tardia existente enumera esse destino mesmo se a resposta omitir a chave de preview. Ambas as opções preservam `plan.js`, os destinos existentes, as assinaturas e os caminhos anteriores das B001–B003.
-- **Resposta:** **(a), aprovada pela equipa.** `applyPlanExtras()` pode também acrescentar `plan.targets.preview`, apenas se estiver ausente e alguma alternativa puder precisar de pré-visualização. Destino determinístico `video_preview/<taskId>.mp4`, calculado no serviço de projetos a partir do destino `original`, com o mesmo proprietário/projeto; persistido antes da publicação para republicação e limpeza tardia. Preservam-se `plan.preview`, `plan.output`, destinos existentes e a assinatura aprovada. O worker usa o destino recebido e não o calcula.
+- **Resposta:** **(a), aprovada pela equipa.** `applyPlanExtras` pode também acrescentar `plan.targets.preview`, apenas se estiver ausente e alguma alternativa puder precisar de pré-visualização. Destino determinístico `video_preview/<taskId>.mp4`, calculado no serviço de projetos a partir do destino `original`, com o mesmo proprietário/projeto; persistido antes da publicação para republicação e limpeza tardia. Preservam-se `plan.preview`, `plan.output`, destinos existentes e a assinatura aprovada. O worker usa o destino recebido e não o calcula.
 
 ## D-55 — Duração ao remover áudio que termina depois da stream de vídeo
 
@@ -483,7 +441,7 @@
 ## D-56 — Entrega do cancelamento durante uma callback Pika síncrona
 
 - **Onde:** integração persistente B004, `cancel active encoding refunds quota and a failed task refunds once`; `Tools/video/task.py:_wait`, `Tools/video/control.py` e Pika 1.3.2 do worker.
-- **Dúvida:** A API passou a tarefa a `cancelled` e devolveu o crédito, mas o worker publicou `completed` cerca de quatro segundos depois, sem interromper FFmpeg. A resposta tardia foi descartada pelo serviço de projetos. O código real instalado do Pika confirma que `_dispatch_channel_events()` não despacha callbacks numa chamada reentrante de `process_data_events()` enquanto a callback `on_message` da operação está em execução. A sondagem com fakes da B003 não exercita esta proteção; a integração revelou a limitação no mesmo mecanismo reutilizado pela B004.
+- **Dúvida:** A API passou a tarefa a `cancelled` e devolveu o crédito, mas o worker publicou `completed` cerca de quatro segundos depois, sem interromper FFmpeg. A resposta tardia foi descartada pelo serviço de projetos. O código real instalado do Pika confirma que `_dispatch_channel_events` não despacha callbacks numa chamada reentrante de `process_data_events` enquanto a callback `on_message` da operação está em execução. A sondagem com fakes da B003 não exercita esta proteção; a integração revelou a limitação no mesmo mecanismo reutilizado pela B004.
 - **O que as fontes dizem:** T-03 pede cancelamento efetivo do FFmpeg e um segundo canal na mesma ligação, servido pelo ciclo do worker, sem threads. Regra 2.6 impede substituir as linhas existentes da B003. É necessário um ponto adicional que receba o controlo sem depender de dispatch reentrante.
 - **Opções:** (a) acrescentar um adaptador de controlo com uma fila exclusiva adicional ligada ao mesmo `video_control`, no canal de controlo existente, consultada por `basic_get` nos pontos `_wait`/`_tick`; o tratamento da mensagem reutiliza `ControlChannel._on_message`, sem threads, sem nova ligação e sem mudar assinaturas/linhas anteriores; (b) criar uma ligação separada para o controlo, bombeada pelo mesmo ciclo, o que muda a escolha explícita da ligação única; (c) aceitar cancelamento apenas lógico, deixando FFmpeg terminar, o que não cumpre TASK-005.
 - **Recomendação:** **(a)**, para manter a ligação única, o executor e o cancelamento existentes, acrescentando apenas receção por consulta explícita; documentar a fila exclusiva adicional e testar com RabbitMQ real. A fila e a consulta são locais ao worker e não mudam o fluxo de imagem nem a configuração global.
@@ -553,7 +511,7 @@
   - Nenhuma fonte fixa o tamanho máximo, o local nem a limpeza.
 - **Opções:**
   - **(a) Recurso de marca próprio:** endpoint novo `POST /projects/:user/:project/videos/watermarks`, com a autorização da pré-visualização.
-    - Recebe um ficheiro local (`multer.memoryStorage()` num router novo, limite de 1 MB) ou `{imageId}` de uma imagem da galeria, que o serviço de projetos lê do storage de imagem.
+    - Recebe um ficheiro local (`multer.memoryStorage` num router novo, limite de 1 MB) ou `{imageId}` de uma imagem da galeria, que o serviço de projetos lê do storage de imagem.
     - Valida a imagem com o sharp: PNG ou JPEG legível, no máximo 4096×4096 px. Caso contrário devolve `INVALID_WATERMARK_CONTENT`.
     - Guarda a imagem normalizada para PNG RGBA no estágio existente `video_src`, com o nome `wm-<id>.png`, e regista-a numa coleção nova `video_watermarks` (`project_id`, `owner_id`, chave, `width` e `height`). Devolve `{watermarkId, width, height}`.
     - As marcas de texto (D-59 a) são geradas na aceitação com o nome `wm-<taskId>.png`.
@@ -581,7 +539,7 @@
 - **Opções:**
   - **(a)** Operação `watermark`, versão 1, com os parâmetros:
     - `type: "text" | "image"`;
-    - `text` (1 a 100 caracteres depois de `trim()`) ou `watermarkId`;
+    - `text` (1 a 100 caracteres depois de `trim`) ou `watermarkId`;
     - `position`: `{preset: "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center"}` ou `{x, y}`, inteiros em px de apresentação, canto superior esquerdo da marca;
     - `scale` de 0.05 a 0.5, passo 0.01;
     - `opacity` de 0.1 a 1, passo 0.01.
@@ -602,8 +560,8 @@
 - **Onde:** B005, endpoint de pré-visualização (T-07) e painel de marca de água.
 - **Dúvida:** A REQ-VID-WATERMARK-009 pede uma pré-visualização estática em tempo real da marca sobre o primeiro fotograma. Mas o T-07 diz que o endpoint `…/preview` ignora os passos de marca de água ("recorte, velocidade, áudio, marca de água, junção, conversão"). Como se mostra a pré-visualização?
 - **O que as fontes dizem:**
-  - ADD T-07: o endpoint só aplica o ajuste, o filtro, o redimensionamento e a orientação, os passos abrangidos pela NFR-015.
-  - REQ-VID-WATERMARK-009 é "Deveria ter" e não está na NFR-015.
+  - ADD T-07: o endpoint só aplica o ajuste, o filtro, o redimensionamento e a orientação, os passos abrangidos pela NFR-013.
+  - REQ-VID-WATERMARK-009 é "Deveria ter" e não está na NFR-013.
   - UC-VID-004 FA2: a pré-visualização é atualizada "imediatamente".
 - **Opções:**
   - **(a) Endpoint novo** `POST …/videos/:video/watermark-preview`, com a autorização do T-07. Compõe com o sharp (`composite`, com a opacidade aplicada ao alfa) o PNG da marca (D-59/D-60) sobre o fotograma 0. O `…/preview` do T-07 continua a ignorar a marca, como o ADD diz.
@@ -614,15 +572,15 @@
 
 ## D-63 — Ponto de ligação dos extras do plano da B005 (ADR-008)
 
-- **Onde:** `projects/video/planExtras.js` (B004), `projects/video/tasks.js:339` (única chamada, depois de `buildPlan()`).
-- **Dúvida:** O plano da B005 tem de levar dados que o `estimate` e o `copyable` não exprimem: a entrada completa do filtro do catálogo (T-07, "o plano leva a entrada completa do filtro escolhido") e a origem da marca de água no storage (D-60). O `applyPlanExtras()` sai logo na primeira instrução quando não há `trim`, `remove_audio` nem `speed`, e essa lista é uma linha existente que não pode mudar (regra 2.6). Onde se acrescentam estes extras?
-- **O que as fontes dizem:** O ADR-008 apresenta o `planExtras.js` como o padrão a seguir pela B005 (`Read when`: "any bolt that adds new operation modules"). A D-54 (b) já considerou válida uma "linha adicional em `submit()`, depois de `applyPlanExtras()`".
+- **Onde:** `projects/video/planExtras.js` (B004), `projects/video/tasks.js:339` (única chamada, depois de `buildPlan`).
+- **Dúvida:** O plano da B005 tem de levar dados que o `estimate` e o `copyable` não exprimem: a entrada completa do filtro do catálogo (T-07, "o plano leva a entrada completa do filtro escolhido") e a origem da marca de água no storage (D-60). O `applyPlanExtras` sai logo na primeira instrução quando não há `trim`, `remove_audio` nem `speed`, e essa lista é uma linha existente que não pode mudar (regra 2.6). Onde se acrescentam estes extras?
+- **O que as fontes dizem:** O ADR-008 apresenta o `planExtras.js` como o padrão a seguir pela B005 (`Read when`: "any bolt that adds new operation modules"). A D-54 (b) já considerou válida uma "linha adicional em `submit`, depois de `applyPlanExtras`".
 - **Opções:**
   - **(a)** Módulo novo `projects/video/planExtrasVisual.js` com `applyVisualPlanExtras(plan, steps, inputProps, registry)`, com a mesma assinatura e o mesmo padrão. É chamado por uma linha nova em `tasks.js`, logo a seguir à do `applyPlanExtras`. Acrescenta `plan.steps[i].filter` (a entrada do catálogo) e `plan.steps[i].mark` (o destino do PNG, D-60), e não toca nos campos da B003 nem da B004. Fica registado como ADR-010, ao lado do ADR-008.
   - **(b)** As operações devolvem os extras pelo `estimate`, mas o `plan.js` não os passa para o plano.
   - **(c)** O worker lê uma cópia do `filters.json`, o que contraria o T-07 e o T-01.
 - **Recomendação:** (a).
-- **Resposta:** **(a), aprovada pela equipa.** Módulo novo `projects/video/planExtrasVisual.js`, chamado por uma linha nova em `tasks.js` a seguir ao `applyPlanExtras`. A equipa deixou ao critério da construção juntar ao ADR-010 ou criar outro: fica no **ADR-011**, separado do ADR-010 (*middleware* do `_mark`), por serem pontos de ligação diferentes (pedido HTTP antes da validação vs. plano depois de `buildPlan()`).
+- **Resposta:** **(a), aprovada pela equipa.** Módulo novo `projects/video/planExtrasVisual.js`, chamado por uma linha nova em `tasks.js` a seguir ao `applyPlanExtras`. A equipa deixou ao critério da construção juntar ao ADR-010 ou criar outro: fica no **ADR-011**, separado do ADR-010 (*middleware* do `_mark`), por serem pontos de ligação diferentes (pedido HTTP antes da validação vs. plano depois de `buildPlan`).
 
 ## D-64 — Pormenores da pré-visualização, das miniaturas e do painel de redimensionamento que as fontes não fixam
 
@@ -651,8 +609,8 @@
 
 - **Onde:** B005, `projects/video/watermarks.js` (`storeText`), `projects/video/planExtrasVisual.js`, `projects/video/watermarkCleanup.js`; desvio 1 do `implementation-walkthrough.md`.
 - **Dúvida:** A D-60 (a) dizia que as marcas de texto eram geradas na aceitação com o nome `wm-<taskId>.png`. A implementação guarda-as como `wm-<watermarkId>.png`, com um registo em `video_watermarks` por projeto e texto (*hash*), e reutiliza o PNG quando o mesmo texto volta a ser usado. Aceita-se?
-- **O que as fontes dizem:** D-60 (a), com a alteração da equipa na limpeza: só se apagam marcas de projetos apagados ou sem referência em nenhum `VideoTask` nem em nenhuma `recipe` ao fim de 24 h, para a `recipe` ser reproduzível. ADR-010: o *middleware* resolve o texto antes da validação, quando ainda não há `taskId` (gerado no `submit()` da B003).
-- **Opções:** (a) aceitar `wm-<watermarkId>.png`, com um registo por projeto e texto e o PNG reutilizado; (b) voltar a `wm-<taskId>.png`, o que obrigaria a gerar o PNG depois da criação do `taskId`, dentro do `submit()` da B003, que não pode mudar.
+- **O que as fontes dizem:** D-60 (a), com a alteração da equipa na limpeza: só se apagam marcas de projetos apagados ou sem referência em nenhum `VideoTask` nem em nenhuma `recipe` ao fim de 24 h, para a `recipe` ser reproduzível. ADR-010: o *middleware* resolve o texto antes da validação, quando ainda não há `taskId` (gerado no `submit` da B003).
+- **Opções:** (a) aceitar `wm-<watermarkId>.png`, com um registo por projeto e texto e o PNG reutilizado; (b) voltar a `wm-<taskId>.png`, o que obrigaria a gerar o PNG depois da criação do `taskId`, dentro do `submit` da B003, que não pode mudar.
 - **Recomendação:** (a).
 - **Resposta:** **(a), aceite pela equipa; altera a resposta à D-60.** As marcas de texto ficam em `wm-<watermarkId>.png`, com um registo por projeto e texto e o PNG reutilizado, em vez de `wm-<taskId>.png`. A `recipe` e a limpeza usam o `watermarkId`, o que mantém a reprodutibilidade pedida pela equipa. **Risco residual aceite:** a limpeza pode apagar um registo de texto com mais de 24 h que esteja a ser reutilizado nos milissegundos antes de o `VideoTask` ser criado.
 
@@ -660,7 +618,7 @@
 
 - **Onde:** `frontend/components/video/video-edit-actions.tsx` (B004) e `frontend/components/video/video-visual-actions.tsx` (B005), montados lado a lado no `video-player.tsx`; desvio 4 do `implementation-walkthrough.md`.
 - **Dúvida:** Cada componente cria a sua sessão (`useVideoEditSession`), por isso uma tarefa iniciada num não deixa o outro ocupado (`busy`) na interface. Aceita-se?
-- **O que as fontes dizem:** Regra 2.6: o `video-edit-actions.tsx` não pode ser alterado (tipo `Operation` e `TITLES`). D-47: as peças comuns de tarefa são montadas pelos painéis. REQ-VID-NFR-021 e T-03: uma tarefa ativa por projeto, garantida no servidor pelo lugar de tarefa ativa (`TASK_ALREADY_ACTIVE`).
+- **O que as fontes dizem:** Regra 2.6: o `video-edit-actions.tsx` não pode ser alterado (tipo `Operation` e `TITLES`). D-47: as peças comuns de tarefa são montadas pelos painéis. REQ-VID-NFR-017 e T-03: uma tarefa ativa por projeto, garantida no servidor pelo lugar de tarefa ativa (`TASK_ALREADY_ACTIVE`).
 - **Opções:** (a) aceitar as duas sessões como risco residual; (b) partilhar a sessão, o que exigiria alterar o componente da B004.
 - **Recomendação:** (a).
 - **Resposta:** **(a), aceite pela equipa como risco residual**, porque o servidor garante uma tarefa por projeto. Na etapa 3, testa-se que um pedido da B005, com uma tarefa da B004 ativa, mostra na interface o erro do servidor.
@@ -676,8 +634,8 @@
     - saturação com `eq=saturation=s` ↔ `modulate({saturation: s})`.
   - O ADD 4.3 aponta como risco a "equivalência sharp ↔ FFmpeg (testes com fotogramas de referência)" e o espaço de cor (o `eq` trabalha em YUV).
   - REQ-VID-ADJUST-005: pré-visualização "com os ajustes aplicados".
-  - DQ-020: a mesma semântica das ferramentas de imagem. O `ImageEnhance.Contrast` é uma mistura linear em RGB com um pivô. O `ImageEnhance.Color` é uma mistura com a imagem em tons de cinzento BT.601 (`convert("L")`).
-  - O critério de passagem do bolt sobre a NFR-015 só refere as orientações e os filtros.
+  - DQ-019: a mesma semântica das ferramentas de imagem. O `ImageEnhance.Contrast` é uma mistura linear em RGB com um pivô. O `ImageEnhance.Color` é uma mistura com a imagem em tons de cinzento BT.601 (`convert("L")`).
+  - O critério de passagem do bolt sobre a NFR-013 só refere as orientações e os filtros.
 - **Medições:** diferença média por canal (0–255) entre a pré-visualização e o fotograma do resultado, com o FFmpeg 5.1.9 e o sharp 0.33.5.
   - **Integração real (quadrantes de cor):**
     - brilho 1.2: 0,42;
@@ -696,29 +654,29 @@
   - **(a) Mudar o contraste e a saturação para RGB nos dois motores e manter o brilho:**
     - contraste com `lutrgb=r=val*c+128*(1-c):g=…:b=…` no worker, mantendo o `linear(c, 128·(1−c))` no sharp (pivô fixo 128, Q-ADD-18);
     - saturação com a matriz `s·I + (1−s)·[luma BT.601]` (`colorchannelmixer` no worker e `recomb` no sharp).
-    - Diverge da letra do ADD 4.3 e do T-07 (`eq`, `modulate`) e da A1 do UC-VID-008, mas cumpre a DQ-020 à letra: o `ImageEnhance.Color` do PIL é esta matriz. Fica registado como ADR-012. É uma linha de código em cada passo, em ficheiros novos da B005.
+    - Diverge da letra do ADD 4.3 e do T-07 (`eq`, `modulate`) e da A1 do UC-VID-007, mas cumpre a DQ-019 à letra: o `ImageEnhance.Color` do PIL é esta matriz. Fica registado como ADR-012. É uma linha de código em cada passo, em ficheiros novos da B005.
   - **(b) Manter as fórmulas do ADD e aceitar a diferença:** a pré-visualização do ajuste fica só indicativa. Os casos `todo` passam a documentar a diferença em vez de a exigir.
   - **(c) Mudar só a pré-visualização, para imitar o `eq` em YUV:** o sharp não tem operações em YUV, por isso exigiria código de conversão próprio por píxel no serviço de projetos e afastaria a pré-visualização do padrão do T-07.
-- **Recomendação:** (a). A pré-visualização passa a coincidir com o resultado (cerca de 2/255, como nos filtros), a semântica fica igual à das ferramentas de imagem (DQ-020), e não há dependências novas.
-- **Resposta:** **(a), aprovada pela equipa.** O contraste passa a `lutrgb` com pivô 128 no worker (`val·c + 128·(1−c)`), mantendo o `linear(c, 128·(1−c))` no sharp. A saturação passa à matriz que preserva a luma BT.601 (`colorchannelmixer` no worker e `recomb` no sharp). O brilho não muda. Registado no ADR-012 e no `decision-index.md`. Justificação da equipa: o ADD 4.3 pretende que a pré-visualização seja igual ao resultado (pivô fixo "igual ao da pré-visualização sharp"), e a DQ-020 pede a semântica RGB das ferramentas de imagem; o pivô 128 da Q-ADD-18 mantém-se.
+- **Recomendação:** (a). A pré-visualização passa a coincidir com o resultado (cerca de 2/255, como nos filtros), a semântica fica igual à das ferramentas de imagem (DQ-019), e não há dependências novas.
+- **Resposta:** **(a), aprovada pela equipa.** O contraste passa a `lutrgb` com pivô 128 no worker (`val·c + 128·(1−c)`), mantendo o `linear(c, 128·(1−c))` no sharp. A saturação passa à matriz que preserva a luma BT.601 (`colorchannelmixer` no worker e `recomb` no sharp). O brilho não muda. Registado no ADR-012 e no `decision-index.md`. Justificação da equipa: o ADD 4.3 pretende que a pré-visualização seja igual ao resultado (pivô fixo "igual ao da pré-visualização sharp"), e a DQ-019 pede a semântica RGB das ferramentas de imagem; o pivô 128 da Q-ADD-18 mantém-se.
 
 ## D-68 — Qualidade da saída AVI na conversão (parte pendente da Q-ADD-11)
 
 - **Onde:** B007, etapa 1; `projects/video/encoding.js`, `projects/video/operations/convert.js` e `Tools/video/ops/convert.py`.
 - **Dúvida:** Que valor de `-q:v` usa o codificador `mpeg4` e que bitrate constante (`-b:a`) usa o `libmp3lame` nos resultados AVI?
-- **O que as fontes dizem:** ADD T-02/T-05/4.7 fixa `mpeg4` + `libmp3lame`, `yuv420p`, MP3 em taxa constante e ausência de `+faststart`, mas deixa os valores na Q-ADD-11. D-19 fixa `veryfast`/CRF 23/AAC 128 kb/s para a pré-visualização MP4; D-39 aplica os mesmos valores aos resultados MP4/MOV e reserva os parâmetros de AVI para a B007. UC-VID-012 Q1 não dá valores.
+- **O que as fontes dizem:** ADD T-02/T-05/4.7 fixa `mpeg4` + `libmp3lame`, `yuv420p`, MP3 em taxa constante e ausência de `+faststart`, mas deixa os valores na Q-ADD-11. D-19 fixa `veryfast`/CRF 23/AAC 128 kb/s para a pré-visualização MP4; D-39 aplica os mesmos valores aos resultados MP4/MOV e reserva os parâmetros de AVI para a B007. UC-VID-011 Q1 não dá valores.
 - **Opções:**
   - **(a)** `mpeg4 -q:v 5 -pix_fmt yuv420p` e `libmp3lame -b:a 192k` com bitrate constante; qualidade visual moderada e áudio a uma taxa comum, com ficheiros AVI de tamanho variável em função do vídeo.
   - **(b)** `mpeg4 -q:v 3 -pix_fmt yuv420p` e `libmp3lame -b:a 128k` com bitrate constante; mais qualidade de vídeo e menos bitrate de áudio.
   - **(c)** Outros valores indicados pela equipa, mantendo MP3 em taxa constante.
 - **Recomendação:** (a), sujeita a ensaio de descodificação/reprodução na etapa 3. Nenhum valor AVI é adotado antes da resposta.
-- **Resposta:** **(c), aprovada pela equipa para a B007:** `mpeg4 -q:v 3 -pix_fmt yuv420p` e `libmp3lame -b:a 192k` em taxa constante. O `mpeg4` é menos eficiente do que H.264; `-q:v 3` aproxima a qualidade do CRF 23 da D-39, e MP3 a 192 kb/s fica próximo do AAC a 128 kb/s. Confirmar a reprodução na etapa 3 (NFR-026).
+- **Resposta:** **(c), aprovada pela equipa para a B007:** `mpeg4 -q:v 3 -pix_fmt yuv420p` e `libmp3lame -b:a 192k` em taxa constante. O `mpeg4` é menos eficiente do que H.264; `-q:v 3` aproxima a qualidade do CRF 23 da D-39, e MP3 a 192 kb/s fica próximo do AAC a 128 kb/s. Confirmar a reprodução na etapa 3 (NFR-022).
 
 ## D-69 — Cópia MP4 para perfis H.264 incompatíveis com navegadores (Q-ADD-20)
 
 - **Onde:** B007, etapa 1; ADD T-06/4.7, `projects/video/formats.js`, `projects/video/plan.js` e o leitor de vídeo.
 - **Dúvida:** Confirma-se a cópia de pré-visualização MP4 também para originais e resultados MP4 com H.264 High 10, 4:2:2 ou 4:4:4, recodificada para `yuv420p`, ou rejeitam-se esses perfis na ingestão?
-- **O que as fontes dizem:** DQ-012 previa cópia para MOV/AVI. O ADD T-06 e Q-ADD-20 propõem alargá-la a MP4 incompatível. REQ-VID-CONVERT-008 já inclui resultados MP4 incompatíveis e REQ-VID-UPLOAD-009 admite H.264 sem fixar o perfil. A B001 já gera cópia segundo `formats.previewPlan`; rejeitar agora esses originais afetaria a fundação existente e a regra 2.6.
+- **O que as fontes dizem:** DQ-011 previa cópia para MOV/AVI. O ADD T-06 e Q-ADD-20 propõem alargá-la a MP4 incompatível. REQ-VID-CONVERT-008 já inclui resultados MP4 incompatíveis e REQ-VID-UPLOAD-009 admite H.264 sem fixar o perfil. A B001 já gera cópia segundo `formats.previewPlan`; rejeitar agora esses originais afetaria a fundação existente e a regra 2.6.
 - **Opções:**
   - **(a)** Confirmar o alargamento do T-06: aceitar esses originais e gerar cópia MP4 `yuv420p` para originais e resultados incompatíveis, guardada em `storage.preview_key`.
   - **(b)** Restringir a ingestão aos perfis reproduzíveis sem cópia; exige rever a fundação/ERS e a regra 2.6 antes de aplicar à B007.
@@ -798,13 +756,13 @@
 
 - **Onde:** Verificação V4 da correção D-75; `projects/test/video/tasks.test.js:492`.
 - **Dúvida:** Como atualizar a expectativa do teste da B003 sem violar a regra 2.6, depois da decisão D-75?
-- **O que as fontes dizem:** A asserção `assert.equal(video.original_name, "férias.mov", "first source's name (D-35)")` verifica o objeto emitido por `tasks.js` antes do middleware do Mongoose: o teste injeta a coleção falsa `createCollection()` na linha 65, por isso o hook `pre("validate")` não corre. A atribuição do nome da origem em `tasks.js` mantém-se. Um teste novo com `new Video(doc).validate()` cobre o comportamento persistido; o teste de ingestão cobre um original sem `task_id`.
+- **O que as fontes dizem:** A asserção `assert.equal(video.original_name, "férias.mov", "first source's name (D-35)")` verifica o objeto emitido por `tasks.js` antes do middleware do Mongoose: o teste injeta a coleção falsa `createCollection` na linha 65, por isso o hook `pre("validate")` não corre. A atribuição do nome da origem em `tasks.js` mantém-se. Um teste novo com `new Video(doc).validate` cobre o comportamento persistido; o teste de ingestão cobre um original sem `task_id`.
 - **Opções:**
   - **(a)** Manter a asserção da coleção falsa e acrescentar testes com o schema real para o comportamento do hook.
   - **(b)** Alterar a expectativa do teste da B003, apesar de ele não usar Mongoose.
   - **(c)** Adiar a correção D-75 até existir uma revisão da regra 2.6 aplicável aos testes históricos.
 - **Recomendação:** (a), porque a asserção continua a verificar corretamente `tasks.js` e o teste novo cobre o comportamento persistido, sem base de dados.
-- **Resposta:** **(a), esclarecida pela equipa.** A asserção da linha 492 não muda e continua a passar: usa `createCollection()`, não o modelo Mongoose. O teste novo com o schema real verifica que um resultado novo com `task_id` recebe a extensão de `meta.container`, um original sem `task_id` não muda e um documento já existente também não muda. A V4 fica satisfeita sem alterar linhas existentes.
+- **Resposta:** **(a), esclarecida pela equipa.** A asserção da linha 492 não muda e continua a passar: usa `createCollection`, não o modelo Mongoose. O teste novo com o schema real verifica que um resultado novo com `task_id` recebe a extensão de `meta.container`, um original sem `task_id` não muda e um documento já existente também não muda. A V4 fica satisfeita sem alterar linhas existentes.
 
 ## D-77 — A main remota ainda não contém a B007
 
@@ -821,8 +779,8 @@
 ## D-78 — Posição da junção numa cadeia e rotas com e sem `:video`
 
 - **Onde:** B008, etapa 1 (`ddd-01-domain-model.md`, EstruturaCadeia, AceitacaoOperacao); `POST …/videos/operations` (com e sem `:video`) e `POST …/videos/validate`.
-- **Dúvida:** Numa cadeia com junção, a junção tem de ser o primeiro passo de topo? Se não for, a que vídeo se aplicam os passos de topo que vêm antes dela? E que rota recebe cada pedido: a junção usa a rota sem `:video` (4.8), mas uma cadeia com junção tem um vídeo selecionado no editor (UC-VID-014, passo 1)?
-- **O que as fontes dizem:** ADD T-01: a junção é um passo com `parameters.clips: [{videoId, steps}]`, ou seja, todos os clips, incluindo o primeiro, vêm dentro da junção com a sua sub-cadeia. ADD 4.8: uma junção isolada usa `POST …/videos/operations` sem `:video`. ADD 4.9 e UC-VID-014 FA1: "sub-cadeias por clip → junção → passos finais"; o utilizador começa por selecionar um vídeo e, ao acrescentar a junção, junta outros vídeos como clips. REQ-VID-CHAIN-005/006: sub-cadeias antes da junção e passos depois dela. Nenhuma fonte diz o que acontece a passos de topo antes da junção nem que rota recebe uma cadeia com junção.
+- **Dúvida:** Numa cadeia com junção, a junção tem de ser o primeiro passo de topo? Se não for, a que vídeo se aplicam os passos de topo que vêm antes dela? E que rota recebe cada pedido: a junção usa a rota sem `:video` (4.8), mas uma cadeia com junção tem um vídeo selecionado no editor (UC-VID-013, passo 1)?
+- **O que as fontes dizem:** ADD T-01: a junção é um passo com `parameters.clips: [{videoId, steps}]`, ou seja, todos os clips, incluindo o primeiro, vêm dentro da junção com a sua sub-cadeia. ADD 4.8: uma junção isolada usa `POST …/videos/operations` sem `:video`. ADD 4.9 e UC-VID-013 FA1: "sub-cadeias por clip → junção → passos finais"; o utilizador começa por selecionar um vídeo e, ao acrescentar a junção, junta outros vídeos como clips. REQ-VID-CHAIN-005, REQ-VID-CHAIN-006: sub-cadeias antes da junção e passos depois dela. Nenhuma fonte diz o que acontece a passos de topo antes da junção nem que rota recebe uma cadeia com junção.
 - **Opções:**
   - **(a)** Quando há junção, é o **primeiro passo de topo**; o que se faz a cada clip antes dela vai na sua sub-cadeia. Junção noutra posição → 422 `INVALID_CHAIN` com `{rule: "concat_not_first"}`. No editor, o vídeo selecionado passa a ser o clip 1 e os passos que já tinha passam para a sua sub-cadeia. Uma cadeia com junção (isolada ou não) usa as rotas **sem** `:video` (`POST …/videos/operations` e `POST …/videos/validate` sem `videoId`); uma cadeia sem junção usa as rotas com `:video`. Um pedido sem `:video` cujo primeiro passo não é uma junção, ou com `:video` e uma junção, → 422 `INVALID_REQUEST` com `{field: "steps"}` (D-23).
   - **(b)** A junção pode estar em qualquer posição; os passos de topo antes dela aplicam-se ao vídeo da rota com `:video`, que tem de ser o clip 1. Há duas formas de escrever a mesma composição (passos antes da junção ou na sub-cadeia do clip 1), o que complica a contagem, a `recipe` e as predefinições.
@@ -830,17 +788,11 @@
 - **Recomendação:** (a). Uma só forma de exprimir a composição, igual à do T-01 (`clips` com as sub-cadeias) e à do exemplo da FA1, e uma só rota para pedidos com várias entradas.
 - **Resposta:** **(a), aprovada pela equipa.** A junção, quando existe, é o primeiro passo de topo; noutra posição → `INVALID_CHAIN {rule: "concat_not_first"}`. Cadeias com junção usam as rotas sem `:video`; sem `:video` e sem junção no início, ou com `:video` e uma junção → 422 `INVALID_REQUEST {field: "steps"}`.
 
-## D-79 — Regras do `INVALID_CHAIN`, restrições das sub-cadeias e extração de fotogramas sem operação
+## D-79 — Regras de estrutura e subcadeias
 
-- **Onde:** B008, etapa 1 (`ddd-01-domain-model.md`, EstruturaCadeia, ValidadorCadeia); `projects/video/errors.js` (detalhes do `INVALID_CHAIN`).
-- **Dúvida:** Que valores leva o `{rule}` do `INVALID_CHAIN`? As sub-cadeias dos clips podem ter `convert` ou outra junção? E como se rejeita a extração de fotogramas com `INVALID_CHAIN` (CHAIN-018) se a operação não existe no registo (D-05, D-06)?
-- **O que as fontes dizem:** ADD 4.9: `INVALID_CHAIN` com `{rule}` a indicar a regra violada (cadeia vazia, mais de uma `concat`, `convert` só no fim, sem extração de fotogramas) e `CHAIN_TOO_LONG`; T-10: `{rule}` nos detalhes. REQ-VID-CHAIN-007, 016, 017 e 018. UC-VID-013 RN13 e UC-VID-014 RN3: no máximo uma junção por cadeia; conversão só no último passo da cadeia. D-42: operação desconhecida → `INVALID_STEP_PARAMS` com `{index, errors}`. D-05/D-06: a extração não é implementada e não tem nome de operação. Nenhuma fonte dá os nomes das regras nem fala de `convert` ou junção dentro de uma sub-cadeia.
-- **Opções:**
-  - **(a)** `{rule}` ∈ `empty_chain`, `convert_not_last`, `multiple_concat`, `frame_extraction` e `concat_not_first` (D-78), com `{index}` do passo de topo e, dentro de um clip, `{clipIndex, stepIndex}`. Numa sub-cadeia, `convert` dá `convert_not_last` (a junção vem depois e o resultado é MP4) e uma junção dá `multiple_concat`. O validador de estrutura reconhece o nome reservado `extract_frames` antes de consultar o registo, e dá `frame_extraction` em vez de operação desconhecida. As sub-cadeias podem ser vazias (UC-VID-014 FA1).
-  - **(b)** Como (a), mas `convert` e junção dentro de um clip dão `INVALID_STEP_PARAMS` desse passo, e a extração de fotogramas fica como operação desconhecida (`INVALID_STEP_PARAMS`, D-42); a CHAIN-018 ficaria por verificar com o seu código.
-  - **(c)** Outros nomes.
-- **Recomendação:** (a). Cumpre o código da CHAIN-018 sem construir a extração, e os nomes descrevem a regra para o editor os traduzir.
-- **Resposta:** **(a), aprovada pela equipa.** `{rule}` ∈ `empty_chain`, `convert_not_last`, `multiple_concat`, `frame_extraction`, `concat_not_first`, com `{index}` e, dentro de um clip, `{clipIndex, stepIndex}`; `convert` numa sub-cadeia → `convert_not_last`, junção numa sub-cadeia → `multiple_concat`; `extract_frames` é um nome reservado reconhecido antes do registo; sub-cadeias vazias permitidas.
+- **Âmbito:** validação da estrutura antes dos parâmetros e dos limites.
+- **Decisão:** cadeia não vazia; uma única junção na primeira posição principal; conversão apenas no último passo principal e nunca numa subcadeia. São utilizados os códigos INVALID_CHAIN com detalhes de regra e INVALID_STEP_PARAMS para parâmetros inválidos.
+- **Revisão:** a D-86 retirou o teto fixo de passos. As regras de estrutura continuam a aplicar-se.
 
 ## D-80 — Ordem das três fases da validação e endereço dos erros nas sub-cadeias
 
@@ -858,7 +810,7 @@
 
 - **Onde:** B008, etapa 1 (`ddd-01-domain-model.md`, ValidadorCadeia, fase 3).
 - **Dúvida:** A fase 3 verifica a duração estimada só nos pontos que o ADD nomeia, ou depois de cada passo? Por exemplo: um vídeo de 4 min abrandado para 0,5× (8 min) e depois recortado para 1 min, num perfil Registado (5 min).
-- **O que as fontes dizem:** ADD 4.9, fase 3: "a duração estimada de cada clip e a do resultado final" não podem exceder o limite do perfil (`LIMIT_EXCEEDED` com `{total, limit}`, exceção 5 do UC-VID-014). ADD 4.8 e CONCAT-007: a soma das durações dos clips na junção. T-03 passo 5: limites de duração e tamanho de cada vídeo de entrada. Nenhuma fonte fala das saídas intermédias.
+- **O que as fontes dizem:** ADD 4.9, fase 3: "a duração estimada de cada clip e a do resultado final" não podem exceder o limite do perfil (`LIMIT_EXCEEDED` com `{total, limit}`, exceção 5 do UC-VID-013). ADD 4.8 e CONCAT-007: a soma das durações dos clips na junção. T-03 passo 5: limites de duração e tamanho de cada vídeo de entrada. Nenhuma fonte fala das saídas intermédias.
 - **Opções:**
   - **(a)** Só os pontos das fontes: cada vídeo de entrada (passo 5 da aceitação), a saída da sub-cadeia de cada clip, a soma na junção (`validate` da `concat`, CONCAT-007) e o resultado final. As saídas intermédias não são limitadas; o exemplo é aceite.
   - **(b)** Também a saída de cada passo; o exemplo é rejeitado no abrandamento.
@@ -868,8 +820,8 @@
 ## D-82 — Fase da falha de uma tarefa (Q-ADD-16, parte da falha)
 
 - **Onde:** B008, etapa 1 (`ddd-01-domain-model.md`, FaseFalha, ErroTarefa); `VideoTask.error`, `GET …/videos/tasks/:taskId`, `video-task-update`, resposta `failed` do worker.
-- **Dúvida:** A ST-VID-014 (AC4) e a exceção 7 do UC-VID-014 pedem que o erro indique a fase (descarregamento, codificação ou *upload*) em vez do passo. A D-40 deixou esta parte da Q-ADD-16 para a B008. Onde e com que valores vai a fase, e para que tarefas?
-- **O que as fontes dizem:** UC-VID-014, exceção 7; ADD 4.9 (riscos) e Q-ADD-16. B003: `ErroTarefa {code, message}` com `PROCESSING_ERROR` (D-21); a causa técnica fica só nos logs (ERROR-002, T-10). Nenhuma fonte dá o nome nem os valores do campo.
+- **Dúvida:** A ST-VID-014 (AC4) e a exceção 7 do UC-VID-013 pedem que o erro indique a fase (descarregamento, codificação ou *upload*) em vez do passo. A D-40 deixou esta parte da Q-ADD-16 para a B008. Onde e com que valores vai a fase, e para que tarefas?
+- **O que as fontes dizem:** UC-VID-013, exceção 7; ADD 4.9 (riscos) e Q-ADD-16. B003: `ErroTarefa {code, message}` com `PROCESSING_ERROR` (D-21); a causa técnica fica só nos logs (ERROR-002, T-10). Nenhuma fonte dá o nome nem os valores do campo.
 - **Opções:**
   - **(a)** Campo novo `error.phase` ∈ `download` (URLs e descarregamento das entradas, incluindo as marcas de água), `encode` (FFmpeg, FFprobe, miniatura e fotograma 0) e `upload` (URLs de escrita e envio). Vai no `VideoTask.error`, no `GET …/tasks/:taskId` e no `video-task-update`, em **qualquer** tarefa (uma operação isolada também ganha a fase), por acréscimo. O worker indica a fase na resposta `failed`. As falhas sem fase observável (esgotamento das entregas, rotina de manutenção, falha antes de começar) ficam sem `phase`. O `code` continua `PROCESSING_ERROR`; a interface mostra a fase na mensagem.
   - **(b)** Como (a), mas só nas tarefas `chain` e `concat`.
@@ -881,9 +833,9 @@
 
 - **Onde:** B008, etapa 1 (`ddd-01-domain-model.md`, PredefinicaoVideo, ServicoPredefinicoesVideo); `users/models/videoPreset.js`, `users/routes/videoPresets.js`, `apiGateway/routes/videoPresets.js` e o editor de cadeia.
 - **Dúvida:** Que limites tem o nome, que erros dão um nome repetido e uma cadeia inválida, que operações há (listar, criar, mudar, apagar), o que se valida ao guardar e como se carrega uma predefinição no editor?
-- **O que as fontes dizem:** ADD 4.9: `{owner_id, name, steps: [{operation, version, parameters}]}`, nome único por dono, sem partilha, sem junção; recusa do `anonymous` com 403; `videoAuth` no gateway; "repete o padrão de `users/routes/presets.js` (CRUD, nome único), sem a partilha". REQ-VID-CHAIN-014 e UC-VID-014 FA3: guardar com um nome e reutilizar numa nova cadeia (num lote fica de fora, D-06). T-01: a `version` serve para migrar ou rejeitar receitas guardadas. Os parâmetros de vários passos dependem do vídeo (por exemplo os instantes do recorte), por isso não se podem validar sem ele.
+- **O que as fontes dizem:** ADD 4.9: `{owner_id, name, steps: [{operation, version, parameters}]}`, nome único por dono, sem partilha, sem junção; recusa do `anonymous` com 403; `videoAuth` no gateway; "repete o padrão de `users/routes/presets.js` (CRUD, nome único), sem a partilha". REQ-VID-CHAIN-014 e UC-VID-013 FA3: guardar com um nome e reutilizar numa nova cadeia. T-01: a `version` serve para migrar ou rejeitar receitas guardadas. Os parâmetros de vários passos dependem do vídeo (por exemplo os instantes do recorte), por isso não se podem validar sem ele.
 - **Opções:**
-  - **(a)** Nome com `trim()`, de 1 a 50 caracteres, único por dono sem distinguir maiúsculas de minúsculas; repetido → 409 `PRESET_NAME_TAKEN`. Rotas `GET /users/:user/video-presets`, `POST`, `PUT /…/:id` (muda o nome e/ou os passos) e `DELETE /…/:id`; sem limite de número. Ao guardar valida-se só a estrutura (operações e versões conhecidas, sem junção, sem `extract_frames`, `convert` só no fim, 1 a 10 passos), com os códigos da D-79 e o `CHAIN_TOO_LONG`, e retiram-se os campos que o servidor grava (`_mark`, `_input`). Os parâmetros são validados quando a predefinição é carregada numa cadeia, pelo `POST …/videos/validate`. Carregar **substitui** os passos da cadeia principal (sem junção) ou da sub-cadeia de um clip, com confirmação quando a lista não está vazia.
+  - **(a)** Nome com `trim`, de 1 a 50 caracteres, único por dono sem distinguir maiúsculas de minúsculas; repetido → 409 `PRESET_NAME_TAKEN`. Rotas `GET /users/:user/video-presets`, `POST`, `PUT /…/:id` (muda o nome e/ou os passos) e `DELETE /…/:id`; sem limite de número. Ao guardar valida-se só a estrutura (operações e versões conhecidas, sem junção, `convert` só no fim, 1 a 10 passos), com os códigos da D-79 e o `CHAIN_TOO_LONG`, e retiram-se os campos que o servidor grava (`_mark`, `_input`). Os parâmetros são validados quando a predefinição é carregada numa cadeia, pelo `POST …/videos/validate`. Carregar **substitui** os passos da cadeia principal (sem junção) ou da sub-cadeia de um clip, com confirmação quando a lista não está vazia.
   - **(b)** Como (a), mas carregar **acrescenta** os passos aos que já existem, até 10.
   - **(c)** Copiar as regras exatas de `users/routes/presets.js` (a verificar no código na etapa 2), sem a partilha.
 - **Recomendação:** (a); na etapa 2 regista-se onde o padrão das predefinições de imagem difere.
@@ -905,7 +857,7 @@
 
 - **Onde:** B008, etapa 2 (`ddd-02-technical-design.md`, API das predefinições); `POST` e `PATCH /users/:user/video-presets…`.
 - **Dúvida:** A D-83 manda validar a estrutura ao guardar "com os códigos da D-79", mas nenhuma regra da D-79 cobre uma predefinição com uma junção: numa cadeia, uma junção é permitida. Que código e que `{rule}` recebe?
-- **O que as fontes dizem:** ADD 4.9 e UC-VID-014 FA3: "Cadeias com junção não podem ser guardadas"; REQ-VID-CHAIN-014: "guardar uma cadeia sem junção". D-79: `{rule}` ∈ `empty_chain`, `convert_not_last`, `multiple_concat`, `frame_extraction`, `concat_not_first`. Nenhuma fonte dá o código.
+- **O que as fontes dizem:** ADD 4.9 e UC-VID-013 FA3: "Cadeias com junção não podem ser guardadas"; REQ-VID-CHAIN-014: "guardar uma cadeia sem junção". D-79: `{rule}` ∈ `empty_chain`, `convert_not_last`, `multiple_concat`, `concat_not_first`. Nenhuma fonte dá o código.
 - **Opções:** (a) 422 `INVALID_CHAIN` com `{rule: "concat_in_preset", index}`, uma sexta regra só usada pelas predefinições; (b) 422 `INVALID_CHAIN` com `{rule: "multiple_concat"}`, que descreve mal o caso; (c) 422 `INVALID_REQUEST` com `{field: "steps"}` (D-23).
 - **Recomendação:** (a). O editor já traduz o `{rule}` e a mensagem diz exatamente porque a cadeia não pode ser guardada; o botão "Guardar como predefinição" fica desativado no editor quando há junção, por isso o código só aparece a quem chama a API diretamente.
 - **Resposta:** **(a), aprovada pela equipa.** Predefinição com junção → 422 `INVALID_CHAIN` com `{rule: "concat_in_preset", index}`.
@@ -914,10 +866,10 @@
 
 - **Onde:** B008, revisão da etapa 2 depois da revisão da equipa no browser; `projects/video/chainStructure.js`, `projects/video/compositionLimits.js`, `projects/video/operations/concat.js`, interface das composições.
 - **Dúvida:** A equipa quer composições sem limite fixo de passos por cadeia nem de vídeos por junção. O que deixa de valer e o que se mantém?
-- **O que as fontes dizem:** DQ-015: junção com 2–10 (Registado) ou 2–50 (Premium) vídeos, cadeia com no máximo 10 passos. REQ-VID-CHAIN-008, REQ-VID-CONCAT-006, REQ-VID-NFR-022 e NFR-023 aplicam esses limites (`CHAIN_TOO_LONG`, `TOO_MANY_INPUTS`). CONCAT-005 (mínimo de 2), CONCAT-007, NFR-024 e D-81 (duração), DQ-014 (custo), QUOTA-001/007 (quota) e RN1 (anónimos).
+- **O que as fontes dizem:** DQ-014: junção com 2–10 (Registado) ou 2–50 (Premium) vídeos, cadeia com no máximo 10 passos. REQ-VID-CHAIN-008, REQ-VID-CONCAT-006, REQ-VID-NFR-018 e NFR-019 aplicam esses limites (`CHAIN_TOO_LONG`, `TOO_MANY_INPUTS`). CONCAT-005 (mínimo de 2), CONCAT-007, NFR-020 e D-81 (duração), DQ-013 (custo), QUOTA-001/007 (quota) e RN1 (anónimos).
 - **Opções:** decisão da equipa.
 - **Recomendação:** —
-- **Resposta:** **Decisão da equipa.** Deixam de existir limites fixos de número de passos por cadeia e de número de vídeos por junção, para todos os perfis (revoga, para esta construção, o `CHAIN_TOO_LONG` e o `TOO_MANY_INPUTS` da DQ-015, REQ-VID-CHAIN-008, REQ-VID-CONCAT-006, REQ-VID-NFR-022 e NFR-023). Mantêm-se: o mínimo de 2 vídeos numa junção (CONCAT-005), os limites de duração e tamanho por perfil (CONCAT-007, NFR-024, D-81), a quota diária dos Registados (cada passo 1 crédito, verificada e reservada antes da tarefa, com `QUOTA_EXCEEDED` se não chegar), a recusa dos anónimos e as validações de formato, permissões e integridade. Os Premium não têm débito de créditos. Os requisitos ficam com a nota "Revisto pela D-86", sem apagar o texto original, e o impacto fica no ADR correspondente. Uma proteção técnica que a ausência de limite exija é registada como dúvida nova (D-88), sem inventar um número.
+- **Resposta:** **Decisão da equipa.** Deixam de existir limites fixos de número de passos por cadeia e de número de vídeos por junção, para todos os perfis (revoga, para esta construção, o `CHAIN_TOO_LONG` e o `TOO_MANY_INPUTS` da DQ-014, REQ-VID-CHAIN-008, REQ-VID-CONCAT-006, REQ-VID-NFR-018 e NFR-019). Mantêm-se: o mínimo de 2 vídeos numa junção (CONCAT-005), os limites de duração e tamanho por perfil (CONCAT-007, NFR-020, D-81), a quota diária dos Registados (cada passo 1 crédito, verificada e reservada antes da tarefa, com `QUOTA_EXCEEDED` se não chegar), a recusa dos anónimos e as validações de formato, permissões e integridade. Os Premium não têm débito de créditos. Os requisitos ficam com a nota "Revisto pela D-86", sem apagar o texto original, e o impacto fica no ADR correspondente. Uma proteção técnica que a ausência de limite exija é registada como dúvida nova (D-88), sem inventar um número.
 
 ## D-87 — Exceção à regra 2.6 para os painéis de vídeo das B004, B005 e B007
 
@@ -930,21 +882,21 @@
 
 ## D-88 — Proteção técnica sem limite fixo de passos e de vídeos (D-86)
 
-- **Onde:** B008, revisão da etapa 2; `express.json()` do API Gateway e do serviço de projetos, mensagem `task.run` e `VideoTask.plan`, comando FFmpeg do `composition_task.py`.
+- **Onde:** B008, revisão da etapa 2; `express.json` do API Gateway e do serviço de projetos, mensagem `task.run` e `VideoTask.plan`, comando FFmpeg do `composition_task.py`.
 - **Dúvida:** Sem `CHAIN_TOO_LONG` nem `TOO_MANY_INPUTS`, o tamanho de uma composição só fica limitado pela duração do resultado e pela quota. Que proteção técnica fica, e com que comportamento quando é atingida?
 - **O que as fontes dizem:**
   - D-86: não inventar um número; registar uma dúvida.
-  - ADD 4.8, riscos: "todas as entradas ficam abertas ao mesmo tempo (um descodificador por clip): a memória cresce com N". ADD T-02: uma só invocação (NFR-013).
-  - O `express.json()` do gateway e do serviço de projetos usa o limite de omissão do Express (100 kB), que não se pode mudar nas linhas existentes (regra 2.6). Um pedido maior é recusado com 413 antes de chegar às rotas de vídeo, com o formato de erro do *handler* existente e não o do vídeo.
+  - ADD 4.8, riscos: "todas as entradas ficam abertas ao mesmo tempo (um descodificador por clip): a memória cresce com N". ADD T-02: uma só invocação (NFR-012).
+  - O `express.json` do gateway e do serviço de projetos usa o limite de omissão do Express (100 kB), que não se pode mudar nas linhas existentes (regra 2.6). Um pedido maior é recusado com 413 antes de chegar às rotas de vídeo, com o formato de erro do *handler* existente e não o do vídeo.
   - O documento MongoDB do `VideoTask` (com `steps` e `plan`) tem um máximo de 16 MB.
-  - Para o Registado, a quota (5 créditos por dia) já limita uma cadeia a 5 passos, mas uma junção custa 1 crédito, qualquer que seja o número de vídeos (DQ-014). O Premium não tem quota.
+  - Para o Registado, a quota (5 créditos por dia) já limita uma cadeia a 5 passos, mas uma junção custa 1 crédito, qualquer que seja o número de vídeos (DQ-013). O Premium não tem quota.
   - A duração mínima de um clip é um fotograma, por isso o limite de duração do perfil (5 min ou 60 min) não limita o número de clips.
 - **Opções:**
   - **(a)** Sem limite novo. Ficam só os limites que já existem: os 100 kB do corpo do pedido (centenas de passos ou de clips), os 16 MB do documento e os recursos do worker. Mede-se na etapa 5 uma junção grande (por exemplo, 100 clips curtos no Premium: memória e tempo do worker) e regista-se o resultado. Um 413 do Express é traduzido pelo gateway de vídeo para `INVALID_REQUEST {field: "steps", reason: "too_large"}`, por acréscimo.
   - **(b)** Um teto técnico configurável por variável de ambiente (sem valor por omissão no código), com um código próprio (`COMPOSITION_TOO_LARGE`), e um valor medido na etapa 5 e escolhido pela equipa.
-  - **(c)** Processar junções muito grandes por partes, com ficheiros intermédios. Contraria a NFR-013 e o ADD 4.8, por isso fica de fora.
+  - **(c)** Processar junções muito grandes por partes, com ficheiros intermédios. Contraria a NFR-012 e o ADD 4.8, por isso fica de fora.
 - **Recomendação:** (a). Cumpre a D-86 sem inventar números, e a medição da etapa 5 diz se é preciso passar para (b).
-- **Resposta:** **(a), aprovada pela equipa.** Nenhum limite novo. Na etapa 5 mede-se e regista-se a memória e o tempo do worker numa junção de 100 clips curtos num Premium e numa cadeia longa; se algum falhar, regista-se uma dúvida nova com a proposta de teto configurável da opção (b) e para-se. O 413 do `express.json()` é traduzido para `INVALID_REQUEST {field: "steps", reason: "too_large"}` no gateway de vídeo.
+- **Resposta:** **(a), aprovada pela equipa.** Nenhum limite novo. Na etapa 5 mede-se e regista-se a memória e o tempo do worker numa junção de 100 clips curtos num Premium e numa cadeia longa; se algum falhar, regista-se uma dúvida nova com a proposta de teto configurável da opção (b) e para-se. O 413 do `express.json` é traduzido para `INVALID_REQUEST {field: "steps", reason: "too_large"}` no gateway de vídeo.
 
 ## D-89 — Controlos do recorte e pré-visualizações quando o passo não recebe o vídeo original
 
@@ -988,7 +940,7 @@
 
 - **Onde:** `frontend/components/video/project-video-list.tsx`, `video-section.tsx`, `video-gallery.tsx` e `frontend/app/dashboard/[pid]/page.tsx`.
 - **Dúvida:** Como passam a aparecer os vídeos na página do projeto após a proposta UI-VID-01 a UI-VID-12?
-- **Resposta da equipa:** A apresentação das D-31/D-32 fica revista. O espaço de vídeo ocupa a área principal por cima do `Toolbar` e da lista de imagens quando se escolhe «Vídeos», ocultando também o estado vazio das imagens. O seletor «Imagens/Vídeos» alterna as vistas; o botão «Apply» do cabeçalho permanece como está. Em `page.tsx` só se podem acrescentar linhas, sem envolver nem alterar JSX existente. A proveniência vem de `source_video_ids` por uma rota nova `GET …/videos/lineage`, antes de `/:video`, sem mudar a listagem existente. Quando a fonte já não existe, mostra-se «Origem removida»; «Origem indisponível» só se usa quando não há `source_video_ids`. Uma junção mostra «Junção de N clips», fontes na ordem e com repetições. Resultados de junção e Movie Maker constituem um mini grupo próprio. B006 e B009 continuam bloqueadas pela D-06.
+- **Resposta da equipa:** A apresentação das D-31/D-32 fica revista. O espaço de vídeo ocupa a área principal por cima do `Toolbar` e da lista de imagens quando se escolhe «Vídeos», ocultando também o estado vazio das imagens. O seletor «Imagens/Vídeos» alterna as vistas; o botão «Apply» do cabeçalho permanece como está. Em `page.tsx` só se podem acrescentar linhas, sem envolver nem alterar JSX existente. A proveniência vem de `source_video_ids` por uma rota nova `GET …/videos/lineage`, antes de `/:video`, sem mudar a listagem existente. Quando a fonte já não existe, mostra-se «Origem removida»; «Origem indisponível» só se usa quando não há `source_video_ids`. Uma junção mostra «Junção de N clips», fontes na ordem e com repetições. Resultados de junção e Movie Maker constituem um mini grupo próprio.
 
 ## D-93 — Criação de projetos de imagem e vídeo num único botão
 

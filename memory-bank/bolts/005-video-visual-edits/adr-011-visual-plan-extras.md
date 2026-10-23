@@ -9,7 +9,7 @@ superseded_by: null
 
 ## Context
 
-O T-07 manda o plano levar a entrada completa do filtro escolhido, porque o worker não tem cópia do catálogo. A marca de água precisa de levar a origem do PNG no storage e a geometria final. O ADR-008 apresenta o `planExtras.js` como o padrão para estes casos, mas o `applyPlanExtras()` sai logo quando não há `trim`, `remove_audio` nem `speed`, e essa lista é uma linha existente (regra 2.6).
+O T-07 manda o plano levar a entrada completa do filtro escolhido, porque o worker não tem cópia do catálogo. A marca de água precisa de levar a origem do PNG no storage e a geometria final. O ADR-008 apresenta o `planExtras.js` como o padrão para estes casos, mas o `applyPlanExtras` sai logo quando não há `trim`, `remove_audio` nem `speed`, e essa lista é uma linha existente (regra 2.6).
 
 No worker, o `executor._filters` passa a cada módulo só os `parameters` (com o `with_filter_input` da B004, que só trata a `speed`). Os campos do plano não chegam aos módulos.
 
@@ -25,7 +25,7 @@ No worker, o `executor._filters` passa a cada módulo só os `parameters` (com o
    - descarrega a marca para `mark<i>.png` na pasta da tarefa e passa-a em `parameters._overlay`.
 
    Os valores do cliente com esses nomes são removidos. O plano persistido e a `recipe` não mudam.
-3. **Filtro da marca no grafo único:** o `build_command` monta uma só cadeia linear `[0:V:0]…[v]`. O passo `watermark` fecha a cadeia com uma etiqueta, abre a fonte `movie=<png>,format=rgba,scale,colorchannelmixer=aa=<opacidade>` e continua a cadeia a partir do `overlay`. O resultado é um único `-filter_complex` válido, sem segunda entrada `-i` e sem alterar o `executor.py`. Continua a haver uma só recodificação (NFR-013).
+3. **Filtro da marca no grafo único:** o `build_command` monta uma só cadeia linear `[0:V:0]…[v]`. O passo `watermark` fecha a cadeia com uma etiqueta, abre a fonte `movie=<png>,format=rgba,scale,colorchannelmixer=aa=<opacidade>` e continua a cadeia a partir do `overlay`. O resultado é um único `-filter_complex` válido, sem segunda entrada `-i` e sem alterar o `executor.py`. Continua a haver uma só recodificação (NFR-012).
 
 ## Rationale
 

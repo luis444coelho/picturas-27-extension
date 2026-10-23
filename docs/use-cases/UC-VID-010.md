@@ -1,105 +1,97 @@
-# Caso de Uso: UC-VID-010 — Redimensionar um vídeo
-### PictuRAS (v27.1) · Fase 1: Suporte a Vídeo Digital
+# UC-VID-010 — Rodar e espelhar um vídeo
 
----
+A numeração e o conteúdo seguem os casos de uso do relatório de entrega.
 
-## 2.1 Cabeçalho
+## Cabeçalho
 
-| **Secção** | **Detalhes** |
-|------------|--------------|
-| **ID do Caso de Uso** | UC-VID-010 |
-| **Nome** | Redimensionar um vídeo |
-| **Versão** | v1.1 (Alinhamento com o ADD v1.1) |
-| **Autor** | Equipa PictuRAS-27 |
-| **Data** | 2026-10-21 |
-| **Objetivo** | Permitir ao utilizador alterar a resolução de um vídeo do projeto, selecionando as dimensões de saída pretendidas, e obter um novo vídeo com essas dimensões, sem alterar o original. |
-| **Âmbito** | Módulo de processamento de vídeo e gestão de recursos do PictuRAS |
-| **Ator Principal** | Utilizador **Registado** ou **Premium** com sessão iniciada e acesso ao projeto |
-| **Stakeholders e Interesses** | - **Utilizador Registado / Premium**: pretende reduzir o tamanho do vídeo para partilha ou adaptá-lo a uma resolução-alvo (e.g. 720p).<br>- **Sistema PictuRAS**: deve garantir dimensões compatíveis com o codec H.264 e com os limites do perfil.<br>- **Administrador**: pretende evitar resoluções excessivas que sobrecarreguem os workers e o armazenamento. |
-| **Pré-condições** | - O utilizador tem sessão iniciada (JWT válido).<br>- O utilizador tem permissão de edição sobre o projeto.<br>- O projeto contém um vídeo num formato suportado (MP4, MOV ou AVI, segundo a matriz da DQ-002), com duração ≤ 5 min e tamanho ≤ 200 MB (Registado) ou ≤ 60 min e ≤ 2 GB (Premium).<br>- Não existe outra tarefa de vídeo ativa no projeto. |
-| **Trigger** | O utilizador seleciona um vídeo do projeto e escolhe a operação "Redimensionar". |
+| Secção | Detalhes |
+| --- | --- |
+| *ID do Caso de Uso* | UC-VID-010 |
+| *Nome* | Rodar e espelhar um vídeo |
+| *Versão* | v2.1 |
+| *Autor* | Equipa PictuRAS-27 |
+| *Data* | 2026-10-23 |
+| *Objetivo* | Permitir ao utilizador rodar um vídeo do projeto num ângulo de 90°, 180° ou 270° e/ou espelhá-lo na horizontal ou na vertical, de modo a corrigir ou alterar a orientação, obtendo um novo vídeo sem alterar o original. |
+| *Âmbito* | Módulo de processamento de vídeo e gestão de recursos do PictuRAS |
+| *Ator Principal* | Utilizador *Registado* ou *Premium* com sessão iniciada e acesso ao projeto |
+| *Stakeholders e Interesses* | - *Utilizador Registado / Premium*: pretende corrigir vídeos gravados na orientação errada (e.g. telemóvel na vertical) ou criar efeitos de espelho.<br> - *Sistema PictuRAS*: deve aplicar transformações geométricas exatas e sem perda de área visível.<br> - *Administrador*: pretende garantir que o processamento respeita quotas e limites de infraestrutura. |
+| *Pré-condições* | - O utilizador tem sessão iniciada (JWT válido).<br> - O utilizador tem permissão de edição sobre o projeto.<br> - O projeto contém um vídeo num formato suportado (MP4, MOV ou AVI, segundo a matriz da DQ-002), com duração ≤ 5 min e tamanho ≤ 200 MB (Registado) ou ≤ 60 min e ≤ 2 GB (Premium).<br> - Não existe outra tarefa de vídeo ativa no projeto. |
+| *Trigger* | O utilizador seleciona um vídeo do projeto e escolhe a operação "Rodar / Espelhar". |
 
----
 
-## 2.2 Fluxo Principal
+## Fluxo principal
 
-| **Passo** | **Ação do Ator** | **Resposta do Sistema** |
-|-----------|------------------|-------------------------|
-| 1 | O utilizador acede ao projeto, seleciona um vídeo e escolhe a operação "Redimensionar". | O sistema apresenta a resolução atual em dimensões de apresentação (com a etiqueta de rotação aplicada), os campos de largura e altura preenchidos com esses valores (ADD v1.1, 4.5, Q-ADD-13), o bloqueio de proporção ativo e as predefinições 1080p, 720p, 480p e 360p. |
-| 2 | O utilizador escolhe uma predefinição ou introduz a largura (ou a altura) pretendida. | Com a proporção bloqueada, o sistema recalcula a outra dimensão, arredondando-a para o número par mais próximo, e apresenta as dimensões finais. |
-| 3 | O utilizador confirma a operação. | O sistema valida que as dimensões são pares, ≥ 128 px, dentro do limite do perfil e diferentes das atuais, verifica a quota disponível (se Registado) e cria a tarefa assíncrona. |
-| 4 | — | O sistema reserva 1 operação da quota diária (se Registado), coloca a tarefa na fila com estado `queued` e notifica o utilizador da aceitação. |
-| 5 | — | O worker inicia o processamento (estado `processing`), reamostra todos os fotogramas para as dimensões pretendidas e emite progresso percentual (0–100%) via WebSocket. |
-| 6 | — | O worker gera o novo vídeo em MP4 (H.264/AAC) com as dimensões exatas e rotação 0, preservando a duração, a taxa de fotogramas e o áudio; o sistema associa-o ao projeto como novo recurso (referenciando o vídeo de origem), transita a tarefa para `completed` (a reserva da quota torna-se definitiva, ADD v1.1, Q-ADD-03) e notifica o utilizador. |
-| 7 | O utilizador consulta o projeto. | O sistema apresenta o novo vídeo redimensionado na lista de recursos; o vídeo original permanece inalterado. |
+| Passo | Ação do Ator | Resposta do Sistema |
+| --- | --- | --- |
+| 1 | O utilizador acede ao projeto, seleciona um vídeo e escolhe a operação "Rodar / Espelhar". | O sistema apresenta o vídeo, os botões de rotação no sentido horário (90°, 180°, 270°) e as opções de espelho horizontal e vertical, todos desativados. |
+| 2 | O utilizador escolhe um ângulo de rotação e/ou uma ou ambas as opções de espelho. | O sistema apresenta, em ≤ 1 s, uma pré-visualização estática do primeiro fotograma com a transformação combinada (rotação aplicada primeiro, espelho depois) e as dimensões resultantes. |
+| 3 | O utilizador confirma a operação. | O sistema valida que o ângulo pertence ao conjunto permitido e que foi definida pelo menos uma transformação, verifica a quota disponível (se Registado) e cria a tarefa assíncrona. |
+| 4 | — | O sistema reserva 1 operação da quota diária (se Registado), coloca a tarefa na fila com estado queued e notifica o utilizador da aceitação. |
+| 5 | — | O worker inicia o processamento (estado processing), aplica a transformação a todos os fotogramas e emite progresso percentual (0–100%) via WebSocket. |
+| 6 | — | O worker gera o novo vídeo em MP4 (H.264/AAC), com largura e altura trocadas nas rotações de 90° e 270°, preservando a duração, a taxa de fotogramas e o áudio; o sistema associa-o ao projeto como novo recurso (referenciando o vídeo de origem), transita a tarefa para completed, mantém o débito já reservado, sem nova cobrança e notifica o utilizador. |
+| 7 | O utilizador consulta o projeto. | O sistema apresenta o novo vídeo transformado na lista de recursos; o vídeo original permanece inalterado. |
 
----
 
-## 2.3 Fluxos Alternativos
+## Fluxos alternativos
 
-| **Fluxo** | **Descrição** |
-|-----------|---------------|
-| **FA1 – Desbloqueio da proporção** | No passo 2, o utilizador desativa o bloqueio de proporção e define largura e altura de forma independente → O sistema apresenta um aviso de que a imagem ficará distorcida. O fluxo continua no passo 3. |
-| **FA2 – Ampliação acima da resolução original** | No passo 2, as dimensões pretendidas são superiores às originais → O sistema apresenta um aviso de que a ampliação não acrescenta detalhe. O fluxo continua no passo 3. |
-| **FA3 – Cancelamento antes do início do processamento** | No passo 4, com a tarefa no estado `queued`, o utilizador solicita o cancelamento → O sistema marca a tarefa como `cancelled` (o worker descarta-a quando a consome, ADD v1.1, T-03), devolve a quota reservada (se Registado) e notifica o utilizador. |
-| **FA4 – Cancelamento durante o processamento** | No passo 5, com a tarefa no estado `processing`, o utilizador solicita o cancelamento → O sistema interrompe o worker, elimina os ficheiros temporários, devolve a quota reservada (se Registado), transita a tarefa para `cancelled` e notifica o utilizador. |
-| **FA5 – Utilizador com perfil Premium** | No passo 3, o utilizador tem perfil Premium → O sistema não verifica nem debita quota diária e aplica o limite de resolução alargado (3840×2160). |
-| **FA6 – Utilização como passo de cadeia ou lote** | A operação é configurada como passo de uma cadeia (UC-VID-014) ou aplicada em lote (UC-VID-015) → As mesmas regras de validação aplicam-se e a execução segue o caso de uso respetivo. |
+| Fluxo | Descrição |
+| --- | --- |
+| *FA1 – Alteração da transformação após pré-visualização* | No passo 2, o utilizador altera o ângulo ou as opções de espelho → O sistema atualiza a pré-visualização e as dimensões resultantes. |
+| *FA2 – Cancelamento antes do início do processamento* | No passo 4, com a tarefa no estado queued, o utilizador solicita o cancelamento → O sistema marca a tarefa como cancelada e impede a execução da mensagem pendente, devolve a quota reservada (se Registado), transita a tarefa para cancelled e notifica o utilizador. |
+| *FA3 – Cancelamento durante o processamento* | No passo 5, com a tarefa no estado processing, o utilizador solicita o cancelamento → O sistema interrompe o worker, elimina os ficheiros temporários, devolve a quota reservada (se Registado), transita a tarefa para cancelled e notifica o utilizador. |
+| *FA4 – Utilizador com perfil Premium* | No passo 3, o utilizador tem perfil Premium → O sistema não verifica nem debita quota diária e aplica os limites alargados. |
+| *FA5 – Utilização como passo de cadeia* | A operação é configurada como passo de uma cadeia (UC-VID-013) → As mesmas regras de validação aplicam-se e a execução segue o caso de uso respetivo. |
 
----
 
-## 2.4 Exceções
+## Exceções
 
-| **Condição** | **Comportamento do Sistema** |
-|--------------|------------------------------|
-| **Dimensões ímpares, inferiores a 128 px ou acima do limite do perfil.** | No passo 3, o sistema rejeita a operação (`INVALID_RESIZE_PARAMS`), indicando a dimensão incorreta e o limite aplicável. A tarefa não é criada e a quota não é afetada. |
-| **Dimensões iguais às dimensões de apresentação do vídeo original.** | No passo 3, o sistema bloqueia a confirmação (`NO_CHANGES`) (ADD v1.1, Q-ADD-13). |
-| **Formato ou codec de vídeo não suportado.** | No passo 3, o sistema rejeita a operação (`UNSUPPORTED_FORMAT`). A tarefa não é criada e a quota não é afetada. |
-| **Duração ou tamanho superior ao limite do perfil.** | No passo 3, o sistema rejeita a operação (`LIMIT_EXCEEDED`). A tarefa não é criada e a quota não é afetada. |
-| **Quota diária esgotada (utilizador Registado).** | No passo 3, o sistema informa que o limite diário de 5 operações foi atingido (`QUOTA_EXCEEDED`). A tarefa não é criada. |
-| **Falha de processamento durante a execução.** | No passo 5, se o worker falhar → O sistema transita a tarefa para `failed`, elimina ficheiros temporários, estorna a quota reservada (se Registado) e notifica o utilizador. Nenhum recurso parcial é gravado no projeto. |
+| Condição | Comportamento do Sistema |
+| --- | --- |
+| *Ângulo de rotação fora do conjunto {90°, 180°, 270°}.* | No passo 3, o sistema rejeita a operação (INVALID_ORIENT_PARAMS). A tarefa não é criada e a quota não é afetada. |
+| *Nenhuma transformação definida (sem rotação e sem espelho).* | No passo 3, o sistema bloqueia a confirmação (NO_CHANGES). |
+| *Formato ou codec de vídeo não suportado.* | No passo 3, o sistema rejeita a operação (UNSUPPORTED_FORMAT). A tarefa não é criada e a quota não é afetada. |
+| *Duração ou tamanho superior ao limite do perfil.* | No passo 3, o sistema rejeita a operação (LIMIT_EXCEEDED). A tarefa não é criada e a quota não é afetada. |
+| *Quota diária esgotada (utilizador Registado).* | No passo 3, o sistema informa que o limite diário de 5 operações foi atingido (QUOTA_EXCEEDED). A tarefa não é criada. |
+| *Falha de processamento durante a execução.* | No passo 5, se o worker falhar → O sistema transita a tarefa para failed, elimina ficheiros temporários, estorna a quota reservada (se Registado) e notifica o utilizador. Nenhum recurso parcial é gravado no projeto. |
 
----
 
-## 2.5 Pós-condições
+## Pós-condições
 
-| **Tipo** | **Resultado** |
-|----------|---------------|
-| **Garantia de Sucesso** | Um novo vídeo MP4 com exatamente as dimensões confirmadas é persistido e associado ao projeto (com referência ao vídeo de origem). O vídeo original permanece inalterado. A quota diária é consumida em 1 operação (apenas Registado). A tarefa transita para `completed`. |
-| **Garantia Mínima** | Em caso de erro ou cancelamento, nenhum novo recurso é associado ao projeto, os ficheiros temporários são purgados, a quota reservada é devolvida e a tarefa transita para `failed` ou `cancelled`. O vídeo original permanece inalterado. |
+| Tipo | Resultado |
+| --- | --- |
+| *Garantia de Sucesso* | Um novo vídeo MP4 com a orientação pretendida é persistido e associado ao projeto (com referência ao vídeo de origem). O vídeo original permanece inalterado. A quota diária é consumida em 1 operação (apenas Registado). A tarefa transita para completed. |
+| *Garantia Mínima* | Em caso de erro ou cancelamento, nenhum novo recurso é associado ao projeto, os ficheiros temporários são purgados, a quota reservada é devolvida e a tarefa transita para failed ou cancelled. O vídeo original permanece inalterado. |
 
----
 
-## 2.6 Regras de Negócio e Restrições
+## Regras de negócio e restrições
 
-| **ID** | **Regra** |
-|--------|-----------|
-| **RN1** | Apenas utilizadores Registados e Premium com sessão iniciada e permissão de edição no projeto podem executar a operação. |
-| **RN2** | A largura e a altura de saída são números inteiros pares, com mínimo de 128 px (requisito de compatibilidade do codec H.264), e referem-se às dimensões de apresentação do vídeo; o resultado fica com rotação 0 (ADD v1.1, 4.5, Q-ADD-13). |
-| **RN3** | Limites de resolução de saída por perfil (maior dimensão × menor dimensão): Registado — até 1920×1080; Premium — até 3840×2160 (DQ-022). |
-| **RN4** | Por omissão, a proporção original é mantida; o desbloqueio da proporção é permitido mediante aviso de distorção. |
-| **RN5** | A ampliação acima da resolução original é permitida, mediante aviso. |
-| **RN6** | O resultado é gerado em MP4 (H.264/AAC), preservando a duração, a taxa de fotogramas e o áudio do original (DQ-013). |
-| **RN7** | Cada operação concluída consome exatamente 1 crédito da quota diária do utilizador Registado (limite de 5 operações/dia). Utilizadores Premium têm quota ilimitada. |
-| **RN8** | Em caso de cancelamento ou falha técnica, o crédito reservado é integralmente devolvido ao utilizador Registado. |
-| **RN9** | A operação é assíncrona; o progresso numérico (0–100%) é emitido via WebSocket. |
-| **RN10** | O vídeo original nunca é alterado nem eliminado; o resultado é um novo recurso independente no projeto. |
-| **RN11** | Apenas pode existir 1 tarefa de processamento de vídeo ativa em simultâneo por projeto. |
-| **RN12** | A operação pode ser usada como passo de uma cadeia (UC-VID-014) e no processamento em lote (UC-VID-015). |
+| ID | Regra |
+| --- | --- |
+| *RN1* | Apenas utilizadores Registados e Premium com sessão iniciada e permissão de edição no projeto podem executar a operação. |
+| *RN2* | A rotação é feita no sentido horário e apenas nos ângulos 90°, 180° e 270°. |
+| *RN3* | O espelho pode ser horizontal, vertical ou ambos, e pode ser combinado com a rotação numa única operação; a rotação é aplicada antes do espelho. |
+| *RN4* | Pelo menos uma transformação (rotação ou espelho) deve estar definida. |
+| *RN5* | Nas rotações de 90° e 270°, a largura e a altura do vídeo resultante são trocadas, sem recorte nem barras. |
+| *RN6* | O resultado é gerado em MP4 (H.264/AAC), preservando a duração, a taxa de fotogramas e o áudio do original (DQ-012). |
+| *RN7* | Cada operação concluída consome exatamente 1 crédito da quota diária do utilizador Registado (limite de 5 operações/dia). Utilizadores Premium têm quota ilimitada. |
+| *RN8* | Em caso de cancelamento ou falha técnica, o crédito reservado é integralmente devolvido ao utilizador Registado. |
+| *RN9* | A operação é assíncrona; o progresso numérico (0–100%) é emitido via WebSocket. |
+| *RN10* | O vídeo original nunca é alterado nem eliminado; o resultado é um novo recurso independente no projeto. |
+| *RN11* | Apenas pode existir 1 tarefa de processamento de vídeo ativa em simultâneo por projeto. |
+| *RN12* | A operação pode ser usada como passo de uma cadeia (UC-VID-013). |
 
----
 
-## 2.7 Assunções
+## Assunções
 
-| **ID** | **Assunção** |
-|--------|--------------|
-| **A1** | O FFmpeg (filtro `scale`) suporta a reamostragem para as dimensões pretendidas com qualidade adequada. |
-| **A2** | Os limites de resolução são valores de MVP, configuráveis e a validar pela equipa. |
+| ID | Assunção |
+| --- | --- |
+| *A1* | O FFmpeg (filtros transpose, hflip e vflip) aplica as transformações sem perda de área visível. |
+| *A2* | A quota diária é reposta diariamente às 00:00 UTC. |
 
----
 
-## 2.8 Questões em Aberto
+## Questões em aberto e resolução
 
-| **ID** | **Questão** | **Resolução / Decisão** |
-|--------|-------------|-------------------------|
-| **Q1** | Com a proporção desbloqueada, deve ser oferecido o preenchimento com barras pretas (*letterbox*) em vez da distorção? | Não no MVP. Com a proporção desbloqueada, a imagem é esticada mediante aviso; o *letterbox* fica para a Fase 2. |
+| ID | Questão | Resolução / Decisão |
+| --- | --- | --- |
+| *Q1* | Deve ser suportada a rotação por ângulos arbitrários (e.g. 15°)? | Não no MVP. Apenas múltiplos de 90°, que não exigem recorte nem preenchimento. |
+| *Q2* | Deve ser respeitada a etiqueta de rotação dos metadados (e.g. vídeos de telemóvel)? | Sim. A pré-visualização e o processamento partem da orientação de apresentação indicada pelos metadados do original. |

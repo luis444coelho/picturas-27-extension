@@ -35,7 +35,7 @@ A validação de codecs e de duração já tem de acontecer no serviço de proje
 |-------------|------|------|--------------|
 | Uma só ida, com a matriz e as regras de compatibilidade enviadas na mensagem | Uma descarga do original; menos latência | Segunda implementação das regras em Python (avaliar a matriz); risco de divergência; contraria o T-05 | Viola a "única fonte" da matriz |
 | Uma só ida, com cópia de matriz no worker | Simples | Duas cópias da matriz (JS e Python) | Contraria o T-05 e a REQ-VID-COM-006 (uma única fonte de verdade) |
-| FFprobe síncrono no serviço de projetos | Sem segunda mensagem | FFmpeg instalado no contentor do serviço de projetos (altera a sua imagem, regra 2.6); bloqueia o Node | Proibido pela regra 2.6 e pela NFR-010 |
+| FFprobe síncrono no serviço de projetos | Sem segunda mensagem | FFmpeg instalado no contentor do serviço de projetos (altera a sua imagem, regra 2.6); bloqueia o Node | Proibido pela regra 2.6 e pela NFR-009 |
 
 ## Consequences
 

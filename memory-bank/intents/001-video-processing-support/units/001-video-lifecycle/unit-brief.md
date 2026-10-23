@@ -4,7 +4,7 @@ intent: 001-video-processing-support
 phase: inception
 status: complete
 created: 2026-10-18T18:00:00.000Z
-updated: 2026-10-21T11:19:15.000Z
+updated: 2026-10-23
 default_bolt_type: ddd-construction-bolt
 ---
 
@@ -12,33 +12,25 @@ default_bolt_type: ddd-construction-bolt
 
 ## Objetivo e âmbito
 
-Disponibilizar recursos de vídeo autorizados em projetos e definir os contratos partilhados de tarefa, quota, storage e erro consumidos pelas operações seguintes. É uma fatia vertical da aplicação web: inclui a interface de upload, reprodução, consulta e download, os endpoints e a persistência correspondente.
+Ciclo de vida e acesso a vídeo no projeto PictuRAS, com preservação dos originais e resultados persistidos. **Casos:** UC-VID-000, UC-VID-005 e UC-VID-006.
 
-**Casos:** UC-VID-000, UC-VID-006, UC-VID-007. **Stories:** ST-VID-000, ST-VID-006, ST-VID-007, ST-VID-COM-001.
+## Requisitos e Stories
 
-## Requisitos atribuídos
+Esta Unit tem 70 requisitos funcionais exclusivos: UPLOAD, DOWNLOAD, INFO e requisitos comuns de autorização, quota, armazenamento, tarefas e erros. Os requisitos não funcionais são rastreados por responsabilidade na [matriz do intent](../../traceability.md), com resultados e limitações no Capítulo 10 do relatório.
 
-- **72 FR (propriedade exclusiva):** `REQ-VID-COM-*` (33, incluindo AUTH, QUOTA, STORAGE, TASK e ERROR), `REQ-VID-UPLOAD-*` (21, o `021` vem da specsDuvidas D-30), `REQ-VID-DOWNLOAD-*` (9), `REQ-VID-INFO-*` (9).
-- **NFR (16):** `REQ-VID-NFR-001`, `002`, `003`, `005` a `011`, `013`, `016`, `017`, `018`, `021`, `025`. A NFR-010 passa para a B001 e a NFR-013 e a NFR-018 para a B003, que constroem o worker e o executor (specsDuvidas D-03); a NFR-011 passa da B003 para a B001, que cria as filas e o worker (specsDuvidas D-09).
-- Não cobertos nesta construção (specsDuvidas D-06): `REQ-VID-TASK-007` e a parte de lotes da `REQ-VID-QUOTA-007`.
-- Outras Units consomem contratos comuns, mas não voltam a ser donas desses FR.
+- [ST-VID-000](stories/ST-VID-000-video-ingestion.md)
+- [ST-VID-006](stories/ST-VID-006-video-download.md)
+- [ST-VID-007](stories/ST-VID-007-video-information.md)
+- [ST-VID-COM-001](stories/ST-VID-COM-001-video-task-quota-foundation.md)
 
-## Conceitos, interfaces e limites
+## Contratos e dependências
 
-- Conceitos: Projeto, RecursoMultimédia, Vídeo, Utilizador, TrabalhoProcessamento, SaldoQuotaDiária.
-- Responsabilidades: validar JWT e permissão do projeto (`videoAuth`, `checkSharePermission`, `requireEditPermission`); validar contentor/codec (`formats.js`, T-05) e limite do perfil; persistir recurso e metadados na coleção `videos` (T-00), incluindo rotação e dimensões de apresentação (Q-ADD-13); gerar miniatura, fotograma 0 e cópia de pré-visualização MP4 (T-06, T-07, Q-ADD-20, Q-ADD-22); expor consulta e descarregamento por URL portador de 15 min via `/s3-video/` (4.1, 4.2, T-08, Q-ADD-05); construir o contrato `{operation, version, parameters}`, o registo de operações, o worker único e o executor de cadeias (T-01, T-02); tarefas `VideoTask`, `video_project_locks`, filas de vídeo e `video_control`, eventos `wsGateway/video.js` (T-03); reserva e devolução de quota sem passo de confirmação (T-04, Q-ADD-03); correlação e formato de erro (T-10); rotina periódica da Q-ADD-14 para tarefas paradas, lugares sem dono e recursos de vídeo de projetos apagados (specsDuvidas D-04). Não constrói o `VideoBatch`, o estágio `video_zip`, o campo `batch_id`, o endpoint de lote, os itens `batch_item`, a devolução por item, a rotina de lotes e ZIP nem o `archiver` (specsDuvidas D-06).
-- Entrada: ficheiro local ou pedido autorizado de consulta/download. Saída: recurso de vídeo íntegro e metadados consultáveis, URL temporário de storage quando autorizado e contrato de tarefa comum.
-- Não implementa as operações concretas (Unit 002), a junção, a validação de estrutura das cadeias nem os lotes (Unit 003); fornece-lhes o executor.
+A Unit 001 fornece autenticação/autorização, recursos de vídeo, armazenamento, tarefas, quota, mensagens e erros. A Unit 002 utiliza esses contratos e fornece operações elegíveis à Unit 003, que compõe junção, subcadeias por clip e passos finais. A cadeia é executada como uma tarefa e publica apenas o vídeo final; falha e cancelamento desencadeiam limpeza e compensação. Não há dependências circulares.
 
-## Dependências e critérios de sucesso
+## Bolts e verificação
 
-- Depende da baseline: autenticação JWT, permissões (incluindo leitura vs edição), projeto, MongoDB, SeaweedFS/S3, WebSockets e quota diária existente.
-- O upload e a leitura/download não debitam quota. A identidade que submete trabalho é a identidade cuja quota é contabilizada.
-- Aceita somente a matriz de formatos aprovada e os limites de perfil da ERS; publicação de um recurso exige integridade entre objeto e metadados.
-- Critérios: UC-VID-000, 006, 007 e ST-VID-COM-001 cumprem os AC rastreados; pedido sem autorização não expõe metadados nem URL; falhas deixam projeto e storage sem estado parcial; nenhuma linha de código existente é alterada (regra 2.6).
+- [B001 — 001-video-lifecycle](../../../../bolts/001-video-lifecycle/bolt.md): concluído.
+- [B002 — 002-video-access](../../../../bolts/002-video-access/bolt.md): concluído.
+- [B003 — 003-video-task-foundation](../../../../bolts/003-video-task-foundation/bolt.md): concluído.
 
-## Bolts
-
-- B001 `001-video-lifecycle` (DDD): UC-VID-000 e a parte do T-00 de que a ingestão precisa: coleção `videos`, `videoStages.js` e URLs de escrita (T-08), `formats.js` (T-05), routers de vídeo com o `videoAuth`, filas `video_operations_queue`, `video_project_queue` e `video_ws_queue`, `wsGateway/video.js` e worker `Tools/video/` com a ingestão (T-06); e ainda o `amqp.js`, os URLs internos de leitura com o `route/video.js` e o `videoUrls.js`, o volume `video_tmp` e a declaração completa da `video_operations_queue` com os argumentos do T-03 (specsDuvidas D-08); dona dos `REQ-VID-AUTH-*`, da NFR-010 e da NFR-011 (specsDuvidas D-02, D-03, D-09).
-- B002 `002-video-access` (Simple): UC-VID-006/007 (ADD 4.1, 4.2); depende de B001.
-- B003 `003-video-task-foundation` (DDD): `VideoTask`, `video_project_locks`, exchange `video_control`, quota (T-04), cancelamento e progresso (T-03), registo de operações (T-01), executor de cadeias e codificação por omissão (T-02), erros e correlação (T-10); rotina da Q-ADD-14 sem a parte de lotes (specsDuvidas D-02, D-04); estende por acréscimo, sem os alterar, os componentes da B001 (specsDuvidas D-08); dona da NFR-013 e da NFR-018 (specsDuvidas D-03) e verifica a NFR-011 (specsDuvidas D-09); depende de B001 e desbloqueia B004 a B007 (a B006 está `blocked`, specsDuvidas D-06).
+Os critérios normativos e a respetiva evidência são os da ERS e da matriz de verificação do relatório. «Construção concluída» não significa que todos os alvos tenham validação integral; os desvios e ensaios incompletos permanecem identificados.

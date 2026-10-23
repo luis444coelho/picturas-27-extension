@@ -8,11 +8,11 @@ updated: 2026-10-09T16:57:05Z
 
 # Requirements: Video Processing Support
 
-> **Arquivo histórico — não usar como requisito atual.** Esta proposta de cinco operações foi substituída pela ERS v2.3 em `docs/requirements.md` e `docs/requirements/`, que cobre UC-VID-000 a UC-VID-015.
+> **Arquivo histórico — não usar como requisito atual.** Esta proposta de cinco operações foi substituída pela ERS v2.3 em `docs/requirements.md` e `docs/requirements/`, que cobre UC-VID-000, UC-VID-001, UC-VID-002, UC-VID-003, UC-VID-004, UC-VID-005, UC-VID-006, UC-VID-007, UC-VID-008, UC-VID-009, UC-VID-010, UC-VID-011, UC-VID-012, UC-VID-013.
 
 ## Intent Overview
 
-Esta especificacao define a primeira versao dos requisitos candidatos para estender o PictuRAS v27.1, atualmente orientado para imagens, com cinco funcionalidades de video: recorte temporal, remocao de audio, alteracao de velocidade, marca de agua e extracao de fotogramas.
+Esta especificacao define a primeira versao dos requisitos candidatos para estender o PictuRAS v27.1, atualmente orientado para imagens, com quatro funcionalidades de video: recorte temporal, remocao de audio, alteracao de velocidade, marca de agua.
 
 Esta e uma especificacao de trabalho para revisao iterativa. O documento original de casos de uso permanece inalterado e a secao 4 do documento academico nao e preenchida por este artefacto.
 
@@ -21,7 +21,7 @@ Esta e uma especificacao de trabalho para revisao iterativa. O documento origina
 - **Confirmado no sistema**: JWT, perfis `anonymous`/`free`/`premium`, projetos e resultados MongoDB, armazenamento S3/SeaweedFS, filas RabbitMQ, processamento assincrono de imagens, WebSocket e cancelamento do processamento atual de projetos.
 - **Parcialmente confirmado**: progresso e cancelamento existem para pipelines de imagens; nao ha contrato generico de tarefas de video nem cancelamento confirmado a meio de uma operacao de video.
 - **Nao confirmado**: upload/validacao de video, deteccao de codecs, processamento de video, extraacao de fotogramas, quotas especificas de video e suporte a resultados de video.
-- **Origem desta especificacao**: comportamento descrito nos UC-VID-001 a UC-VID-004 e no bloco duplicado de extracao, normalizado como UC-VID-005.
+- **Origem desta especificacao**: comportamento descrito nos UC-VID-001, UC-VID-002, UC-VID-003, UC-VID-004 e no bloco duplicado de extracao, normalizado como .
 
 ## Business Goals
 
@@ -35,7 +35,7 @@ Esta e uma especificacao de trabalho para revisao iterativa. O documento origina
 
 - Estado inicial de todos os requisitos: **Em revisão**.
 - `Must`, `Should` e `Could` sao prioridades propostas, nao aprovacao da equipa.
-- A normalizacao proposta dos IDs e: `UC-VID-001` trim, `UC-VID-002` audio, `UC-VID-003` velocidade, `UC-VID-004` marca de agua e `UC-VID-005` extracao de fotogramas.
+- A normalizacao proposta dos IDs e: `UC-VID-001` trim, `UC-VID-002` audio, `UC-VID-003` velocidade, `UC-VID-004` marca de agua.
 
 ## Functional Requirements
 
@@ -44,7 +44,7 @@ Esta e uma especificacao de trabalho para revisao iterativa. O documento origina
 ### FR-VID-COMMON-001: Selecionar um video elegivel
 - **Description**: O sistema deve permitir iniciar uma operacao de video apenas para um video identificado e acessivel no contexto do projeto ou biblioteca aplicavel ao utilizador.
 - **Justification**: Todos os casos de uso pressupõem um video selecionado; o codigo atual apenas confirma recursos de imagem.
-- **Origin**: UC-VID-001 passo 1, UC-VID-002 passo 1, UC-VID-003 passo 1, UC-VID-004 passo 1, UC-VID-005 pre-condicoes.
+- **Origin**: UC-VID-001 passo 1, UC-VID-002 passo 1, UC-VID-003 passo 1, UC-VID-004 passo 1,  pre-condicoes.
 - **Priority**: Must
 - **Acceptance Criteria**: Um pedido sem video identificavel e rejeitado; um video de outro projeto ou sem permissao e rejeitado; um video elegivel chega a validacao da operacao.
 - **Dependencies**: FR-VID-AUTH-001, FR-VID-STORAGE-001
@@ -54,7 +54,7 @@ Esta e uma especificacao de trabalho para revisao iterativa. O documento origina
 ### FR-VID-COMMON-002: Preservar o video original
 - **Description**: O sistema deve produzir resultados sem substituir, alterar ou eliminar o video original.
 - **Justification**: E uma garantia minima/sucesso repetida nos cinco casos de uso.
-- **Origin**: UC-VID-001 RN3, UC-VID-002 RN2, UC-VID-003 RN4, UC-VID-004 RN4, UC-VID-005 RN6.
+- **Origin**: UC-VID-001 RN3, UC-VID-002 RN2, UC-VID-003 RN4, UC-VID-004 RN4,  RN6.
 - **Priority**: Must
 - **Acceptance Criteria**: Antes e depois de uma operacao, o identificador, conteudo e metadados do original permanecem disponiveis e inalterados; uma falha nao remove o original.
 - **Dependencies**: FR-VID-STORAGE-002, FR-VID-ERROR-002
@@ -64,7 +64,7 @@ Esta e uma especificacao de trabalho para revisao iterativa. O documento origina
 ### FR-VID-COMMON-003: Disponibilizar resultado valido
 - **Description**: O sistema deve associar um resultado concluido com sucesso ao projeto ou biblioteca definida para a operacao e disponibiliza-lo para visualizacao e download quando aplicavel.
 - **Justification**: Os casos de uso exigem um novo ficheiro ou imagens utilizaveis depois do processamento.
-- **Origin**: UC-VID-001 passo 6-7, UC-VID-002 passo 5-6, UC-VID-003 passo 6-7, UC-VID-004 passos 8-9, UC-VID-005 passo 7-8.
+- **Origin**: UC-VID-001 passo 6-7, UC-VID-002 passo 5-6, UC-VID-003 passo 6-7, UC-VID-004 passos 8-9,  passo 7-8.
 - **Priority**: Must
 - **Acceptance Criteria**: Um resultado so aparece como disponivel depois de concluido; o resultado referencia a operacao e o original; resultados parciais nao aparecem na galeria final.
 - **Dependencies**: FR-VID-STORAGE-002, FR-VID-ERROR-002
@@ -74,7 +74,7 @@ Esta e uma especificacao de trabalho para revisao iterativa. O documento origina
 ### FR-VID-COMMON-004: Validar parametros antes de processar
 - **Description**: O sistema deve validar os parametros especificos de cada operacao antes de criar ou iniciar o processamento.
 - **Justification**: Os fluxos exigem bloqueio de pedidos invalidos antes de consumir recursos.
-- **Origin**: UC-VID-001 passo 4, UC-VID-003 passo 4, UC-VID-005 passo 3-4, UC-VID-004 RN2-RN3.
+- **Origin**: UC-VID-001 passo 4, UC-VID-003 passo 4,  passo 3-4, UC-VID-004 RN2-RN3.
 - **Priority**: Must
 - **Acceptance Criteria**: Cada parametro invalido gera uma resposta identificavel; nenhum pedido invalido cria uma tarefa de processamento; parametros validos avancam para autorizacao.
 - **Dependencies**: FR-VID-VALIDATION-001, FR-VID-ERROR-001
@@ -151,42 +151,12 @@ Esta e uma especificacao de trabalho para revisao iterativa. O documento origina
 - **Assumptions/Pending**: O requisito assume posicao fixa ao longo do video, proposta ainda nao aprovada.
 - **Status**: Em revisão
 
-### FR-VID-FRAMES-001: Definir extracao regular de fotogramas
-- **Description**: O sistema deve permitir definir um intervalo temporal, um passo regular e um formato de imagem para extracao de fotogramas.
-- **Justification**: Deriva do fluxo principal do caso de extracao normalizado como UC-VID-005.
-- **Origin**: UC-VID-005 passos 2-3, RN2-RN3.
-- **Priority**: Must
-- **Acceptance Criteria**: Inicio, fim, passo e formato sao apresentados; inicio < fim e o intervalo respeita a duracao; passo invalido e rejeitado; o numero estimado de fotogramas e mostrado antes da confirmacao.
-- **Dependencies**: FR-VID-COMMON-001, FR-VID-VALIDATION-002
-- **Assumptions/Pending**: A contagem final deve ser corrigida/confirmada pela equipa para a convencao `[inicio,fim[`.
-- **Status**: Em revisão
-
-### FR-VID-FRAMES-002: Adicionar fotogramas atomically ao projeto
-- **Description**: O sistema deve adicionar todos os fotogramas validamente extraidos ao projeto como imagens de forma atomica ou rejeitar o conjunto sem publicar fotogramas parciais.
-- **Justification**: Deriva da regra tudo-ou-nada e da garantia minima do UC-VID-005.
-- **Origin**: UC-VID-005 passo 7-8, RN5 e garantia minima.
-- **Priority**: Must
-- **Acceptance Criteria**: Em sucesso, o projeto recebe todos os fotogramas previstos e cada um conserva o instante de origem; em falha ou cancelamento, nao fica nenhum fotograma parcial; o video original permanece inalterado.
-- **Dependencies**: FR-VID-FRAMES-001, FR-VID-COMMON-002, FR-VID-STORAGE-002, FR-VID-ERROR-002
-- **Assumptions/Pending**: A transacao entre armazenamento de objetos e MongoDB ainda nao existe confirmada e requer desenho posterior.
-- **Status**: Em revisão
-
-### FR-VID-FRAMES-003: Pré-visualizar amostra sem consumir operação
-- **Description**: O sistema deve permitir solicitar uma amostra dos fotogramas estimados sem criar a tarefa final nem consumir quota.
-- **Justification**: Deriva do fluxo alternativo FA1 e RN8 de UC-VID-005.
-- **Origin**: UC-VID-005 FA1 e RN8.
-- **Priority**: Should
-- **Acceptance Criteria**: A pre-visualizacao nao cria resultados permanentes nem altera o projeto; nao incrementa a quota; o utilizador pode alterar os parametros depois.
-- **Dependencies**: FR-VID-FRAMES-001, FR-VID-QUOTA-001
-- **Assumptions/Pending**: O numero de imagens da amostra e o custo de recursos sao pendentes.
-- **Status**: Em revisão
-
 ### Authentication, Authorization and Quotas
 
 ### FR-VID-AUTH-001: Autenticar operacoes protegidas
 - **Description**: O sistema deve exigir um JWT valido nas operacoes que requerem sessao ou acesso a projeto privado.
 - **Justification**: A arquitetura confirma JWT para rotas protegidas; os casos de marca de agua e extracao exigem sessao.
-- **Origin**: UC-VID-004 pre-condicoes, UC-VID-005 pre-condicoes, arquitetura existente.
+- **Origin**: UC-VID-004 pre-condicoes,  pre-condicoes, arquitetura existente.
 - **Priority**: Must
 - **Acceptance Criteria**: Sem JWT ou com JWT invalido a operacao e rejeitada; um JWT valido identifica o utilizador; o utilizador nao pode operar num projeto privado de outro utilizador sem permissao explicita.
 - **Dependencies**: Sistema de autenticacao JWT existente.
@@ -196,7 +166,7 @@ Esta e uma especificacao de trabalho para revisao iterativa. O documento origina
 ### FR-VID-AUTH-002: Verificar permissao de edicao
 - **Description**: O sistema deve verificar que o utilizador e proprietario ou possui permissao de edicao no projeto antes de criar, alterar ou guardar um resultado de video.
 - **Justification**: O sistema existente ja distingue dono e links de partilha read/edit; o caso de extracao exige permissao de editar.
-- **Origin**: UC-VID-004 pre-condicoes, UC-VID-005 pre-condicoes, middleware de partilha existente.
+- **Origin**: UC-VID-004 pre-condicoes,  pre-condicoes, middleware de partilha existente.
 - **Priority**: Must
 - **Acceptance Criteria**: Um utilizador com permissao read nao inicia a operacao; dono ou permissao edit podem iniciar se todas as outras validacoes passarem; a decisao e registada no pedido.
 - **Dependencies**: FR-VID-AUTH-001
@@ -205,8 +175,8 @@ Esta e uma especificacao de trabalho para revisao iterativa. O documento origina
 
 ### FR-VID-QUOTA-001: Aplicar politica de quota aprovada
 - **Description**: Quando a politica aprovada definir quota para uma operacao de video, o sistema deve verificar, reservar e confirmar ou devolver a unidade de quota antes de iniciar processamento que a consuma.
-- **Justification**: UC-VID-002 e UC-VID-005 referem quota; o codigo atual so confirma quota para ferramentas avancadas de imagem.
-- **Origin**: UC-VID-002 excecao de quota, UC-VID-005 passo 4, RN4, FA2/FA4.
+- **Justification**: UC-VID-002 e  referem quota; o codigo atual so confirma quota para ferramentas avancadas de imagem.
+- **Origin**: UC-VID-002 excecao de quota,  passo 4, RN4, FA2/FA4.
 - **Priority**: Must
 - **Acceptance Criteria**: Uma operacao sem quota nao inicia; uma reserva aparece como consumida apenas segundo a politica aprovada; falha/cancelamento devolve a reserva quando a politica o determinar; Premium segue a regra aprovada.
 - **Dependencies**: FR-VID-AUTH-001, decisao D-VID-001.
@@ -218,7 +188,7 @@ Esta e uma especificacao de trabalho para revisao iterativa. O documento origina
 ### FR-VID-VALIDATION-001: Validar ficheiro e streams
 - **Description**: O sistema deve validar que o ficheiro e descodificavel e que contem as streams necessarias para a operacao antes de processar.
 - **Justification**: Todos os casos referem formato/codec; audio requer stream de audio; video requer stream de video.
-- **Origin**: UC-VID-001/002/003 excecoes, UC-VID-004 EX1/EX4, UC-VID-005 excecao de descodificacao.
+- **Origin**: UC-VID-001, UC-VID-002, UC-VID-003 excecoes, UC-VID-004 EX1/EX4,  excecao de descodificacao.
 - **Priority**: Must
 - **Acceptance Criteria**: Ficheiro inexistente, corrompido ou nao descodificavel e rejeitado com erro identificavel; ausencia de audio e detetada antes de remove audio; metadata de duracao e streams fica disponivel para validacao.
 - **Dependencies**: FR-VID-STORAGE-001
@@ -228,7 +198,7 @@ Esta e uma especificacao de trabalho para revisao iterativa. O documento origina
 ### FR-VID-VALIDATION-002: Validar limites de tamanho e duracao
 - **Description**: O sistema deve comparar o tamanho e a duracao do video com os limites aprovados para o perfil e a operacao antes de iniciar o processamento.
 - **Justification**: Os casos de uso exigem bloqueio de videos que excedam limites, embora os valores sejam propostas.
-- **Origin**: UC-VID-001/002/003 excecoes, UC-VID-004 EX2, UC-VID-005 RN1 e excecoes.
+- **Origin**: UC-VID-001, UC-VID-002, UC-VID-003 excecoes, UC-VID-004 EX2,  RN1 e excecoes.
 - **Priority**: Must
 - **Acceptance Criteria**: Um video acima de qualquer limite aprovado e rejeitado; a resposta identifica o limite excedido; nenhum recurso de processamento e reservado antes da validacao passar.
 - **Dependencies**: FR-VID-AUTH-001, decisao D-VID-001.
@@ -238,7 +208,7 @@ Esta e uma especificacao de trabalho para revisao iterativa. O documento origina
 ### FR-VID-STORAGE-001: Armazenar e recuperar videos
 - **Description**: O sistema deve armazenar e recuperar videos de forma identificavel e autorizada, mantendo a separacao entre original, temporarios e resultados.
 - **Justification**: As cinco funcionalidades requerem um input persistente ou acessivel e os casos 004/005 exigem biblioteca/projeto.
-- **Origin**: Pre-condicoes dos cinco casos, UC-VID-004 passos 8-9, UC-VID-005 RN9.
+- **Origin**: Pre-condicoes dos cinco casos, UC-VID-004 passos 8-9,  RN9.
 - **Priority**: Must
 - **Acceptance Criteria**: Um video carregado recebe identificador e metadata; apenas utilizadores autorizados obtem URL/resultado; os objetos original e resultado nao colidem; falha de upload nao cria referencia valida.
 - **Dependencies**: Storage S3/SeaweedFS existente, FR-VID-AUTH-002.
@@ -248,7 +218,7 @@ Esta e uma especificacao de trabalho para revisao iterativa. O documento origina
 ### FR-VID-STORAGE-002: Gerir ciclo de vida dos resultados
 - **Description**: O sistema deve criar, manter, consultar e eliminar resultados de video e imagens extraidas segundo a politica aprovada para recursos do projeto.
 - **Justification**: E necessario para resultados, falhas, rejeicao e preservacao do original.
-- **Origin**: UC-VID-001/002/003 garantias, UC-VID-004 RN6, UC-VID-005 RN9.
+- **Origin**: UC-VID-001, UC-VID-002, UC-VID-003 garantias, UC-VID-004 RN6,  RN9.
 - **Priority**: Must
 - **Acceptance Criteria**: Resultado concluido e consultavel; resultado cancelado/falhado e removido ou marcado como nao utilizavel; a eliminacao respeita a autorizacao; a referencia persistida nao aponta para objeto inexistente.
 - **Dependencies**: FR-VID-STORAGE-001, FR-VID-COMMON-003.
@@ -258,7 +228,7 @@ Esta e uma especificacao de trabalho para revisao iterativa. O documento origina
 ### FR-VID-TASK-001: Executar operacoes demoradas de forma assincrona
 - **Description**: O sistema deve criar uma tarefa identificavel para operacoes de video que possam bloquear a aplicacao e deve devolver o estado inicial ao cliente sem esperar pela conclusao.
 - **Justification**: E explicito para marca de agua e extracao e assumido para o processamento de video.
-- **Origin**: UC-VID-004 passo 5 e A2, UC-VID-005 passo 4-6 e RN7.
+- **Origin**: UC-VID-004 passo 5 e A2,  passo 4-6 e RN7.
 - **Priority**: Must
 - **Acceptance Criteria**: A confirmacao devolve um identificador e estado; a tarefa pode ser consultada; a conclusao ou falha atualiza o estado sem exigir que o pedido HTTP original permaneça aberto.
 - **Dependencies**: RabbitMQ existente, FR-VID-STORAGE-001.
@@ -268,7 +238,7 @@ Esta e uma especificacao de trabalho para revisao iterativa. O documento origina
 ### FR-VID-TASK-002: Comunicar progresso
 - **Description**: Durante uma operacao assincrona, o sistema deve comunicar os estados da tarefa e, quando a operacao tiver uma unidade de trabalho mensuravel, o progresso correspondente.
 - **Justification**: Os casos de marca de agua e extracao exigem progresso; WebSocket existe para imagens.
-- **Origin**: UC-VID-004 passo 7, UC-VID-005 passo 5-6 e RN7.
+- **Origin**: UC-VID-004 passo 7,  passo 5-6 e RN7.
 - **Priority**: Should
 - **Acceptance Criteria**: O cliente recebe estados equivalentes a queued, processing e um estado terminal completed, failed ou cancelled; quando existir uma unidade de trabalho mensuravel, recebe progresso monotonicamente crescente entre 0 e 100; uma tarefa em estado terminal nao emite novos eventos de progresso.
 - **Dependencies**: FR-VID-TASK-001, WebSocket existente.
@@ -277,8 +247,8 @@ Esta e uma especificacao de trabalho para revisao iterativa. O documento origina
 
 ### FR-VID-TASK-003: Cancelar tarefa de video
 - **Description**: O sistema deve permitir solicitar o cancelamento de uma tarefa de video em processamento e deve impedir a publicacao de resultados parciais.
-- **Justification**: UC-VID-001/003 permitem cancelar antes do processamento e UC-VID-005 permite cancelar durante processamento; marca de agua cobre cancelamento antes da execucao efetiva.
-- **Origin**: UC-VID-001 FA4.2, UC-VID-003 FA4.2, UC-VID-004 FA3, UC-VID-005 FA2/RN7.
+- **Justification**: UC-VID-001, UC-VID-003 permitem cancelar antes do processamento e  permite cancelar durante processamento; marca de agua cobre cancelamento antes da execucao efetiva.
+- **Origin**: UC-VID-001 FA4.2, UC-VID-003 FA4.2, UC-VID-004 FA3,  FA2/RN7.
 - **Priority**: Should
 - **Acceptance Criteria**: Um pedido autorizado de cancelamento altera o estado para cancelling/cancelled; nenhum resultado parcial e publicado; a tarefa terminada nao pode ser cancelada como se estivesse ativa; a politica de quota e aplicada.
 - **Dependencies**: FR-VID-TASK-001, FR-VID-ERROR-002, FR-VID-QUOTA-001.
@@ -288,7 +258,7 @@ Esta e uma especificacao de trabalho para revisao iterativa. O documento origina
 ### FR-VID-ERROR-001: Comunicar erros acionaveis
 - **Description**: O sistema deve comunicar ao utilizador a causa funcional de uma rejeicao ou falha de video sem expor segredos ou detalhes internos desnecessarios.
 - **Justification**: Todos os casos exigem mensagens para parametros, formatos, limites, quota e falhas.
-- **Origin**: Excecoes dos UC-VID-001 a UC-VID-005.
+- **Origin**: Excecoes dos UC-VID-001, UC-VID-002, UC-VID-003, UC-VID-004.
 - **Priority**: Must
 - **Acceptance Criteria**: Cada classe de erro tem codigo ou categoria estavel; a mensagem identifica a correcao esperada quando aplicavel; respostas de producao nao incluem stack traces, tokens ou credenciais.
 - **Dependencies**: FR-VID-VALIDATION-001, FR-VID-VALIDATION-002.
@@ -298,7 +268,7 @@ Esta e uma especificacao de trabalho para revisao iterativa. O documento origina
 ### FR-VID-ERROR-002: Recuperar de falha sem contaminar o projeto
 - **Description**: Se uma operacao falhar, expirar ou for cancelada, o sistema deve deixar o projeto e o original no ultimo estado consistente e limpar ou invalidar artefactos parciais.
 - **Justification**: Garantias minimas e excecoes dos cinco casos exigem ausencia de resultados incompletos.
-- **Origin**: Garantias minimas dos UC-VID-001 a UC-VID-005; UC-VID-005 RN5.
+- **Origin**: Garantias minimas dos UC-VID-001, UC-VID-002, UC-VID-003, UC-VID-004;  RN5.
 - **Priority**: Must
 - **Acceptance Criteria**: Apos falha, nao existe resultado utilizavel parcial; o original e consultavel; referencias temporarias sao limpas ou marcadas invalidas; a operacao reservada e tratada segundo D-VID-001.
 - **Dependencies**: FR-VID-STORAGE-002, FR-VID-TASK-003, FR-VID-QUOTA-001.
@@ -309,7 +279,7 @@ Esta e uma especificacao de trabalho para revisao iterativa. O documento origina
 
 ### NFR-VID-001: Seguranca no acesso a recursos
 - **Description**: Operacoes e URLs de videos/resultados devem respeitar autenticacao, autorizacao de projeto e expiracao/controlo de acesso aplicavel ao storage.
-- **Origin/Justification**: JWT, projetos privados, partilha read/edit e storage assinado existentes; UC-VID-004/005.
+- **Origin/Justification**: JWT, projetos privados, partilha read/edit e storage assinado existentes; UC-VID-004.
 - **Priority**: Must
 - **Acceptance Criteria**: Pedidos sem permissao falham; URL interna nao e exposta como URL publica; utilizador read nao consegue criar resultado; logs nao contem JWT ou credenciais.
 - **Dependencies**: FR-VID-AUTH-001/002, FR-VID-STORAGE-001.
@@ -327,7 +297,7 @@ Esta e uma especificacao de trabalho para revisao iterativa. O documento origina
 
 ### NFR-VID-003: Gestao de recursos
 - **Description**: O processamento deve impor os limites aprovados de entrada, tarefas ativas e armazenamento temporario, rejeitando pedidos que excedam capacidade conhecida.
-- **Origin/Justification**: Limites propostos nos casos e necessidade DevOps descrita em UC-VID-005.
+- **Origin/Justification**: Limites propostos nos casos e necessidade DevOps descrita em .
 - **Priority**: Should
 - **Acceptance Criteria**: Um pedido acima do limite aprovado e rejeitado antes de consumir processamento; tarefas temporarias sao removidas ou expiradas; o sistema comunica falta de capacidade de forma controlada.
 - **Dependencies**: FR-VID-VALIDATION-002, FR-VID-ERROR-002.
@@ -354,7 +324,7 @@ Esta e uma especificacao de trabalho para revisao iterativa. O documento origina
 
 ### NFR-VID-006: Feedback sem objetivo quantitativo inventado
 - **Description**: O feedback de uma operacao assincrona deve representar de forma consistente os estados de espera, processamento, sucesso, cancelamento e falha, sem anunciar um estado terminal antes de a tarefa o atingir.
-- **Origin/Justification**: UC-VID-004/005 e ausencia de metricas existentes para video.
+- **Origin/Justification**: UC-VID-004 e ausencia de metricas existentes para video.
 - **Priority**: Should
 - **Acceptance Criteria**: Cada estado terminal e distinguivel no cliente; uma tarefa que falha ou e cancelada apresenta o respetivo resultado; nenhum evento ou resposta afirma conclusao antes do estado terminal.
 - **Dependencies**: FR-VID-TASK-002, FR-VID-ERROR-001.
@@ -380,10 +350,9 @@ Esta e uma especificacao de trabalho para revisao iterativa. O documento origina
 
 | Assumption | Risk if Invalid | Mitigation |
 |------------|-----------------|------------|
-| A normalizacao UC-VID-005 sera aceite | Rastreabilidade fica ambigua no documento original | Manter tabela de correspondencia em `case-review.md` |
+| A normalizacao  sera aceite | Rastreabilidade fica ambigua no documento original | Manter tabela de correspondencia em `case-review.md` |
 | Videos poderao ser associados a projetos | Os cinco casos nao podem partilhar o mesmo fluxo de recursos | Decidir modelo de recurso antes do desenho tecnico |
 | Operacoes longas serao assincronas | Pedidos HTTP bloqueiam e a UX nao corresponde aos casos | Reaproveitar RabbitMQ/WebSocket apenas como pontos de integracao, nao como suporte ja existente |
-| Resultados de extracao serao imagens normais | Necessario novo tipo de resultado e mais alteracoes | Confirmar com a equipa antes de congelar requisitos de frames |
 | Limites quantitativos sao propostas configuraveis | Requisitos de validacao podem mudar | Manter limites fora do texto normativo ate aprovacao |
 
 ## Open Questions
@@ -391,11 +360,10 @@ Esta e uma especificacao de trabalho para revisao iterativa. O documento origina
 | ID | Question | Affected Requirements | Recommendation for MVP | Status |
 |----|----------|-----------------------|------------------------|--------|
 | D-VID-001 | Que perfis podem executar cada operacao e como se aplica quota a video? | FR-VID-AUTH-001/002, FR-VID-QUOTA-001, FR-VID-VALIDATION-002, NFR-VID-001 | Registado/Premium para operacoes que guardam no projeto; decidir anonimo separadamente | Pending |
-| D-VID-002 | Quais formatos e codecs de entrada/saida sao suportados? | FR-VID-VALIDATION-001, NFR-VID-005, trim/audio/speed/watermark/frames | Comecar com uma matriz pequena e explicitamente testavel | Pending |
-| D-VID-003 | Como representar videos e resultados nos projetos? | FR-VID-COMMON-001/003, FR-VID-STORAGE-001/002, FR-VID-FRAMES-002 | Recurso de video explicito, sem forcar video no schema de imagens | Pending |
-| D-VID-004 | O cancelamento e progresso aplicam-se a todas as operacoes? | FR-VID-TASK-001/002/003, FR-VID-ERROR-002, NFR-VID-006 | Aplicar a todas as tarefas demoradas, com granularidade definida por operacao | Pending |
-| D-VID-005 | Quais limites de tamanho, duracao e frames sao aprovados? | FR-VID-VALIDATION-002, FR-VID-FRAMES-001, NFR-VID-003 | Manter os limites do documento como configuracao proposta, nao requisito aprovado | Pending |
-| D-VID-006 | Qual a formula e semantica do intervalo de frames? | FR-VID-FRAMES-001/002 | Confirmar `[inicio,fim[` e corrigir a contagem para uma formula consistente | Pending |
+| D-VID-002 | Quais formatos e codecs de entrada/saida sao suportados? | FR-VID-VALIDATION-001, NFR-VID-005, trim/audio/speed/watermark | Comecar com uma matriz pequena e explicitamente testavel | Pending |
+| D-VID-003 | Como representar videos e resultados nos projetos? | FR-VID-COMMON-001/003, FR-VID-STORAGE-001/002,  | Recurso de video explicito, sem forcar video no schema de imagens | Pending |
+| D-VID-004 | O cancelamento e progresso aplicam-se a todas as operacoes? | FR-VID-TASK-001, TASK-002, TASK-003, FR-VID-ERROR-002, NFR-VID-006 | Aplicar a todas as tarefas demoradas, com granularidade definida por operacao | Pending |
+| D-VID-005 | Quais limites de tamanho, duracao sao aprovados? | FR-VID-VALIDATION-002, NFR-VID-003 | Manter os limites do documento como configuracao proposta, nao requisito aprovado | Pending |
 | D-VID-007 | Resultados de video sao guardados automaticamente e por quanto tempo? | FR-VID-COMMON-003, FR-VID-STORAGE-002, NFR-VID-002 | Guardar como novo recurso e aplicar politica de projeto existente, se confirmada | Pending |
 | D-VID-008 | Em partilha edit, a quota pertence ao dono ou ao executor? | FR-VID-AUTH-002, FR-VID-QUOTA-001 | Usar identidade que executa a operacao, salvo regra de negocio contraria | Pending |
 | D-VID-009 | A marca de agua fica fixa ou pode variar no tempo? | FR-VID-WATERMARK-002 | Fixa no MVP por ser verificavel e coerente com o caso atual | Pending |

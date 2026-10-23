@@ -1,292 +1,208 @@
----
-intent: 001-video-processing-support
-phase: inception
-status: mapped
-updated: 2026-10-21T11:23:25Z
----
+# Rastreabilidade da solução de vídeo
 
-# Matriz de rastreabilidade — Suporte a vídeo
+A matriz utiliza os 202 requisitos e os 14 casos de uso do relatório. Os identificadores de Stories e Bolts mantêm a numeração de construção. O resultado de cada teste é discriminado no Capítulo 10 e na matriz CSV em docs/.
 
-## Fonte e estado
-
-Esta matriz alinha o ADD v1.1 (`docs/add.md`), a ERS v2.4, os casos de uso v1.5 e as Units/Stories/Bolts. A coluna "Decisões do ADD v1.1" indica as secções do ADD (T-xx, 4.x, Q-ADD-xx) que decidem como cada requisito é realizado; "—" significa que o ADD não tem decisão própria para esse requisito. A origem e os critérios de aceitação autoritativos permanecem nos requisitos individuais. O capítulo 7 do relatório mantém a rastreabilidade académica requisito→origem/critério/estado; esta matriz acrescenta o planeamento requisito→Story proprietária→Unit→Bolt e identifica Stories consumidoras de requisitos transversais. Todas as linhas estão **especificadas; implementação e testes de aceitação não iniciados**. As linhas marcadas "Não coberto nesta construção (D-06)" pertencem à extração de fotogramas e aos lotes, que a equipa deixou fora desta construção (specsDuvidas D-06).
-
-## Caso de uso → Story → Bolt
-
-| Caso de uso | Story | Unit | Bolt |
-|---|---|---|---|
-| UC-VID-000 | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` |
-| UC-VID-001 | ST-VID-001 | `002-video-transformations` | `004-video-basic-edits` |
-| UC-VID-002 | ST-VID-002 | `002-video-transformations` | `004-video-basic-edits` |
-| UC-VID-003 | ST-VID-003 | `002-video-transformations` | `004-video-basic-edits` |
-| UC-VID-004 | ST-VID-004 | `002-video-transformations` | `005-video-visual-edits` |
-| UC-VID-005 | ST-VID-005 | `002-video-transformations` | `006-video-frame-export` (`blocked`, D-06) |
-| UC-VID-006 | ST-VID-006 | `001-video-lifecycle` | `002-video-access` |
-| UC-VID-007 | ST-VID-007 | `001-video-lifecycle` | `002-video-access` |
-| UC-VID-008 | ST-VID-008 | `002-video-transformations` | `005-video-visual-edits` |
-| UC-VID-009 | ST-VID-009 | `002-video-transformations` | `005-video-visual-edits` |
-| UC-VID-010 | ST-VID-010 | `002-video-transformations` | `005-video-visual-edits` |
-| UC-VID-011 | ST-VID-011 | `002-video-transformations` | `005-video-visual-edits` |
-| UC-VID-012 | ST-VID-012 | `002-video-transformations` | `007-video-format-conversion` |
-| UC-VID-013 | ST-VID-013 | `003-video-composition` | `008-video-concat-chain` |
-| UC-VID-014 | ST-VID-014 | `003-video-composition` | `008-video-concat-chain` |
-| UC-VID-015 | ST-VID-015 | `003-video-composition` | `009-video-batch` (`blocked`, D-06) |
-| Regras transversais | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` |
-
-## Requisito → Story → Unit → Bolt
-
-A coluna “Story proprietária” identifica o trabalho dono do requisito; “Stories consumidoras” regista os casos adicionais abrangidos por requisitos comuns. Essa utilização não duplica a propriedade do requisito.
-
-| Requisito | Ficheiro de origem | Story proprietária | Unit | Bolt | Decisões do ADD v1.1 | Stories consumidoras | Estado |
-|---|---|---|---|---|---|---|---|
-| `REQ-VID-ADJUST-001` | [`REQ-VID-ADJUST.md`](../../../docs/requirements/REQ-VID-ADJUST.md) | ST-VID-008 | `002-video-transformations` | `005-video-visual-edits` | 4.3, T-07, Q-ADD-18, Q-ADD-23 | ST-VID-008 | Especificado; implementação pendente |
-| `REQ-VID-ADJUST-002` | [`REQ-VID-ADJUST.md`](../../../docs/requirements/REQ-VID-ADJUST.md) | ST-VID-008 | `002-video-transformations` | `005-video-visual-edits` | 4.3, T-07, Q-ADD-18, Q-ADD-23 | ST-VID-008 | Especificado; implementação pendente |
-| `REQ-VID-ADJUST-003` | [`REQ-VID-ADJUST.md`](../../../docs/requirements/REQ-VID-ADJUST.md) | ST-VID-008 | `002-video-transformations` | `005-video-visual-edits` | 4.3, T-07, Q-ADD-18, Q-ADD-23 | ST-VID-008 | Especificado; implementação pendente |
-| `REQ-VID-ADJUST-004` | [`REQ-VID-ADJUST.md`](../../../docs/requirements/REQ-VID-ADJUST.md) | ST-VID-008 | `002-video-transformations` | `005-video-visual-edits` | 4.3, T-07, Q-ADD-18, Q-ADD-23 | ST-VID-008 | Especificado; implementação pendente |
-| `REQ-VID-ADJUST-005` | [`REQ-VID-ADJUST.md`](../../../docs/requirements/REQ-VID-ADJUST.md) | ST-VID-008 | `002-video-transformations` | `005-video-visual-edits` | 4.3, T-07, Q-ADD-18, Q-ADD-23 | ST-VID-008 | Especificado; implementação pendente |
-| `REQ-VID-ADJUST-006` | [`REQ-VID-ADJUST.md`](../../../docs/requirements/REQ-VID-ADJUST.md) | ST-VID-008 | `002-video-transformations` | `005-video-visual-edits` | 4.3, T-07, Q-ADD-18, Q-ADD-23 | ST-VID-008 | Especificado; implementação pendente |
-| `REQ-VID-ADJUST-007` | [`REQ-VID-ADJUST.md`](../../../docs/requirements/REQ-VID-ADJUST.md) | ST-VID-008 | `002-video-transformations` | `005-video-visual-edits` | 4.3, T-07, Q-ADD-18, Q-ADD-23 | ST-VID-008 | Especificado; implementação pendente |
-| `REQ-VID-ADJUST-008` | [`REQ-VID-ADJUST.md`](../../../docs/requirements/REQ-VID-ADJUST.md) | ST-VID-008 | `002-video-transformations` | `005-video-visual-edits` | 4.3, T-07, Q-ADD-18, Q-ADD-23 | ST-VID-008 | Especificado; implementação pendente |
-| `REQ-VID-ADJUST-009` | [`REQ-VID-ADJUST.md`](../../../docs/requirements/REQ-VID-ADJUST.md) | ST-VID-008 | `002-video-transformations` | `005-video-visual-edits` | 4.3, T-02, Q-ADD-25 | ST-VID-008 | Especificado; implementação pendente |
-| `REQ-VID-ADJUST-010` | [`REQ-VID-ADJUST.md`](../../../docs/requirements/REQ-VID-ADJUST.md) | ST-VID-008 | `002-video-transformations` | `005-video-visual-edits` | 4.3, T-07, Q-ADD-18, Q-ADD-23 | ST-VID-008 | Especificado; implementação pendente |
-| `REQ-VID-AUDIO-001` | [`REQ-VID-AUDIO.md`](../../../docs/requirements/REQ-VID-AUDIO.md) | ST-VID-002 | `002-video-transformations` | `004-video-basic-edits` | T-02, T-05 | ST-VID-002 | Especificado; implementação pendente |
-| `REQ-VID-AUDIO-002` | [`REQ-VID-AUDIO.md`](../../../docs/requirements/REQ-VID-AUDIO.md) | ST-VID-002 | `002-video-transformations` | `004-video-basic-edits` | T-02, T-05 | ST-VID-002 | Especificado; implementação pendente |
-| `REQ-VID-AUDIO-003` | [`REQ-VID-AUDIO.md`](../../../docs/requirements/REQ-VID-AUDIO.md) | ST-VID-002 | `002-video-transformations` | `004-video-basic-edits` | T-02, T-05 | ST-VID-002 | Especificado; implementação pendente |
-| `REQ-VID-AUDIO-004` | [`REQ-VID-AUDIO.md`](../../../docs/requirements/REQ-VID-AUDIO.md) | ST-VID-002 | `002-video-transformations` | `004-video-basic-edits` | T-02, T-05 | ST-VID-002 | Especificado; implementação pendente |
-| `REQ-VID-AUDIO-005` | [`REQ-VID-AUDIO.md`](../../../docs/requirements/REQ-VID-AUDIO.md) | ST-VID-002 | `002-video-transformations` | `004-video-basic-edits` | T-02, T-05 | ST-VID-002 | Especificado; implementação pendente |
-| `REQ-VID-AUDIO-006` | [`REQ-VID-AUDIO.md`](../../../docs/requirements/REQ-VID-AUDIO.md) | ST-VID-002 | `002-video-transformations` | `004-video-basic-edits` | T-02, T-05 | ST-VID-002 | Especificado; implementação pendente |
-| `REQ-VID-AUTH-001` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, T-03 (specsDuvidas D-02) | ST-VID-000, ST-VID-006, ST-VID-007, ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-AUTH-002` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, T-03 (specsDuvidas D-02) | ST-VID-000, ST-VID-006, ST-VID-007, ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-AUTH-003` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, T-03 (specsDuvidas D-02) | ST-VID-000, ST-VID-006, ST-VID-007, ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-BATCH-001` | [`REQ-VID-BATCH.md`](../../../docs/requirements/REQ-VID-BATCH.md) | ST-VID-015 | `003-video-composition` | `009-video-batch` | 4.10, T-09 | ST-VID-015 | Não coberto nesta construção (D-06) |
-| `REQ-VID-BATCH-002` | [`REQ-VID-BATCH.md`](../../../docs/requirements/REQ-VID-BATCH.md) | ST-VID-015 | `003-video-composition` | `009-video-batch` | 4.10, T-09 | ST-VID-015 | Não coberto nesta construção (D-06) |
-| `REQ-VID-BATCH-003` | [`REQ-VID-BATCH.md`](../../../docs/requirements/REQ-VID-BATCH.md) | ST-VID-015 | `003-video-composition` | `009-video-batch` | 4.10, T-09 | ST-VID-015 | Não coberto nesta construção (D-06) |
-| `REQ-VID-BATCH-004` | [`REQ-VID-BATCH.md`](../../../docs/requirements/REQ-VID-BATCH.md) | ST-VID-015 | `003-video-composition` | `009-video-batch` | 4.10, T-09 | ST-VID-015 | Não coberto nesta construção (D-06) |
-| `REQ-VID-BATCH-005` | [`REQ-VID-BATCH.md`](../../../docs/requirements/REQ-VID-BATCH.md) | ST-VID-015 | `003-video-composition` | `009-video-batch` | 4.10, T-09 | ST-VID-015 | Não coberto nesta construção (D-06) |
-| `REQ-VID-BATCH-006` | [`REQ-VID-BATCH.md`](../../../docs/requirements/REQ-VID-BATCH.md) | ST-VID-015 | `003-video-composition` | `009-video-batch` | 4.10, T-09 | ST-VID-015 | Não coberto nesta construção (D-06) |
-| `REQ-VID-BATCH-007` | [`REQ-VID-BATCH.md`](../../../docs/requirements/REQ-VID-BATCH.md) | ST-VID-015 | `003-video-composition` | `009-video-batch` | 4.10, T-09 | ST-VID-015 | Não coberto nesta construção (D-06) |
-| `REQ-VID-BATCH-008` | [`REQ-VID-BATCH.md`](../../../docs/requirements/REQ-VID-BATCH.md) | ST-VID-015 | `003-video-composition` | `009-video-batch` | 4.10, T-09 | ST-VID-015 | Não coberto nesta construção (D-06) |
-| `REQ-VID-BATCH-009` | [`REQ-VID-BATCH.md`](../../../docs/requirements/REQ-VID-BATCH.md) | ST-VID-015 | `003-video-composition` | `009-video-batch` | 4.10, T-09 | ST-VID-015 | Não coberto nesta construção (D-06) |
-| `REQ-VID-BATCH-010` | [`REQ-VID-BATCH.md`](../../../docs/requirements/REQ-VID-BATCH.md) | ST-VID-015 | `003-video-composition` | `009-video-batch` | 4.10, T-09 | ST-VID-015 | Não coberto nesta construção (D-06) |
-| `REQ-VID-BATCH-011` | [`REQ-VID-BATCH.md`](../../../docs/requirements/REQ-VID-BATCH.md) | ST-VID-015 | `003-video-composition` | `009-video-batch` | 4.10, T-09 | ST-VID-015 | Não coberto nesta construção (D-06) |
-| `REQ-VID-BATCH-012` | [`REQ-VID-BATCH.md`](../../../docs/requirements/REQ-VID-BATCH.md) | ST-VID-015 | `003-video-composition` | `009-video-batch` | 4.10, T-09 | ST-VID-015 | Não coberto nesta construção (D-06) |
-| `REQ-VID-BATCH-013` | [`REQ-VID-BATCH.md`](../../../docs/requirements/REQ-VID-BATCH.md) | ST-VID-015 | `003-video-composition` | `009-video-batch` | 4.10, T-09 | ST-VID-015 | Não coberto nesta construção (D-06) |
-| `REQ-VID-BATCH-014` | [`REQ-VID-BATCH.md`](../../../docs/requirements/REQ-VID-BATCH.md) | ST-VID-015 | `003-video-composition` | `009-video-batch` | 4.10, T-09 | ST-VID-015 | Não coberto nesta construção (D-06) |
-| `REQ-VID-BATCH-015` | [`REQ-VID-BATCH.md`](../../../docs/requirements/REQ-VID-BATCH.md) | ST-VID-015 | `003-video-composition` | `009-video-batch` | 4.10, T-08 | ST-VID-015 | Não coberto nesta construção (D-06) |
-| `REQ-VID-BATCH-016` | [`REQ-VID-BATCH.md`](../../../docs/requirements/REQ-VID-BATCH.md) | ST-VID-015 | `003-video-composition` | `009-video-batch` | 4.10, T-09 | ST-VID-015 | Não coberto nesta construção (D-06) |
-| `REQ-VID-BATCH-017` | [`REQ-VID-BATCH.md`](../../../docs/requirements/REQ-VID-BATCH.md) | ST-VID-015 | `003-video-composition` | `009-video-batch` | 4.10, T-09 | ST-VID-015 | Não coberto nesta construção (D-06) |
-| `REQ-VID-BATCH-018` | [`REQ-VID-BATCH.md`](../../../docs/requirements/REQ-VID-BATCH.md) | ST-VID-015 | `003-video-composition` | `009-video-batch` | 4.10, T-09 | ST-VID-015 | Não coberto nesta construção (D-06) |
-| `REQ-VID-BATCH-019` | [`REQ-VID-BATCH.md`](../../../docs/requirements/REQ-VID-BATCH.md) | ST-VID-015 | `003-video-composition` | `009-video-batch` | 4.10, T-09 | ST-VID-015 | Não coberto nesta construção (D-06) |
-| `REQ-VID-CHAIN-001` | [`REQ-VID-CHAIN.md`](../../../docs/requirements/REQ-VID-CHAIN.md) | ST-VID-014 | `003-video-composition` | `008-video-concat-chain` | 4.9, T-01, Q-ADD-16 | ST-VID-014 | Especificado; implementação pendente |
-| `REQ-VID-CHAIN-002` | [`REQ-VID-CHAIN.md`](../../../docs/requirements/REQ-VID-CHAIN.md) | ST-VID-014 | `003-video-composition` | `008-video-concat-chain` | 4.9, T-01, Q-ADD-16 | ST-VID-014 | Especificado; implementação pendente |
-| `REQ-VID-CHAIN-003` | [`REQ-VID-CHAIN.md`](../../../docs/requirements/REQ-VID-CHAIN.md) | ST-VID-014 | `003-video-composition` | `008-video-concat-chain` | 4.9, T-01, Q-ADD-16 | ST-VID-014 | Especificado; implementação pendente |
-| `REQ-VID-CHAIN-004` | [`REQ-VID-CHAIN.md`](../../../docs/requirements/REQ-VID-CHAIN.md) | ST-VID-014 | `003-video-composition` | `008-video-concat-chain` | 4.9, T-01, Q-ADD-16 | ST-VID-014 | Especificado; implementação pendente |
-| `REQ-VID-CHAIN-005` | [`REQ-VID-CHAIN.md`](../../../docs/requirements/REQ-VID-CHAIN.md) | ST-VID-014 | `003-video-composition` | `008-video-concat-chain` | 4.9, T-01, Q-ADD-16 | ST-VID-014 | Especificado; implementação pendente |
-| `REQ-VID-CHAIN-006` | [`REQ-VID-CHAIN.md`](../../../docs/requirements/REQ-VID-CHAIN.md) | ST-VID-014 | `003-video-composition` | `008-video-concat-chain` | 4.9, T-01, Q-ADD-16 | ST-VID-014 | Especificado; implementação pendente |
-| `REQ-VID-CHAIN-007` | [`REQ-VID-CHAIN.md`](../../../docs/requirements/REQ-VID-CHAIN.md) | ST-VID-014 | `003-video-composition` | `008-video-concat-chain` | 4.9, T-01, Q-ADD-16 | ST-VID-014 | Especificado; implementação pendente |
-| `REQ-VID-CHAIN-008` | [`REQ-VID-CHAIN.md`](../../../docs/requirements/REQ-VID-CHAIN.md) | ST-VID-014 | `003-video-composition` | `008-video-concat-chain` | 4.9, T-01, Q-ADD-16 | ST-VID-014 | Especificado; implementação pendente |
-| `REQ-VID-CHAIN-009` | [`REQ-VID-CHAIN.md`](../../../docs/requirements/REQ-VID-CHAIN.md) | ST-VID-014 | `003-video-composition` | `008-video-concat-chain` | 4.9, T-01, Q-ADD-16 | ST-VID-014 | Especificado; implementação pendente |
-| `REQ-VID-CHAIN-010` | [`REQ-VID-CHAIN.md`](../../../docs/requirements/REQ-VID-CHAIN.md) | ST-VID-014 | `003-video-composition` | `008-video-concat-chain` | 4.9, T-01, Q-ADD-16 | ST-VID-014 | Especificado; implementação pendente |
-| `REQ-VID-CHAIN-011` | [`REQ-VID-CHAIN.md`](../../../docs/requirements/REQ-VID-CHAIN.md) | ST-VID-014 | `003-video-composition` | `008-video-concat-chain` | 4.9, T-01, Q-ADD-16 | ST-VID-014 | Especificado; implementação pendente |
-| `REQ-VID-CHAIN-012` | [`REQ-VID-CHAIN.md`](../../../docs/requirements/REQ-VID-CHAIN.md) | ST-VID-014 | `003-video-composition` | `008-video-concat-chain` | 4.9, Q-ADD-16 | ST-VID-014 | Especificado; implementação pendente |
-| `REQ-VID-CHAIN-013` | [`REQ-VID-CHAIN.md`](../../../docs/requirements/REQ-VID-CHAIN.md) | ST-VID-014 | `003-video-composition` | `008-video-concat-chain` | 4.9, T-01, Q-ADD-16 | ST-VID-014 | Especificado; implementação pendente |
-| `REQ-VID-CHAIN-014` | [`REQ-VID-CHAIN.md`](../../../docs/requirements/REQ-VID-CHAIN.md) | ST-VID-014 | `003-video-composition` | `008-video-concat-chain` | 4.9 | ST-VID-014 | Especificado; implementação pendente |
-| `REQ-VID-CHAIN-015` | [`REQ-VID-CHAIN.md`](../../../docs/requirements/REQ-VID-CHAIN.md) | ST-VID-014 | `003-video-composition` | `008-video-concat-chain` | 4.9, T-01, Q-ADD-16 | ST-VID-014 | Especificado; implementação pendente |
-| `REQ-VID-CHAIN-016` | [`REQ-VID-CHAIN.md`](../../../docs/requirements/REQ-VID-CHAIN.md) | ST-VID-014 | `003-video-composition` | `008-video-concat-chain` | 4.9, T-01, Q-ADD-16 | ST-VID-014 | Especificado; implementação pendente |
-| `REQ-VID-CHAIN-017` | [`REQ-VID-CHAIN.md`](../../../docs/requirements/REQ-VID-CHAIN.md) | ST-VID-014 | `003-video-composition` | `008-video-concat-chain` | 4.9, T-01, Q-ADD-16 | ST-VID-014 | Especificado; implementação pendente |
-| `REQ-VID-CHAIN-018` | [`REQ-VID-CHAIN.md`](../../../docs/requirements/REQ-VID-CHAIN.md) | ST-VID-014 | `003-video-composition` | `008-video-concat-chain` | 4.9, T-01, Q-ADD-16 | ST-VID-014 | Especificado; implementação pendente |
-| `REQ-VID-COM-001` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-00, T-01 | ST-VID-COM-001, ST-VID-001, ST-VID-002, ST-VID-003, ST-VID-004, ST-VID-005, ST-VID-008, ST-VID-009, ST-VID-010, ST-VID-011, ST-VID-012, ST-VID-013, ST-VID-014, ST-VID-015 | Especificado; implementação pendente |
-| `REQ-VID-COM-002` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-00, T-01 | ST-VID-COM-001, ST-VID-001, ST-VID-002, ST-VID-003, ST-VID-004, ST-VID-005, ST-VID-008, ST-VID-009, ST-VID-010, ST-VID-011, ST-VID-012, ST-VID-013, ST-VID-014, ST-VID-015 | Especificado; implementação pendente |
-| `REQ-VID-COM-003` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-00, T-01 | ST-VID-COM-001, ST-VID-001, ST-VID-002, ST-VID-003, ST-VID-004, ST-VID-005, ST-VID-008, ST-VID-009, ST-VID-010, ST-VID-011, ST-VID-012, ST-VID-013, ST-VID-014, ST-VID-015 | Especificado; implementação pendente |
-| `REQ-VID-COM-004` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-00, T-01 | ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-COM-005` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-00, T-01 | ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-COM-006` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-01 | ST-VID-COM-001, ST-VID-001, ST-VID-002, ST-VID-003, ST-VID-004, ST-VID-005, ST-VID-008, ST-VID-009, ST-VID-010, ST-VID-011, ST-VID-012, ST-VID-013, ST-VID-014, ST-VID-015 | Especificado; implementação pendente |
-| `REQ-VID-CONCAT-001` | [`REQ-VID-CONCAT.md`](../../../docs/requirements/REQ-VID-CONCAT.md) | ST-VID-013 | `003-video-composition` | `008-video-concat-chain` | 4.8, Q-ADD-13 | ST-VID-013 | Especificado; implementação pendente |
-| `REQ-VID-CONCAT-002` | [`REQ-VID-CONCAT.md`](../../../docs/requirements/REQ-VID-CONCAT.md) | ST-VID-013 | `003-video-composition` | `008-video-concat-chain` | 4.8, Q-ADD-13 | ST-VID-013 | Especificado; implementação pendente |
-| `REQ-VID-CONCAT-003` | [`REQ-VID-CONCAT.md`](../../../docs/requirements/REQ-VID-CONCAT.md) | ST-VID-013 | `003-video-composition` | `008-video-concat-chain` | 4.8, Q-ADD-13 | ST-VID-013 | Especificado; implementação pendente |
-| `REQ-VID-CONCAT-004` | [`REQ-VID-CONCAT.md`](../../../docs/requirements/REQ-VID-CONCAT.md) | ST-VID-013 | `003-video-composition` | `008-video-concat-chain` | 4.8, Q-ADD-13 | ST-VID-013 | Especificado; implementação pendente |
-| `REQ-VID-CONCAT-005` | [`REQ-VID-CONCAT.md`](../../../docs/requirements/REQ-VID-CONCAT.md) | ST-VID-013 | `003-video-composition` | `008-video-concat-chain` | 4.8, Q-ADD-13 | ST-VID-013 | Especificado; implementação pendente |
-| `REQ-VID-CONCAT-006` | [`REQ-VID-CONCAT.md`](../../../docs/requirements/REQ-VID-CONCAT.md) | ST-VID-013 | `003-video-composition` | `008-video-concat-chain` | 4.8, Q-ADD-13 | ST-VID-013 | Especificado; implementação pendente |
-| `REQ-VID-CONCAT-007` | [`REQ-VID-CONCAT.md`](../../../docs/requirements/REQ-VID-CONCAT.md) | ST-VID-013 | `003-video-composition` | `008-video-concat-chain` | 4.8, Q-ADD-13 | ST-VID-013 | Especificado; implementação pendente |
-| `REQ-VID-CONCAT-008` | [`REQ-VID-CONCAT.md`](../../../docs/requirements/REQ-VID-CONCAT.md) | ST-VID-013 | `003-video-composition` | `008-video-concat-chain` | 4.8, T-02, Q-ADD-13, Q-ADD-25 | ST-VID-013 | Especificado; implementação pendente |
-| `REQ-VID-CONCAT-009` | [`REQ-VID-CONCAT.md`](../../../docs/requirements/REQ-VID-CONCAT.md) | ST-VID-013 | `003-video-composition` | `008-video-concat-chain` | 4.8, Q-ADD-13 | ST-VID-013 | Especificado; implementação pendente |
-| `REQ-VID-CONCAT-010` | [`REQ-VID-CONCAT.md`](../../../docs/requirements/REQ-VID-CONCAT.md) | ST-VID-013 | `003-video-composition` | `008-video-concat-chain` | 4.8, Q-ADD-13 | ST-VID-013 | Especificado; implementação pendente |
-| `REQ-VID-CONCAT-011` | [`REQ-VID-CONCAT.md`](../../../docs/requirements/REQ-VID-CONCAT.md) | ST-VID-013 | `003-video-composition` | `008-video-concat-chain` | 4.8, Q-ADD-13 | ST-VID-013 | Especificado; implementação pendente |
-| `REQ-VID-CONCAT-012` | [`REQ-VID-CONCAT.md`](../../../docs/requirements/REQ-VID-CONCAT.md) | ST-VID-013 | `003-video-composition` | `008-video-concat-chain` | 4.8, Q-ADD-13 | ST-VID-013 | Especificado; implementação pendente |
-| `REQ-VID-CONCAT-013` | [`REQ-VID-CONCAT.md`](../../../docs/requirements/REQ-VID-CONCAT.md) | ST-VID-013 | `003-video-composition` | `008-video-concat-chain` | 4.8, Q-ADD-13 | ST-VID-013 | Especificado; implementação pendente |
-| `REQ-VID-CONVERT-001` | [`REQ-VID-CONVERT.md`](../../../docs/requirements/REQ-VID-CONVERT.md) | ST-VID-012 | `002-video-transformations` | `007-video-format-conversion` | 4.7, T-05, T-06, Q-ADD-21 | ST-VID-012 | Especificado; implementação pendente |
-| `REQ-VID-CONVERT-002` | [`REQ-VID-CONVERT.md`](../../../docs/requirements/REQ-VID-CONVERT.md) | ST-VID-012 | `002-video-transformations` | `007-video-format-conversion` | 4.7, T-05, T-06, Q-ADD-21 | ST-VID-012 | Especificado; implementação pendente |
-| `REQ-VID-CONVERT-003` | [`REQ-VID-CONVERT.md`](../../../docs/requirements/REQ-VID-CONVERT.md) | ST-VID-012 | `002-video-transformations` | `007-video-format-conversion` | 4.7, T-05, T-06, Q-ADD-21 | ST-VID-012 | Especificado; implementação pendente |
-| `REQ-VID-CONVERT-004` | [`REQ-VID-CONVERT.md`](../../../docs/requirements/REQ-VID-CONVERT.md) | ST-VID-012 | `002-video-transformations` | `007-video-format-conversion` | 4.7, T-05, T-06, Q-ADD-21 | ST-VID-012 | Especificado; implementação pendente |
-| `REQ-VID-CONVERT-005` | [`REQ-VID-CONVERT.md`](../../../docs/requirements/REQ-VID-CONVERT.md) | ST-VID-012 | `002-video-transformations` | `007-video-format-conversion` | 4.7, T-05, T-06, Q-ADD-21 | ST-VID-012 | Especificado; implementação pendente |
-| `REQ-VID-CONVERT-006` | [`REQ-VID-CONVERT.md`](../../../docs/requirements/REQ-VID-CONVERT.md) | ST-VID-012 | `002-video-transformations` | `007-video-format-conversion` | 4.7, T-05, T-06, Q-ADD-21 | ST-VID-012 | Especificado; implementação pendente |
-| `REQ-VID-CONVERT-007` | [`REQ-VID-CONVERT.md`](../../../docs/requirements/REQ-VID-CONVERT.md) | ST-VID-012 | `002-video-transformations` | `007-video-format-conversion` | 4.7, T-05, Q-ADD-25 | ST-VID-012 | Especificado; implementação pendente |
-| `REQ-VID-CONVERT-008` | [`REQ-VID-CONVERT.md`](../../../docs/requirements/REQ-VID-CONVERT.md) | ST-VID-012 | `002-video-transformations` | `007-video-format-conversion` | T-06, Q-ADD-20 | ST-VID-012 | Especificado; implementação pendente |
-| `REQ-VID-CONVERT-009` | [`REQ-VID-CONVERT.md`](../../../docs/requirements/REQ-VID-CONVERT.md) | ST-VID-012 | `002-video-transformations` | `007-video-format-conversion` | 4.7, T-05, T-06, Q-ADD-21 | ST-VID-012 | Especificado; implementação pendente |
-| `REQ-VID-CONVERT-010` | [`REQ-VID-CONVERT.md`](../../../docs/requirements/REQ-VID-CONVERT.md) | ST-VID-012 | `002-video-transformations` | `007-video-format-conversion` | 4.7, T-05, T-06, Q-ADD-21 | ST-VID-012 | Especificado; implementação pendente |
-| `REQ-VID-DOWNLOAD-001` | [`REQ-VID-DOWNLOAD.md`](../../../docs/requirements/REQ-VID-DOWNLOAD.md) | ST-VID-006 | `001-video-lifecycle` | `002-video-access` | 4.1, T-08, T-10, Q-ADD-05 | ST-VID-006 | Especificado; implementação pendente |
-| `REQ-VID-DOWNLOAD-002` | [`REQ-VID-DOWNLOAD.md`](../../../docs/requirements/REQ-VID-DOWNLOAD.md) | ST-VID-006 | `001-video-lifecycle` | `002-video-access` | 4.1, T-08, T-10, Q-ADD-05 | ST-VID-006 | Especificado; implementação pendente |
-| `REQ-VID-DOWNLOAD-003` | [`REQ-VID-DOWNLOAD.md`](../../../docs/requirements/REQ-VID-DOWNLOAD.md) | ST-VID-006 | `001-video-lifecycle` | `002-video-access` | 4.1, T-08, T-10, Q-ADD-05 | ST-VID-006 | Especificado; implementação pendente |
-| `REQ-VID-DOWNLOAD-004` | [`REQ-VID-DOWNLOAD.md`](../../../docs/requirements/REQ-VID-DOWNLOAD.md) | ST-VID-006 | `001-video-lifecycle` | `002-video-access` | 4.1, T-08, T-10, Q-ADD-05 | ST-VID-006 | Especificado; implementação pendente |
-| `REQ-VID-DOWNLOAD-005` | [`REQ-VID-DOWNLOAD.md`](../../../docs/requirements/REQ-VID-DOWNLOAD.md) | ST-VID-006 | `001-video-lifecycle` | `002-video-access` | 4.1, T-08, T-10, Q-ADD-05 | ST-VID-006 | Especificado; implementação pendente |
-| `REQ-VID-DOWNLOAD-006` | [`REQ-VID-DOWNLOAD.md`](../../../docs/requirements/REQ-VID-DOWNLOAD.md) | ST-VID-006 | `001-video-lifecycle` | `002-video-access` | 4.1, T-08, T-10, Q-ADD-05 | ST-VID-006 | Especificado; implementação pendente |
-| `REQ-VID-DOWNLOAD-007` | [`REQ-VID-DOWNLOAD.md`](../../../docs/requirements/REQ-VID-DOWNLOAD.md) | ST-VID-006 | `001-video-lifecycle` | `002-video-access` | 4.1, T-08, T-10, Q-ADD-05 | ST-VID-006 | Especificado; implementação pendente |
-| `REQ-VID-DOWNLOAD-008` | [`REQ-VID-DOWNLOAD.md`](../../../docs/requirements/REQ-VID-DOWNLOAD.md) | ST-VID-006 | `001-video-lifecycle` | `002-video-access` | 4.1, T-08, T-10, Q-ADD-05 | ST-VID-006 | Especificado; implementação pendente |
-| `REQ-VID-DOWNLOAD-009` | [`REQ-VID-DOWNLOAD.md`](../../../docs/requirements/REQ-VID-DOWNLOAD.md) | ST-VID-006 | `001-video-lifecycle` | `002-video-access` | 4.1, T-08, T-10, Q-ADD-05 | ST-VID-006 | Especificado; implementação pendente |
-| `REQ-VID-ERROR-001` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-10, Q-ADD-14 | ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-ERROR-002` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-10, Q-ADD-14 | ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-ERROR-003` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-03, Q-ADD-14 | ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-FILTER-001` | [`REQ-VID-FILTER.md`](../../../docs/requirements/REQ-VID-FILTER.md) | ST-VID-009 | `002-video-transformations` | `005-video-visual-edits` | 4.4, T-07, Q-ADD-07 | ST-VID-009 | Especificado; implementação pendente |
-| `REQ-VID-FILTER-002` | [`REQ-VID-FILTER.md`](../../../docs/requirements/REQ-VID-FILTER.md) | ST-VID-009 | `002-video-transformations` | `005-video-visual-edits` | 4.4, T-07, Q-ADD-07 | ST-VID-009 | Especificado; implementação pendente |
-| `REQ-VID-FILTER-003` | [`REQ-VID-FILTER.md`](../../../docs/requirements/REQ-VID-FILTER.md) | ST-VID-009 | `002-video-transformations` | `005-video-visual-edits` | 4.4, T-07, Q-ADD-07 | ST-VID-009 | Especificado; implementação pendente |
-| `REQ-VID-FILTER-004` | [`REQ-VID-FILTER.md`](../../../docs/requirements/REQ-VID-FILTER.md) | ST-VID-009 | `002-video-transformations` | `005-video-visual-edits` | 4.4, T-07, Q-ADD-07 | ST-VID-009 | Especificado; implementação pendente |
-| `REQ-VID-FILTER-005` | [`REQ-VID-FILTER.md`](../../../docs/requirements/REQ-VID-FILTER.md) | ST-VID-009 | `002-video-transformations` | `005-video-visual-edits` | 4.4, T-07, Q-ADD-07 | ST-VID-009 | Especificado; implementação pendente |
-| `REQ-VID-FILTER-006` | [`REQ-VID-FILTER.md`](../../../docs/requirements/REQ-VID-FILTER.md) | ST-VID-009 | `002-video-transformations` | `005-video-visual-edits` | 4.4, T-07, Q-ADD-07 | ST-VID-009 | Especificado; implementação pendente |
-| `REQ-VID-FILTER-007` | [`REQ-VID-FILTER.md`](../../../docs/requirements/REQ-VID-FILTER.md) | ST-VID-009 | `002-video-transformations` | `005-video-visual-edits` | 4.4, T-02, Q-ADD-25 | ST-VID-009 | Especificado; implementação pendente |
-| `REQ-VID-FRAMES-001` | [`REQ-VID-FRAMES.md`](../../../docs/requirements/REQ-VID-FRAMES.md) | ST-VID-005 | `002-video-transformations` | `006-video-frame-export` | — (specsDuvidas D-05) | ST-VID-005 | Não coberto nesta construção (D-06) |
-| `REQ-VID-FRAMES-002` | [`REQ-VID-FRAMES.md`](../../../docs/requirements/REQ-VID-FRAMES.md) | ST-VID-005 | `002-video-transformations` | `006-video-frame-export` | — (specsDuvidas D-05) | ST-VID-005 | Não coberto nesta construção (D-06) |
-| `REQ-VID-FRAMES-003` | [`REQ-VID-FRAMES.md`](../../../docs/requirements/REQ-VID-FRAMES.md) | ST-VID-005 | `002-video-transformations` | `006-video-frame-export` | — (specsDuvidas D-05) | ST-VID-005 | Não coberto nesta construção (D-06) |
-| `REQ-VID-FRAMES-004` | [`REQ-VID-FRAMES.md`](../../../docs/requirements/REQ-VID-FRAMES.md) | ST-VID-005 | `002-video-transformations` | `006-video-frame-export` | — (specsDuvidas D-05) | ST-VID-005 | Não coberto nesta construção (D-06) |
-| `REQ-VID-FRAMES-005` | [`REQ-VID-FRAMES.md`](../../../docs/requirements/REQ-VID-FRAMES.md) | ST-VID-005 | `002-video-transformations` | `006-video-frame-export` | — (specsDuvidas D-05) | ST-VID-005 | Não coberto nesta construção (D-06) |
-| `REQ-VID-FRAMES-006` | [`REQ-VID-FRAMES.md`](../../../docs/requirements/REQ-VID-FRAMES.md) | ST-VID-005 | `002-video-transformations` | `006-video-frame-export` | — (specsDuvidas D-05) | ST-VID-005 | Não coberto nesta construção (D-06) |
-| `REQ-VID-FRAMES-007` | [`REQ-VID-FRAMES.md`](../../../docs/requirements/REQ-VID-FRAMES.md) | ST-VID-005 | `002-video-transformations` | `006-video-frame-export` | — (specsDuvidas D-05) | ST-VID-005 | Não coberto nesta construção (D-06) |
-| `REQ-VID-FRAMES-008` | [`REQ-VID-FRAMES.md`](../../../docs/requirements/REQ-VID-FRAMES.md) | ST-VID-005 | `002-video-transformations` | `006-video-frame-export` | — (specsDuvidas D-05) | ST-VID-005 | Não coberto nesta construção (D-06) |
-| `REQ-VID-FRAMES-009` | [`REQ-VID-FRAMES.md`](../../../docs/requirements/REQ-VID-FRAMES.md) | ST-VID-005 | `002-video-transformations` | `006-video-frame-export` | — (specsDuvidas D-05) | ST-VID-005 | Não coberto nesta construção (D-06) |
-| `REQ-VID-FRAMES-010` | [`REQ-VID-FRAMES.md`](../../../docs/requirements/REQ-VID-FRAMES.md) | ST-VID-005 | `002-video-transformations` | `006-video-frame-export` | — (specsDuvidas D-05) | ST-VID-005 | Não coberto nesta construção (D-06) |
-| `REQ-VID-FRAMES-011` | [`REQ-VID-FRAMES.md`](../../../docs/requirements/REQ-VID-FRAMES.md) | ST-VID-005 | `002-video-transformations` | `006-video-frame-export` | — (specsDuvidas D-05) | ST-VID-005 | Não coberto nesta construção (D-06) |
-| `REQ-VID-FRAMES-012` | [`REQ-VID-FRAMES.md`](../../../docs/requirements/REQ-VID-FRAMES.md) | ST-VID-005 | `002-video-transformations` | `006-video-frame-export` | — (specsDuvidas D-05) | ST-VID-005 | Não coberto nesta construção (D-06) |
-| `REQ-VID-FRAMES-013` | [`REQ-VID-FRAMES.md`](../../../docs/requirements/REQ-VID-FRAMES.md) | ST-VID-005 | `002-video-transformations` | `006-video-frame-export` | — (specsDuvidas D-05) | ST-VID-005 | Não coberto nesta construção (D-06) |
-| `REQ-VID-INFO-001` | [`REQ-VID-INFO.md`](../../../docs/requirements/REQ-VID-INFO.md) | ST-VID-007 | `001-video-lifecycle` | `002-video-access` | 4.2, Q-ADD-13 | ST-VID-007 | Especificado; implementação pendente |
-| `REQ-VID-INFO-002` | [`REQ-VID-INFO.md`](../../../docs/requirements/REQ-VID-INFO.md) | ST-VID-007 | `001-video-lifecycle` | `002-video-access` | 4.2, Q-ADD-13 | ST-VID-007 | Especificado; implementação pendente |
-| `REQ-VID-INFO-003` | [`REQ-VID-INFO.md`](../../../docs/requirements/REQ-VID-INFO.md) | ST-VID-007 | `001-video-lifecycle` | `002-video-access` | 4.2, Q-ADD-13 | ST-VID-007 | Especificado; implementação pendente |
-| `REQ-VID-INFO-004` | [`REQ-VID-INFO.md`](../../../docs/requirements/REQ-VID-INFO.md) | ST-VID-007 | `001-video-lifecycle` | `002-video-access` | 4.2, Q-ADD-13 | ST-VID-007 | Especificado; implementação pendente |
-| `REQ-VID-INFO-005` | [`REQ-VID-INFO.md`](../../../docs/requirements/REQ-VID-INFO.md) | ST-VID-007 | `001-video-lifecycle` | `002-video-access` | 4.2, Q-ADD-13 | ST-VID-007 | Especificado; implementação pendente |
-| `REQ-VID-INFO-006` | [`REQ-VID-INFO.md`](../../../docs/requirements/REQ-VID-INFO.md) | ST-VID-007 | `001-video-lifecycle` | `002-video-access` | 4.2, Q-ADD-13 | ST-VID-007 | Especificado; implementação pendente |
-| `REQ-VID-INFO-007` | [`REQ-VID-INFO.md`](../../../docs/requirements/REQ-VID-INFO.md) | ST-VID-007 | `001-video-lifecycle` | `002-video-access` | 4.2, Q-ADD-13 | ST-VID-007 | Especificado; implementação pendente |
-| `REQ-VID-INFO-008` | [`REQ-VID-INFO.md`](../../../docs/requirements/REQ-VID-INFO.md) | ST-VID-007 | `001-video-lifecycle` | `002-video-access` | 4.2, Q-ADD-13 | ST-VID-007 | Especificado; implementação pendente |
-| `REQ-VID-INFO-009` | [`REQ-VID-INFO.md`](../../../docs/requirements/REQ-VID-INFO.md) | ST-VID-007 | `001-video-lifecycle` | `002-video-access` | 4.2, Q-ADD-13 | ST-VID-007 | Especificado; implementação pendente |
-| `REQ-VID-NFR-001` | [`REQ-VID-NFR.md`](../../../docs/requirements/REQ-VID-NFR.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, 4.1 | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-NFR-002` | [`REQ-VID-NFR.md`](../../../docs/requirements/REQ-VID-NFR.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-10 | ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-NFR-003` | [`REQ-VID-NFR.md`](../../../docs/requirements/REQ-VID-NFR.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-05 | ST-VID-000, ST-VID-001, ST-VID-002, ST-VID-003, ST-VID-004, ST-VID-005, ST-VID-008, ST-VID-009, ST-VID-010, ST-VID-011, ST-VID-012, ST-VID-013, ST-VID-014, ST-VID-015 | Especificado; implementação pendente |
-| `REQ-VID-NFR-004` | [`REQ-VID-NFR.md`](../../../docs/requirements/REQ-VID-NFR.md) | ST-VID-005 | `002-video-transformations` | `006-video-frame-export` | — | ST-VID-005 | Não coberto nesta construção (D-06) |
-| `REQ-VID-NFR-005` | [`REQ-VID-NFR.md`](../../../docs/requirements/REQ-VID-NFR.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-03 | ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-NFR-006` | [`REQ-VID-NFR.md`](../../../docs/requirements/REQ-VID-NFR.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-03 | ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-NFR-007` | [`REQ-VID-NFR.md`](../../../docs/requirements/REQ-VID-NFR.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-03, Q-ADD-14 | ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-NFR-008` | [`REQ-VID-NFR.md`](../../../docs/requirements/REQ-VID-NFR.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-03 | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-NFR-009` | [`REQ-VID-NFR.md`](../../../docs/requirements/REQ-VID-NFR.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-02, T-03 | ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-NFR-010` | [`REQ-VID-NFR.md`](../../../docs/requirements/REQ-VID-NFR.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-02 (specsDuvidas D-03) | ST-VID-000, ST-VID-001, ST-VID-002, ST-VID-003, ST-VID-004, ST-VID-005, ST-VID-008, ST-VID-009, ST-VID-010, ST-VID-011, ST-VID-012, ST-VID-013, ST-VID-014, ST-VID-015 | Especificado; implementação pendente |
-| `REQ-VID-NFR-011` | [`REQ-VID-NFR.md`](../../../docs/requirements/REQ-VID-NFR.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, T-02 (specsDuvidas D-09) | ST-VID-000, ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-NFR-012` | [`REQ-VID-NFR.md`](../../../docs/requirements/REQ-VID-NFR.md) | ST-VID-012 | `002-video-transformations` | `007-video-format-conversion` | T-05, 4.7 | ST-VID-012, ST-VID-001, ST-VID-002, ST-VID-003, ST-VID-004, ST-VID-005, ST-VID-008, ST-VID-009, ST-VID-010, ST-VID-011, ST-VID-013, ST-VID-014, ST-VID-015 | Especificado; implementação pendente |
-| `REQ-VID-NFR-013` | [`REQ-VID-NFR.md`](../../../docs/requirements/REQ-VID-NFR.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-02, 4.9 (specsDuvidas D-03) | ST-VID-COM-001, ST-VID-001, ST-VID-002, ST-VID-003, ST-VID-013, ST-VID-014 | Especificado; implementação pendente |
-| `REQ-VID-NFR-014` | [`REQ-VID-NFR.md`](../../../docs/requirements/REQ-VID-NFR.md) | ST-VID-013 | `003-video-composition` | `008-video-concat-chain` | 4.8, 4.9, T-09, 4.10 (specsDuvidas D-10) | ST-VID-013, ST-VID-014, ST-VID-015 | Especificado; implementação pendente; parte de lotes parcialmente não coberta nesta construção (D-06, D-07) |
-| `REQ-VID-NFR-015` | [`REQ-VID-NFR.md`](../../../docs/requirements/REQ-VID-NFR.md) | ST-VID-008 | `002-video-transformations` | `005-video-visual-edits` | T-07 | ST-VID-008, ST-VID-009, ST-VID-010, ST-VID-011 | Especificado; implementação pendente |
-| `REQ-VID-NFR-016` | [`REQ-VID-NFR.md`](../../../docs/requirements/REQ-VID-NFR.md) | ST-VID-006 | `001-video-lifecycle` | `002-video-access` | T-08, 4.1 | ST-VID-006 | Especificado; implementação pendente |
-| `REQ-VID-NFR-017` | [`REQ-VID-NFR.md`](../../../docs/requirements/REQ-VID-NFR.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | 4.1, 4.2 | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-NFR-018` | [`REQ-VID-NFR.md`](../../../docs/requirements/REQ-VID-NFR.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-02, T-05 (specsDuvidas D-03) | ST-VID-COM-001, ST-VID-001, ST-VID-002, ST-VID-003, ST-VID-004, ST-VID-005, ST-VID-008, ST-VID-009, ST-VID-010, ST-VID-011, ST-VID-012, ST-VID-013, ST-VID-014, ST-VID-015 | Especificado; implementação pendente |
-| `REQ-VID-NFR-019` | [`REQ-VID-NFR.md`](../../../docs/requirements/REQ-VID-NFR.md) | ST-VID-005 | `002-video-transformations` | `006-video-frame-export` | — | ST-VID-005 | Não coberto nesta construção (D-06) |
-| `REQ-VID-NFR-020` | [`REQ-VID-NFR.md`](../../../docs/requirements/REQ-VID-NFR.md) | ST-VID-005 | `002-video-transformations` | `006-video-frame-export` | — | ST-VID-005 | Não coberto nesta construção (D-06) |
-| `REQ-VID-NFR-021` | [`REQ-VID-NFR.md`](../../../docs/requirements/REQ-VID-NFR.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-03, Q-ADD-02 | ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-NFR-022` | [`REQ-VID-NFR.md`](../../../docs/requirements/REQ-VID-NFR.md) | ST-VID-013 | `003-video-composition` | `008-video-concat-chain` | 4.8 | ST-VID-013 | Especificado; implementação pendente |
-| `REQ-VID-NFR-023` | [`REQ-VID-NFR.md`](../../../docs/requirements/REQ-VID-NFR.md) | ST-VID-014 | `003-video-composition` | `008-video-concat-chain` | 4.9 | ST-VID-014 | Especificado; implementação pendente |
-| `REQ-VID-NFR-024` | [`REQ-VID-NFR.md`](../../../docs/requirements/REQ-VID-NFR.md) | ST-VID-013 | `003-video-composition` | `008-video-concat-chain` | 4.8 | ST-VID-013 | Especificado; implementação pendente |
-| `REQ-VID-NFR-025` | [`REQ-VID-NFR.md`](../../../docs/requirements/REQ-VID-NFR.md) | ST-VID-006 | `001-video-lifecycle` | `002-video-access` | T-08 | ST-VID-006 | Especificado; implementação pendente |
-| `REQ-VID-NFR-026` | [`REQ-VID-NFR.md`](../../../docs/requirements/REQ-VID-NFR.md) | ST-VID-012 | `002-video-transformations` | `007-video-format-conversion` | T-05, 4.7 | ST-VID-012, ST-VID-001, ST-VID-002, ST-VID-003, ST-VID-004, ST-VID-005, ST-VID-008, ST-VID-009, ST-VID-010, ST-VID-011, ST-VID-013, ST-VID-014, ST-VID-015 | Especificado; implementação pendente |
-| `REQ-VID-ORIENT-001` | [`REQ-VID-ORIENT.md`](../../../docs/requirements/REQ-VID-ORIENT.md) | ST-VID-011 | `002-video-transformations` | `005-video-visual-edits` | 4.6, T-07, Q-ADD-24 | ST-VID-011 | Especificado; implementação pendente |
-| `REQ-VID-ORIENT-002` | [`REQ-VID-ORIENT.md`](../../../docs/requirements/REQ-VID-ORIENT.md) | ST-VID-011 | `002-video-transformations` | `005-video-visual-edits` | 4.6, T-07, Q-ADD-24 | ST-VID-011 | Especificado; implementação pendente |
-| `REQ-VID-ORIENT-003` | [`REQ-VID-ORIENT.md`](../../../docs/requirements/REQ-VID-ORIENT.md) | ST-VID-011 | `002-video-transformations` | `005-video-visual-edits` | 4.6, T-07, Q-ADD-24 | ST-VID-011 | Especificado; implementação pendente |
-| `REQ-VID-ORIENT-004` | [`REQ-VID-ORIENT.md`](../../../docs/requirements/REQ-VID-ORIENT.md) | ST-VID-011 | `002-video-transformations` | `005-video-visual-edits` | 4.6, T-07, Q-ADD-24 | ST-VID-011 | Especificado; implementação pendente |
-| `REQ-VID-ORIENT-005` | [`REQ-VID-ORIENT.md`](../../../docs/requirements/REQ-VID-ORIENT.md) | ST-VID-011 | `002-video-transformations` | `005-video-visual-edits` | 4.6, T-07, Q-ADD-24 | ST-VID-011 | Especificado; implementação pendente |
-| `REQ-VID-ORIENT-006` | [`REQ-VID-ORIENT.md`](../../../docs/requirements/REQ-VID-ORIENT.md) | ST-VID-011 | `002-video-transformations` | `005-video-visual-edits` | 4.6, T-07, Q-ADD-24 | ST-VID-011 | Especificado; implementação pendente |
-| `REQ-VID-ORIENT-007` | [`REQ-VID-ORIENT.md`](../../../docs/requirements/REQ-VID-ORIENT.md) | ST-VID-011 | `002-video-transformations` | `005-video-visual-edits` | 4.6, T-07, Q-ADD-24 | ST-VID-011 | Especificado; implementação pendente |
-| `REQ-VID-ORIENT-008` | [`REQ-VID-ORIENT.md`](../../../docs/requirements/REQ-VID-ORIENT.md) | ST-VID-011 | `002-video-transformations` | `005-video-visual-edits` | 4.6, T-02, Q-ADD-25 | ST-VID-011 | Especificado; implementação pendente |
-| `REQ-VID-ORIENT-009` | [`REQ-VID-ORIENT.md`](../../../docs/requirements/REQ-VID-ORIENT.md) | ST-VID-011 | `002-video-transformations` | `005-video-visual-edits` | 4.6, T-07, Q-ADD-24 | ST-VID-011 | Especificado; implementação pendente |
-| `REQ-VID-QUOTA-001` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-04, Q-ADD-03 | ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-QUOTA-002` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-04, Q-ADD-03 | ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-QUOTA-003` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-04, Q-ADD-03 | ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-QUOTA-004` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-04, Q-ADD-03 | ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-QUOTA-005` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-04, Q-ADD-03 | ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-QUOTA-006` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-04, Q-ADD-03 | ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-QUOTA-007` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-04, Q-ADD-03 | ST-VID-COM-001 | Especificado; implementação pendente; parte de lotes não coberta nesta construção (D-06) |
-| `REQ-VID-QUOTA-008` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-04, Q-ADD-03 | ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-RESIZE-001` | [`REQ-VID-RESIZE.md`](../../../docs/requirements/REQ-VID-RESIZE.md) | ST-VID-010 | `002-video-transformations` | `005-video-visual-edits` | 4.5, T-07, Q-ADD-13 | ST-VID-010 | Especificado; implementação pendente |
-| `REQ-VID-RESIZE-002` | [`REQ-VID-RESIZE.md`](../../../docs/requirements/REQ-VID-RESIZE.md) | ST-VID-010 | `002-video-transformations` | `005-video-visual-edits` | 4.5, T-07, Q-ADD-13 | ST-VID-010 | Especificado; implementação pendente |
-| `REQ-VID-RESIZE-003` | [`REQ-VID-RESIZE.md`](../../../docs/requirements/REQ-VID-RESIZE.md) | ST-VID-010 | `002-video-transformations` | `005-video-visual-edits` | 4.5, T-07, Q-ADD-13 | ST-VID-010 | Especificado; implementação pendente |
-| `REQ-VID-RESIZE-004` | [`REQ-VID-RESIZE.md`](../../../docs/requirements/REQ-VID-RESIZE.md) | ST-VID-010 | `002-video-transformations` | `005-video-visual-edits` | 4.5, T-07, Q-ADD-13 | ST-VID-010 | Especificado; implementação pendente |
-| `REQ-VID-RESIZE-005` | [`REQ-VID-RESIZE.md`](../../../docs/requirements/REQ-VID-RESIZE.md) | ST-VID-010 | `002-video-transformations` | `005-video-visual-edits` | 4.5, T-07, Q-ADD-13 | ST-VID-010 | Especificado; implementação pendente |
-| `REQ-VID-RESIZE-006` | [`REQ-VID-RESIZE.md`](../../../docs/requirements/REQ-VID-RESIZE.md) | ST-VID-010 | `002-video-transformations` | `005-video-visual-edits` | 4.5, T-07, Q-ADD-13 | ST-VID-010 | Especificado; implementação pendente |
-| `REQ-VID-RESIZE-007` | [`REQ-VID-RESIZE.md`](../../../docs/requirements/REQ-VID-RESIZE.md) | ST-VID-010 | `002-video-transformations` | `005-video-visual-edits` | 4.5, T-07, Q-ADD-13 | ST-VID-010 | Especificado; implementação pendente |
-| `REQ-VID-RESIZE-008` | [`REQ-VID-RESIZE.md`](../../../docs/requirements/REQ-VID-RESIZE.md) | ST-VID-010 | `002-video-transformations` | `005-video-visual-edits` | 4.5, T-07, Q-ADD-13 | ST-VID-010 | Especificado; implementação pendente |
-| `REQ-VID-RESIZE-009` | [`REQ-VID-RESIZE.md`](../../../docs/requirements/REQ-VID-RESIZE.md) | ST-VID-010 | `002-video-transformations` | `005-video-visual-edits` | 4.5, T-07, Q-ADD-13 | ST-VID-010 | Especificado; implementação pendente |
-| `REQ-VID-SPEED-001` | [`REQ-VID-SPEED.md`](../../../docs/requirements/REQ-VID-SPEED.md) | ST-VID-003 | `002-video-transformations` | `004-video-basic-edits` | T-02 | ST-VID-003 | Especificado; implementação pendente |
-| `REQ-VID-SPEED-002` | [`REQ-VID-SPEED.md`](../../../docs/requirements/REQ-VID-SPEED.md) | ST-VID-003 | `002-video-transformations` | `004-video-basic-edits` | T-02 | ST-VID-003 | Especificado; implementação pendente |
-| `REQ-VID-SPEED-003` | [`REQ-VID-SPEED.md`](../../../docs/requirements/REQ-VID-SPEED.md) | ST-VID-003 | `002-video-transformations` | `004-video-basic-edits` | T-02 | ST-VID-003 | Especificado; implementação pendente |
-| `REQ-VID-SPEED-004` | [`REQ-VID-SPEED.md`](../../../docs/requirements/REQ-VID-SPEED.md) | ST-VID-003 | `002-video-transformations` | `004-video-basic-edits` | T-02 | ST-VID-003 | Especificado; implementação pendente |
-| `REQ-VID-SPEED-005` | [`REQ-VID-SPEED.md`](../../../docs/requirements/REQ-VID-SPEED.md) | ST-VID-003 | `002-video-transformations` | `004-video-basic-edits` | T-02 | ST-VID-003 | Especificado; implementação pendente |
-| `REQ-VID-SPEED-006` | [`REQ-VID-SPEED.md`](../../../docs/requirements/REQ-VID-SPEED.md) | ST-VID-003 | `002-video-transformations` | `004-video-basic-edits` | T-02 | ST-VID-003 | Especificado; implementação pendente |
-| `REQ-VID-SPEED-007` | [`REQ-VID-SPEED.md`](../../../docs/requirements/REQ-VID-SPEED.md) | ST-VID-003 | `002-video-transformations` | `004-video-basic-edits` | T-02 | ST-VID-003 | Especificado; implementação pendente |
-| `REQ-VID-SPEED-008` | [`REQ-VID-SPEED.md`](../../../docs/requirements/REQ-VID-SPEED.md) | ST-VID-003 | `002-video-transformations` | `004-video-basic-edits` | T-02 | ST-VID-003 | Especificado; implementação pendente |
-| `REQ-VID-STORAGE-001` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, T-08 | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-STORAGE-002` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, T-08 | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-STORAGE-003` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, T-08 | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-STORAGE-004` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, T-08 | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-STORAGE-005` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, Q-ADD-14 | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-TASK-001` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-03 | ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-TASK-002` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-03 | ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-TASK-003` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-03 | ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-TASK-004` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-03 | ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-TASK-005` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-03 | ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-TASK-006` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-03 | ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-TASK-007` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-03, T-09 | ST-VID-COM-001 | Não coberto nesta construção (D-06) |
-| `REQ-VID-TASK-008` | [`REQ-VID-COM.md`](../../../docs/requirements/REQ-VID-COM.md) | ST-VID-COM-001 | `001-video-lifecycle` | `003-video-task-foundation` | T-03 | ST-VID-COM-001 | Especificado; implementação pendente |
-| `REQ-VID-TRIM-001` | [`REQ-VID-TRIM.md`](../../../docs/requirements/REQ-VID-TRIM.md) | ST-VID-001 | `002-video-transformations` | `004-video-basic-edits` | T-02, T-05, Q-ADD-25 | ST-VID-001 | Especificado; implementação pendente |
-| `REQ-VID-TRIM-002` | [`REQ-VID-TRIM.md`](../../../docs/requirements/REQ-VID-TRIM.md) | ST-VID-001 | `002-video-transformations` | `004-video-basic-edits` | T-02, T-05, Q-ADD-25 | ST-VID-001 | Especificado; implementação pendente |
-| `REQ-VID-TRIM-003` | [`REQ-VID-TRIM.md`](../../../docs/requirements/REQ-VID-TRIM.md) | ST-VID-001 | `002-video-transformations` | `004-video-basic-edits` | T-02, T-05, Q-ADD-25 | ST-VID-001 | Especificado; implementação pendente |
-| `REQ-VID-TRIM-004` | [`REQ-VID-TRIM.md`](../../../docs/requirements/REQ-VID-TRIM.md) | ST-VID-001 | `002-video-transformations` | `004-video-basic-edits` | T-02, T-05, Q-ADD-25 | ST-VID-001 | Especificado; implementação pendente |
-| `REQ-VID-TRIM-005` | [`REQ-VID-TRIM.md`](../../../docs/requirements/REQ-VID-TRIM.md) | ST-VID-001 | `002-video-transformations` | `004-video-basic-edits` | T-02, T-05, Q-ADD-25 | ST-VID-001 | Especificado; implementação pendente |
-| `REQ-VID-TRIM-006` | [`REQ-VID-TRIM.md`](../../../docs/requirements/REQ-VID-TRIM.md) | ST-VID-001 | `002-video-transformations` | `004-video-basic-edits` | T-02, T-05, Q-ADD-25 | ST-VID-001 | Especificado; implementação pendente |
-| `REQ-VID-TRIM-007` | [`REQ-VID-TRIM.md`](../../../docs/requirements/REQ-VID-TRIM.md) | ST-VID-001 | `002-video-transformations` | `004-video-basic-edits` | T-02, T-05, Q-ADD-25 | ST-VID-001 | Especificado; implementação pendente |
-| `REQ-VID-TRIM-008` | [`REQ-VID-TRIM.md`](../../../docs/requirements/REQ-VID-TRIM.md) | ST-VID-001 | `002-video-transformations` | `004-video-basic-edits` | T-02, T-05, Q-ADD-25 | ST-VID-001 | Especificado; implementação pendente |
-| `REQ-VID-TRIM-009` | [`REQ-VID-TRIM.md`](../../../docs/requirements/REQ-VID-TRIM.md) | ST-VID-001 | `002-video-transformations` | `004-video-basic-edits` | T-02, T-05, Q-ADD-25 | ST-VID-001 | Especificado; implementação pendente |
-| `REQ-VID-TRIM-010` | [`REQ-VID-TRIM.md`](../../../docs/requirements/REQ-VID-TRIM.md) | ST-VID-001 | `002-video-transformations` | `004-video-basic-edits` | T-02, T-05, Q-ADD-25 | ST-VID-001 | Especificado; implementação pendente |
-| `REQ-VID-UPLOAD-001` | [`REQ-VID-UPLOAD.md`](../../../docs/requirements/REQ-VID-UPLOAD.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, T-06, T-07, T-08 | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-UPLOAD-002` | [`REQ-VID-UPLOAD.md`](../../../docs/requirements/REQ-VID-UPLOAD.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, T-06, T-07, T-08 | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-UPLOAD-003` | [`REQ-VID-UPLOAD.md`](../../../docs/requirements/REQ-VID-UPLOAD.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, T-06, T-07, T-08 | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-UPLOAD-004` | [`REQ-VID-UPLOAD.md`](../../../docs/requirements/REQ-VID-UPLOAD.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, T-06, T-07, T-08 | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-UPLOAD-005` | [`REQ-VID-UPLOAD.md`](../../../docs/requirements/REQ-VID-UPLOAD.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, T-06, T-07, T-08 | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-UPLOAD-006` | [`REQ-VID-UPLOAD.md`](../../../docs/requirements/REQ-VID-UPLOAD.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, T-06, T-07, T-08 | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-UPLOAD-007` | [`REQ-VID-UPLOAD.md`](../../../docs/requirements/REQ-VID-UPLOAD.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, T-06, T-07, T-08 | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-UPLOAD-008` | [`REQ-VID-UPLOAD.md`](../../../docs/requirements/REQ-VID-UPLOAD.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, T-06, T-07, T-08 | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-UPLOAD-009` | [`REQ-VID-UPLOAD.md`](../../../docs/requirements/REQ-VID-UPLOAD.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, T-06, T-07, T-08 | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-UPLOAD-010` | [`REQ-VID-UPLOAD.md`](../../../docs/requirements/REQ-VID-UPLOAD.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, T-06, T-07, T-08 | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-UPLOAD-011` | [`REQ-VID-UPLOAD.md`](../../../docs/requirements/REQ-VID-UPLOAD.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, T-06, T-07, T-08 | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-UPLOAD-012` | [`REQ-VID-UPLOAD.md`](../../../docs/requirements/REQ-VID-UPLOAD.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, T-06, T-07, T-08 | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-UPLOAD-013` | [`REQ-VID-UPLOAD.md`](../../../docs/requirements/REQ-VID-UPLOAD.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, Q-ADD-13 | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-UPLOAD-014` | [`REQ-VID-UPLOAD.md`](../../../docs/requirements/REQ-VID-UPLOAD.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, T-07, Q-ADD-06, Q-ADD-22 | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-UPLOAD-015` | [`REQ-VID-UPLOAD.md`](../../../docs/requirements/REQ-VID-UPLOAD.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, T-06, T-07, T-08 | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-UPLOAD-016` | [`REQ-VID-UPLOAD.md`](../../../docs/requirements/REQ-VID-UPLOAD.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-06, Q-ADD-20 | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-UPLOAD-017` | [`REQ-VID-UPLOAD.md`](../../../docs/requirements/REQ-VID-UPLOAD.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-06 | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-UPLOAD-018` | [`REQ-VID-UPLOAD.md`](../../../docs/requirements/REQ-VID-UPLOAD.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, T-06, T-07, T-08 | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-UPLOAD-019` | [`REQ-VID-UPLOAD.md`](../../../docs/requirements/REQ-VID-UPLOAD.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, Q-ADD-13 | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-UPLOAD-020` | [`REQ-VID-UPLOAD.md`](../../../docs/requirements/REQ-VID-UPLOAD.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | T-00, T-06, T-07, T-08 | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-UPLOAD-021` | [`REQ-VID-UPLOAD.md`](../../../docs/requirements/REQ-VID-UPLOAD.md) | ST-VID-000 | `001-video-lifecycle` | `001-video-lifecycle` | — (specsDuvidas D-30) | ST-VID-000 | Especificado; implementação pendente |
-| `REQ-VID-WATERMARK-001` | [`REQ-VID-WATERMARK.md`](../../../docs/requirements/REQ-VID-WATERMARK.md) | ST-VID-004 | `002-video-transformations` | `005-video-visual-edits` | T-02, Q-ADD-12 | ST-VID-004 | Especificado; implementação pendente |
-| `REQ-VID-WATERMARK-002` | [`REQ-VID-WATERMARK.md`](../../../docs/requirements/REQ-VID-WATERMARK.md) | ST-VID-004 | `002-video-transformations` | `005-video-visual-edits` | T-02, Q-ADD-12 | ST-VID-004 | Especificado; implementação pendente |
-| `REQ-VID-WATERMARK-003` | [`REQ-VID-WATERMARK.md`](../../../docs/requirements/REQ-VID-WATERMARK.md) | ST-VID-004 | `002-video-transformations` | `005-video-visual-edits` | T-02, Q-ADD-12 | ST-VID-004 | Especificado; implementação pendente |
-| `REQ-VID-WATERMARK-004` | [`REQ-VID-WATERMARK.md`](../../../docs/requirements/REQ-VID-WATERMARK.md) | ST-VID-004 | `002-video-transformations` | `005-video-visual-edits` | T-02, Q-ADD-12 | ST-VID-004 | Especificado; implementação pendente |
-| `REQ-VID-WATERMARK-005` | [`REQ-VID-WATERMARK.md`](../../../docs/requirements/REQ-VID-WATERMARK.md) | ST-VID-004 | `002-video-transformations` | `005-video-visual-edits` | T-02, Q-ADD-12 | ST-VID-004 | Especificado; implementação pendente |
-| `REQ-VID-WATERMARK-006` | [`REQ-VID-WATERMARK.md`](../../../docs/requirements/REQ-VID-WATERMARK.md) | ST-VID-004 | `002-video-transformations` | `005-video-visual-edits` | T-02, Q-ADD-12 | ST-VID-004 | Especificado; implementação pendente |
-| `REQ-VID-WATERMARK-007` | [`REQ-VID-WATERMARK.md`](../../../docs/requirements/REQ-VID-WATERMARK.md) | ST-VID-004 | `002-video-transformations` | `005-video-visual-edits` | T-02, Q-ADD-12 | ST-VID-004 | Especificado; implementação pendente |
-| `REQ-VID-WATERMARK-008` | [`REQ-VID-WATERMARK.md`](../../../docs/requirements/REQ-VID-WATERMARK.md) | ST-VID-004 | `002-video-transformations` | `005-video-visual-edits` | T-02, Q-ADD-12 | ST-VID-004 | Especificado; implementação pendente |
-| `REQ-VID-WATERMARK-009` | [`REQ-VID-WATERMARK.md`](../../../docs/requirements/REQ-VID-WATERMARK.md) | ST-VID-004 | `002-video-transformations` | `005-video-visual-edits` | T-02, Q-ADD-12 | ST-VID-004 | Especificado; implementação pendente |
-| `REQ-VID-WATERMARK-010` | [`REQ-VID-WATERMARK.md`](../../../docs/requirements/REQ-VID-WATERMARK.md) | ST-VID-004 | `002-video-transformations` | `005-video-visual-edits` | T-02, Q-ADD-12 | ST-VID-004 | Especificado; implementação pendente |
-| `REQ-VID-WATERMARK-011` | [`REQ-VID-WATERMARK.md`](../../../docs/requirements/REQ-VID-WATERMARK.md) | ST-VID-004 | `002-video-transformations` | `005-video-visual-edits` | T-02, Q-ADD-12 | ST-VID-004 | Especificado; implementação pendente |
-
-## Verificações
-
-- Catálogo: **215 FR e 26 NFR**; todos os IDs canónicos estão listados uma vez nesta matriz.
-- A propriedade dos FR é exclusiva por Unit: Unit 001 = 72; Unit 002 = 93; Unit 003 = 50 (215 no total).
-- A propriedade dos NFR é exclusiva por Unit: Unit 001 = 16; Unit 002 = 6; Unit 003 = 4 (26 no total).
-- Os `REQ-VID-AUTH-*` pertencem à ST-VID-000 e à B001, que constrói os routers de vídeo com o `videoAuth` (specsDuvidas D-02). A NFR-010 pertence à B001 (worker) e a NFR-013 e a NFR-018 à B003 (executor e codificação por omissão); a B004 e a B008 verificam as três nos seus critérios de aceitação, sem serem donas (specsDuvidas D-03).
-- Não cobertos nesta construção (specsDuvidas D-06, D-07): os 13 `REQ-VID-FRAMES-*`, os 19 `REQ-VID-BATCH-*`, a `REQ-VID-TASK-007` e a NFR-004, a NFR-019 e a NFR-020 (só extração). Parcialmente não cobertas, só na parte de lotes: a `REQ-VID-QUOTA-007` e a NFR-014; a NFR-014 continua coberta na parte da junção e da cadeia, que pertence à ST-VID-013 e à B008, com a ST-VID-014 a verificá-la (specsDuvidas D-10). A NFR-011 pertence à ST-VID-000 e à B001, que cria as filas e o worker; a B003 verifica-a nos critérios de passagem (specsDuvidas D-09).
-- As 17 Stories (16 casos de uso e uma transversal) estão atribuídas uma única vez a um Bolt; a ST-VID-005 (B006) e a ST-VID-015 (B009) estão `blocked` (specsDuvidas D-06). NFR e requisitos comuns podem ter Stories consumidoras adicionais sem duplicar propriedade.
-- Critérios de aceitação e testes de implementação serão executados e registados na Construção; não são presumidos como verificados nesta fase.
+| Requisito | Story | Unit | Bolt | Teste | Resultado |
+|---|---|---|---|---|---|
+| REQ-VID-ADJUST-001 | ST-VID-008 | 002-video-transformations | B005 | TST-ADJUST-001 | Passa |
+| REQ-VID-ADJUST-002 | ST-VID-008 | 002-video-transformations | B005 | TST-ADJUST-002 | Passa |
+| REQ-VID-ADJUST-003 | ST-VID-008 | 002-video-transformations | B005 | TST-ADJUST-003 | Passa |
+| REQ-VID-ADJUST-004 | ST-VID-008 | 002-video-transformations | B005 | TST-ADJUST-004 | Passa |
+| REQ-VID-ADJUST-005 | ST-VID-008 | 002-video-transformations | B005 | TST-ADJUST-005 | Parcial |
+| REQ-VID-ADJUST-006 | ST-VID-008 | 002-video-transformations | B005 | TST-ADJUST-006 | Passa |
+| REQ-VID-ADJUST-007 | ST-VID-008 | 002-video-transformations | B005 | TST-ADJUST-007 | Passa |
+| REQ-VID-ADJUST-008 | ST-VID-008 | 002-video-transformations | B005 | TST-ADJUST-008 | Passa |
+| REQ-VID-ADJUST-009 | ST-VID-008 | 002-video-transformations | B005 | TST-ADJUST-009 | Passa |
+| REQ-VID-ADJUST-010 | ST-VID-008 | 002-video-transformations | B005 | TST-ADJUST-010 | Passa |
+| REQ-VID-AUDIO-001 | ST-VID-002 | 002-video-transformations | B004 | TST-AUDIO-001 | Passa |
+| REQ-VID-AUDIO-002 | ST-VID-002 | 002-video-transformations | B004 | TST-AUDIO-002 | Passa |
+| REQ-VID-AUDIO-003 | ST-VID-002 | 002-video-transformations | B004 | TST-AUDIO-003 | Passa |
+| REQ-VID-AUDIO-004 | ST-VID-002 | 002-video-transformations | B004 | TST-AUDIO-004 | Passa |
+| REQ-VID-AUDIO-005 | ST-VID-002 | 002-video-transformations | B004 | TST-AUDIO-005 | Passa |
+| REQ-VID-AUDIO-006 | ST-VID-002 | 002-video-transformations | B004 | TST-AUDIO-006 | Passa |
+| REQ-VID-AUTH-001 | ST-VID-000 | 001-video-lifecycle | B001 | TST-AUTH-001 | Parcial |
+| REQ-VID-AUTH-002 | ST-VID-000 | 001-video-lifecycle | B001 | TST-AUTH-002 | Passa |
+| REQ-VID-AUTH-003 | ST-VID-000 | 001-video-lifecycle | B001 | TST-AUTH-003 | Passa |
+| REQ-VID-CHAIN-001 | ST-VID-014 | 003-video-composition | B008 | TST-CHAIN-001 | Passa |
+| REQ-VID-CHAIN-002 | ST-VID-014 | 003-video-composition | B008 | TST-CHAIN-002 | Passa |
+| REQ-VID-CHAIN-003 | ST-VID-014 | 003-video-composition | B008 | TST-CHAIN-003 | Passa |
+| REQ-VID-CHAIN-004 | ST-VID-014 | 003-video-composition | B008 | TST-CHAIN-004 | Passa |
+| REQ-VID-CHAIN-005 | ST-VID-014 | 003-video-composition | B008 | TST-CHAIN-005 | Passa |
+| REQ-VID-CHAIN-006 | ST-VID-014 | 003-video-composition | B008 | TST-CHAIN-006 | Passa |
+| REQ-VID-CHAIN-007 | ST-VID-014 | 003-video-composition | B008 | TST-CHAIN-007 | Passa |
+| REQ-VID-CHAIN-008 | ST-VID-014 | 003-video-composition | B008 | TST-CHAIN-008 | Passa |
+| REQ-VID-CHAIN-009 | ST-VID-014 | 003-video-composition | B008 | TST-CHAIN-009 | Passa |
+| REQ-VID-CHAIN-010 | ST-VID-014 | 003-video-composition | B008 | TST-CHAIN-010 | Passa |
+| REQ-VID-CHAIN-011 | ST-VID-014 | 003-video-composition | B008 | TST-CHAIN-011 | Passa |
+| REQ-VID-CHAIN-012 | ST-VID-014 | 003-video-composition | B008 | TST-CHAIN-012 | Passa |
+| REQ-VID-CHAIN-013 | ST-VID-014 | 003-video-composition | B008 | TST-CHAIN-013 | Passa |
+| REQ-VID-CHAIN-014 | ST-VID-014 | 003-video-composition | B008 | TST-CHAIN-014 | Passa |
+| REQ-VID-CHAIN-015 | ST-VID-014 | 003-video-composition | B008 | TST-CHAIN-015 | Passa |
+| REQ-VID-CHAIN-016 | ST-VID-014 | 003-video-composition | B008 | TST-CHAIN-016 | Passa |
+| REQ-VID-CHAIN-017 | ST-VID-014 | 003-video-composition | B008 | TST-CHAIN-017 | Passa |
+| REQ-VID-COM-001 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-COM-001 | Passa |
+| REQ-VID-COM-002 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-COM-002 | Passa |
+| REQ-VID-COM-003 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-COM-003 | Passa |
+| REQ-VID-COM-004 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-COM-004 | Passa |
+| REQ-VID-COM-005 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-COM-005 | Passa |
+| REQ-VID-COM-006 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-COM-006 | Passa |
+| REQ-VID-CONCAT-001 | ST-VID-013 | 003-video-composition | B008 | TST-CONCAT-001 | Passa |
+| REQ-VID-CONCAT-002 | ST-VID-013 | 003-video-composition | B008 | TST-CONCAT-002 | Passa |
+| REQ-VID-CONCAT-003 | ST-VID-013 | 003-video-composition | B008 | TST-CONCAT-003 | Passa |
+| REQ-VID-CONCAT-004 | ST-VID-013 | 003-video-composition | B008 | TST-CONCAT-004 | Passa |
+| REQ-VID-CONCAT-005 | ST-VID-013 | 003-video-composition | B008 | TST-CONCAT-005 | Passa |
+| REQ-VID-CONCAT-006 | ST-VID-013 | 003-video-composition | B008 | TST-CONCAT-006 | Passa |
+| REQ-VID-CONCAT-007 | ST-VID-013 | 003-video-composition | B008 | TST-CONCAT-007 | Passa |
+| REQ-VID-CONCAT-008 | ST-VID-013 | 003-video-composition | B008 | TST-CONCAT-008 | Passa |
+| REQ-VID-CONCAT-009 | ST-VID-013 | 003-video-composition | B008 | TST-CONCAT-009 | Passa |
+| REQ-VID-CONCAT-010 | ST-VID-013 | 003-video-composition | B008 | TST-CONCAT-010 | Passa |
+| REQ-VID-CONCAT-011 | ST-VID-013 | 003-video-composition | B008 | TST-CONCAT-011 | Passa |
+| REQ-VID-CONCAT-012 | ST-VID-013 | 003-video-composition | B008 | TST-CONCAT-012 | Passa |
+| REQ-VID-CONCAT-013 | ST-VID-013 | 003-video-composition | B008 | TST-CONCAT-013 | Passa |
+| REQ-VID-CONVERT-001 | ST-VID-012 | 002-video-transformations | B007 | TST-CONVERT-001 | Passa |
+| REQ-VID-CONVERT-002 | ST-VID-012 | 002-video-transformations | B007 | TST-CONVERT-002 | Passa |
+| REQ-VID-CONVERT-003 | ST-VID-012 | 002-video-transformations | B007 | TST-CONVERT-003 | Passa |
+| REQ-VID-CONVERT-004 | ST-VID-012 | 002-video-transformations | B007 | TST-CONVERT-004 | Passa |
+| REQ-VID-CONVERT-005 | ST-VID-012 | 002-video-transformations | B007 | TST-CONVERT-005 | Passa |
+| REQ-VID-CONVERT-006 | ST-VID-012 | 002-video-transformations | B007 | TST-CONVERT-006 | Passa |
+| REQ-VID-CONVERT-007 | ST-VID-012 | 002-video-transformations | B007 | TST-CONVERT-007 | Parcial |
+| REQ-VID-CONVERT-008 | ST-VID-012 | 002-video-transformations | B007 | TST-CONVERT-008 | Parcial |
+| REQ-VID-CONVERT-009 | ST-VID-012 | 002-video-transformations | B007 | TST-CONVERT-009 | Passa |
+| REQ-VID-CONVERT-010 | ST-VID-012 | 002-video-transformations | B007 | TST-CONVERT-010 | Passa |
+| REQ-VID-DOWNLOAD-001 | ST-VID-006 | 001-video-lifecycle | B002 | TST-DOWNLOAD-001 | Passa |
+| REQ-VID-DOWNLOAD-002 | ST-VID-006 | 001-video-lifecycle | B002 | TST-DOWNLOAD-002 | Passa |
+| REQ-VID-DOWNLOAD-003 | ST-VID-006 | 001-video-lifecycle | B002 | TST-DOWNLOAD-003 | Passa |
+| REQ-VID-DOWNLOAD-004 | ST-VID-006 | 001-video-lifecycle | B002 | TST-DOWNLOAD-004 | Passa |
+| REQ-VID-DOWNLOAD-005 | ST-VID-006 | 001-video-lifecycle | B002 | TST-DOWNLOAD-005 | Passa |
+| REQ-VID-DOWNLOAD-006 | ST-VID-006 | 001-video-lifecycle | B002 | TST-DOWNLOAD-006 | Passa |
+| REQ-VID-DOWNLOAD-007 | ST-VID-006 | 001-video-lifecycle | B002 | TST-DOWNLOAD-007 | Parcial |
+| REQ-VID-DOWNLOAD-008 | ST-VID-006 | 001-video-lifecycle | B002 | TST-DOWNLOAD-008 | Passa |
+| REQ-VID-DOWNLOAD-009 | ST-VID-006 | 001-video-lifecycle | B002 | TST-DOWNLOAD-009 | Passa |
+| REQ-VID-ERROR-001 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-ERROR-001 | Passa |
+| REQ-VID-ERROR-002 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-ERROR-002 | Passa |
+| REQ-VID-ERROR-003 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-ERROR-003 | Passa |
+| REQ-VID-FILTER-001 | ST-VID-009 | 002-video-transformations | B005 | TST-FILTER-001 | Passa |
+| REQ-VID-FILTER-002 | ST-VID-009 | 002-video-transformations | B005 | TST-FILTER-002 | Passa |
+| REQ-VID-FILTER-003 | ST-VID-009 | 002-video-transformations | B005 | TST-FILTER-003 | Passa |
+| REQ-VID-FILTER-004 | ST-VID-009 | 002-video-transformations | B005 | TST-FILTER-004 | Parcial |
+| REQ-VID-FILTER-005 | ST-VID-009 | 002-video-transformations | B005 | TST-FILTER-005 | Passa |
+| REQ-VID-FILTER-006 | ST-VID-009 | 002-video-transformations | B005 | TST-FILTER-006 | Passa |
+| REQ-VID-FILTER-007 | ST-VID-009 | 002-video-transformations | B005 | TST-FILTER-007 | Passa |
+| REQ-VID-INFO-001 | ST-VID-007 | 001-video-lifecycle | B002 | TST-INFO-001 | Passa |
+| REQ-VID-INFO-002 | ST-VID-007 | 001-video-lifecycle | B002 | TST-INFO-002 | Passa |
+| REQ-VID-INFO-003 | ST-VID-007 | 001-video-lifecycle | B002 | TST-INFO-003 | Passa |
+| REQ-VID-INFO-004 | ST-VID-007 | 001-video-lifecycle | B002 | TST-INFO-004 | Passa |
+| REQ-VID-INFO-005 | ST-VID-007 | 001-video-lifecycle | B002 | TST-INFO-005 | Passa |
+| REQ-VID-INFO-006 | ST-VID-007 | 001-video-lifecycle | B002 | TST-INFO-006 | Passa |
+| REQ-VID-INFO-007 | ST-VID-007 | 001-video-lifecycle | B002 | TST-INFO-007 | Passa |
+| REQ-VID-INFO-008 | ST-VID-007 | 001-video-lifecycle | B002 | TST-INFO-008 | Passa |
+| REQ-VID-INFO-009 | ST-VID-007 | 001-video-lifecycle | B002 | TST-INFO-009 | Passa |
+| REQ-VID-NFR-001 | ST-VID-000 | 001-video-lifecycle | B001 | TST-NFR-001 | Passa |
+| REQ-VID-NFR-002 | ST-VID-000 | 001-video-lifecycle | B001 | TST-NFR-002 | Passa |
+| REQ-VID-NFR-003 | ST-VID-000 | 001-video-lifecycle | B001 | TST-NFR-003 | Passa |
+| REQ-VID-NFR-004 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-NFR-004 | Passa |
+| REQ-VID-NFR-005 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-NFR-005 | Passa |
+| REQ-VID-NFR-006 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-NFR-006 | Passa |
+| REQ-VID-NFR-007 | ST-VID-000 | 001-video-lifecycle | B001 | TST-NFR-007 | Passa |
+| REQ-VID-NFR-008 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-NFR-008 | Parcial |
+| REQ-VID-NFR-009 | ST-VID-000 | 001-video-lifecycle | B001 | TST-NFR-009 | Passa |
+| REQ-VID-NFR-010 | ST-VID-000 | 001-video-lifecycle | B001 | TST-NFR-010 | Passa |
+| REQ-VID-NFR-011 | ST-VID-012 | 002-video-transformations | B007 | TST-NFR-011 | Passa |
+| REQ-VID-NFR-012 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-NFR-012 | Passa |
+| REQ-VID-NFR-013 | ST-VID-008 | 002-video-transformations | B005 | TST-NFR-013 |  |
+| REQ-VID-NFR-014 | ST-VID-006 | 001-video-lifecycle | B002 | TST-NFR-014 | Parcial |
+| REQ-VID-NFR-015 | ST-VID-006 | 001-video-lifecycle | B002 | TST-NFR-015 | Passa |
+| REQ-VID-NFR-016 | ST-VID-001 | 002-video-transformations | B004 | TST-NFR-016 | Passa |
+| REQ-VID-NFR-017 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-NFR-017 | Passa |
+| REQ-VID-NFR-018 | ST-VID-013 | 003-video-composition | B008 | TST-NFR-018 | Passa |
+| REQ-VID-NFR-019 | ST-VID-014 | 003-video-composition | B008 | TST-NFR-019 | Passa |
+| REQ-VID-NFR-020 | ST-VID-013 | 003-video-composition | B008 | TST-NFR-020 | Passa |
+| REQ-VID-NFR-021 | ST-VID-006 | 001-video-lifecycle | B002 | TST-NFR-021 | Parcial |
+| REQ-VID-NFR-022 | ST-VID-012 | 002-video-transformations | B007 | TST-NFR-022 | Parcial |
+| REQ-VID-ORIENT-001 | ST-VID-011 | 002-video-transformations | B005 | TST-ORIENT-001 | Passa |
+| REQ-VID-ORIENT-002 | ST-VID-011 | 002-video-transformations | B005 | TST-ORIENT-002 | Passa |
+| REQ-VID-ORIENT-003 | ST-VID-011 | 002-video-transformations | B005 | TST-ORIENT-003 | Passa |
+| REQ-VID-ORIENT-004 | ST-VID-011 | 002-video-transformations | B005 | TST-ORIENT-004 | Passa |
+| REQ-VID-ORIENT-005 | ST-VID-011 | 002-video-transformations | B005 | TST-ORIENT-005 | Parcial |
+| REQ-VID-ORIENT-006 | ST-VID-011 | 002-video-transformations | B005 | TST-ORIENT-006 | Passa |
+| REQ-VID-ORIENT-007 | ST-VID-011 | 002-video-transformations | B005 | TST-ORIENT-007 | Passa |
+| REQ-VID-ORIENT-008 | ST-VID-011 | 002-video-transformations | B005 | TST-ORIENT-008 | Passa |
+| REQ-VID-ORIENT-009 | ST-VID-011 | 002-video-transformations | B005 | TST-ORIENT-009 | Passa |
+| REQ-VID-QUOTA-001 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-QUOTA-001 | Passa |
+| REQ-VID-QUOTA-002 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-QUOTA-002 | Passa |
+| REQ-VID-QUOTA-003 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-QUOTA-003 | Passa |
+| REQ-VID-QUOTA-004 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-QUOTA-004 | Passa |
+| REQ-VID-QUOTA-005 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-QUOTA-005 | Passa |
+| REQ-VID-QUOTA-006 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-QUOTA-006 | Passa |
+| REQ-VID-QUOTA-007 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-QUOTA-007 | Passa |
+| REQ-VID-QUOTA-008 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-QUOTA-008 | Passa |
+| REQ-VID-RESIZE-001 | ST-VID-010 | 002-video-transformations | B005 | TST-RESIZE-001 | Passa |
+| REQ-VID-RESIZE-002 | ST-VID-010 | 002-video-transformations | B005 | TST-RESIZE-002 | Passa |
+| REQ-VID-RESIZE-003 | ST-VID-010 | 002-video-transformations | B005 | TST-RESIZE-003 | Passa |
+| REQ-VID-RESIZE-004 | ST-VID-010 | 002-video-transformations | B005 | TST-RESIZE-004 | Passa |
+| REQ-VID-RESIZE-005 | ST-VID-010 | 002-video-transformations | B005 | TST-RESIZE-005 | Passa |
+| REQ-VID-RESIZE-006 | ST-VID-010 | 002-video-transformations | B005 | TST-RESIZE-006 | Passa |
+| REQ-VID-RESIZE-007 | ST-VID-010 | 002-video-transformations | B005 | TST-RESIZE-007 | Passa |
+| REQ-VID-RESIZE-008 | ST-VID-010 | 002-video-transformations | B005 | TST-RESIZE-008 | Passa |
+| REQ-VID-RESIZE-009 | ST-VID-010 | 002-video-transformations | B005 | TST-RESIZE-009 | Passa |
+| REQ-VID-SPEED-001 | ST-VID-003 | 002-video-transformations | B004 | TST-SPEED-001 | Passa |
+| REQ-VID-SPEED-002 | ST-VID-003 | 002-video-transformations | B004 | TST-SPEED-002 | Passa |
+| REQ-VID-SPEED-003 | ST-VID-003 | 002-video-transformations | B004 | TST-SPEED-003 | Passa |
+| REQ-VID-SPEED-004 | ST-VID-003 | 002-video-transformations | B004 | TST-SPEED-004 | Passa |
+| REQ-VID-SPEED-005 | ST-VID-003 | 002-video-transformations | B004 | TST-SPEED-005 | Passa |
+| REQ-VID-SPEED-006 | ST-VID-003 | 002-video-transformations | B004 | TST-SPEED-006 | Passa |
+| REQ-VID-SPEED-007 | ST-VID-003 | 002-video-transformations | B004 | TST-SPEED-007 | Passa |
+| REQ-VID-SPEED-008 | ST-VID-003 | 002-video-transformations | B004 | TST-SPEED-008 | Passa |
+| REQ-VID-STORAGE-001 | ST-VID-000 | 001-video-lifecycle | B001 | TST-STORAGE-001 | Passa |
+| REQ-VID-STORAGE-002 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-STORAGE-002 | Passa |
+| REQ-VID-STORAGE-003 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-STORAGE-003 | Passa |
+| REQ-VID-STORAGE-004 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-STORAGE-004 | Passa |
+| REQ-VID-STORAGE-005 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-STORAGE-005 | Passa |
+| REQ-VID-TASK-001 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-TASK-001 | Passa |
+| REQ-VID-TASK-002 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-TASK-002 | Passa |
+| REQ-VID-TASK-003 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-TASK-003 | Passa |
+| REQ-VID-TASK-004 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-TASK-004 | Passa |
+| REQ-VID-TASK-005 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-TASK-005 | Passa |
+| REQ-VID-TASK-006 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-TASK-006 | Passa |
+| REQ-VID-TASK-007 | ST-VID-COM-001 | 001-video-lifecycle | B003 | TST-TASK-007 | Passa |
+| REQ-VID-TRIM-001 | ST-VID-001 | 002-video-transformations | B004 | TST-TRIM-001 | Passa |
+| REQ-VID-TRIM-002 | ST-VID-001 | 002-video-transformations | B004 | TST-TRIM-002 | Passa |
+| REQ-VID-TRIM-003 | ST-VID-001 | 002-video-transformations | B004 | TST-TRIM-003 | Passa |
+| REQ-VID-TRIM-004 | ST-VID-001 | 002-video-transformations | B004 | TST-TRIM-004 | Passa |
+| REQ-VID-TRIM-005 | ST-VID-001 | 002-video-transformations | B004 | TST-TRIM-005 | Passa |
+| REQ-VID-TRIM-006 | ST-VID-001 | 002-video-transformations | B004 | TST-TRIM-006 | Passa |
+| REQ-VID-TRIM-007 | ST-VID-001 | 002-video-transformations | B004 | TST-TRIM-007 | Passa |
+| REQ-VID-TRIM-008 | ST-VID-001 | 002-video-transformations | B004 | TST-TRIM-008 | Passa |
+| REQ-VID-TRIM-009 | ST-VID-001 | 002-video-transformations | B004 | TST-TRIM-009 | Passa |
+| REQ-VID-TRIM-010 | ST-VID-001 | 002-video-transformations | B004 | TST-TRIM-010 | Passa |
+| REQ-VID-UPLOAD-001 | ST-VID-000 | 001-video-lifecycle | B001 | TST-UPLOAD-001 | Passa |
+| REQ-VID-UPLOAD-002 | ST-VID-000 | 001-video-lifecycle | B001 | TST-UPLOAD-002 | Passa |
+| REQ-VID-UPLOAD-003 | ST-VID-000 | 001-video-lifecycle | B001 | TST-UPLOAD-003 | Parcial |
+| REQ-VID-UPLOAD-004 | ST-VID-000 | 001-video-lifecycle | B001 | TST-UPLOAD-004 | Passa |
+| REQ-VID-UPLOAD-005 | ST-VID-000 | 001-video-lifecycle | B001 | TST-UPLOAD-005 | Passa |
+| REQ-VID-UPLOAD-006 | ST-VID-000 | 001-video-lifecycle | B001 | TST-UPLOAD-006 | Passa |
+| REQ-VID-UPLOAD-007 | ST-VID-000 | 001-video-lifecycle | B001 | TST-UPLOAD-007 | Passa |
+| REQ-VID-UPLOAD-008 | ST-VID-000 | 001-video-lifecycle | B001 | TST-UPLOAD-008 | Passa |
+| REQ-VID-UPLOAD-009 | ST-VID-000 | 001-video-lifecycle | B001 | TST-UPLOAD-009 | Passa |
+| REQ-VID-UPLOAD-010 | ST-VID-000 | 001-video-lifecycle | B001 | TST-UPLOAD-010 | Passa |
+| REQ-VID-UPLOAD-011 | ST-VID-000 | 001-video-lifecycle | B001 | TST-UPLOAD-011 | Passa |
+| REQ-VID-UPLOAD-012 | ST-VID-000 | 001-video-lifecycle | B001 | TST-UPLOAD-012 | Passa |
+| REQ-VID-UPLOAD-013 | ST-VID-000 | 001-video-lifecycle | B001 | TST-UPLOAD-013 | Passa |
+| REQ-VID-UPLOAD-014 | ST-VID-000 | 001-video-lifecycle | B001 | TST-UPLOAD-014 | Passa |
+| REQ-VID-UPLOAD-015 | ST-VID-000 | 001-video-lifecycle | B001 | TST-UPLOAD-015 | Parcial |
+| REQ-VID-UPLOAD-016 | ST-VID-000 | 001-video-lifecycle | B001 | TST-UPLOAD-016 | Passa |
+| REQ-VID-UPLOAD-017 | ST-VID-000 | 001-video-lifecycle | B001 | TST-UPLOAD-017 | Passa |
+| REQ-VID-UPLOAD-018 | ST-VID-000 | 001-video-lifecycle | B001 | TST-UPLOAD-018 | Parcial |
+| REQ-VID-UPLOAD-019 | ST-VID-000 | 001-video-lifecycle | B001 | TST-UPLOAD-019 | Passa |
+| REQ-VID-UPLOAD-020 | ST-VID-000 | 001-video-lifecycle | B001 | TST-UPLOAD-020 | Parcial |
+| REQ-VID-WATERMARK-001 | ST-VID-004 | 002-video-transformations | B005 | TST-WATERMARK-001 | Passa |
+| REQ-VID-WATERMARK-002 | ST-VID-004 | 002-video-transformations | B005 | TST-WATERMARK-002 | Passa |
+| REQ-VID-WATERMARK-003 | ST-VID-004 | 002-video-transformations | B005 | TST-WATERMARK-003 | Passa |
+| REQ-VID-WATERMARK-004 | ST-VID-004 | 002-video-transformations | B005 | TST-WATERMARK-004 | Passa |
+| REQ-VID-WATERMARK-005 | ST-VID-004 | 002-video-transformations | B005 | TST-WATERMARK-005 | Passa |
+| REQ-VID-WATERMARK-006 | ST-VID-004 | 002-video-transformations | B005 | TST-WATERMARK-006 | Passa |
+| REQ-VID-WATERMARK-007 | ST-VID-004 | 002-video-transformations | B005 | TST-WATERMARK-007 | Passa |
+| REQ-VID-WATERMARK-008 | ST-VID-004 | 002-video-transformations | B005 | TST-WATERMARK-008 | Passa |
+| REQ-VID-WATERMARK-009 | ST-VID-004 | 002-video-transformations | B005 | TST-WATERMARK-009 | Passa |
+| REQ-VID-WATERMARK-010 | ST-VID-004 | 002-video-transformations | B005 | TST-WATERMARK-010 | Passa |
+| REQ-VID-WATERMARK-011 | ST-VID-004 | 002-video-transformations | B005 | TST-WATERMARK-011 | Passa |

@@ -71,16 +71,16 @@ Implementar o UC-VID-000 sobre a fundação mínima do ADD (T-00): coleção `vi
 
 REQ-VID-AUTH-001 a 003; REQ-VID-UPLOAD-001 a 021 (021: specsDuvidas D-30); REQ-VID-STORAGE-001 a 005; REQ-VID-NFR-001, 003, 008, 010, 011, 017.
 
-Os `REQ-VID-AUTH-*` passam para este bolt, que constrói os routers de vídeo com o `videoAuth` (specsDuvidas D-02). A NFR-010 (FFmpeg em Docker) passa para este bolt, que cria o worker (specsDuvidas D-03). A NFR-011 (filas AMQP de vídeo independentes) passa para este bolt, que cria as filas e o worker; a B003 continua a verificá-la (specsDuvidas D-09).
+Os `REQ-VID-AUTH-*` passam para este bolt, que constrói os routers de vídeo com o `videoAuth` (specsDuvidas D-02). A NFR-009 (FFmpeg em Docker) passa para este bolt, que cria o worker (specsDuvidas D-03). A NFR-010 (filas AMQP de vídeo independentes) passa para este bolt, que cria as filas e o worker; a B003 continua a verificá-la (specsDuvidas D-09).
 
 Os critérios de aceitação autoritativos são os dos ficheiros `docs/requirements/REQ-VID-*.md`; a propriedade de cada requisito está em `intents/001-video-processing-support/traceability.md`.
 
 ## Decisões do ADD v1.1
 
-- **T-00 (fundação mínima):** modelo novo `projects/models/video.js` (coleção `videos`, separada de `project.imgs`) com os campos do esquema do T-00, incluindo `meta.rotation`, `meta.display_width`/`display_height` (Q-ADD-13), `storage.preview_key`, `storage.thumb_key`, `storage.first_frame_key`, `source_video_ids` e `recipe`; `status` de ingestão `queued | processing | completed | failed`. O campo `batch_id` não é criado (specsDuvidas D-06).
+- **T-00 (fundação mínima):** modelo novo `projects/models/video.js` (coleção `videos`, separada de `project.imgs`) com os campos do esquema do T-00, incluindo `meta.rotation`, `meta.display_width`/`display_height` (Q-ADD-13), `storage.preview_key`, `storage.thumb_key`, `storage.first_frame_key`, `source_video_ids` e `recipe`; `status` de ingestão `queued | processing | completed | failed`.
 - **T-00, ingestão:** FFprobe extrai os metadados; miniatura a 00:00:01, ou no fotograma 0 se o vídeo tiver menos de 1 s (Q-ADD-22); fotograma 0 rodado e reduzido a no máximo 1280 px de largura para as pré-visualizações (T-07, Q-ADD-06).
 - **T-06 / Q-ADD-20:** cópia de pré-visualização MP4 na ingestão para originais MOV ou AVI e para MP4 com perfis H.264 que os navegadores não reproduzem (10 bits, 4:2:2, 4:4:4), recodificada para `yuv420p`; guardada em `storage.preview_key`; o leitor usa-a quando existe.
-- **T-08:** estágios de vídeo num ficheiro novo `imageStorageService/utils/videoStages.js` (`video_src`, `video_out`, `video_preview`, `video_thumb`); o `utils/stages.js` não muda. O estágio `video_zip` não é criado, porque só os lotes o usam (specsDuvidas D-06).
+- **T-08:** estágios de vídeo num ficheiro novo `imageStorageService/utils/videoStages.js` (`video_src`, `video_out`, `video_preview`, `video_thumb`); o `utils/stages.js` não muda.
 - **Q-ADD-04 (pendente no ADD):** a estratégia de carregamento de ficheiros até 2 GB (*streaming* pelos serviços ou PUT pré-assinado) não está decidida; em qualquer caso, a rota escolhida tem um `location` novo no nginx com `client_max_body_size 2g` e `proxy_request_buffering off` (T-08).
 - **Q-ADD-19:** o módulo de vídeo reutiliza o `services/s3Client.js` (`aws-sdk` v2) existente, sem migração.
 - **T-00 (rotas) / T-08 (URLs de escrita):** routers novos `apiGateway/routes/videos.js` e `projects/routes/videos.js`, cada um montado com uma linha `app.use` nova antes do router existente; *middleware* `apiGateway/auth/videoAuth.js` (401 sem JWT válido, 403 se o utilizador do token não for o `:user`); no serviço de projetos, reutilização de `checkSharePermission`, `requireEditPermission` e `enforcePresenceLimit`, sem `requireProjectVersion`. URL de escrita (`putObject`) só para a rede interna, pedido pelo worker quando o FFmpeg termina (specsDuvidas D-02).
@@ -92,7 +92,7 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 ## Saídas esperadas
 
 - Modelo `projects/models/video.js` e acesso à coleção `videos`.
-- `imageStorageService/utils/videoStages.js` sem `video_zip`; `route/video.js` montado no `server.js` e `services/videoUrls.js` com os URLs internos de leitura e de escrita (T-08) (specsDuvidas D-02, D-06, D-08).
+- `imageStorageService/utils/videoStages.js` sem `video_zip`; `route/video.js` montado no `server.js` e `services/videoUrls.js` com os URLs internos de leitura e de escrita (T-08) (specsDuvidas D-02, D-08).
 - `projects/video/amqp.js` (T-03) (specsDuvidas D-08).
 - Pipeline de ingestão: validação de contentor/codecs e limites por perfil, metadados (incluindo rotação e dimensões de apresentação), miniatura, fotograma 0 e cópia MP4 (T-00, T-06, T-07).
 - Frontend: componentes novos de carregamento (seleção e arrastamento, progresso, cancelamento) e leitor integrado que usa `preview_key` quando existe.
@@ -100,7 +100,6 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 - Routers `apiGateway/routes/videos.js` e `projects/routes/videos.js` e *middleware* `apiGateway/auth/videoAuth.js` (T-00).
 - Filas `video_operations_queue` (declaração completa com os argumentos do T-03), `video_project_queue` e `video_ws_queue` em `rabbitMQ/definitions.json` e módulo `wsGateway/video.js` (T-00; specsDuvidas D-08).
 - Worker `Tools/video/` com a ingestão (FFprobe, miniatura, fotograma 0 e cópia MP4), o respetivo serviço e o volume `video_tmp` no `docker-compose.yaml` (T-02, T-06; specsDuvidas D-08).
-- Não constrói o `VideoBatch`, o estágio `video_zip`, o campo `batch_id`, o endpoint de lote nem a dependência `archiver` (specsDuvidas D-06), nem a extração de fotogramas no worker (specsDuvidas D-05, D-06).
 - Testes de aceitação ligados aos critérios de `REQ-VID-AUTH-*`, `REQ-VID-UPLOAD-*`, `REQ-VID-STORAGE-*` e NFR rastreados.
 
 ## Critérios de passagem
@@ -113,7 +112,7 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 - [ ] Um vídeo válido fica em `videos` com `status: completed`, metadados, miniatura, fotograma 0 e, quando aplicável, cópia MP4; o carregamento não debita quota.
 - [ ] Falha ou cancelamento do carregamento não deixa objeto no storage nem registo em `videos`.
 - [ ] As rotas de vídeo respondem 401 sem JWT válido e 403 ao utilizador `anonymous` e a quem não tem a permissão exigida; o worker de vídeo arranca com `docker compose up` sem binários instalados no *host*.
-- [ ] A ingestão usa só as filas de vídeo novas e o `amqp.js`, sem alterar as ferramentas de imagem nem as filas existentes (NFR-011).
+- [ ] A ingestão usa só as filas de vídeo novas e o `amqp.js`, sem alterar as ferramentas de imagem nem as filas existentes (NFR-010).
 
 ## Dependências
 

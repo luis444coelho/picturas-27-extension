@@ -9,11 +9,11 @@ superseded_by: null
 
 ## Context
 
-A ST-VID-014 (AC4) e a exceção 7 do UC-VID-014 pedem que o erro de uma cadeia falhada indique a fase (descarregamento, codificação ou *upload*) em vez do passo, porque os passos correm num único grafo (Q-ADD-16). A D-40 deixou esta parte para a B008, e a D-82 escolheu um campo `error.phase` em todas as tarefas, condicionado a uma verificação: a fase tem de entrar na resposta `failed` do worker e no `VideoTask` só com linhas novas (regra 2.6).
+A ST-VID-014 (AC4) e a exceção 7 do UC-VID-013 pedem que o erro de uma cadeia falhada indique a fase (descarregamento, codificação ou *upload*) em vez do passo, porque os passos correm num único grafo (Q-ADD-16). A D-40 deixou esta parte para a B008, e a D-82 escolheu um campo `error.phase` em todas as tarefas, condicionado a uma verificação: a fase tem de entrar na resposta `failed` do worker e no `VideoTask` só com linhas novas (regra 2.6).
 
 ## Decision
 
-1. **Worker:** um módulo novo, `Tools/video/phase.py`, guarda a fase da entrega corrente. O `task.py` chama `reset()` no início de cada entrega e `set_phase("download" | "encode" | "upload")` antes de pedir os URLs GET, antes do FFmpeg e antes de pedir os URLs PUT, nos três caminhos (genérico, `convert_task`, `composition_task`). A resposta `failed` ganha `error.phase`.
+1. **Worker:** um módulo novo, `Tools/video/phase.py`, guarda a fase da entrega corrente. O `task.py` chama `reset` no início de cada entrega e `set_phase("download" | "encode" | "upload")` antes de pedir os URLs GET, antes do FFmpeg e antes de pedir os URLs PUT, nos três caminhos (genérico, `convert_task`, `composition_task`). A resposta `failed` ganha `error.phase`.
 2. **Serviço de projetos:** o esquema do `VideoTask` ganha `error.phase` (opcional); o tratamento de `failed` grava-o; o `GET …/tasks/:taskId` e o `video-task-update` passam-no ao cliente.
 3. O `code` continua `PROCESSING_ERROR` (ou `RESOURCE_UNAVAILABLE`); as falhas sem fase observável (*dead-letter*, rotina, falha antes de começar) ficam sem `phase`.
 4. **Condição (D-82 e checkpoint do Estágio 2):** a V6 confirma no Estágio 4, antes de escrever código, que cada um destes pontos aceita a fase só com linhas novas. Em particular, se a fase não puder entrar na resposta `failed` sem mudar a linha existente do `_reply` em `task.py`, regista-se uma dúvida nova e para-se. Este ADR só se aplica se a V6 passar.

@@ -98,7 +98,7 @@ A lista dos 20 ficheiros de texto com CRLF do repositório não mudou; nenhum fi
   73          disabled={session.busy || neutral}
   79        <Button
   80          disabled={!validation.valid || session.busy}
-  81          onClick={() => void session.submit(step)}
+  81          onClick={ => void session.submit(step)}
   82        >
   83          Aplicar ajuste · 1 crédito
   84        </Button>
@@ -126,7 +126,7 @@ A lista dos 20 ficheiros de texto com CRLF do repositório não mudou; nenhum fi
   65            disabled={session.busy}
   94        <Button
   95          disabled={!validation.valid || !verdict || session.busy}
-  96          onClick={() => void session.submit(step)}
+  96          onClick={ => void session.submit(step)}
   97        >
   98          Converter · 1 crédito
   99        </Button>
@@ -149,7 +149,7 @@ A lista dos 20 ficheiros de texto com CRLF do repositório não mudou; nenhum fi
   55                disabled={session.busy}
   86        <Button
   87          disabled={!step || !validation.valid || session.busy}
-  88          onClick={() => {
+  88          onClick={ => {
   89            if (step) void session.submit(step);
   90          }}
   91        >
@@ -179,7 +179,7 @@ A lista dos 20 ficheiros de texto com CRLF do repositório não mudou; nenhum fi
   72              disabled={session.busy}
   88        <Button
   89          disabled={!validation.valid || session.busy}
-  90          onClick={() => void session.submit(step)}
+  90          onClick={ => void session.submit(step)}
   91        >
   92          Aplicar orientação · 1 crédito
   93        </Button>
@@ -188,7 +188,7 @@ A lista dos 20 ficheiros de texto com CRLF do repositório não mudou; nenhum fi
 #### `frontend/components/video/video-remove-audio-panel.tsx` (33 linhas originais alteradas ou removidas)
 
 ```text
-  32    const step = removeAudioStep();
+  32    const step = removeAudioStep;
   33    const validation = useVideoEditValidation(target, videoId, step);
   35      <div className="flex flex-col gap-3">
   36        <p className="text-sm">
@@ -213,7 +213,7 @@ A lista dos 20 ficheiros de texto com CRLF do repositório não mudou; nenhum fi
   55              <AlertDialogCancel>Voltar</AlertDialogCancel>
   56              <AlertDialogAction
   57                disabled={!validation.valid || session.busy}
-  58                onClick={() => void session.submit(step)}
+  58                onClick={ => void session.submit(step)}
   59              >
   60                Confirmar
   61              </AlertDialogAction>
@@ -248,7 +248,7 @@ A lista dos 20 ficheiros de texto com CRLF do repositório não mudou; nenhum fi
  116              disabled={session.busy}
  141        <Button
  142          disabled={!step || !validation.valid || session.busy}
- 143          onClick={() => {
+ 143          onClick={ => {
  144            if (step) void session.submit(step);
  145          }}
  146        >
@@ -275,7 +275,7 @@ A lista dos 20 ficheiros de texto com CRLF do repositório não mudou; nenhum fi
   58          disabled={session.busy}
   73        <Button
   74          disabled={!step || !validation.valid || session.busy}
-  75          onClick={() => {
+  75          onClick={ => {
   76            if (step) void session.submit(step);
   77          }}
   78        >
@@ -303,7 +303,7 @@ A lista dos 20 ficheiros de texto com CRLF do repositório não mudou; nenhum fi
  159              disabled={session.busy || !url}
  170              disabled={session.busy}
  178              disabled={session.busy || !url}
- 208              stop();
+ 208              stop;
  214        </div>
  215      </div>
 ```
@@ -330,11 +330,10 @@ A lista dos 20 ficheiros de texto com CRLF do repositório não mudou; nenhum fi
   57    const busy = session.busy || uploading;
  230        <Button
  231          disabled={!step || !validation.valid || busy}
- 232          onClick={() => {
+ 232          onClick={ => {
  233            if (step) void session.submit(step);
  234          }}
  235        >
  236          Aplicar marca de água · 1 crédito
  237        </Button>
 ```
-

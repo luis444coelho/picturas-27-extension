@@ -25,8 +25,8 @@ implemented: true
 
 ## Traceability
 
-- **Use case:** UC-VID-010.
-- **Requirements:** `REQ-VID-RESIZE-001` a `009`. Consome `REQ-VID-COM-*`, `REQ-VID-NFR-015`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
+- **Use case:** UC-VID-009.
+- **Requirements:** `REQ-VID-RESIZE-001` a `009`. Consome `REQ-VID-COM-*`, `REQ-VID-NFR-013`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
 - **Decisões do ADD v1.1:** 4.5, T-07, Q-ADD-13 (dimensões de apresentação).
 
 ## Dependencies

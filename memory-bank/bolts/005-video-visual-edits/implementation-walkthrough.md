@@ -12,7 +12,7 @@ Foram acrescentadas as operações `watermark`, `adjust`, `filter`, `resize` e `
 
 ### Structure Overview
 
-O serviço de projetos valida cada operação com o `validate` síncrono do registo. As dimensões da marca chegam-lhe através de um *middleware* novo, que corre antes do router da B001 (ADR-010). Depois do `buildPlan()` e do `applyPlanExtras()` da B004, um módulo novo acrescenta ao plano a entrada do filtro e a origem e geometria da marca (ADR-011). O worker copia esses dados para os parâmetros locais dos módulos e compõe a marca no mesmo grafo único (`movie` + `overlay`), por isso continua a haver uma só recodificação. As pré-visualizações são síncronas, com o sharp, sobre o fotograma 0 em cache, com uma operação por passagem. No gateway, um router novo trata as respostas binárias e o carregamento em bruto. No frontend, um componente irmão do da B004 monta os cinco painéis, reutilizando a sessão de tarefa, a validação e o estado da B003/B004.
+O serviço de projetos valida cada operação com o `validate` síncrono do registo. As dimensões da marca chegam-lhe através de um *middleware* novo, que corre antes do router da B001 (ADR-010). Depois do `buildPlan` e do `applyPlanExtras` da B004, um módulo novo acrescenta ao plano a entrada do filtro e a origem e geometria da marca (ADR-011). O worker copia esses dados para os parâmetros locais dos módulos e compõe a marca no mesmo grafo único (`movie` + `overlay`), por isso continua a haver uma só recodificação. As pré-visualizações são síncronas, com o sharp, sobre o fotograma 0 em cache, com uma operação por passagem. No gateway, um router novo trata as respostas binárias e o carregamento em bruto. No frontend, um componente irmão do da B004 monta os cinco painéis, reutilizando a sessão de tarefa, a validação e o estado da B003/B004.
 
 ### Completed Work
 
@@ -75,14 +75,14 @@ O serviço de projetos valida cada operação com o `validate` síncrono do regi
 
 - **Nome das marcas de texto:** ficam em `video_src/wm-<watermarkId>.png`, um registo por projeto e texto (*hash*), e não em `wm-<taskId>.png` (D-60). A aceitação de um texto já usado reutiliza o mesmo PNG. A limpeza e a `recipe` referem-se a ele pelo `watermarkId`, como nas imagens.
 - **`express.raw` inexistente:** o Express dos dois serviços é o 4.16 e o `express.raw` só existe a partir do 4.17. Na primeira reconstrução, o serviço `projects` entrou em ciclo de reinício por causa disto. Foi corrigido com um leitor próprio do corpo, com limite (`rawBody.js`), sem dependências novas.
-- **Router próprio no gateway:** o `forward()` da B001 só reencaminha JSON. A pré-visualização devolve bytes e o carregamento envia o corpo em bruto, por isso o gateway tem um router novo, montado depois do de vídeo (herda o `correlationId` e a linha de log).
+- **Router próprio no gateway:** o `forward` da B001 só reencaminha JSON. A pré-visualização devolve bytes e o carregamento envia o corpo em bruto, por isso o gateway tem um router novo, montado depois do de vídeo (herda o `correlationId` e a linha de log).
 - **Frontend:** os painéis ficam num componente irmão (`video-visual-actions.tsx`). O `video-edit-actions.tsx` da B004 não muda: alterar o seu tipo `Operation` e o `TITLES` seria alterar linhas existentes. Cada leitor tem duas sessões de tarefa (B004 e B005). O limite de uma tarefa por projeto continua a ser garantido pelo servidor (`TASK_ALREADY_ACTIVE`).
 - **Imagens da galeria:** o limite de 1 MB aplica-se só ao ficheiro local, que passa pelo nginx. As imagens da galeria são lidas entre serviços e só têm o limite de 4096 px.
 - **Pré-visualização com parâmetros inválidos:** responde 422 `INVALID_STEP_PARAMS` com os erros do passo. `NO_CHANGES` não impede a pré-visualização (mostra o fotograma inalterado).
 
 **Decisões tomadas no checkpoint (2026-10-22T20:49:13Z):** a equipa aprovou a etapa 2.
 - **Desvio 1:** registado como D-65 e aceite (`wm-<watermarkId>.png`, altera a resposta à D-60).
-- **Desvios 2 e 3:** aprovados sem dúvida nova. O desvio 2 é o leitor próprio do corpo, porque o Express dos serviços é o 4.16. O desvio 3 é o router próprio no gateway, porque o `forward()` da B001 só reencaminha JSON.
+- **Desvios 2 e 3:** aprovados sem dúvida nova. O desvio 2 é o leitor próprio do corpo, porque o Express dos serviços é o 4.16. O desvio 3 é o router próprio no gateway, porque o `forward` da B001 só reencaminha JSON.
 - **Desvio 4:** registado como D-66 e aceite como risco residual. Na etapa 3 testa-se o erro do servidor na interface.
 - **Desvio 5:** aprovado; já está na letra da D-60.
 - **ADR seguinte:** ADR-012.

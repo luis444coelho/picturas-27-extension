@@ -8,7 +8,7 @@ updated: 2026-10-23T00:47:57Z
 
 # Technical Design - Junção de vídeos, cadeias de operações e predefinições de vídeo
 
-Fontes, por ordem de precedência: `docs/add.md` (ADD v1.1, mestre: 2.6, T-00 a T-06, T-08, T-10, 4.8, 4.9, Q-ADD-13, Q-ADD-16, Q-ADD-25), `docs/specsDuvidas.md` (D-23, D-35, D-39, D-40, D-42 a D-45, D-47, D-49, D-60, D-61, D-68, D-75, D-78 a D-85), `memory-bank/standards/decision-index.md` (ADR-004, ADR-005, ADR-007 a ADR-011, ADR-013 a ADR-015), `bolt.md` e as stories ST-VID-013 e 014, `docs/requirements/REQ-VID-CONCAT.md`, `REQ-VID-CHAIN.md`, `REQ-VID-NFR.md`, `docs/use-cases/UC-VID-013.md` e `014.md`. Base: `ddd-01-domain-model.md` (aprovado com as D-78 a D-84). Os componentes das B001 a B007 que este bolt estende são descritos a partir dos seus artefactos (`ddd-02-technical-design.md` da B003 e da B004, `implementation-walkthrough.md` da B005 e da B007, ADR-007 a ADR-014). Não se leu código (restrição do estágio); o que depende do código está em "Verificações a fazer no Estágio 4".
+Fontes, por ordem de precedência: `docs/add.md` (ADD v1.1, mestre: 2.6, T-00 a T-06, T-08, T-10, 4.8, 4.9, Q-ADD-13, Q-ADD-16, Q-ADD-25), `docs/specsDuvidas.md` (D-23, D-35, D-39, D-40, D-42 a D-45, D-47, D-49, D-60, D-61, D-68, D-75, D-78 a D-85), `memory-bank/standards/decision-index.md` (ADR-004, ADR-005, ADR-007 a ADR-011, ADR-013 a ADR-015), `bolt.md` e as stories ST-VID-013 e 014, `docs/requirements/REQ-VID-CONCAT.md`, `REQ-VID-CHAIN.md`, `REQ-VID-NFR.md`, `docs/use-cases/UC-VID-012.md` e `014.md`. Base: `ddd-01-domain-model.md` (aprovado com as D-78 a D-84). Os componentes das B001 a B007 que este bolt estende são descritos a partir dos seus artefactos (`ddd-02-technical-design.md` da B003 e da B004, `implementation-walkthrough.md` da B005 e da B007, ADR-007 a ADR-014). Não se leu código (restrição do estágio); o que depende do código está em "Verificações a fazer no Estágio 4".
 
 Uma dúvida nova surgiu neste estágio, **D-85** (código de uma predefinição com junção), respondida (a) pela equipa no checkpoint.
 
@@ -65,7 +65,7 @@ Regra 2.6 também para o código das B001 a B007: só ficheiros novos e linhas a
 
 **Novos, no serviço de projetos:**
 
-1. `projects/video/chainStructure.js`: `checkStructure(steps, {preset})` → `null` ou `{code: "INVALID_CHAIN", details: {rule, index?, clipIndex?, stepIndex?}}` ou `{code: "CHAIN_TOO_LONG", details: {total, limit: 10}}`; `countSteps(steps)` → N. Puro, sem leituras. Reconhece `extract_frames` antes do registo (D-79).
+1. `projects/video/chainStructure.js`: `checkStructure(steps, {preset})` → `null` ou `{code: "INVALID_CHAIN", details: {rule, index?, clipIndex?, stepIndex?}}` ou `{code: "CHAIN_TOO_LONG", details: {total, limit: 10}}`; `countSteps(steps)` → N. Puro, sem leituras.
 2. `projects/video/compositionLimits.js`: `maxClips(profile)` (10 / 50) e `MAX_STEPS = 10`, se o `profiles.js` da B001 não os tiver (V8). Os limites de duração vêm do `profiles.js`.
 3. `projects/video/operations/concat.js`: operação `concat` v1 (ver "API Design").
 4. `projects/video/composition.js`: o ValidadorCadeia (três fases, D-80, D-81), o cálculo do `_clips` e a aceitação com junção (ver "Aceitação").
@@ -86,7 +86,7 @@ Regra 2.6 também para o código das B001 a B007: só ficheiros novos e linhas a
 
 1. `ops/concat.py`: `clip_branch(...)` e `concat_filter(...)` (filtros da NormalizacaoClip e do `concat`).
 2. `composition_task.py`: execução de um plano com `composition` ou de uma cadeia de vários passos terminada em `convert` (ver "Executor").
-3. `phase.py`: `set_phase(name)`, `current_phase()`, `reset()` (D-82).
+3. `phase.py`: `set_phase(name)`, `current_phase`, `reset` (D-82).
 
 **Novos, no frontend:**
 
@@ -155,11 +155,11 @@ O servidor acrescenta `parameters._clips = [{videoId, input: PropriedadesVideo, 
 Para cada pedido de `…/validate` e de `…/operations` (com ou sem `:video`), o router de composição:
 
 1. **Forma e rota (D-78):** `steps` lista não vazia de objetos, senão `INVALID_REQUEST {field: "steps"}`; junção no início ⇔ rota sem `:video` (ou `validate` sem `videoId`).
-2. **Fase 1, estrutura:** `chainStructure.checkStructure(steps)`, por esta ordem de regras: `empty_chain`; `frame_extraction` (topo e clips); `multiple_concat` (mais de uma junção no topo, ou junção num clip); `concat_not_first`; `convert_not_last` (topo, ou qualquer `convert` num clip); `CHAIN_TOO_LONG` com N > 10. 422 e fim.
+2. **Fase 1, estrutura:** `chainStructure.checkStructure(steps)`, por esta ordem de regras: `empty_chain` (topo e clips); `multiple_concat` (mais de uma junção no topo, ou junção num clip); `concat_not_first`; `convert_not_last` (topo, ou qualquer `convert` num clip); `CHAIN_TOO_LONG` com N > 10. 422 e fim.
 3. **Entradas:** com junção, os `videoId` distintos dos clips são lidos de uma vez (`videos.meta`) e verificados como nos passos 4 e 5 da aceitação: `NOT_FOUND`, `RESOURCE_NOT_READY`, `UNSUPPORTED_FORMAT`, `LIMIT_EXCEEDED` de entrada, com `{videoId, clipIndex}` do primeiro clip em que aparece (D-80). Sem junção, estas verificações ficam para a B003.
-4. **Fase 2, passos:** cada sub-cadeia com o `chain.validateChain(clip.steps, clip.input, profile)` da B003, com os erros reendereçados para `{index: 0, clipIndex, stepIndex}` (V2); depois o `_clips` é gravado com o `estimate` final de cada sub-cadeia, e a cadeia de topo é validada com o `validateChain` (a junção e os passos finais), com os erros em `{index}`. **Sem junção**, o router corre também o `chain.validateChain(steps, inputProps, profile)` em memória, com os `videos.meta` do vídeo da rota; se a fase 2 falhar, faz `next()` sem responder, e é a B003 que devolve o `INVALID_STEP_PARAMS` (ou o erro de entrada do vídeo, se o vídeo não existir ou não estiver pronto). Só com a fase 2 válida se passa à fase 3.
+4. **Fase 2, passos:** cada sub-cadeia com o `chain.validateChain(clip.steps, clip.input, profile)` da B003, com os erros reendereçados para `{index: 0, clipIndex, stepIndex}` (V2); depois o `_clips` é gravado com o `estimate` final de cada sub-cadeia, e a cadeia de topo é validada com o `validateChain` (a junção e os passos finais), com os erros em `{index}`. **Sem junção**, o router corre também o `chain.validateChain(steps, inputProps, profile)` em memória, com os `videos.meta` do vídeo da rota; se a fase 2 falhar, faz `next` sem responder, e é a B003 que devolve o `INVALID_STEP_PARAMS` (ou o erro de entrada do vídeo, se o vídeo não existir ou não estiver pronto). Só com a fase 2 válida se passa à fase 3.
 5. **Fase 3, limites (D-81):** só depois de a fase 2 passar. Saída de cada clip (`LIMIT_EXCEEDED {total, limit, clipIndex}`) e resultado final (`LIMIT_EXCEEDED {total, limit}`); a soma na junção já foi verificada pelo `validate` da `concat`. Sem junção, só o resultado final, com o `estimate` dos passos já calculado na fase 2.
-6. Sem junção e sem erros: `next()`, e o pedido segue sem mudanças pelo router de vídeo e pelo `tasks.js` da B003 (fase 2 e aceitação). Com junção: `validate` responde 200 aqui; `operations` segue para a aceitação com junção.
+6. Sem junção e sem erros: `next`, e o pedido segue sem mudanças pelo router de vídeo e pelo `tasks.js` da B003 (fase 2 e aceitação). Com junção: `validate` responde 200 aqui; `operations` segue para a aceitação com junção.
 
 Assim a ordem estrutura → passos → limites da D-80 vale também sem junção, sem tocar no código da B003: uma cadeia sem junção com parâmetros inválidos que também excederia o limite recebe `INVALID_STEP_PARAMS` (da B003) e não `LIMIT_EXCEEDED`. A fase 2 repetida no router seguinte é um cálculo em memória.
 
@@ -178,7 +178,7 @@ O resultado recebe `source_video_ids = input_video_ids` (B003), o que dá a orde
 
 | Code | HTTP | `details` |
 |------|------|-----------|
-| `INVALID_CHAIN` | 422 | `{rule, index?, clipIndex?, stepIndex?}`; `rule` ∈ `empty_chain`, `convert_not_last`, `multiple_concat`, `frame_extraction`, `concat_not_first` (D-79), `concat_in_preset` (D-85) |
+| `INVALID_CHAIN` | 422 | `{rule, index?, clipIndex?, stepIndex?}`; `rule` ∈ `empty_chain`, `convert_not_last`, `multiple_concat`, `concat_not_first` (D-79), `concat_in_preset` (D-85) |
 | `CHAIN_TOO_LONG` | 422 | `{total, limit: 10}` |
 | `INSUFFICIENT_INPUTS` | 422 | `{min: 2}` |
 | `TOO_MANY_INPUTS` | 422 | `{limit}` |
@@ -247,11 +247,11 @@ ffmpeg -hide_banner -nostdin -y [-fflags +genpts] -i <ficheiro do clip 0> -i <fi
 - Sem junção (cadeia terminada em `convert`), o grafo tem uma só entrada e os filtros de todos os passos, como o da B003, com a saída do `convert`.
 - Um ficheiro descarregado uma vez pode ser várias entradas `-i` (4.8). O espaço temporário é a soma dos ficheiros distintos e do resultado.
 - O progresso usa `expectedDurationMs` da soma; o `step` aproximado é o da B003 (D-40).
-- Uma só invocação de codificação, registada no log (`video.task.command`, sem URLs) para a NFR-013.
+- Uma só invocação de codificação, registada no log (`video.task.command`, sem URLs) para a NFR-012.
 
 ### Fase da falha (D-82)
 
-`phase.py` guarda a fase da entrega corrente: `download` antes de pedir os URLs GET; `encode` antes do FFmpeg (e do FFprobe, miniatura e fotograma 0); `upload` antes de pedir os URLs PUT. O `task.py` chama `phase.reset()` no início de cada entrega e `set_phase(...)` nesses pontos, nos três caminhos (genérico, `convert_task`, `composition_task`), e acrescenta `error.phase = current_phase()` à resposta `failed` (V6). No serviço de projetos, o tratamento de `failed` grava `error.phase` no `VideoTask`, e o GET e o `video-task-update` passam-no ao cliente (V6). As falhas que não passam pelo worker (*dead-letter*, rotina) ficam sem `phase`.
+`phase.py` guarda a fase da entrega corrente: `download` antes de pedir os URLs GET; `encode` antes do FFmpeg (e do FFprobe, miniatura e fotograma 0); `upload` antes de pedir os URLs PUT. O `task.py` chama `phase.reset` no início de cada entrega e `set_phase(...)` nesses pontos, nos três caminhos (genérico, `convert_task`, `composition_task`), e acrescenta `error.phase = current_phase` à resposta `failed` (V6). No serviço de projetos, o tratamento de `failed` grava `error.phase` no `VideoTask`, e o GET e o `video-task-update` passam-no ao cliente (V6). As falhas que não passam pelo worker (*dead-letter*, rotina) ficam sem `phase`.
 
 ## Data Persistence
 
@@ -259,7 +259,7 @@ ffmpeg -hide_banner -nostdin -y [-fflags +genpts] -i <ficheiro do clip 0> -i <fi
 |-------|---------|---------------|
 | `videotasks` (B003) | Os da B003. `kind: "concat"` com junção, `"chain"` sem ela; `steps` com os clips e o `_clips`; `input_video_ids` com repetições; `total_steps = cost = N`; `plan.composition`; `error.phase` (novo, opcional, D-82) | — |
 | `videos` (B001/B003) | Resultado como na B003: `source_video_ids` pela ordem, com repetições; `recipe = steps`; `original_name` da primeira origem com a extensão do contentor (D-35, D-75) | — |
-| `videopresets` (novo, serviço de utilizadores, `timestamps: true`) | `_id`; `owner_id` (ObjectId); `name` (com `trim()`, 1 a 50); `name_key` (`name` em minúsculas, para a unicidade); `steps` [{operation, version, parameters}] | Índice único `{owner_id: 1, name_key: 1}` (D-83); `owner_id` → `users`. Sem campos de partilha |
+| `videopresets` (novo, serviço de utilizadores, `timestamps: true`) | `_id`; `owner_id` (ObjectId); `name` (com `trim`, 1 a 50); `name_key` (`name` em minúsculas, para a unicidade); `steps` [{operation, version, parameters}] | Índice único `{owner_id: 1, name_key: 1}` (D-83); `owner_id` → `users`. Sem campos de partilha |
 
 Sem migrações: as coleções são novas ou recebem só campos opcionais. As predefinições não têm limite de número (D-83). Os passos guardados não têm `_mark`, `_input` nem `_clips` (D-83, D-84).
 
@@ -273,14 +273,14 @@ As peças comuns da B003 (`lib/video-tasks.ts`, `use-video-task.ts`, `video-task
 - Lista ordenável com o dnd-kit, com remover (CHAIN-004, CHAIN-015); cada alteração revalida com *debounce* e descarta respostas antigas.
 - Contador "N passos · N créditos" e duração estimada a partir do `output` (CHAIN-009, passo 3 do UC). Com N = 10, "Acrescentar passo" fica desativado (CHAIN-008).
 - Erros mostrados no passo indicado por `{index, clipIndex, stepIndex}`; os de estrutura e de limites num aviso no topo, com a mensagem da regra.
-- Aviso para o Registado quando N > 5 (DQ-025) ou N acima das operações restantes da sessão (que pode estar desatualizado, D-74; o servidor decide com `QUOTA_EXCEEDED`).
+- Aviso para o Registado quando N > 5 (DQ-024) ou N acima das operações restantes da sessão (que pode estar desatualizado, D-74; o servidor decide com `QUOTA_EXCEEDED`).
 - "Acrescentar junção" (só sem junção): o vídeo do leitor passa a clip 1 e os passos que já existiam passam para a sua sub-cadeia (D-78); abre-se a linha temporal.
 - "Guardar como predefinição" (desativado com junção, D-85) e "Carregar predefinição", que substitui os passos da cadeia principal ou da sub-cadeia escolhida, com confirmação se não estiver vazia (D-83). Uma marca de imagem de outro projeto aparece com o erro `INVALID_WATERMARK_CONTENT` no passo e pede outra imagem (D-84).
 - "Executar" → `POST …/:video/operations` ou, com junção, `POST …/videos/operations`; depois o `VideoTaskProgress` com "passo k de N" e, numa falha, a fase (D-82).
 
 **"Juntar vídeos"** (botão na área dos vídeos do projeto): abre o mesmo editor já com uma junção e a linha temporal vazia.
 
-- `video-clip-picker.tsx`: vídeos `completed` do projeto com miniatura, nome e duração; cada clique acrescenta um clip no fim (repetições permitidas, CONCAT-001/002), até `maxClips`, mostrado ao lado (passo 1 do UC-VID-013).
+- `video-clip-picker.tsx`: vídeos `completed` do projeto com miniatura, nome e duração; cada clique acrescenta um clip no fim (repetições permitidas, CONCAT-001/002), até `maxClips`, mostrado ao lado (passo 1 do UC-VID-012).
 - `video-concat-timeline.tsx`: arrastar para reordenar (CONCAT-013), remover (CONCAT-003), duração total e `W×H` a `F` fps do `output` em tempo real (CONCAT-004, CONCAT-012). Cada clip pode abrir a sua sub-cadeia. Com menos de 2 clips, "Executar" fica desativado (FA1).
 
 **Mensagens:** `lib/video-chain.ts` traduz os códigos e as regras novas para português; os códigos de cada operação continuam a usar as mensagens das bibliotecas das B004, B005 e B007.
@@ -300,12 +300,12 @@ As peças comuns da B003 (`lib/video-tasks.ts`, `use-video-task.ts`, `video-task
 
 | Requirement | Design Approach |
 |-------------|-----------------|
-| NFR-013 (verificação, dona: B003) | Uma invocação de codificação por tarefa, incluindo as sub-cadeias e os passos finais; verificado no log do worker com uma cadeia de 4 passos e uma junção com sub-cadeias. |
-| NFR-014 (parte da junção e da cadeia, dona: ST-VID-013), NFR-022, NFR-024 | `maxClips` e `maxDurationMs` antes da tarefa, contando as repetições; testes com 11 e 51 clips e com 5 min 30 s. |
-| NFR-023 | `CHAIN_TOO_LONG` antes da tarefa, contando sub-cadeias, junção e passos finais; bloqueio no editor. |
-| NFR-005 / D-43 (≤ 1 s) | Validação em memória com uma leitura dos `videos.meta` dos clips distintos (até 50); medido nos testes. |
-| NFR-009 | Progresso da B003 também no `composition_task`. |
-| NFR-010, NFR-018 (verificação) | Resultado no `video_worker` com o FFmpeg 5.1; MP4 H.264/AAC verificado com o FFprobe, ou o formato do `convert` final. |
+| NFR-012 (verificação, dona: B003) | Uma invocação de codificação por tarefa, incluindo as sub-cadeias e os passos finais; verificado no log do worker com uma cadeia de 4 passos e uma junção com sub-cadeias. |
+|  (parte da junção e da cadeia, dona: ST-VID-013), NFR-018, NFR-020 | `maxClips` e `maxDurationMs` antes da tarefa, contando as repetições; testes com 11 e 51 clips e com 5 min 30 s. |
+| NFR-019 | `CHAIN_TOO_LONG` antes da tarefa, contando sub-cadeias, junção e passos finais; bloqueio no editor. |
+| NFR-004 / D-43 (≤ 1 s) | Validação em memória com uma leitura dos `videos.meta` dos clips distintos (até 50); medido nos testes. |
+| NFR-008 | Progresso da B003 também no `composition_task`. |
+| NFR-009, NFR-016 (verificação) | Resultado no `video_worker` com o FFmpeg 5.1; MP4 H.264/AAC verificado com o FFprobe, ou o formato do `convert` final. |
 
 ## Error Handling
 
@@ -325,7 +325,7 @@ Sem dependências novas. O `@dnd-kit/core` e o `@dnd-kit/sortable` já estão no
 
 ## Testes previstos (Estágio 5)
 
-- **Unitários do serviço de projetos:** `chainStructure` (cada regra, sub-cadeias, `extract_frames`, N = 10 e 11, preset com junção → `concat_in_preset`); `concat.js` (limites por perfil com repetições, `estimate` com rotação, dimensões ímpares, áudio misto, fps do primeiro clip à saída da sua sub-cadeia); `composition.js` (ordem das fases, endereços, `_clips` por cima do cliente, limites da D-81; **cadeia sem junção com parâmetros inválidos que também excederia o limite → o router faz `next()` e a resposta final é `INVALID_STEP_PARAMS`, não `LIMIT_EXCEEDED`**, pedido da equipa no checkpoint do Estágio 2); `planExtrasComposition` (ficheiros distintos, ocorrências, extras nas sub-cadeias).
+- **Unitários do serviço de projetos:** `chainStructure` (cada regra, sub-cadeias, N = 10 e 11, preset com junção → `concat_in_preset`); `concat.js` (limites por perfil com repetições, `estimate` com rotação, dimensões ímpares, áudio misto, fps do primeiro clip à saída da sua sub-cadeia); `composition.js` (ordem das fases, endereços, `_clips` por cima do cliente, limites da D-81; **cadeia sem junção com parâmetros inválidos que também excederia o limite → o router faz `next` e a resposta final é `INVALID_STEP_PARAMS`, não `LIMIT_EXCEEDED`**, pedido da equipa no checkpoint do Estágio 2); `planExtrasComposition` (ficheiros distintos, ocorrências, extras nas sub-cadeias).
 - **Unitários do worker com FFmpeg 5.1 real:** junção de clips heterogéneos (16:9 e 9:16, 25 e 30 fps, com e sem áudio, mono e estéreo, rotação), clip repetido, sem áudio em nenhum clip, dimensão ímpar no primeiro clip; sub-cadeias com recorte, velocidade e filtro; cadeia terminada em `convert` para MOV e AVI com a cópia MP4; fase em falhas simuladas de descarregamento, codificação e envio.
 - **E2E pela pilha:** junção isolada e composição da CHAIN-009 (custo 5) com o FFprobe do resultado; rejeições sem tarefa e sem quota (cada `rule`, `CHAIN_TOO_LONG`, `INSUFFICIENT_INPUTS`, `TOO_MANY_INPUTS`, `LIMIT_EXCEEDED`, `UNSUPPORTED_FORMAT` de um clip); cancelamento e falha com devolução de N créditos; `source_video_ids` com repetições; uma única invocação de codificação; predefinições (CRUD, nome repetido, `anonymous`, outro utilizador, junção).
 - **Frontend:** unitários do `lib/video-chain.ts`; no navegador, o editor, a linha temporal com o dnd-kit e as predefinições.
@@ -361,7 +361,7 @@ Se alguma verificação mostrar que a extensão não é possível só com linhas
 
 Respondidas pela equipa em 2026-10-23T00:47:57Z:
 
-1. Desenho técnico aprovado, com uma correção: numa cadeia sem junção, o router de composição corre a fase 2 (`chain.validateChain` em memória) antes da fase 3; se a fase 2 falhar, faz `next()` sem responder e a B003 devolve o `INVALID_STEP_PARAMS`; só com a fase 2 válida a fase 3 pode dar `LIMIT_EXCEEDED`. Atualizada a secção "Validação em três fases" e acrescentado o teste unitário correspondente.
+1. Desenho técnico aprovado, com uma correção: numa cadeia sem junção, o router de composição corre a fase 2 (`chain.validateChain` em memória) antes da fase 3; se a fase 2 falhar, faz `next` sem responder e a B003 devolve o `INVALID_STEP_PARAMS`; só com a fase 2 válida a fase 3 pode dar `LIMIT_EXCEEDED`. Atualizada a secção "Validação em três fases" e acrescentado o teste unitário correspondente.
 2. **D-85 (a):** predefinição com junção → 422 `INVALID_CHAIN {rule: "concat_in_preset", index}`.
 3. Estágio 3: os quatro ADR propostos, ADR-016 (router de composição e `_clips`), ADR-017 (`composition_task.py`), ADR-018 (validação da estrutura das predefinições delegada ao serviço de projetos) e ADR-019 (`error.phase`, condicionado à V6), acrescentados ao `decision-index.md`.
 4. V6: se a fase não puder entrar na resposta `failed` sem mudar a linha existente do `_reply` em `task.py`, regista-se a dúvida e para-se.
@@ -374,7 +374,7 @@ A equipa reviu a etapa 5 no browser e não aprovou a interface: queria três aç
 
 - Rotas, router de composição (ADR-016), `concat` com `_clips`, as três fases pela ordem da D-80, `planExtrasComposition.js`, `composition_task.py` (ADR-017), `error.phase` (ADR-019), predefinições (ADR-018, D-83 a D-85), nomes (D-35, D-75) e os testes do backend.
 - O modelo D-78: `[concat {clips: [{videoId, steps}]}, ...passos finais]` para composições; `steps` sem junção na rota com `:video`.
-- Custo N (1 crédito por passo; a junção conta 1, DQ-014), reserva antes da tarefa e devolução em falha ou cancelamento (D-45), resultado atómico.
+- Custo N (1 crédito por passo; a junção conta 1, DQ-013), reserva antes da tarefa e devolução em falha ou cancelamento (D-45), resultado atómico.
 
 ### O que muda no backend (D-86)
 
@@ -382,7 +382,7 @@ A equipa reviu a etapa 5 no browser e não aprovou a interface: queria três aç
 2. `concat.checkClips` deixa de devolver `TOO_MANY_INPUTS`. Ficam o `INVALID_REQUEST` da forma e o `INSUFFICIENT_INPUTS` (mínimo de 2, CONCAT-005).
 3. `compositionLimits.js` fica só com `MIN_CLIPS` e `maxDurationMs`. As linhas `TOO_MANY_INPUTS` e `CHAIN_TOO_LONG` acrescentadas pela B008 ao `errors.js` saem. São linhas que a B008 tinha acrescentado e que não estão na `main`, por isso o `numstat` face à `origin/main` continua sem linhas removidas.
 4. Limites que ficam: a duração e o tamanho por perfil (entradas, saída de cada clip, soma da junção e resultado, D-81), a quota dos Registados (`QUOTA_EXCEEDED` antes da tarefa, B003), a recusa dos anónimos, o formato e as permissões.
-5. **Proteção técnica:** fica pendente na D-88. A recomendação (a) não acrescenta limite: medem-se na etapa 5 uma junção grande e uma cadeia longa, e um 413 do `express.json()` passa a `INVALID_REQUEST {field: "steps", reason: "too_large"}` no gateway de vídeo.
+5. **Proteção técnica:** fica pendente na D-88. A recomendação (a) não acrescenta limite: medem-se na etapa 5 uma junção grande e uma cadeia longa, e um 413 do `express.json` passa a `INVALID_REQUEST {field: "steps", reason: "too_large"}` no gateway de vídeo.
 6. **Rota nova `POST …/videos/chain/validate`** (router de composição e uma linha no gateway). O corpo é o mesmo do `…/validate`: `{videoId, steps}` sem junção, ou `{steps}` com junção. A resposta é a da B003 (`{valid, cost, totalSteps, output, errors}`), mais `inputs: {steps: [PropriedadesVideo], clips: [[PropriedadesVideo]]}`, com as propriedades estimadas **à entrada** de cada passo do topo e de cada passo de cada clip. Esses valores vêm dos `estimates` que o `chain.validateChain` já devolve.
    - Sem junção, a rota usa a `tasks.validate` da B003 para a resposta comum e acrescenta os `inputs`.
    - Com junção, usa a `validateConcat` da B008.
@@ -412,7 +412,7 @@ O "Movie Maker" é a forma geral `((V1 × F…) + … + (Vn × F…)) × F…` d
 1. `video-operation-config.tsx`: o registo `operation → componente de configuração` (os nove da D-87) e o contrato comum (ver abaixo).
 2. `video-operation-chain.tsx`: lista ordenável de operações, com "Acrescentar operação" (escolha entre as operações permitidas naquela cadeia: sem `convert` nos clips, com `convert` só no fim, D-79). Cada operação abre num diálogo o seu componente de configuração, com o mesmo aspeto do painel simples; também se pode configurar, remover e reordenar. Mostra os erros de cada passo e tem o espaço das predefinições.
 3. `use-composition.ts`: estado da composição, validação com *debounce* pela rota nova (descartando respostas antigas), submissão, acompanhamento da tarefa (`useVideoTask` da B003) e fase da falha.
-4. `video-composition-summary.tsx`: custo, duração, resolução e fps estimados, aviso de quota do Registado (DQ-025), erros gerais, Executar, progresso e fase.
+4. `video-composition-summary.tsx`: custo, duração, resolução e fps estimados, aviso de quota do Registado (DQ-024), erros gerais, Executar, progresso e fase.
 5. `video-multi-operations.tsx`, `video-concat-videos.tsx` e `video-movie-maker.tsx`: os três fluxos.
 6. `video-composition-actions.tsx`: o botão "Aplicar várias operações" (leitor) e os botões "Juntar vídeos" e "Movie Maker" (janela "Vídeos"). As montagens são as duas linhas que a B008 já acrescentou ao `video-player.tsx` e ao `video-section.tsx`, que mudam de componente.
 
@@ -470,7 +470,7 @@ interface OperationConfigProps {
     - O que acontece com propriedades estimadas diferentes das do fotograma 0.
 18. **V18:** o painel de conversão numa cadeia: a origem é estimada (MP4); a indicação "Cópia direta"/"Recodificação" do ADR-014 só existe para o `convert` isolado; os destinos vêm das propriedades à entrada.
 19. **V19:** a `tasks.validate` e o `chain.validateChain` chegam para a rota `…/chain/validate` (`estimates` por passo e por clip) sem mudar linhas da B003.
-20. **V20 (D-88):** o limite do `express.json()` no gateway e no serviço de projetos, e o caminho de um 413 até ao cliente.
+20. **V20 (D-88):** o limite do `express.json` no gateway e no serviço de projetos, e o caminho de um 413 até ao cliente.
 21. **V21:** as duas montagens da B008 (`video-player.tsx`, `video-section.tsx`) passam para o `video-composition-actions.tsx`, sem tocar nas linhas das B001 a B007.
 22. **V22:** os testes existentes do frontend (`video-edit`, `video-visual`, `video-convert`) e o que fica por verificar só na checklist visual (os painéis não têm testes de componentes).
 23. **V23:** as linhas que a B008 acrescentou e que saem com a D-86 (`errors.js`, `chainStructure.js`, `concat.js`, `compositionLimits.js`, frontend) e os testes que as cobriam (11 passos, 11/51 clips), que passam a provar a ausência de limite.
@@ -505,4 +505,3 @@ Respondidas pela equipa em 2026-10-23T14:03:00Z:
 3. **D-89 (a):** leitor, *scrubbing* e *loop preview* do recorte só com `isSource`; pré-visualizações com os passos estáticos anteriores da mesma cadeia.
 4. Os ficheiros de prompts não vão para o repositório: o `docs/prompt-b008-revisao.md` saiu do ramo (`git rm --cached`, a cópia local fica).
 5. Etapa 3: ADR-020 (D-87) e nota de impacto da D-86 no ADR-016.
-

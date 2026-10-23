@@ -27,8 +27,8 @@ implemented: true
 
 ## Traceability
 
-- **Use case:** UC-VID-006.
-- **Requirements:** `REQ-VID-DOWNLOAD-001` a `009`; `REQ-VID-NFR-016`, `025`. Consome `REQ-VID-AUTH-*`, `REQ-VID-QUOTA-008`, `REQ-VID-NFR-001`, `017`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
+- **Use case:** UC-VID-005.
+- **Requirements:** `REQ-VID-DOWNLOAD-001` a `009`; `REQ-VID-NFR-014`, `025`. Consome `REQ-VID-AUTH-*`, `REQ-VID-QUOTA-008`, `REQ-VID-NFR-001`, `017`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
 - **Decisões do ADD v1.1:** 4.1, T-08 (`videoUrls`, `/s3-video/`), T-10 (registo e `log_format` sem *query string*), Q-ADD-05 (URL portador), Q-ADD-08 (sufixo do nome, pendente no ADD).
 
 ## Dependencies

@@ -16,8 +16,8 @@ Por ordem de autoridade. Se duas fontes se contradisserem, manda a primeira:
 
 1. `docs/add.md` (ADD v1.1). É o **documento mestre** das decisões de arquitetura e implementação: regra 2.6 "só acrescentar", T-00 a T-10, decisões por caso de uso (secção 4), tabela-resumo (5), dependências novas (6) e questões Q-ADD-01 a 25 (7). As Q-ADD são dadas como aceites com a decisão que o próprio ADD propõe.
 2. `docs/requirements.md` (ERS v2.4) e `docs/requirements/REQ-VID-*.md`. Os critérios de aceitação autoritativos são os destes ficheiros.
-3. `docs/use-cases.md` (v1.5) e `docs/use-cases/UC-VID-000.md` a `UC-VID-015.md`.
-4. `docs/inception/artefactos-finais.md` (Units, planeamento dos Bolts B001 a B009, regras de negócio RNG) e `docs/diagrams/` (`modelo_dominio.puml`, `diagrama_casos_uso.puml`).
+3. `docs/use-cases.md` (v1.5) e `docs/use-cases/UC-VID-000.md` a `.md`.
+4. `docs/inception/artefactos-finais.md` (Units, planeamento dos Bolts B001 a B005, B007 e B008, regras de negócio RNG) e `docs/diagrams/` (`modelo_dominio.puml`, `diagrama_casos_uso.puml`).
 5. O código que existe no repositório, tal como está. O ADD, na 2.5, descreve o que já está implementado.
 
 **Não uses** o `docs/merge.md`: é um documento antigo e está desatualizado. Também não uses nenhum ficheiro que não esteja nesta lista.
@@ -33,8 +33,8 @@ Por ordem de autoridade. Se duas fontes se contradisserem, manda a primeira:
 ## O que refazer
 
 1. **Bolts** (`memory-bank/bolts/*/bolt.md`): todos.
-   - Segue os IDs, a ordem, o âmbito, os tipos (DDD ou Simple) e as dependências da tabela "5. Planeamento dos Bolts" de `docs/inception/artefactos-finais.md` (B001 a B009). Se o ADD contradisser essa tabela, manda o ADD e registas a diferença em `specsDuvidas.md`.
-   - Em cada bolt, o objetivo, os requisitos rastreados, as saídas esperadas, os critérios de passagem e os limites passam a citar as decisões do ADD que lhe dizem respeito (T-xx, secção 4.x, Q-ADD-xx) e os componentes que o ADD indica. Exemplos de componentes: coleções `videos`, `VideoTask` e `VideoBatch`, `video_project_locks`, `videoAuth`, `Tools/video/` com um único `-filter_complex`, filas `video_operations_queue`, `video_project_queue` e `video_ws_queue`, `video_control`, `videoStages` e `videoUrls`, `/s3-video/` no nginx, `archiver`, `correlationId` no corpo das mensagens.
+   - Segue os IDs, a ordem, o âmbito, os tipos (DDD ou Simple) e as dependências da tabela "5. Planeamento dos Bolts" de `docs/inception/artefactos-finais.md` (B001 a B005, B007 e B008). Se o ADD contradisser essa tabela, manda o ADD e registas a diferença em `specsDuvidas.md`.
+   - Em cada bolt, o objetivo, os requisitos rastreados, as saídas esperadas, os critérios de passagem e os limites passam a citar as decisões do ADD que lhe dizem respeito (T-xx, secção 4.x, Q-ADD-xx) e os componentes que o ADD indica. Exemplos de componentes: coleções `videos`, `VideoTask` e `video_project_locks`, `videoAuth`, `Tools/video/` com um único `-filter_complex`, filas `video_operations_queue`, `video_project_queue` e `video_ws_queue`, `video_control`, `videoStages` e `videoUrls`, `/s3-video/` no nginx, `correlationId` no corpo das mensagens.
    - A regra 2.6 "só acrescentar" tem de aparecer nos limites de cada bolt: o código existente não é alterado.
    - Mantém o formato do template `.specsmd/aidlc/templates/construction/bolt-template.md` e o esquema de `.specsmd/aidlc/memory-bank.yaml`. Todos os bolts ficam com `status: planned`, porque nada da fundação de vídeo está implementado (ADD 2.5, Q-ADD-01).
    - Usa a skill `.specsmd/aidlc/skills/inception/bolt-plan.md`. A complexidade só é preenchida quando as fontes a justificam; caso contrário, vai para dúvida.

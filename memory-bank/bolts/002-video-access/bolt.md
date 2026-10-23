@@ -24,7 +24,6 @@ stages_completed:
 requires_bolts:
   - 001-video-lifecycle
 enables_bolts:
-  - 009-video-batch
 requires_units: []
 blocks: true
 complexity:
@@ -38,7 +37,7 @@ complexity:
 
 ## Visão geral
 
-Descarregamento e consulta de informações de vídeos concluídos (UC-VID-006 e UC-VID-007), sem quota, segundo as secções 4.1 e 4.2 do ADD v1.1.
+Descarregamento e consulta de informações de vídeos concluídos (UC-VID-005 e UC-VID-006), sem quota, segundo as secções 4.1 e 4.2 do ADD v1.1.
 
 ## Objetivo
 
@@ -62,7 +61,7 @@ Implementar os endpoints `GET /projects/:user/:project/videos/:video` (informaç
 
 ## Requisitos rastreados
 
-REQ-VID-DOWNLOAD-001 a 009; REQ-VID-INFO-001 a 009; REQ-VID-NFR-016, 025.
+REQ-VID-DOWNLOAD-001 a 009; REQ-VID-INFO-001 a 009; REQ-VID-NFR-014, 025.
 
 Consome os contratos de autorização (`REQ-VID-AUTH-*`) da B001, que constrói os routers de vídeo com o `videoAuth` (specsDuvidas D-02).
 
@@ -74,7 +73,7 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 - **4.2 (informações):** devolve `meta`, `status`, `source_video_ids` (com nomes; "Vídeo removido" se a origem já não existir), `recipe` e `downloadFileName`; resolução de apresentação (Q-ADD-13), tamanho com 1 MB = 1024² e 1 GB = 1024³ bytes; campo ausente mostrado como "Indisponível" com `METADATA_UNAVAILABLE` nos logs.
 - **T-08:** o `route/video.js` e o `services/videoUrls.js` são criados e montados pela B001, com os URLs internos de leitura e de escrita (specsDuvidas D-02, D-08); este bolt usa-os para o URL de descarregamento, com `expires` de 900 s, `ResponseContentDisposition` (RFC 6266, `filename` e `filename*`) e `ResponseContentType`, e para a verificação com `headObject`; `location /s3-video/` novo no nginx, sem *buffering*, com `Range` e respostas 206.
 - **T-10:** registo da emissão do URL com `correlationId`, utilizador e recurso; `log_format` novo do `/s3-video/` regista só `$uri`, sem a *query string*.
-- **Função única do nome sugerido:** `projects/video/fileName.js`, usada pelos dois endpoints. **Q-ADD-08 (pendente no ADD):** sufixo para cadeias, junções e lotes e nome base de uma junção.
+- **Função única do nome sugerido:** `projects/video/fileName.js`, usada pelos dois endpoints. **Q-ADD-08 (pendente no ADD):** sufixo para cadeias, junções e nome base de uma junção.
 - **Q-ADD-05:** os URLs pré-assinados são portadores; o controlo é a validade de 15 min.
 
 ## Saídas esperadas
@@ -84,7 +83,7 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 - `imageStorageService/services/videoUrls.js` (leitura) e rotas do `route/video.js` (`headObject`).
 - `location /s3-video/` e `log_format` novos no `nginx/nginx.conf`.
 - Frontend: ação "Descarregar" (âncora `href`, não `blob`) e painel "Informações" na galeria e no leitor, com os formatadores da 4.2.
-- Testes ligados aos critérios de `REQ-VID-DOWNLOAD-*`, `REQ-VID-INFO-*`, NFR-016 e NFR-025.
+- Testes ligados aos critérios de `REQ-VID-DOWNLOAD-*`, `REQ-VID-INFO-*`, NFR-014 e NFR-021.
 
 ## Critérios de passagem
 
@@ -105,7 +104,6 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 
 ### Desbloqueia
 
-- 009-video-batch (ZIP do lote usa o URL assinado e o `downloadFileName` da 4.1); a B009 está `blocked` (specsDuvidas D-06).
 
 ## Limites
 
@@ -115,5 +113,5 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 
 ## Notas
 
-- Esforço no ADD: UC-VID-006 = S, UC-VID-007 = S. `avg_complexity` = 1 (maior esforço do ADD no bolt, com S=1, M=2, L=3); `avg_uncertainty`, `max_dependencies` e `testing_scope` são preenchidos no início do bolt na Construção (specsDuvidas D-01).
+- Esforço no ADD: UC-VID-005 = S, UC-VID-006 = S. `avg_complexity` = 1 (maior esforço do ADD no bolt, com S=1, M=2, L=3); `avg_uncertainty`, `max_dependencies` e `testing_scope` são preenchidos no início do bolt na Construção (specsDuvidas D-01).
 - Confirmar que o SeaweedFS 4.47 aplica `response-content-disposition`; se não, o nome vai no atributo `download` da âncora (ADD 4.1, riscos).

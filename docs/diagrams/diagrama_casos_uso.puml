@@ -51,30 +51,28 @@ rectangle "Sistema" {
   package "Extensão de vídeo" as Video #EAF8FD {
     package "Ciclo de vida e acesso" as Ciclo #F7FCFE {
       usecase "UC-VID-000\nCarregar e visualizar vídeo" as UC_VID_000 #55C8EC
-      usecase "UC-VID-006\nDescarregar vídeo" as UC_VID_006 #55C8EC
-      usecase "UC-VID-007\nConsultar informações do vídeo" as UC_VID_007 #55C8EC
+      usecase "UC-VID-005\nDescarregar vídeo" as UC_VID_005 #55C8EC
+      usecase "UC-VID-006\nConsultar informações do vídeo" as UC_VID_006 #55C8EC
     }
 
-    package "Edição temporal e extração" as Temporal #F7FCFE {
+    package "Edição temporal e marca de água" as Temporal #F7FCFE {
       usecase "UC-VID-001\nRecortar vídeo" as UC_VID_001 #55C8EC
       usecase "UC-VID-002\nRemover áudio" as UC_VID_002 #55C8EC
       usecase "UC-VID-003\nAlterar velocidade" as UC_VID_003 #55C8EC
       usecase "UC-VID-004\nAplicar marca de água" as UC_VID_004 #55C8EC
-      usecase "UC-VID-005\nExtrair fotogramas" as UC_VID_005 #55C8EC
     }
 
     package "Edição visual e formato" as Visual #F7FCFE {
-      usecase "UC-VID-008\nAjustar propriedades visuais" as UC_VID_008 #55C8EC
-      usecase "UC-VID-009\nAplicar filtro visual" as UC_VID_009 #55C8EC
-      usecase "UC-VID-010\nRedimensionar vídeo" as UC_VID_010 #55C8EC
-      usecase "UC-VID-011\nRodar e espelhar vídeo" as UC_VID_011 #55C8EC
-      usecase "UC-VID-012\nConverter formato" as UC_VID_012 #55C8EC
+      usecase "UC-VID-007\nAjustar propriedades visuais" as UC_VID_007 #55C8EC
+      usecase "UC-VID-008\nAplicar filtro visual" as UC_VID_008 #55C8EC
+      usecase "UC-VID-009\nRedimensionar vídeo" as UC_VID_009 #55C8EC
+      usecase "UC-VID-010\nRodar e espelhar vídeo" as UC_VID_010 #55C8EC
+      usecase "UC-VID-011\nConverter formato" as UC_VID_011 #55C8EC
     }
 
     package "Composição e processamento" as Composicao #F7FCFE {
-      usecase "UC-VID-013\nJuntar vídeos" as UC_VID_013 #55C8EC
-      usecase "UC-VID-014\nEncadear operações" as UC_VID_014 #55C8EC
-      usecase "UC-VID-015\nProcessar vídeos em lote" as UC_VID_015 #55C8EC
+      usecase "UC-VID-012\nJuntar vídeos" as UC_VID_012 #55C8EC
+      usecase "UC-VID-013\nEncadear operações" as UC_VID_013 #55C8EC
     }
   }
 }
@@ -105,8 +103,6 @@ Utilizador -- UC_VID_010
 Utilizador -- UC_VID_011
 Utilizador -- UC_VID_012
 Utilizador -- UC_VID_013
-Utilizador -- UC_VID_014
-Utilizador -- UC_VID_015
 
 legend bottom
   |= Marca |= Perfil e permissões |
@@ -116,8 +112,7 @@ legend bottom
   | Utilizador (Registado) | Autenticado; edição exige permissão de edição no projeto; até 5 min / 200 MB e 5 créditos/dia |
   | Premium → Utilizador | Herda associações; sem quota diária; até 60 min / 2 GB |
   | Convidado → Utilizador | Herda após convite; projeto determina leitura/edição; quota debitada à conta executora |
-  | UC-VID-006/007 | Leitura ou superior; todos os restantes casos de vídeo exigem edição |
-  | UC-VID-005 / UC-VID-015 | Limite de 50/500 fotogramas e lote de 10/50 vídeos (Registado/Premium) |
+  | UC-VID-005/006 | Leitura ou superior; todos os restantes casos de vídeo exigem edição |
 endlegend
 
 @enduml

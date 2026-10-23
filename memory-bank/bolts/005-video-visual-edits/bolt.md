@@ -28,7 +28,6 @@ requires_bolts:
   - 003-video-task-foundation
 enables_bolts:
   - 008-video-concat-chain
-  - 009-video-batch
 requires_units:
   - 001-video-lifecycle
 blocks: true
@@ -70,7 +69,7 @@ Acrescentar ao registo de operações e ao worker as operações `watermark`, `a
 
 ## Requisitos rastreados
 
-REQ-VID-WATERMARK-001 a 011; REQ-VID-ADJUST-001 a 010; REQ-VID-FILTER-001 a 007; REQ-VID-RESIZE-001 a 009; REQ-VID-ORIENT-001 a 009; REQ-VID-NFR-015.
+REQ-VID-WATERMARK-001 a 011; REQ-VID-ADJUST-001 a 010; REQ-VID-FILTER-001 a 007; REQ-VID-RESIZE-001 a 009; REQ-VID-ORIENT-001 a 009; REQ-VID-NFR-013.
 
 Os critérios de aceitação autoritativos são os dos ficheiros `docs/requirements/REQ-VID-*.md`; a propriedade de cada requisito está em `intents/001-video-processing-support/traceability.md`.
 
@@ -78,7 +77,7 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 
 - **T-07:** `POST /projects/:user/:project/videos/:video/preview` com a autorização da aceitação (T-03, passos 1 a 3); `sharp` sobre o fotograma 0 com cache em memória (`Map`, por exemplo 100 fotogramas e 10 min); uma operação do `sharp` por passagem; resposta com os bytes da imagem, sem gravar no storage nem consumir quota; o `applyToolsPreview` existente não é chamado nem alterado.
 - **4.3 (ajuste):** brilho com `colorchannelmixer=rr=f:gg=f:bb=f` e `linear(f, 0)` na pré-visualização; contraste com `eq=contrast` e `linear(c, 128·(1−c))` (pivô fixo, Q-ADD-18); saturação com `eq=saturation` e `modulate`; passo 0.05 com tolerância `1e-6` e normalização; `NO_CHANGES` com os três em 1.0 (Q-ADD-23).
-- **4.4 (filtro):** catálogo `projects/video/filters.json` com entradas `{type: "matrix"}` ou `{type: "invert"}`, enviado no plano; `colorchannelmixer` / `lutrgb` no worker e `recomb` / `negate()` no `sharp`; miniaturas do catálogo por `GET …/videos/:id/filters/thumbnails` sobre o fotograma 0 reduzido. **Q-ADD-07 (pendente no ADD):** matrizes de Vintage, Frio e Quente.
+- **4.4 (filtro):** catálogo `projects/video/filters.json` com entradas `{type: "matrix"}` ou `{type: "invert"}`, enviado no plano; `colorchannelmixer` / `lutrgb` no worker e `recomb` / `negate` no `sharp`; miniaturas do catálogo por `GET …/videos/:id/filters/thumbnails` sobre o fotograma 0 reduzido. **Q-ADD-07 (pendente no ADD):** matrizes de Vintage, Frio e Quente.
 - **4.5 (redimensionamento):** `width`/`height` em dimensões de apresentação; inteiros pares ≥ 128 dentro do teto do perfil, com erros `{field, code, limit}`; `NO_CHANGES` face a `display_width × display_height`; `scale=w:h,setsar=1`; resultado com rotação 0 (Q-ADD-13).
 - **4.6 (orientação):** `{rotation: 0|90|180|270, flipH, flipV}`, rotação antes do espelho; `NO_CHANGES` sem transformação e na identidade 180° + dois espelhos (Q-ADD-24); duas passagens do `sharp` (`rotate` e depois `flop`/`flip`); `transpose`/`hflip`/`vflip` no worker.
 - **Marca de água (Q-ADD-12):** implementação de raiz no worker de vídeo, com `overlay` (`format=rgba`, `colorchannelmixer=aa=…`) ou `drawtext` (T-02); a dependência de tipos de letra (`fonts-dejavu-core`) só entra se se usar `drawtext` (ADD 6).
@@ -99,7 +98,7 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 - [ ] Nenhuma linha de código existente alterada (regra 2.6 do ADD); o fluxo de imagem continua a funcionar como antes.
 - [ ] Testes automatizados e relatório do bolt registados; nenhum resultado de teste é presumido nesta fase.
 - [ ] Código revisto.
-- [ ] A pré-visualização responde em ≤ 1 s em 95% dos pedidos (NFR-015) e corresponde ao resultado do FFmpeg nas oito combinações de rotação e espelho e nos filtros do catálogo.
+- [ ] A pré-visualização responde em ≤ 1 s em 95% dos pedidos (NFR-013) e corresponde ao resultado do FFmpeg nas oito combinações de rotação e espelho e nos filtros do catálogo.
 
 ## Dependências
 
@@ -110,7 +109,7 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 
 ### Desbloqueia
 
-- 008-video-concat-chain, 009-video-batch. A B009 está `blocked` (specsDuvidas D-06).
+- 008-video-concat-chain.
 
 ## Limites
 
@@ -120,7 +119,7 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 
 ## Notas
 
-- Esforço no ADD: UC-VID-008 = M, 009 = M, 010 = S, 011 = S; o UC-VID-004 não tem secção própria no ADD. `avg_complexity` = 2 (maior esforço do ADD no bolt, com S=1, M=2, L=3); `avg_uncertainty`, `max_dependencies` e `testing_scope` são preenchidos no início do bolt na Construção (specsDuvidas D-01).
+- Esforço no ADD: UC-VID-007 = M, 009 = M, 010 = S, 011 = S; o UC-VID-004 não tem secção própria no ADD. `avg_complexity` = 2 (maior esforço do ADD no bolt, com S=1, M=2, L=3); `avg_uncertainty`, `max_dependencies` e `testing_scope` são preenchidos no início do bolt na Construção (specsDuvidas D-01).
 - 2026-10-22T20:11:21Z: B005 iniciada no ramo `bolt/005-video-visual-edits`, criado a partir da `main` com a B004. Complexidade preenchida no início do bolt (D-01): `avg_uncertainty` 3 (Q-ADD-07 e Q-ADD-12 em aberto, marca de água sem secção no ADD, D-58 a D-64), `max_dependencies` 2 (B003 e Unit 001; o código da B004 é reutilizado), `testing_scope` 3 (FFmpeg real, equivalência sharp ↔ FFmpeg, integração pela pilha e painéis no navegador).
 - 2026-10-22T21:18:05Z: etapa 3 executada (`test-walkthrough.md`). D-67 registada e pendente (contraste e saturação do ajuste: as fórmulas do ADD 4.3 não dão uma pré-visualização equivalente). O bolt continua aberto até à resposta, aos testes manuais e à aprovação da etapa 3.
 - 2026-10-22T22:05:12Z: D-67 (a) implementada (ADR-012); suites de novo a verde (integração B005 16/16). Testes manuais 12/12 aprovados pela equipa; a comparação do ajuste vai ser repetida depois da correção. Etapa 3 ainda não aprovada.

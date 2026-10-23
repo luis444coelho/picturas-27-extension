@@ -86,7 +86,7 @@ Os pontos que as fontes não decidiam foram registados em `docs/specsDuvidas.md`
 3. `projects/video/amqp.js`: um ramo novo no despacho das respostas e, se não existir, uma função de publicação numa exchange (V1).
 4. `Tools/video/video.py`: um ramo novo no despacho para `task.run` (V2).
 5. `wsGateway/video.js`: o evento `video-task-update` (V3).
-6. Arranque do serviço de projetos: uma linha `require("./video/maintenance").start()`, ao lado da linha do `amqp.js` da B001.
+6. Arranque do serviço de projetos: uma linha `require("./video/maintenance").start`, ao lado da linha do `amqp.js` da B001.
 7. `rabbitMQ/definitions.json`: a exchange `video_control`.
 8. `docker-compose.yaml`: nada (a `VIDEO_TEST_OPERATIONS` não é definida lá, D-37).
 
@@ -97,8 +97,8 @@ Todas as rotas passam pelo gateway em `/api-gateway/projects/:user/:project/vide
 | Endpoint | Method | Request | Response |
 |----------|--------|---------|----------|
 | `/projects/:user/:project/videos/validate` | POST | `{videoId, steps}`. Autorização da pré-visualização (T-01, T-07): `videoAuth`, edição (`checkSharePermission` + `requireEditPermission` + `enforcePresenceLimit`), recusa do `anonymous` | **200** `{valid, cost, totalSteps, output: PropriedadesVideo, errors: [{index, errors: [{code, field?, …}]}]}`. Os `inputProps` são lidos de `videos.meta`, nunca do cliente. Sem tarefa, sem quota, sem filas. Responde em ≤ 1 s (D-43). Erros do pedido (sem `steps` válido, vídeo inexistente ou por concluir) usam os mesmos códigos da aceitação |
-| `/projects/:user/:project/videos/:video/operations` | POST | `{steps}` (contrato T-01). Os 11 passos do T-03, por esta ordem (ver "Aceitação") | **202** `{taskId, status: "queued"}` em ≤ 1 s (TASK-001, NFR-005). Erros: 401/403 (`videoAuth`), 403/410/429 (permissões, D-23), 403 `FORBIDDEN` (`anonymous`), 404 `NOT_FOUND`, 409 `RESOURCE_NOT_READY`, 422 `UNSUPPORTED_FORMAT`/`LIMIT_EXCEEDED`/`INVALID_REQUEST`/`INVALID_STEP_PARAMS`, 409 `TASK_ALREADY_ACTIVE` `{taskId}` (D-44), 429 `QUOTA_EXCEEDED` `{cost, remaining}` (D-44) |
-| `/projects/:user/:project/videos/tasks/:taskId` | GET | Permissão de leitura (`checkSharePermission`), recusa do `anonymous` (T-03). A tarefa tem de ser do projeto, senão 404 | **200** `{taskId, status, kind, step, totalSteps, progress, cost, resultVideoId?, error?: {code, message}, createdAt, updatedAt}` (TASK-002, TASK-006, TASK-008) |
+| `/projects/:user/:project/videos/:video/operations` | POST | `{steps}` (contrato T-01). Os 11 passos do T-03, por esta ordem (ver "Aceitação") | **202** `{taskId, status: "queued"}` em ≤ 1 s (TASK-001, NFR-004). Erros: 401/403 (`videoAuth`), 403/410/429 (permissões, D-23), 403 `FORBIDDEN` (`anonymous`), 404 `NOT_FOUND`, 409 `RESOURCE_NOT_READY`, 422 `UNSUPPORTED_FORMAT`/`LIMIT_EXCEEDED`/`INVALID_REQUEST`/`INVALID_STEP_PARAMS`, 409 `TASK_ALREADY_ACTIVE` `{taskId}` (D-44), 429 `QUOTA_EXCEEDED` `{cost, remaining}` (D-44) |
+| `/projects/:user/:project/videos/tasks/:taskId` | GET | Permissão de leitura (`checkSharePermission`), recusa do `anonymous` (T-03). A tarefa tem de ser do projeto, senão 404 | **200** `{taskId, status, kind, step, totalSteps, progress, cost, resultVideoId?, error?: {code, message}, createdAt, updatedAt}` (TASK-002, TASK-006, TASK-007) |
 | `/projects/:user/:project/videos/tasks/:taskId` | DELETE | Permissão de edição. Só o `runner_id` (senão 403 `FORBIDDEN`); só em `queued` ou `processing` (senão 409 `TASK_NOT_ACTIVE`, D-42/D-44) (TASK-004) | **200** com o mesmo corpo do GET, já em `cancelled`. O FFmpeg é interrompido de forma assíncrona (ver "Cancelamento") |
 
 A rota de junção sem `:video` (`POST …/videos/operations`, 4.8) é da B008, que acrescenta o `concat` ao registo; o `tasks.js` já aceita uma lista de entradas, por isso a B008 só acrescenta a rota.
@@ -112,7 +112,7 @@ A rota de junção sem `:video` (`POST …/videos/operations`, 4.8) é da B008, 
 5. Formato e limites do perfil sobre `videos.meta`, com o `formats.js` e o `profiles.js` da B001 (`UNSUPPORTED_FORMAT`, `INVALID_CODEC`, `LIMIT_EXCEEDED`).
 6. Forma do corpo (`INVALID_REQUEST {field: "steps"}`) e `validateChain`: operação e versão conhecidas e `validate` de cada passo, com o `estimate` do passo anterior como entrada (`INVALID_STEP_PARAMS {index, errors}`, D-42). Custo com `chainCost`.
 7. Plano com `plan.js`.
-8. `holderId = new ObjectId()`; `locks.acquire(projectId, holderId)` → `TASK_ALREADY_ACTIVE` se ocupado (D-38: só tarefas de vídeo).
+8. `holderId = new ObjectId`; `locks.acquire(projectId, holderId)` → `TASK_ALREADY_ACTIVE` se ocupado (D-38: só tarefas de vídeo).
 9. Registado: `quota.reserve(runnerId, cost)`; 701 de quota esgotada → `locks.release`, depois `remaining` lido do `GET users:/:user` (`remaining_operations`) e 429 `QUOTA_EXCEEDED {cost, remaining}`; 701 de erro interno do serviço de utilizadores → `locks.release` e `INTERNAL_ERROR`, sem reserva (V8). Premium: nenhuma chamada (QUOTA-005).
 10. `VideoTask.create({_id: holderId, status: "queued", …, plan, published_at: null})`; `taskBus.publishTask(mensagem)` com confirmação do *broker*; depois `published_at = agora`. Se a publicação falhar, a tarefa fica `queued` sem `published_at` e a rotina republica-a (D-41).
 11. 202 `{taskId, status: "queued"}`; evento `video-task-update` `queued`.
@@ -156,8 +156,8 @@ Worker: recebe {taskId} no canal de controlo → termina o ffmpeg → apaga /tmp
 
 | Table | Columns | Relationships |
 |-------|---------|---------------|
-| `videotasks` (Mongoose `VideoTask`, `timestamps: true`) | `_id` ObjectId (= `holder_id` do lugar); `project_id`; `owner_id`; `runner_id`; `kind` enum `single \| chain \| concat`; `steps` [{operation, version, parameters}]; `input_video_ids` [ObjectId]; `status` enum `queued \| processing \| completed \| failed \| cancelled`; `step`; `total_steps`; `progress`; `cost`; `reserved_credits`; `refund` `{state: none \| pending \| done, at}` (D-45); `correlation_id`; `result_video_id`; `error` `{code, message}`; `plan` (Mixed, para republicar); `published_at`; `status_changed_at` | `project_id` → projeto; `input_video_ids` e `result_video_id` → `videos`. Sem `batch_id` nem `batch_item` (D-06) |
-| `video_project_locks` | `_id`; `project_id` (índice **único**); `holder_kind` enum `task`; `holder_id`; `createdAt` | `holder_id` → `videotasks._id`. Sem `holder_kind: "batch"` (D-06) |
+| `videotasks` (Mongoose `VideoTask`, `timestamps: true`) | `_id` ObjectId (= `holder_id` do lugar); `project_id`; `owner_id`; `runner_id`; `kind` enum `single \| chain \| concat`; `steps` [{operation, version, parameters}]; `input_video_ids` [ObjectId]; `status` enum `queued \| processing \| completed \| failed \| cancelled`; `step`; `total_steps`; `progress`; `cost`; `reserved_credits`; `refund` `{state: none \| pending \| done, at}` (D-45); `correlation_id`; `result_video_id`; `error` `{code, message}`; `plan` (Mixed, para republicar); `published_at`; `status_changed_at` | `project_id` → projeto; `input_video_ids` e `result_video_id` → `videos`. |
+| `video_project_locks` | `_id`; `project_id` (índice **único**); `holder_kind` enum `task`; `holder_id`; `createdAt` | `holder_id` → `videotasks._id`.  |
 | `videos` (B001, sem alterações ao esquema) | Resultado: `_id` = `_id` da tarefa; `status: completed`; `source_video_ids` = `input_video_ids`; `recipe` = `steps`; `task_id`; `created_by` = `runner_id`; `owner_id`; `original_name` da primeira origem (D-35); `mime_type` do contentor; `meta` do FFprobe (com `display_*` calculado pelo `display.js`); `storage` com as chaves do resultado | — |
 
 **Campos acrescentados à lista do ADD (T-03):** `refund`, `plan`, `published_at` e `status_changed_at`, que a D-41 e a D-45 precisam. O modelo é novo, por isso não há regra 2.6 a cumprir aqui.
@@ -211,9 +211,9 @@ ffmpeg -hide_banner -nostdin -y [-fflags +genpts] -i <in0>
 - Sem filtros num ramo, usa-se `null`/`anull`.
 - Uma stream copiada não entra no grafo (`-map 0:V:0 -c:v copy`).
 - Cada `ops/<op>.py` só traduz `parameters` em filtros (`video_filters`, `audio_filters`); a `test_reencode` devolve listas vazias.
-- Uma única invocação de codificação por tarefa (NFR-013), registada no log com o comando, sem URLs.
+- Uma única invocação de codificação por tarefa (NFR-012), registada no log com o comando, sem URLs.
 
-**Progresso.** `progress = min(99, floor(out_time_us / (expectedDurationMs × 1000) × 100))` durante a codificação, e 100 só na resposta `completed`. O valor é monótono dentro de uma entrega (máximo dos valores lidos). `step = min(totalSteps, floor(progress / 100 × totalSteps) + 1)` (D-40). O ciclo de 0,5 s publica um evento sempre que passou 1 s desde o último, mesmo sem dados novos (repete o valor). Por isso a cadência ≥ 1×/s vale também durante o descarregamento (0) e o envio (99) (NFR-009).
+**Progresso.** `progress = min(99, floor(out_time_us / (expectedDurationMs × 1000) × 100))` durante a codificação, e 100 só na resposta `completed`. O valor é monótono dentro de uma entrega (máximo dos valores lidos). `step = min(totalSteps, floor(progress / 100 × totalSteps) + 1)` (D-40). O ciclo de 0,5 s publica um evento sempre que passou 1 s desde o último, mesmo sem dados novos (repete o valor). Por isso a cadência ≥ 1×/s vale também durante o descarregamento (0) e o envio (99) (NFR-008).
 
 **Ciclo do worker (uma só *thread*, T-03).** Repete as voltas descritas no ADD:
 
@@ -230,9 +230,9 @@ Descarregamento e envio por blocos, com `process_data_events(time_limit=0)` entr
 
 1. **Serviço de projetos (`DELETE`):** transição condicional para `cancelled` com `refund.state: pending`. Depois publica `{taskId}` em `video_control`, chama `refund/:k` e marca `done`, liberta o lugar, emite `video-task-update` e responde 200.
 2. **Worker:** o canal de controlo junta o `taskId` a um conjunto com TTL de **4 h**. O valor fica acima do maior tempo que uma tarefa pode esperar na fila, que a D-41 limita a 3 h 10 min: depois disso, a tarefa é fechada pela rotina.
-   - Tarefa a correr: `terminate()`, `kill()` ao fim de 5 s se não sair, apaga os temporários, responde `cancelled` e faz `ack`.
+   - Tarefa a correr: `terminate`, `kill` ao fim de 5 s se não sair, apaga os temporários, responde `cancelled` e faz `ack`.
    - Tarefa ainda na fila: é descartada quando é consumida (`cancelled` + `ack`).
-3. **Resposta tardia:** um `completed` de uma tarefa já `cancelled` ou `failed` leva o serviço de projetos a apagar os objetos do resultado (`targets`) do storage e a não criar vídeo (T-03, NFR-007).
+3. **Resposta tardia:** um `completed` de uma tarefa já `cancelled` ou `failed` leva o serviço de projetos a apagar os objetos do resultado (`targets`) do storage e a não criar vídeo (T-03, NFR-006).
 4. **Cancelamento perdido num reinício do worker:** se chegar `started` de uma tarefa já `cancelled`, o serviço de projetos volta a publicar `{taskId}` em `video_control`. Isto reduz o risco aceite do T-03 (conjunto em memória) sem mudar o contrato.
 
 ## Respostas do worker (`tasks.js`, via `taskBus`)
@@ -243,7 +243,7 @@ Descarregamento e envio por blocos, com `process_data_events(time_limit=0)` entr
 | `completed` | 1. Transição para `completed` (`progress: 100`, `result_video_id = _id`). 2. Se ganhou a transição, ou se a tarefa já estava `completed` (reentrega): cria o Vídeo de resultado (`E11000` = já criado), liberta o lugar e emite `video-task-update`. 3. Se a tarefa estava `cancelled` ou `failed`: apaga os objetos do resultado |
 | `failed` | Transição para `failed` com `error` e `refund: pending` → devolução → `done` → liberta o lugar → `video-task-update` |
 | `cancelled` | A tarefa já é `cancelled`: confirma e regista no log |
-| *Dead-letter* (`x-death`, `operation: "task.run"`) | Como `failed`, com `PROCESSING_ERROR` (NFR-007); publica também o cancelamento, para o caso de ainda haver um FFmpeg vivo |
+| *Dead-letter* (`x-death`, `operation: "task.run"`) | Como `failed`, com `PROCESSING_ERROR` (NFR-006); publica também o cancelamento, para o caso de ainda haver um FFmpeg vivo |
 
 O worker limpa `/tmp/video/<taskId>/` em todos os casos de fim (sucesso, falha, cancelamento), e a pasta é também limpa no recomeço de uma reentrega (ERROR-003).
 
@@ -278,14 +278,14 @@ Cada ação é registada no log com o `correlationId` da tarefa ou do vídeo (ou
 
 | Requirement | Design Approach |
 |-------------|-----------------|
-| NFR-005 / TASK-001 (≤ 1 s) | A aceitação faz duas chamadas ao serviço de utilizadores (tipo e reserva), leituras indexadas e uma publicação com confirmação; nenhuma chamada ao storage nem ao worker. Medido nos testes. |
-| NFR-006 (assíncrono) | Todo o processamento corre no worker; o pedido HTTP termina na publicação. |
-| NFR-007 / ERROR-003 | `ack` manual nos dois lados; reentrega → recomeço do zero; *dead-letter* → `failed` com devolução; resultados tardios apagados; temporários limpos em todos os fins; rotina para o que sobra. |
-| NFR-009 | Progresso ≥ 1×/s em todas as fases da entrega, monótono dentro da entrega. |
-| NFR-011 (verificação) | Só as filas de vídeo e a exchange `video_control`; `Tools/utils/` e as filas de imagem sem alterações (verificado com `git diff` e `rabbitmqctl`). |
-| NFR-013 | Um único `-filter_complex` e uma única invocação de codificação por tarefa; verificado no log do worker. |
-| NFR-018 | Saída MP4 `libx264`/`aac`, `yuv420p`, `+faststart` (D-39); verificado com o FFprobe do resultado. |
-| NFR-021 | Índice único em `video_project_locks.project_id`; 409 antes de reservar. |
+| NFR-004 / TASK-001 (≤ 1 s) | A aceitação faz duas chamadas ao serviço de utilizadores (tipo e reserva), leituras indexadas e uma publicação com confirmação; nenhuma chamada ao storage nem ao worker. Medido nos testes. |
+| NFR-005 (assíncrono) | Todo o processamento corre no worker; o pedido HTTP termina na publicação. |
+| NFR-006 / ERROR-003 | `ack` manual nos dois lados; reentrega → recomeço do zero; *dead-letter* → `failed` com devolução; resultados tardios apagados; temporários limpos em todos os fins; rotina para o que sobra. |
+| NFR-008 | Progresso ≥ 1×/s em todas as fases da entrega, monótono dentro da entrega. |
+| NFR-010 (verificação) | Só as filas de vídeo e a exchange `video_control`; `Tools/utils/` e as filas de imagem sem alterações (verificado com `git diff` e `rabbitmqctl`). |
+| NFR-012 | Um único `-filter_complex` e uma única invocação de codificação por tarefa; verificado no log do worker. |
+| NFR-016 | Saída MP4 `libx264`/`aac`, `yuv420p`, `+faststart` (D-39); verificado com o FFprobe do resultado. |
+| NFR-017 | Índice único em `video_project_locks.project_id`; 409 antes de reservar. |
 | NFR-002 / ERROR-002 | `correlationId` gerado no gateway, gravado na tarefa, no corpo das mensagens e nos logs JSON do gateway, do serviço de projetos e do worker. |
 | D-43 | `validate` sem filas nem storage; medido nos testes. |
 
@@ -317,7 +317,7 @@ Formato `{error: {code, message, details}, correlationId}` (ERROR-001, T-10). Me
 | FFmpeg/FFprobe 5.1 (D-25) | Execução das cadeias | `subprocess.Popen` no worker |
 | Socket.IO (wsGateway) | `video-task-update` | `wsGateway/video.js` (estendido) |
 
-**Sem dependências novas.** Nada de `archiver` (D-06).
+**Sem dependências novas.** Nada de `archiver`.
 
 ## Frontend (D-47)
 

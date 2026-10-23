@@ -26,8 +26,8 @@ implemented: true
 
 ## Traceability
 
-- **Use case:** UC-VID-012.
-- **Requirements:** `REQ-VID-CONVERT-001` a `010`; `REQ-VID-NFR-012`, `026`. Consome `REQ-VID-COM-*`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
+- **Use case:** UC-VID-011.
+- **Requirements:** `REQ-VID-CONVERT-001` a `010`; `REQ-VID-NFR-011`, `026`. Consome `REQ-VID-COM-*`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
 - **Decisões do ADD v1.1:** 4.7, T-05 e Q-ADD-21 (cópia só com codec igual), T-06 e Q-ADD-20 (cópia de pré-visualização), Q-ADD-11 (qualidade, pendente no ADD), Q-ADD-25.
 
 ## Dependencies

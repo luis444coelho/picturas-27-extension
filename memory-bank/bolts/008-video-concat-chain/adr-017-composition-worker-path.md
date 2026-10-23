@@ -21,7 +21,7 @@ O `executor.build_command` da B003 monta uma só entrada (`[0:V:0]…[v];[0:a:0]
 
 ## Rationale
 
-Repete a decisão do ADR-013 (um ramo aditivo que partilha os serviços de execução e publicação) para os dois casos que o construtor genérico não exprime, e mantém a NFR-013: uma só invocação de codificação por tarefa.
+Repete a decisão do ADR-013 (um ramo aditivo que partilha os serviços de execução e publicação) para os dois casos que o construtor genérico não exprime, e mantém a NFR-012: uma só invocação de codificação por tarefa.
 
 ### Alternatives Considered
 
@@ -29,7 +29,7 @@ Repete a decisão do ADR-013 (um ramo aditivo que partilha os serviços de execu
 |-------------|------|------|--------------|
 | Alterar o `executor.build_command` para várias entradas e saídas | Um só construtor | Muda linhas da B003 | Regra 2.6 |
 | Alargar o `convert_task.py` às cadeias | Reutiliza a saída dupla | Muda linhas da B007 e mistura duas responsabilidades | Regra 2.6 |
-| Normalizar cada clip para um intermédio e concatenar por cópia | Memória constante | Duas codificações | Viola a NFR-013 (ADD 4.8) |
+| Normalizar cada clip para um intermédio e concatenar por cópia | Memória constante | Duas codificações | Viola a NFR-012 (ADD 4.8) |
 | Ramo novo só para junções; cadeias com `convert` no construtor genérico | Menos código novo | O genérico não gera AVI nem a saída dupla | Não cumpre o T-06 |
 
 ## Consequences
@@ -52,7 +52,7 @@ Repete a decisão do ADR-013 (um ramo aditivo que partilha os serviços de execu
 ## Related
 
 - **Stories**: ST-VID-013, ST-VID-014
-- **Standards**: regra 2.6; T-02, T-05, T-06, 4.8, 4.9; NFR-013
+- **Standards**: regra 2.6; T-02, T-05, T-06, 4.8, 4.9; NFR-012
 - **Previous ADRs**: ADR-009, ADR-011, ADR-013
 - **Dúvidas**: D-39, D-68; verificações V3, V4, V5
 

@@ -33,7 +33,7 @@ Use this to find relevant prior decisions when working on related features.
 - **Date**: 2026-10-23
 - **Bolt**: 008-video-concat-chain (003-video-composition)
 - **Path**: `bolts/008-video-concat-chain/adr-019-task-error-phase.md`
-- **Summary**: A ST-VID-014 e a exceção 7 do UC-VID-014 pedem a fase da falha em vez do passo (Q-ADD-16, D-82). `Tools/video/phase.py` guarda a fase (`download`, `encode`, `upload`), a resposta `failed` leva `error.phase`, e o `VideoTask`, o GET da tarefa e o `video-task-update` passam-na ao cliente, com o `code` `PROCESSING_ERROR` inalterado; só se aplica se a V6 confirmar que tudo entra com linhas novas, incluindo o `_reply` do `task.py`.
+- **Summary**: A ST-VID-014 e a exceção 7 do UC-VID-013 pedem a fase da falha em vez do passo (Q-ADD-16, D-82). `Tools/video/phase.py` guarda a fase (`download`, `encode`, `upload`), a resposta `failed` leva `error.phase`, e o `VideoTask`, o GET da tarefa e o `video-task-update` passam-na ao cliente, com o `code` `PROCESSING_ERROR` inalterado; só se aplica se a V6 confirmar que tudo entra com linhas novas, incluindo o `_reply` do `task.py`.
 - **Read when**: Working on worker failure replies, `VideoTask.error`, the task GET or `video-task-update` payload, the task progress UI, or any new worker execution path that must mark its phase.
 
 ### ADR-018: Validação da estrutura das predefinições de vídeo delegada pelo gateway ao serviço de projetos
@@ -42,7 +42,7 @@ Use this to find relevant prior decisions when working on related features.
 - **Bolt**: 008-video-concat-chain (003-video-composition)
 - **Path**: `bolts/008-video-concat-chain/adr-018-preset-structure-validation.md`
 - **Summary**: As predefinições de vídeo vivem no serviço de utilizadores, mas as regras de estrutura e o registo de operações estão no serviço de projetos (T-01). O router `apiGateway/routes/videoPresets.js` chama a rota interna `POST projects:/video/chain-structure` (`{steps, preset: true}`) em `POST`/`PATCH` e só depois encaminha ao serviço de utilizadores, com os `steps` sem `_mark`, `_input` e `_clips`.
-- **Read when**: Working on video presets (`users/models/videoPreset.js`, `users/routes/videoPresets.js`, `apiGateway/routes/videoPresets.js`), chain structure rules (`chainStructure.js`), new operations that must be allowed in presets, or loading presets into chains or batches.
+- **Read when**: Working on video presets (`users/models/videoPreset.js`, `users/routes/videoPresets.js`, `apiGateway/routes/videoPresets.js`), chain structure rules (`chainStructure.js`), new operations that must be allowed in presets, or loading presets into chains.
 
 ### ADR-017: Ramo `composition_task.py` no worker para junções e cadeias terminadas em `convert`
 - **Status**: accepted
@@ -57,7 +57,7 @@ Use this to find relevant prior decisions when working on related features.
 - **Date**: 2026-10-23
 - **Bolt**: 008-video-concat-chain (003-video-composition)
 - **Path**: `bolts/008-video-concat-chain/adr-016-composition-router.md`
-- **Summary**: A B003 não faz as fases 1 e 3 da validação, só conhece uma entrada por pedido, e o `validate` da `concat` não recebe as propriedades dos clips. Um router novo, montado antes do router de vídeo, corre estrutura → passos → limites (D-80; sem junção, a fase 2 em memória e `next()` se falhar, para a B003 devolver o `INVALID_STEP_PARAMS`), grava `parameters._clips` por cima do cliente e trata por inteiro os pedidos com junção na rota sem `:video` (D-78), chamando a aceitação do `tasks.js`.
+- **Summary**: A B003 não faz as fases 1 e 3 da validação, só conhece uma entrada por pedido, e o `validate` da `concat` não recebe as propriedades dos clips. Um router novo, montado antes do router de vídeo, corre estrutura → passos → limites (D-80; sem junção, a fase 2 em memória e `next` se falhar, para a B003 devolver o `INVALID_STEP_PARAMS`), grava `parameters._clips` por cima do cliente e trata por inteiro os pedidos com junção na rota sem `:video` (D-78), chamando a aceitação do `tasks.js`.
 - **Read when** (impacto da D-86 no fim do ADR: sem `CHAIN_TOO_LONG` nem `TOO_MANY_INPUTS`; rota `…/chain/validate`): Working on chain or concat validation, `POST …/videos/validate` or `…/operations`, the order of validation phases, server-set fields in `parameters` (`_clips`, `_mark`, `_input`), or routes mounted before the video router.
 
 ### ADR-015: Nome apresentado dos resultados de vídeo acompanha o contentor real
@@ -89,7 +89,7 @@ Use this to find relevant prior decisions when working on related features.
 - **Date**: 2026-10-22
 - **Bolt**: 005-video-visual-edits (002-video-transformations)
 - **Path**: `bolts/005-video-visual-edits/adr-012-adjust-rgb.md`
-- **Summary**: Com o `eq` do ADD 4.3 (YUV), a pré-visualização diferia do resultado até 45,78/255 no contraste e na saturação. D-67 (a), aprovada: contraste com `lutrgb` e pivô 128 no worker (sharp `linear(c, 128·(1−c))`, sem mudança) e saturação com a matriz `s·I + (1−s)·luma BT.601` (`colorchannelmixer` no worker e `recomb` no sharp), igual ao `ImageEnhance.Color` (DQ-020). O brilho não muda. Depois da mudança, a diferença ficou entre 0,42 e 1,39.
+- **Summary**: Com o `eq` do ADD 4.3 (YUV), a pré-visualização diferia do resultado até 45,78/255 no contraste e na saturação. D-67 (a), aprovada: contraste com `lutrgb` e pivô 128 no worker (sharp `linear(c, 128·(1−c))`, sem mudança) e saturação com a matriz `s·I + (1−s)·luma BT.601` (`colorchannelmixer` no worker e `recomb` no sharp), igual ao `ImageEnhance.Color` (DQ-019). O brilho não muda. Depois da mudança, a diferença ficou entre 0,42 e 1,39.
 - **Read when**: Working on the adjust operation, its preview, sharp/FFmpeg equivalence, or chains that combine adjust with other colour steps (B008).
 
 ### ADR-011: `planExtrasVisual.js` e ponte `visual_input.py` para os extras do plano da B005
@@ -97,7 +97,7 @@ Use this to find relevant prior decisions when working on related features.
 - **Date**: 2026-10-22
 - **Bolt**: 005-video-visual-edits (002-video-transformations)
 - **Path**: `bolts/005-video-visual-edits/adr-011-visual-plan-extras.md`
-- **Summary**: O `applyPlanExtras()` sai antes quando não há `trim`, `remove_audio` nem `speed` (linha existente, regra 2.6). D-63 (a), aprovada: o módulo novo `planExtrasVisual.js`, chamado por uma linha nova em `tasks.js`, acrescenta `plan.steps[i].filter` (entrada do catálogo) e `plan.steps[i].mark` (origem `video_src/wm-<id>.png` e caixa). No worker, `visual_input.py` (duas linhas novas no `task.py`) copia-os para `_filter` e `_overlay` numa cópia do plano. A marca entra no grafo único por `movie` + `overlay`, sem alterar o `executor.py`.
+- **Summary**: O `applyPlanExtras` sai antes quando não há `trim`, `remove_audio` nem `speed` (linha existente, regra 2.6). D-63 (a), aprovada: o módulo novo `planExtrasVisual.js`, chamado por uma linha nova em `tasks.js`, acrescenta `plan.steps[i].filter` (entrada do catálogo) e `plan.steps[i].mark` (origem `video_src/wm-<id>.png` e caixa). No worker, `visual_input.py` (duas linhas novas no `task.py`) copia-os para `_filter` e `_overlay` numa cópia do plano. A marca entra no grafo único por `movie` + `overlay`, sem alterar o `executor.py`.
 - **Read when**: Adding plan extras for new operations (B007, B008), working on filter or watermark steps, the worker's step parameters, or the single filtergraph built by `executor.build_command`.
 
 ### ADR-010: Dimensões da marca de água gravadas pelo servidor em `parameters._mark`, antes da validação
@@ -113,7 +113,7 @@ Use this to find relevant prior decisions when working on related features.
 - **Date**: 2026-10-22
 - **Bolt**: 004-video-basic-edits (002-video-transformations)
 - **Path**: `bolts/004-video-basic-edits/adr-009-control-polling.md`
-- **Summary**: A integração real expôs que o Pika 1.3.2 adia callbacks reentrantes enquanto a tarefa corre. D-56 (a), aprovada: fila exclusiva adicional no canal de controlo existente, consultada por `basic_get` em `_wait()`, reutilizando `ControlChannel._on_message`. Mantêm-se a ligação única, thread principal, assinaturas e todas as linhas anteriores das B001–B003.
+- **Summary**: A integração real expôs que o Pika 1.3.2 adia callbacks reentrantes enquanto a tarefa corre. D-56 (a), aprovada: fila exclusiva adicional no canal de controlo existente, consultada por `basic_get` em `_wait`, reutilizando `ControlChannel._on_message`. Mantêm-se a ligação única, thread principal, assinaturas e todas as linhas anteriores das B001–B003.
 - **Read when**: Working on cancellation, Pika callback dispatch, worker heartbeats, control queues or executor wait hooks.
 
 ### ADR-008: `planExtras.js` como módulo de extensão do plano sem alterar o `plan.js` da B003
@@ -178,5 +178,5 @@ Use this to find relevant prior decisions when working on related features.
 - **Date**: 2026-10-21
 - **Bolt**: 001-video-lifecycle (001-video-lifecycle)
 - **Path**: `bolts/001-video-lifecycle/adr-001-upload-put-pre-assinado.md`
-- **Summary**: O carregamento de vídeos até 2 GB não pode passar pelas rotas de upload existentes (`multer.memoryStorage()`, regra 2.6). O navegador envia o ficheiro por PUT pré-assinado através do `location /s3-video/` do nginx, entre um pedido de URL (que cria o registo `queued`) e uma confirmação verificada com `headObject`.
+- **Summary**: O carregamento de vídeos até 2 GB não pode passar pelas rotas de upload existentes (`multer.memoryStorage`, regra 2.6). O navegador envia o ficheiro por PUT pré-assinado através do `location /s3-video/` do nginx, entre um pedido de URL (que cria o registo `queued`) e uma confirmação verificada com `headObject`.
 - **Read when**: Working on video upload or download, pre-signed URLs, the `/s3-video/` nginx location, `imageStorageService/route/video.js` or `videoUrls.js`, upload cancellation, or the Q-ADD-14 cleanup of abandoned uploads (B003).

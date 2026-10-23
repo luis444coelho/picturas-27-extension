@@ -16,7 +16,7 @@ A B008 tem de validar as cadeias em três fases pela ordem estrutura → passos 
 1. Um router novo, `projects/routes/videoComposition.js` (com o par no gateway, se a V7 o exigir), montado antes do router de vídeo e do router da B005 que grava o `_mark`, intercepta `POST …/videos/validate`, `POST …/videos/:video/operations` e a rota nova `POST …/videos/operations`.
 2. Corre a fase 1 (`chainStructure.checkStructure`, D-79) e responde 422 se falhar.
 3. **Com junção:** lê os `videos.meta` dos clips distintos, faz os passos 4 e 5 da aceitação por clip, valida cada sub-cadeia com o `chain.validateChain` da B003 (erros em `{index, clipIndex, stepIndex}`), grava `parameters._clips = [{videoId, input, output}]` por cima do que o cliente enviar, valida a cadeia de topo, corre a fase 3 e trata o pedido por inteiro: no `validate` responde 200; no `operations` chama as funções de aceitação do `tasks.js` com a lista de entradas (V1).
-4. **Sem junção:** corre a fase 2 em memória (`chain.validateChain` com os `videos.meta` do vídeo da rota). Se falhar, faz `next()` sem responder, e é a B003 que devolve o `INVALID_STEP_PARAMS`. Só com a fase 2 válida corre a fase 3 (`LIMIT_EXCEEDED` do resultado final); sem erros, `next()`, e o pedido segue sem mudanças pela B003.
+4. **Sem junção:** corre a fase 2 em memória (`chain.validateChain` com os `videos.meta` do vídeo da rota). Se falhar, faz `next` sem responder, e é a B003 que devolve o `INVALID_STEP_PARAMS`. Só com a fase 2 válida corre a fase 3 (`LIMIT_EXCEEDED` do resultado final); sem erros, `next`, e o pedido segue sem mudanças pela B003.
 5. A rota com `:video` e uma junção, ou a rota sem `:video` sem junção no início, dá 422 `INVALID_REQUEST {field: "steps"}` (D-78).
 
 ## Rationale
@@ -69,6 +69,6 @@ A equipa retirou os limites fixos de quantidade (D-86): a fase 1 deste router de
 - a quota dos Registados, verificada antes da tarefa (B003);
 - o `_clips` gravado pelo servidor.
 
-**Proteção técnica (D-88 a):** não há limite novo. Os limites que já existem são os 100 kB do `express.json()`, os 16 MB do documento do `VideoTask` e os recursos do worker. Um 413 passa a `INVALID_REQUEST {field: "steps", reason: "too_large"}` no gateway de vídeo. A etapa 5 mede uma junção de 100 clips curtos e uma cadeia longa num Premium; se alguma falhar, regista-se uma dúvida com o teto configurável da opção (b).
+**Proteção técnica (D-88 a):** não há limite novo. Os limites que já existem são os 100 kB do `express.json`, os 16 MB do documento do `VideoTask` e os recursos do worker. Um 413 passa a `INVALID_REQUEST {field: "steps", reason: "too_large"}` no gateway de vídeo. A etapa 5 mede uma junção de 100 clips curtos e uma cadeia longa num Premium; se alguma falhar, regista-se uma dúvida com o teto configurável da opção (b).
 
 **O router passa a responder também a `POST …/videos/chain/validate`.** A resposta é a do `…/validate`, mais as propriedades estimadas à entrada de cada passo, para os componentes de configuração das composições (ADR-020).

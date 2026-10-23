@@ -26,7 +26,7 @@ implemented: true
 ## Traceability
 
 - **Use case:** UC-VID-004.
-- **Requirements:** `REQ-VID-WATERMARK-001` a `011`. Consome `REQ-VID-COM-*`, `REQ-VID-NFR-009`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
+- **Requirements:** `REQ-VID-WATERMARK-001` a `011`. Consome `REQ-VID-COM-*`, `REQ-VID-NFR-008`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
 - **Decisões do ADD v1.1:** T-02 (`overlay` ou `drawtext`), Q-ADD-12 (implementação de raiz no worker de vídeo), ADD 6 (tipos de letra, só com `drawtext`).
 
 ## Dependencies

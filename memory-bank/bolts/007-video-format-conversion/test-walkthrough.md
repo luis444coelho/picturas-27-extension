@@ -48,7 +48,7 @@ A regressão de integração B004 passou 14/15: o teste histórico de Brilho esp
 
 ## Checklist manual e limites
 
-`manual-test-checklist.md` descreve os dez percursos no leitor integrado, as indicações do painel, erros, quota, cancelamento e regressão de imagem. A equipa aprovou manualmente MP4→MOV, MP4→AVI com imagem e som no VLC, AVI H.264/MP3→MP4, MOV→AVI, vídeo sem áudio→AVI, galeria/informação e as regressões B004 (recorte), B005 (filtro) e imagem (Brilho). O ensaio automatizado VLC usou saída de vídeo/áudio `dummy` para reproduzir e descodificar integralmente sem abrir uma janela. Os restantes percursos no leitor integrado, QuickTime e Windows Media Player não foram testados manualmente; a NFR-026 fica com esta limitação documentada.
+`manual-test-checklist.md` descreve os dez percursos no leitor integrado, as indicações do painel, erros, quota, cancelamento e regressão de imagem. A equipa aprovou manualmente MP4→MOV, MP4→AVI com imagem e som no VLC, AVI H.264/MP3→MP4, MOV→AVI, vídeo sem áudio→AVI, galeria/informação e as regressões B004 (recorte), B005 (filtro) e imagem (Brilho). O ensaio automatizado VLC usou saída de vídeo/áudio `dummy` para reproduzir e descodificar integralmente sem abrir uma janela. Os restantes percursos no leitor integrado, QuickTime e Windows Media Player não foram testados manualmente; a NFR-022 fica com esta limitação documentada.
 
 ## Riscos residuais aceites no fecho
 

@@ -9,7 +9,7 @@ superseded_by: null
 
 ## Context
 
-O cancelamento de uma tarefa de vídeo (REQ-VID-TASK-004/005, ADD T-03) é publicado uma única vez na exchange *fanout* `video_control`. Cada réplica do worker guarda os `taskId` cancelados num conjunto **em memória**, com TTL, e descarta uma tarefa cancelada quando a consome ou termina o FFmpeg se ela já estiver a correr. O ADD regista como risco aceite que esse conjunto se perde num reinício do worker: uma tarefa cancelada enquanto esperava na fila pode chegar a correr. O orquestrador ignora as respostas e apaga o resultado, mas o FFmpeg corre até ao fim, ocupa a única réplica (D-18) e emite eventos de progresso de uma tarefa que o utilizador já cancelou. O mesmo acontece se o cancelamento for publicado num momento em que nenhuma réplica tem a fila de controlo ligada, porque a exchange *fanout* descarta mensagens sem fila.
+O cancelamento de uma tarefa de vídeo (REQ-VID-TASK-004, REQ-VID-TASK-005, ADD T-03) é publicado uma única vez na exchange *fanout* `video_control`. Cada réplica do worker guarda os `taskId` cancelados num conjunto **em memória**, com TTL, e descarta uma tarefa cancelada quando a consome ou termina o FFmpeg se ela já estiver a correr. O ADD regista como risco aceite que esse conjunto se perde num reinício do worker: uma tarefa cancelada enquanto esperava na fila pode chegar a correr. O orquestrador ignora as respostas e apaga o resultado, mas o FFmpeg corre até ao fim, ocupa a única réplica (D-18) e emite eventos de progresso de uma tarefa que o utilizador já cancelou. O mesmo acontece se o cancelamento for publicado num momento em que nenhuma réplica tem a fila de controlo ligada, porque a exchange *fanout* descarta mensagens sem fila.
 
 A regra 2.6 não se aplica aqui (código novo), mas o contrato de mensagens do T-03 não prevê uma confirmação do cancelamento.
 
@@ -49,7 +49,7 @@ O `started` é o primeiro sinal de que um worker está a executar a tarefa, e ch
 ## Related
 
 - **Stories**: ST-VID-COM-001 (AC4)
-- **Requirements**: REQ-VID-TASK-004, REQ-VID-TASK-005, REQ-VID-NFR-007
+- **Requirements**: REQ-VID-TASK-004, REQ-VID-TASK-005, REQ-VID-NFR-006
 - **ADD**: T-03 ("Cancelamento", "Cancelamento perdido num reinício do worker")
 - **Decisões**: D-18, D-41, D-46
 - **Previous ADRs**: ADR-002 (contrato de mensagens do worker)

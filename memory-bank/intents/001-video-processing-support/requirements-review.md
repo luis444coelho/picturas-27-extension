@@ -29,9 +29,6 @@ Cada requisito foi revisto quanto a obrigacao concreta, clareza, verificabilidad
 | FR-VID-SPEED-002 | Revised | O criterio de duracao foi tornado verificavel para o fator interpretado como multiplicador; a convencao continua identificada como pendente. |
 | FR-VID-WATERMARK-001 | Keep with pending decision | Configuracao concreta e necessaria; limites numericos, fontes e formatos continuam pendentes. |
 | FR-VID-WATERMARK-002 | Keep with pending decision | Cobre consistencia temporal; posicao fixa e uma proposta explicitamente marcada. |
-| FR-VID-FRAMES-001 | Keep with pending decision | Cobre parametros e estimativa; formula do intervalo continua em D-VID-006. |
-| FR-VID-FRAMES-002 | Revised | Terminologia corrigida para “de forma atomica”; a estrategia de compensacao/transacao continua pendente. |
-| FR-VID-FRAMES-003 | Keep as Should | E um fluxo alternativo relevante, mas nao bloqueia a extracao basica. |
 | FR-VID-AUTH-001 | Keep with pending decision | Necessario para recursos privados; o acesso anonimo as tres primeiras operacoes continua por decidir. |
 | FR-VID-AUTH-002 | Keep | A permissao read versus edit e verificavel e alinhada com o middleware existente. |
 | FR-VID-QUOTA-001 | Revised | A aplicacao fica explicitamente condicionada a operacoes para as quais a politica aprovada defina quota; nao generaliza a quota de imagem. |
@@ -57,7 +54,7 @@ Cada requisito foi revisto quanto a obrigacao concreta, clareza, verificabilidad
 - **UC-VID-002**: deteccao de audio, resultado sem audio, original, erros e quota cobertos. Politica para video sem audio e comportamento do audio associado pendentes.
 - **UC-VID-003**: fator, duracao, resultado, original e erros cobertos. Limites e semantica do audio pendentes.
 - **UC-VID-004**: configuracao, aplicacao consistente, tarefa, progresso, resultado e falhas cobertos. Contrato assincrono, limites e posicao fixa pendentes.
-- **UC-VID-005**: parametros, estimativa, quota, tarefa, progresso, cancelamento, atomicidade e integracao no projeto cobertos. Formula, limites e modelo de recurso pendentes.
+- ****: parametros, estimativa, quota, tarefa, progresso, cancelamento, atomicidade e integracao no projeto cobertos. Formula, limites e modelo de recurso pendentes.
 
 ## Findings That Do Not Require Requirement Changes
 

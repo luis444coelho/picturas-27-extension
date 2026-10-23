@@ -9,7 +9,7 @@ superseded_by: null
 
 ## Context
 
-A integração real da etapa 5 revelou que o Pika 1.3.2 adia callbacks de consumidores durante chamadas reentrantes de `process_data_events()`. O worker executa a tarefa dentro da callback de entrega; chamar esse método em `_wait()` serve I/O e heartbeats, mas não entrega o cancelamento à callback do segundo canal até a tarefa terminar. A API cancelava e devolvia o crédito, mas o FFmpeg continuava. Os fakes anteriores não reproduziam a proteção de reentrância do Pika.
+A integração real da etapa 5 revelou que o Pika 1.3.2 adia callbacks de consumidores durante chamadas reentrantes de `process_data_events`. O worker executa a tarefa dentro da callback de entrega; chamar esse método em `_wait` serve I/O e heartbeats, mas não entrega o cancelamento à callback do segundo canal até a tarefa terminar. A API cancelava e devolvia o crédito, mas o FFmpeg continuava. Os fakes anteriores não reproduziam a proteção de reentrância do Pika.
 
 O T-03 mantém um único processo, a thread principal e uma ligação AMQP por worker. A regra 2.6 impede substituir linhas da B003. A equipa aprovou a opção (a) da D-56 em `docs/specsDuvidas.md`.
 
@@ -17,7 +17,7 @@ O T-03 mantém um único processo, a thread principal e uma ligação AMQP por w
 
 Acrescentar `Tools/video/control_poll.py`, com `ControlPoller`. O adaptador declara uma fila adicional de nome gerado, exclusiva da ligação e ligada ao exchange fanout `video_control`, usando o canal de controlo já criado por `ControlChannel`. Não cria outro canal, ligação ou thread, nem altera o exchange ou o compose.
 
-Uma chamada nova em `_wait()`, após a linha existente de `process_data_events()`, consulta a fila com `basic_get(auto_ack=True)` e entrega cada mensagem diretamente a `ControlChannel._on_message`. Assim reutiliza a validação, o conjunto de tarefas canceladas e `_on_cancel`. `_tick()`, transferências, sondagens e `executor.run()` continuam a passar por `_wait()`. O ciclo atende até 100 mensagens por consulta para não monopolizar heartbeats/progresso.
+Uma chamada nova em `_wait`, após a linha existente de `process_data_events`, consulta a fila com `basic_get(auto_ack=True)` e entrega cada mensagem diretamente a `ControlChannel._on_message`. Assim reutiliza a validação, o conjunto de tarefas canceladas e `_on_cancel`. `_tick`, transferências, sondagens e `executor.run` continuam a passar por `_wait`. O ciclo atende até 100 mensagens por consulta para não monopolizar heartbeats/progresso.
 
 O consumidor anterior permanece intacto e continua a servir o ciclo exterior. As mensagens duplicadas de cancelamento são idempotentes; cada fila é removida com o fecho da ligação exclusiva. Não se altera nenhuma assinatura nem se removem linhas anteriores das B001–B003.
 

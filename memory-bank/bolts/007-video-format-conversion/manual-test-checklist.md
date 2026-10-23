@@ -13,7 +13,7 @@ Executar no projeto de teste com `test_reencode` desligada. Abrir a aplicação 
 - [x] Regressão B004: recorte de vídeo.
 - [x] Regressão B005: filtro de vídeo.
 - [x] Regressão de imagem: ferramenta Brilho.
-- [ ] QuickTime e Windows Media Player: **não testados** nesta validação da NFR-026.
+- [ ] QuickTime e Windows Media Player: **não testados** nesta validação da NFR-022.
 
 **Riscos residuais aceites:** D-73 (nome apresentado conserva a extensão da origem; o download usa a extensão correta) e D-74 (numa conta free, o crédito é debitado no servidor, mas o contador da sessão não é atualizado pelo fluxo de vídeo).
 
@@ -44,6 +44,6 @@ Reproduzir do início ao fim, procurar no meio e regressar ao início. Verificar
 | AVI H.264 4:4:4 → MP4 | `incompatible.avi` | MP4 de pré-visualização H.264 4:2:0 |
 
 - [ ] Todos os dez percursos acima reproduzem no leitor integrado. Registar navegador, versão, sistema operativo e qualquer falha.
-- [ ] Para AVI, o resultado descarregado reproduz do início ao fim em VLC; a cópia MP4 é usada apenas no leitor. Repetir para MOV e MP4 em Safari, Chrome e Firefox disponíveis e, quando aplicável, QuickTime/Windows Media Player, conforme NFR-026.
+- [ ] Para AVI, o resultado descarregado reproduz do início ao fim em VLC; a cópia MP4 é usada apenas no leitor. Repetir para MOV e MP4 em Safari, Chrome e Firefox disponíveis e, quando aplicável, QuickTime/Windows Media Player, conforme NFR-022.
 - [ ] Durante uma conversão longa para AVI, cancelar no painel: o progresso termina como cancelado, não aparece resultado, o crédito volta e uma nova tarefa pode começar.
 - [x] Abrir um projeto de imagem, aplicar Brilho e descarregar o resultado; o fluxo de imagem continua funcional.

@@ -32,7 +32,6 @@ requires_bolts:
   - 003-video-task-foundation
 enables_bolts:
   - 008-video-concat-chain
-  - 009-video-batch
 requires_units:
   - 001-video-lifecycle
 blocks: true
@@ -47,7 +46,7 @@ complexity:
 
 ## Visão geral
 
-Recorte, remoção de áudio e alteração de velocidade (UC-VID-001 a 003) como módulos do registo de operações e do worker único da B003.
+Recorte, remoção de áudio e alteração de velocidade (UC-VID-001, UC-VID-002, UC-VID-003) como módulos do registo de operações e do worker único da B003.
 
 ## Objetivo
 
@@ -76,7 +75,7 @@ Acrescentar ao registo de operações (T-01) e ao worker (T-02) as operações d
 
 REQ-VID-TRIM-001 a 010; REQ-VID-AUDIO-001 a 006; REQ-VID-SPEED-001 a 008.
 
-Verifica nos critérios de aceitação a NFR-010 (dona: B001), a NFR-013 e a NFR-018 (donas: B003), sem ser dono delas (specsDuvidas D-03).
+Verifica nos critérios de aceitação a NFR-009 (dona: B001), a NFR-012 e a NFR-016 (donas: B003), sem ser dono delas (specsDuvidas D-03).
 
 Os critérios de aceitação autoritativos são os dos ficheiros `docs/requirements/REQ-VID-*.md`; a propriedade de cada requisito está em `intents/001-video-processing-support/traceability.md`.
 
@@ -85,7 +84,7 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 - **T-02, recorte:** `trim`/`atrim` + `setpts=PTS-STARTPTS` com recodificação do vídeo para a precisão ao milissegundo; cópia com `-ss/-to` só quando o instante inicial coincide com um *keyframe* (verificado com FFprobe); o áudio pode ser copiado (REQ-VID-TRIM-010).
 - **T-02, remover áudio:** `-an`; **T-05:** remover o áudio de um MP4 H.264 copia o vídeo (REQ-VID-AUDIO-005).
 - **T-02, velocidade:** `setpts=PTS/f`; `atempo` aceita 0.5 a 100 no FFmpeg 5.x e só é encadeado abaixo de 0.5× (e.g. `atempo=0.5,atempo=0.5` para 0.25×).
-- **T-01:** cada operação tem `validate`, `estimate` (duração, resolução, fps, áudio) e `cost` de 1 crédito. **T-05 / DQ-013:** o resultado é MP4 H.264/AAC mesmo a partir de MOV ou AVI.
+- **T-01:** cada operação tem `validate`, `estimate` (duração, resolução, fps, áudio) e `cost` de 1 crédito. **T-05 / DQ-012:** o resultado é MP4 H.264/AAC mesmo a partir de MOV ou AVI.
 - **Q-ADD-25:** quando o vídeo é recodificado e tem uma dimensão ímpar, corta-se 1 px para o par abaixo.
 
 ## Saídas esperadas
@@ -93,7 +92,7 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 - `projects/video/operations/` para recorte, remoção de áudio e velocidade.
 - `Tools/video/ops/` para as mesmas operações.
 - Frontend: painéis novos de recorte (seletores, *scrubbing*, *loop preview*), remoção de áudio e velocidade.
-- Testes ligados aos critérios de `REQ-VID-TRIM-*`, `REQ-VID-AUDIO-*`, `REQ-VID-SPEED-*` e verificação da NFR-010, da NFR-013 e da NFR-018 (specsDuvidas D-03).
+- Testes ligados aos critérios de `REQ-VID-TRIM-*`, `REQ-VID-AUDIO-*`, `REQ-VID-SPEED-*` e verificação da NFR-009, da NFR-012 e da NFR-016 (specsDuvidas D-03).
 
 ## Critérios de passagem
 
@@ -113,18 +112,18 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 
 ### Desbloqueia
 
-- 008-video-concat-chain, 009-video-batch. A B009 está `blocked` (specsDuvidas D-06).
+- 008-video-concat-chain.
 
 ## Limites
 
 - **Regra 2.6 do ADD ("só acrescentar"):** o código existente não é alterado. Só se acrescentam ficheiros novos e pontos de ligação novos (uma linha `app.use` ou `require`, uma fila, exchange ou *binding* em `rabbitMQ/definitions.json`, um serviço ou volume no `docker-compose.yaml`, um `location` ou `log_format` no `nginx/nginx.conf`, componentes novos no frontend), sem tocar nas linhas existentes nem mudar o comportamento do fluxo de imagem.
-- Não implementa cadeias com vários passos, junção nem lotes (Unit 003).
+- Não implementa cadeias com vários passos, junção (Unit 003).
 - Monta nos seus painéis as peças comuns de tarefa do frontend construídas e testadas pela B003 (`lib/video-tasks.ts`, `use-video-task.ts`, `video-task-progress.tsx`), sem as reconstruir (specsDuvidas D-47).
 
 ## Notas
 
 - Etapa 4 aprovada explicitamente pela equipa em `2026-10-22T18:12:10Z`; aprovação e passagem à etapa 5 registadas no construction-log. Na etapa 5 foram respondidas D-55 (duração visual), D-56 (consulta de controlo; ADR-009) e D-57 (recuo se o fim não for representável por cópia). Todas aprovadas na opção (a), sem reabrir D-49 a D-54. O bolt permanece aberto até aos testes manuais e à aprovação explícita da etapa 5.
 
-- O ADD v1.1 não tem secção de decisão própria para os UC-VID-001 a 003 (âmbito 1.2); as decisões vêm do T-00, T-01, T-02 e T-05. Sem esforço no ADD para este bolt, por isso `avg_complexity` fica `null`; `avg_uncertainty`, `max_dependencies` e `testing_scope` são preenchidos no início do bolt na Construção (specsDuvidas D-01).
+- O ADD v1.1 não tem secção de decisão própria para os UC-VID-001, UC-VID-002, UC-VID-003 (âmbito 1.2); as decisões vêm do T-00, T-01, T-02 e T-05. Sem esforço no ADD para este bolt, por isso `avg_complexity` fica `null`; `avg_uncertainty`, `max_dependencies` e `testing_scope` são preenchidos no início do bolt na Construção (specsDuvidas D-01).
 
 - 2026-10-22T20:02:18Z: checkpoint final aprovado pela equipa. Testes manuais no browser feitos noutra máquina, todos aprovados (recorte, recorte inválido, remover áudio, vídeo sem áudio, velocidade, cancelamento, regressão de vídeo e de imagem). Etapa 5 não repetida (resultados automáticos de `a5d60d2`). `bolt-complete.cjs` executado; bolt fechado no ramo `bolt/004-video-basic-edits`.

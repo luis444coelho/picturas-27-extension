@@ -9,7 +9,7 @@ superseded_by: null
 
 ## Context
 
-O worker de vídeo processa cada tarefa em `/tmp/video/<taskId>/`, no volume `video_tmp` (ADD T-02). Quando termina, falha ou é cancelado, apaga a pasta, e numa reentrega recomeça do zero, limpando-a (T-03). A REQ-VID-NFR-007 pede que, depois da segunda entrega falhada, a tarefa passe a `failed` "e o disco temporário é limpo".
+O worker de vídeo processa cada tarefa em `/tmp/video/<taskId>/`, no volume `video_tmp` (ADD T-02). Quando termina, falha ou é cancelado, apaga a pasta, e numa reentrega recomeça do zero, limpando-a (T-03). A REQ-VID-NFR-006 pede que, depois da segunda entrega falhada, a tarefa passe a `failed` "e o disco temporário é limpo".
 
 Nesse caso, porém, nenhum worker volta a receber a mensagem: ao fim de duas entregas, o RabbitMQ envia-a por *dead-letter* para o serviço de projetos (`x-delivery-limit: 1`). O processo que tinha a pasta morreu com o contentor e deixou-a no volume. O serviço de projetos publica um cancelamento em `video_control` ao tratar o *dead-letter* (ADR-003), mas a exchange é *fanout* e só entrega a filas ligadas. Nos testes do Estágio 5, o cancelamento chegou enquanto o worker reiniciado ainda não tinha ligado a sua fila exclusiva, e foi descartado. A pasta (com o original descarregado, até 2 GB) ficou no volume.
 
@@ -41,7 +41,7 @@ O `flock` diz, sem estado partilhado nem mensagens, se ainda existe um processo 
 
 ### Positive
 
-- O disco temporário fica limpo depois de um *dead-letter*, verificado no E2E com dois reinícios reais do worker (NFR-007, AC7 da ST-VID-COM-001).
+- O disco temporário fica limpo depois de um *dead-letter*, verificado no E2E com dois reinícios reais do worker (NFR-006, AC7 da ST-VID-COM-001).
 - Funciona com qualquer número de réplicas que partilhem o `video_tmp`.
 
 ### Negative
@@ -56,7 +56,7 @@ O `flock` diz, sem estado partilhado nem mensagens, se ainda existe um processo 
 ## Related
 
 - **Stories**: ST-VID-COM-001 (AC7)
-- **Requirements**: REQ-VID-NFR-007, REQ-VID-ERROR-003
+- **Requirements**: REQ-VID-NFR-006, REQ-VID-ERROR-003
 - **ADD**: T-02 (temporários em `/tmp/video/<taskId>/`), T-03 (reentrega, *dead-letter*, `video_control`), Q-ADD-10
 - **Decisões**: D-18
 - **Previous ADRs**: ADR-003 (reenvio do cancelamento)

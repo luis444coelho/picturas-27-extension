@@ -25,8 +25,8 @@ implemented: true
 
 ## Traceability
 
-- **Use case:** UC-VID-008.
-- **Requirements:** `REQ-VID-ADJUST-001` a `010`; `REQ-VID-NFR-015`. Consome `REQ-VID-COM-*`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
+- **Use case:** UC-VID-007.
+- **Requirements:** `REQ-VID-ADJUST-001` a `010`; `REQ-VID-NFR-013`. Consome `REQ-VID-COM-*`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
 - **Decisões do ADD v1.1:** 4.3 (brilho com `colorchannelmixer`, contraste e saturação com `eq`), T-07 (pré-visualização com `sharp`), Q-ADD-18 (pivô fixo do contraste), Q-ADD-23, Q-ADD-25.
 
 ## Dependencies

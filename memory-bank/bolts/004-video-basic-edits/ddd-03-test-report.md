@@ -53,7 +53,7 @@ As sondagens temporárias da etapa 4 não contam para estes resultados. Os fiche
 
 - O fps do servidor prevalece sobre `_input` do cliente, inclusive fracionário. Ausência, tipos inválidos, booleanos, zero ou valores negativos falham explicitamente; plano e receita não são mutados.
 - `videoMode` é reiniciado por entrega e limpo ao terminar. A suite executa os ciclos reais de `TaskRunner.run/_reply` para B004, tarefa anterior, descarte cancelado e falha: só `completed` da entrega B004 leva o modo.
-- O helper insere `-ss/-to` antes do `-i`, após `build_command()`, e conserva argumentos anteriores, mapas, `+genpts`, progresso e destino. Os limites adicionais são locais à execução; as assinaturas e `executor.run()` permanecem.
+- O helper insere `-ss/-to` antes do `-i`, após `build_command`, e conserva argumentos anteriores, mapas, `+genpts`, progresso e destino. Os limites adicionais são locais à execução; as assinaturas e `executor.run` permanecem.
 - `remove_audio` usa a decisão `audio: none` existente; `plan.js` não foi alterado. A D-54 preserva `plan.output`, `plan.preview`, assinatura e destinos anteriores; o destino adicional é determinístico e tem o mesmo dono/projeto.
 - Os 122 testes JS anteriores e os 44 Python anteriores passaram, assim como os 23 testes anteriores do frontend. Os testes de registo da B003 receberam apenas linhas adicionais para separar as três operações sempre ativas da operação `test_reencode`; mantêm os asserts originais da D-37. O fake de canal recebeu `basic_get` para suportar a porta acrescentada na D-56.
 

@@ -8,7 +8,7 @@ updated: 2026-10-09T16:57:05Z
 
 # Case Review: Video Processing Support
 
-> **Revisão histórica de IDs/conteúdo inicial.** Os casos atuais e estáveis são `docs/use-cases/UC-VID-000.md` a `UC-VID-015.md`; não usar as propostas desta revisão antiga como estado atual.
+> **Revisão histórica de IDs/conteúdo inicial.** Os casos atuais e estáveis são `docs/use-cases/UC-VID-000.md` a `.md`; não usar as propostas desta revisão antiga como estado atual.
 
 ## Source
 
@@ -22,8 +22,7 @@ Documento original: `docs/casos-de-uso-video.md`. O documento nao foi alterado.
 | UC-VID-002 | UC-VID-002 | Remover o audio de um video | Keep |
 | UC-VID-003 | UC-VID-003 | Alterar a velocidade de reproducao | Keep |
 | First UC-VID-004 | UC-VID-004 | Aplicar marca de agua a um video | Keep |
-| Second UC-VID-004 | UC-VID-005 | Extrair fotogramas de um video | Proposed normalization |
-| Repeated extraction block | UC-VID-005 | Extrair fotogramas de um video | Duplicate content; single source for requirements |
+
 
 ## Review Findings
 
@@ -57,6 +56,6 @@ Video upload, video metadata/codec inspection, video processing, frame extractio
 
 ## Normalization Risks
 
-- Requirements use UC-VID-005 for extraction without modifying the original source.
-- Any future change to the original document should preserve a mapping from its duplicated block to UC-VID-005.
+- Requirements use  for extraction without modifying the original source.
+- Any future change to the original document should preserve a mapping from its duplicated block to .
 - Requirements whose behavior is independent of a single use-case step are marked as cross-cutting and retain an explicit source rationale.

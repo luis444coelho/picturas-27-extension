@@ -26,10 +26,10 @@ O que é de submissão é só o `session.submit`, o `session.busy` e o botão (o
 
 | Painel | Ficheiro e linhas | Estado de configuração | Entradas | Submissão (fica no painel simples) |
 |--------|-------------------|------------------------|----------|-------------------------------------|
-| Recorte | `video-trim-panel.tsx:25-217` | `start`, `end`, `url`, `playbackError`, `looping`, `player`, `resumeAt`, `renewals` (`:36-43`) | `durationMs`, `videoId` (leitor) | `:205-213` "Recortar · 1 crédito", na mesma linha (`:197`) do "Pré-visualizar corte"; chama `stop()` antes de submeter |
-| Remoção de áudio | `video-remove-audio-panel.tsx:23-67` | nenhum (`removeAudioStep()`, `:32`) | — | `:40-64` `AlertDialog` de confirmação (AUDIO-004) |
+| Recorte | `video-trim-panel.tsx:25-217` | `start`, `end`, `url`, `playbackError`, `looping`, `player`, `resumeAt`, `renewals` (`:36-43`) | `durationMs`, `videoId` (leitor) | `:205-213` "Recortar · 1 crédito", na mesma linha (`:197`) do "Pré-visualizar corte"; chama `stop` antes de submeter |
+| Remoção de áudio | `video-remove-audio-panel.tsx:23-67` | nenhum (`removeAudioStep`, `:32`) | — | `:40-64` `AlertDialog` de confirmação (AUDIO-004) |
 | Velocidade | `video-speed-panel.tsx:20-83` | `value` (`:31`), por omissão `"2"` | `durationMs` | `:73-80` |
-| Marca de água | `video-watermark-panel.tsx:32-240` | `values`, `uploading`, `imageError` (`:42-51`); por omissão: texto, posição `bottom-right`, escala 0.2, opacidade 0.6 | `useProjectInfo()` (galeria), `videoId` (pré-visualização) | `:230-237`; desativa com `busy = session.busy \|\| uploading` (`:57`) |
+| Marca de água | `video-watermark-panel.tsx:32-240` | `values`, `uploading`, `imageError` (`:42-51`); por omissão: texto, posição `bottom-right`, escala 0.2, opacidade 0.6 | `useProjectInfo` (galeria), `videoId` (pré-visualização) | `:230-237`; desativa com `busy = session.busy \|\| uploading` (`:57`) |
 | Ajuste | `video-adjust-panel.tsx:30-87` | `values` (`:39`), por omissão `NEUTRAL_ADJUST` | `videoId` (pré-visualização) | `:79-84` |
 | Filtro | `video-filter-panel.tsx:25-96` | `filter` (`:34`), miniaturas (`:35-39`) | `videoId` | `:86-93` |
 | Redimensionar | `video-resize-panel.tsx:29-151` | `locked`, `width`, `height` (`:42-44`) | `sourceWidth`, `sourceHeight` | `:141-148` |
@@ -42,7 +42,7 @@ O que é de submissão é só o `session.submit`, o `session.busy` e o botão (o
 - O botão entra por um *slot*, `renderActions(ctx)`, que o `XConfig` coloca exatamente onde o botão estava:
   - no recorte, dentro do `div` da `:197`, a seguir ao "Pré-visualizar corte";
   - nos outros painéis, depois do componente de validação.
-- O `ctx` traz o passo, a validação, o `busy` interno (a marca junta-lhe o `uploading`), a função `beforeSubmit` (o `stop()` do recorte) e, na conversão, o `verdict`. Assim cada painel mantém a sua condição de `disabled` tal como está.
+- O `ctx` traz o passo, a validação, o `busy` interno (a marca junta-lhe o `uploading`), a função `beforeSubmit` (o `stop` do recorte) e, na conversão, o `verdict`. Assim cada painel mantém a sua condição de `disabled` tal como está.
 - A validação continua a correr no mesmo *render* em que o passo é calculado. O `XConfig` recebe o *hook* de validação como *prop* (`useValidation(step)`), estável para cada instância:
   - o painel simples passa `(step) => useVideoEditValidation(target, videoId, step)`, o que dá a mesma ordem de *hooks* e os mesmos pedidos de agora;
   - as composições passam um *hook* que lê a validação da cadeia para aquele passo.
@@ -51,7 +51,7 @@ O que é de submissão é só o `session.submit`, o `session.busy` e o botão (o
 ## V16: leitor do recorte (D-89)
 
 - O leitor do painel pede o URL de reprodução em `video-trim-panel.tsx:54-69` e renova-o em `:111-122`.
-- O *scrubbing* está em `mark()` (`:90-100`) e o *loop preview* em `:71-84` e `:101-110`.
+- O *scrubbing* está em `mark` (`:90-100`) e o *loop preview* em `:71-84` e `:101-110`.
 - Os botões "Definir início/fim" e "Pré-visualizar corte" já ficam desativados sem `url` (`:159`, `:178`, `:200`).
 - Com `isSource: false`, o `TrimConfig` não pede o URL nem mostra o `<video>`. Mostra no lugar dele a indicação "O recorte aplica-se ao resultado do passo anterior" e deixa os três botões visíveis e desativados.
 - Os campos, a duração prevista e a validação ficam iguais, e `durationMs` passa a ser a duração estimada à entrada do passo.
@@ -71,7 +71,7 @@ O que é de submissão é só o `session.submit`, o `session.busy` e o botão (o
 
 - `ConvertPanel` (`video-convert-actions.tsx:31-102`): os destinos vêm de `conversionTargets(source)` (`:47`). O texto "Formato atual" vem de `formatVideoFormat` (`:59`). O `verdict` ("Cópia direta"/"Recodificação") vem de `validation.output.videoMode/audioMode` (`:54-56`).
 - Esses dois campos só existem no `convert` isolado (`annotateConvertValidation`, `projects/video/convertPlanExtras.js:13-17`, ADR-014).
-- Numa cadeia, a origem é a estimada à entrada do passo, normalmente MP4 H.264/AAC (DQ-013): os destinos são MOV e AVI, e o `verdict` não aparece.
+- Numa cadeia, a origem é a estimada à entrada do passo, normalmente MP4 H.264/AAC (DQ-012): os destinos são MOV e AVI, e o `verdict` não aparece.
 - No `ConvertConfig`, o *slot* de ações das composições não depende do `verdict`. O painel simples mantém a sua condição (`!verdict` desativa, `:94`).
 
 ## V19: rota `…/videos/chain/validate`
@@ -84,7 +84,7 @@ O que é de submissão é só o `session.submit`, o `session.busy` e o botão (o
 
 ## V20: limite do corpo do pedido (D-88 a)
 
-- **Gateway:** `apiGateway/app.js:23` `app.use(express.json())`, com o limite por omissão do Express, 100 kB. Um corpo maior falha no *parser* com `err.status = 413` e `err.type = "entity.too.large"`. O Express salta os routers e o 404 (`:36-38`) e chega ao *handler* de erros existente (`:41-48`), que responde `jsonp(err)` fora do formato do vídeo.
+- **Gateway:** `apiGateway/app.js:23` `app.use(express.json)`, com o limite por omissão do Express, 100 kB. Um corpo maior falha no *parser* com `err.status = 413` e `err.type = "entity.too.large"`. O Express salta os routers e o 404 (`:36-38`) e chega ao *handler* de erros existente (`:41-48`), que responde `jsonp(err)` fora do formato do vídeo.
 - **Ponto de acréscimo:** um *middleware* de erros novo, `apiGateway/routes/videoPayloadErrors.js`, montado numa linha nova a seguir à `:33` (depois dos routers e antes do 404). Para caminhos `/projects/:user/:project/videos…` com `err.type === "entity.too.large"`, responde 422 `INVALID_REQUEST {field: "steps", reason: "too_large"}` no formato do vídeo. Para os outros erros, `next(err)`. O fluxo de imagem não muda.
 - **Serviço de projetos:** `projects/app.js:31`, também 100 kB. Como o gateway recusa antes, um pedido demasiado grande nunca lá chega.
 

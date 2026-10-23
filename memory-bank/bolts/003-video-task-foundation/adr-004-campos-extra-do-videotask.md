@@ -9,7 +9,7 @@ superseded_by: null
 
 ## Context
 
-O ADD T-03 define os campos do modelo `projects/models/videoTask.js`: `status`, `kind`, `steps`, `step`, `total_steps`, `progress`, `cost`, `reserved_credits`, `runner_id`, `owner_id`, `project_id`, `input_video_ids`, `result_video_id`, `batch_id`, `correlation_id` e `error` (sem `batch_id` nesta construção, D-06). Três decisões tomadas nesta construção precisam de estado que esses campos não guardam:
+O ADD T-03 define os campos do modelo `projects/models/videoTask.js`: `status`, `kind`, `steps`, `step`, `total_steps`, `progress`, `cost`, `reserved_credits`, `runner_id`, `owner_id`, `project_id`, `input_video_ids`, `result_video_id`, `correlation_id` e `error` (campos de tarefa e recurso). Três decisões tomadas nesta construção precisam de estado que esses campos não guardam:
 
 - **D-41 (rotina da Q-ADD-14):** retomar uma tarefa `queued` que nunca chegou a ser publicada (queda entre a criação e a publicação) e fechar uma tarefa ativa sem transição há mais de 3 h 10 min. Para isso é preciso saber se e quando a mensagem foi publicada, quando foi a última transição e com que mensagem republicar. O progresso não é gravado no MongoDB (T-03), e o `updatedAt` muda com qualquer escrita, não só com transições.
 - **D-45 (devolução pelo menos uma vez):** o `POST users:/:user/process/refund/:k` não é idempotente e não pode mudar (regra 2.6). É preciso registar que uma devolução está pendente, na mesma escrita atómica da transição para `failed`/`cancelled`, e que já foi feita.
@@ -59,7 +59,7 @@ São os campos mínimos para cumprir as respostas da equipa (D-41, D-45) com esc
 ## Related
 
 - **Stories**: ST-VID-COM-001 (AC3, AC5, AC7)
-- **Requirements**: REQ-VID-QUOTA-004, REQ-VID-NFR-007, REQ-VID-ERROR-003
+- **Requirements**: REQ-VID-QUOTA-004, REQ-VID-NFR-006, REQ-VID-ERROR-003
 - **ADD**: T-03 (modelo `VideoTask`), T-04, Q-ADD-14
 - **Decisões**: D-41, D-45
 - **Previous ADRs**: ADR-003, ADR-005

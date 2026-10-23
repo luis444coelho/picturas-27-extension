@@ -37,7 +37,6 @@ abstract class "Recurso multimédia" as Recurso
 class "Imagem" as Imagem
 class "Vídeo" as Video
 class "Ferramenta de vídeo" as FerramentaVideo
-class "Lote" as Lote
 class "Predefinição de vídeo" as PredefinicaoVideo
 
 ' Perfis, projetos, presets e ferramentas — relações da baseline
@@ -65,15 +64,12 @@ Utilizador "0..*" --> "0..*" Avancada : aplica
 ' Relações novas da extensão de vídeo
 FerramentaVideo -up-|> Ferramenta : é
 FerramentaVideo "0..*" --> "0..*" Video : aplica
-Video "1" --> "0..*" Imagem : origina fotogramas
 Video "1..*" --> "0..*" Video : origina resultado
 Projeto "1" --> "0..*" Trabalho : regista
 Utilizador "1" --> "0..*" Trabalho : submete
 Trabalho "0..*" --> "1..*" Video : processa
-Trabalho "0..*" --> "0..*" Recurso : produz
+Trabalho "0..*" --> "0..*" Video : produz
 Trabalho "0..*" --> "1..*" FerramentaVideo : executa
-Projeto "1" --> "0..*" Lote : regista
-Lote "1" --> "2..*" Trabalho : agrupa
 Utilizador "1" --> "0..*" PredefinicaoVideo : cria
 PredefinicaoVideo "0..*" --> "1..*" FerramentaVideo : contém
 

@@ -67,14 +67,14 @@ Os vídeos de referência (MP4 com etiqueta de rotação, MOV, AVI MPEG-4/MP3, M
 | Critério de passagem do bolt | Estado |
 |---|---|
 | Story implementada e critérios cumpridos | ✅ (AC1 a AC7 e D-31) |
-| Critérios dos requisitos rastreados verificados por testes | ✅ AUTH-001/002/003, UPLOAD-003/004/005/006/007/008/009/010/011/012/013/014/016/017/019/020, STORAGE-001/003, NFR-001/003/008/010/011/017 |
+| Critérios dos requisitos rastreados verificados por testes | ✅ AUTH-001/002/003, UPLOAD-003/004/005/006/007/008/009/010/011/012/013/014/016/017/019/020, STORAGE-001/003, NFR-001, NFR-003, NFR-007, NFR-009, NFR-010, NFR-015 |
 | Nenhuma linha de código existente alterada | ✅ `git diff main`: 0 linhas removidas ou alteradas em ficheiros existentes |
 | Testes automatizados e relatório registados | ✅ este relatório |
 | Código revisto | ⏳ falta a revisão humana |
 | Vídeo válido `completed` com metadados, miniatura, fotograma 0, cópia; sem quota | ✅ |
 | Falha ou cancelamento sem objeto nem registo | ✅ |
 | 401/403; worker arranca com `docker compose up` | ✅ |
-| Só filas de vídeo e `amqp.js`; ferramentas de imagem intactas (NFR-011) | ✅ filas com os argumentos certos (`rabbitmqctl`); `Tools/utils` sem alterações |
+| Só filas de vídeo e `amqp.js`; ferramentas de imagem intactas (NFR-010) | ✅ filas com os argumentos certos (`rabbitmqctl`); `Tools/utils` sem alterações |
 
 Não verificados nesta bolt, por serem de outras: UPLOAD-002 (arrastar) só por revisão, porque o teste no navegador usa o seletor de ficheiros; UPLOAD-001/015/018/021 verificados no navegador na adenda; UPLOAD-015 (controlos do leitor) depende do `<video controls>` nativo; STORAGE-002/004 (proveniência e receita, B003+); STORAGE-005 (rotina da Q-ADD-14, B003).
 
@@ -130,7 +130,7 @@ Medições locais (Apple Silicon, Docker Desktop), sem testes de carga:
 
 | Metric | Target | Actual | Status |
 |--------|--------|--------|--------|
-| `POST …/uploads` (gateway → projetos → users → storage) | ≤ 1 s (referência NFR-005) | 16–21 ms | ✅ |
+| `POST …/uploads` (gateway → projetos → users → storage) | ≤ 1 s (referência NFR-004) | 16–21 ms | ✅ |
 | `POST …/upload/complete` (`headObject`, publicação) | ≤ 1 s | 15–36 ms | ✅ |
 | Ingestão de um clip de 2 s (confirmação → evento final), com cópia recodificada | — | 190–320 ms | ✅ |
 | PUT de 150 MB pelo nginx `/s3-video/` | *streaming* sem *buffer* | 1,0 s (≈150 MB/s) | ✅ |
@@ -173,7 +173,7 @@ Incidente durante os testes: um `docker compose up -d --build video_worker` recr
 
 ## Adenda: D-30 e D-31 (2026-10-22)
 
-Pedido da equipa depois do checkpoint do Estágio 5: criar um projeto a partir de um vídeo (D-30, REQ-VID-UPLOAD-021, UC-VID-000 FA6) e mostrar os vídeos concluídos na área principal do projeto (D-31). Os pormenores de interface que as fontes não fixam ficaram na D-32 (pendente, com implementação provisória).
+Pedido da equipa depois do checkpoint do Estágio 5: criar um projeto a partir de um vídeo (D-30, UC-VID-000/FA6, UC-VID-000 FA6) e mostrar os vídeos concluídos na área principal do projeto (D-31). Os pormenores de interface que as fontes não fixam ficaram na D-32 (pendente, com implementação provisória).
 
 Ficheiros novos: `frontend/lib/video-project.ts` (fluxo, com os passos injetados para ser testável), `frontend/components/video/new-video-project-dialog.tsx`, `frontend/components/video/project-video-list.tsx`, `frontend/test/video-project.test.mts`, `projects/test/video/e2e-project.test.js` e `projects/test/video/e2e-ui.test.js`. Linhas acrescentadas: 2 na `dashboard-sidebar.tsx` e 2 em `app/dashboard/[pid]/page.tsx`. O `new-project-dialog.tsx` e o `ProjectImageList` não mudaram. Sem alterações no backend: a rota `POST /projects/:user` já aceita `imgs` vazio.
 

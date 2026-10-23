@@ -21,7 +21,7 @@ Imagens em uso: as reconstruídas na etapa 4 da revisão (`projects`, `api_gatew
 | **Edição simples igual (D-87): `e2e-panels-ui.test.js`, browser real (Brave *headless* por CDP)** | **9/9** painéis com o mesmo DOM normalizado da `origin/main`, antes e depois de uma interação, e **1/1** para as três ações da B008. No *baseline*, a mesma comparação deu 9/9 (o teste é estável) |
 | Integração B008 (`e2e-composition.test.js`, nginx → gateway → projetos e utilizadores → RabbitMQ → worker → storage) | **15/15**, com a medição da D-88 |
 | Integração B007 / B005 / B004 (B005 e B004 incluem o fluxo de imagem) | **3/3** / **16/16** / **14/15** (a falha é a conhecida do Brilho de imagem em ARM: espera 127, recebe 126) |
-| Invocações de codificação por tarefa | Uma por tarefa nos testes do worker; nas tarefas da integração, uma resposta `completed` por tarefa (NFR-013, verificada como na etapa 5 anterior) |
+| Invocações de codificação por tarefa | Uma por tarefa nos testes do worker; nas tarefas da integração, uma resposta `completed` por tarefa (NFR-012, verificada como na etapa 5 anterior) |
 
 ## Cobertura do pedido da equipa
 

@@ -9,7 +9,7 @@ superseded_by: null
 
 ## Context
 
-As predefinições de vídeo ficam numa coleção nova do serviço de utilizadores (ADD 4.9). Ao guardar, a D-83 manda validar a estrutura (operações e versões conhecidas, sem junção, sem `extract_frames`, `convert` só no fim, 1 a 10 passos) com os códigos da D-79 e da D-85, e retirar os campos que o servidor grava (`_mark`, `_input`, `_clips`). O registo de operações e as regras de estrutura vivem no serviço de projetos (T-01: uma única implementação das regras).
+As predefinições de vídeo ficam numa coleção nova do serviço de utilizadores (ADD 4.9). Ao guardar, a D-83 manda validar a estrutura (operações e versões conhecidas, sem junção, `convert` só no fim, 1 a 10 passos) com os códigos da D-79 e da D-85, e retirar os campos que o servidor grava (`_mark`, `_input`, `_clips`). O registo de operações e as regras de estrutura vivem no serviço de projetos (T-01: uma única implementação das regras).
 
 ## Decision
 

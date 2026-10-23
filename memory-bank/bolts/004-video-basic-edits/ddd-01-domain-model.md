@@ -8,7 +8,7 @@ updated: 2026-10-22T16:42:11Z
 
 # Static Model - Recorte, remoção de áudio e velocidade
 
-Fontes, por ordem de precedência: `docs/add.md` (ADD v1.1, mestre: T-01, T-02, T-03, T-05, T-06, T-07, Q-ADD-25), `docs/specsDuvidas.md` (D-01, D-03, D-06, D-37 a D-48), `memory-bank/standards/decision-index.md` (ADR-002 a ADR-006), `bolt.md` e as stories ST-VID-001 a 003, `docs/requirements/REQ-VID-TRIM.md`, `REQ-VID-AUDIO.md`, `REQ-VID-SPEED.md`, `docs/use-cases/UC-VID-001.md` a `003.md`. Base: o modelo e o desenho técnico da B003 (`ddd-01-domain-model.md`, `ddd-02-technical-design.md`) e o relatório de testes da B003. Modelo estático, sem leitura de código (restrição do estágio).
+Fontes, por ordem de precedência: `docs/add.md` (ADD v1.1, mestre: T-01, T-02, T-03, T-05, T-06, T-07, Q-ADD-25), `docs/specsDuvidas.md` (D-01, D-03, D-37 a D-48), `memory-bank/standards/decision-index.md` (ADR-002 a ADR-006), `bolt.md` e as stories ST-VID-001 a 003, `docs/requirements/REQ-VID-TRIM.md`, `REQ-VID-AUDIO.md`, `REQ-VID-SPEED.md`, `docs/use-cases/UC-VID-001.md` a `003.md`. Base: o modelo e o desenho técnico da B003 (`ddd-01-domain-model.md`, `ddd-02-technical-design.md`) e o relatório de testes da B003. Modelo estático, sem leitura de código (restrição do estágio).
 
 Os pontos que as fontes não decidem foram registados em `docs/specsDuvidas.md` como D-49 a D-53 e respondidos pela equipa no checkpoint deste estágio; o modelo cita-os como (D-xx).
 
@@ -29,7 +29,7 @@ Fronteiras e contextos vizinhos:
 - **Tarefas, quota e executor (B003, Unit 001):** dono do `VideoTask`, do lugar, da quota, do `chain.js`, do `plan.js`, do `encoding.js`, do executor do worker e das peças comuns de tarefa do frontend. Este contexto fornece-lhes as regras de três operações e os filtros correspondentes. A única necessidade nova do plano é a cópia condicionada ao *keyframe* do recorte (D-49).
 - **Ciclo de vida do vídeo (B001, B002):** dono do agregado Vídeo, da matriz de formatos (`formats.js`), dos `videos.meta` (as propriedades de entrada), do leitor e dos URLs de reprodução. Este contexto lê `videos.meta` (através da aceitação da B003) e usa o leitor da B002 para o *scrubbing* e o *loop preview*.
 - **Interface de edição (frontend):** os três painéis novos montam as peças comuns da B003 (`lib/video-tasks.ts`, `use-video-task.ts`, `video-task-progress.tsx`) sem as reconstruir (D-47).
-- **Fora deste contexto:** marca de água, ajuste, filtro, redimensionamento e orientação (B005); conversão de formato (B007); cadeias com vários passos, junção e validação de estrutura (B008); extração de fotogramas e lotes (D-06). As pré-visualizações estáticas do T-07 não se aplicam a estas três operações: o T-07 ignora explicitamente o recorte, a velocidade e o áudio.
+- **Fora deste contexto:** marca de água, ajuste, filtro, redimensionamento e orientação (B005); conversão de formato (B007); cadeias com vários passos, junção e validação de estrutura (B008); as pré-visualizações estáticas do T-07 não se aplicam a estas três operações: o T-07 ignora explicitamente o recorte, a velocidade e o áudio.
 
 ## Domain Entities
 
@@ -39,7 +39,7 @@ Este bolt não cria entidades persistentes novas. As operações são serviços 
 |--------|------------|----------------|
 | **Tarefa de vídeo** (`VideoTask`, B003, referência) | Ver o modelo da B003. Aqui: `steps = [PassoOperacao]` com um único passo `trim`, `remove_audio` ou `speed`; `kind = single`; `totalSteps = 1`; `cost = 1` | Uma operação rejeitada pelo `validate` não cria tarefa nem reserva créditos (COM-004, AUDIO-003, exceções dos UC). Falha ou cancelamento devolve o crédito e não publica resultado (TRIM AC4, SPEED AC3, B003 T2 e T3). |
 | **Vídeo de entrada** (B001, só leitura) | `meta`: `container`, `videoCodec`, `audioCodec` (`null` = sem áudio, T-00), `width`, `height`, `rotation`, `displayWidth`, `displayHeight`, `fpsNum`, `fpsDen`, `durationMs`, `sizeBytes` | Tem de ser `completed`, de um formato admitido e dentro dos limites do perfil (B003, passos 4 e 5). Nunca é alterado (RN8 do UC-VID-001, RN8 do UC-VID-002, RN10 do UC-VID-003). As propriedades vêm sempre de `videos.meta`, nunca do cliente (T-01). |
-| **Vídeo de resultado** (B001/B003, criação) | Ver o modelo da B003: `_id` = `_id` da tarefa (ADR-005); `sourceVideoIds = [vídeo de entrada]`; `recipe = steps`; `meta` do FFprobe ao ficheiro produzido | MP4 H.264/AAC (ou sem áudio), mesmo a partir de MOV ou AVI (DQ-013, T-05, NFR-018). Os metadados vêm do ficheiro real e não do `estimate` (T-02). Regras de cada operação em "Aggregates". |
+| **Vídeo de resultado** (B001/B003, criação) | Ver o modelo da B003: `_id` = `_id` da tarefa (ADR-005); `sourceVideoIds = [vídeo de entrada]`; `recipe = steps`; `meta` do FFprobe ao ficheiro produzido | MP4 H.264/AAC (ou sem áudio), mesmo a partir de MOV ou AVI (DQ-012, T-05, NFR-016). Os metadados vêm do ficheiro real e não do `estimate` (T-02). Regras de cada operação em "Aggregates". |
 
 ## Value Objects
 
@@ -149,7 +149,7 @@ Sem repositórios novos. O contexto usa os da B003 e da B001 tal como estão:
 
 ### Verificações sem propriedade (D-03)
 
-- ↪ **NFR-010** (FFmpeg em Docker, dona: B001), **NFR-013** (uma recodificação por cadeia) e **NFR-018** (saída MP4 H.264/AAC), donas: B003: verificadas nos resultados destas três operações; a cópia (remoção de áudio, recorte num *keyframe*) não recodifica nenhuma vez.
+- ↪ **NFR-009** (FFmpeg em Docker, dona: B001), **NFR-012** (uma recodificação por cadeia) e **NFR-016** (saída MP4 H.264/AAC), donas: B003: verificadas nos resultados destas três operações; a cópia (remoção de áudio, recorte num *keyframe*) não recodifica nenhuma vez.
 
 ## Decisões tomadas no checkpoint do Estágio 1
 

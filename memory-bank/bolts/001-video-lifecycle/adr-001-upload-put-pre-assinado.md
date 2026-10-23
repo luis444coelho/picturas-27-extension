@@ -9,7 +9,7 @@ superseded_by: null
 
 ## Context
 
-O carregamento de vídeos (UC-VID-000) tem de aceitar ficheiros até 2 GB (Premium) e transferi-los em *streaming* com progresso e cancelamento (REQ-VID-UPLOAD-004/005/006/018). As rotas de upload de imagem existentes usam `multer.memoryStorage()` no API Gateway, no serviço de projetos e no `imageStorageService`, o que carregaria o ficheiro inteiro em memória em cada salto. A regra 2.6 do ADD proíbe alterar essas rotas. O `nginx` não define `client_max_body_size` (vale 1 MB) e os `location` existentes não podem mudar. O ADD deixou a estratégia em aberto (Q-ADD-04), e o T-08 previa URLs de escrita só para a rede interna (worker).
+O carregamento de vídeos (UC-VID-000) tem de aceitar ficheiros até 2 GB (Premium) e transferi-los em *streaming* com progresso e cancelamento (REQ-VID-UPLOAD-004/005/006/018). As rotas de upload de imagem existentes usam `multer.memoryStorage` no API Gateway, no serviço de projetos e no `imageStorageService`, o que carregaria o ficheiro inteiro em memória em cada salto. A regra 2.6 do ADD proíbe alterar essas rotas. O `nginx` não define `client_max_body_size` (vale 1 MB) e os `location` existentes não podem mudar. O ADD deixou a estratégia em aberto (Q-ADD-04), e o T-08 previa URLs de escrita só para a rede interna (worker).
 
 ## Decision
 
@@ -19,14 +19,14 @@ O navegador envia o ficheiro **diretamente para o SeaweedFS** com um **URL pré-
    - valida a permissão de edição, recusa o `anonymous` e verifica extensão, MIME e tamanho declarado contra o perfil;
    - cria o registo em `videos` com `status: queued`, com a chave `<projectId>/video_src/<videoId>.<ext>` derivada pelo servidor no bucket `user-<ownerId>`;
    - devolve o URL PUT público (900 s, `Content-Type` assinado).
-2. O cliente faz o PUT com `XMLHttpRequest` (progresso e `abort()`).
+2. O cliente faz o PUT com `XMLHttpRequest` (progresso e `abort`).
 3. `POST …/videos/:video/upload/complete`: só para quem carregou e em `queued`. Verifica o objeto com `headObject` (existência, tamanho real igual ao declarado e dentro do limite), passa o vídeo a `processing` e inicia a ingestão.
 
 O cancelamento é `DELETE …/videos/:video/upload` (apaga o objeto e o registo). Os registos `queued` nunca aparecem na galeria. Os carregamentos abandonados (`queued` há mais de 900 s + margem) são apagados pela rotina periódica da Q-ADD-14, no âmbito da B003.
 
 ## Rationale
 
-O PUT pré-assinado é a única opção que transfere até 2 GB sem passar pela memória dos serviços, sem tocar em código existente e sem que os dados atravessem o API Gateway (coerente com a NFR-016 e com o *streaming* da UPLOAD-005). A confirmação explícita com `headObject` repõe no servidor as verificações que o URL sozinho não garante: o tamanho real e a existência do objeto.
+O PUT pré-assinado é a única opção que transfere até 2 GB sem passar pela memória dos serviços, sem tocar em código existente e sem que os dados atravessem o API Gateway (coerente com a NFR-014 e com o *streaming* da UPLOAD-005). A confirmação explícita com `headObject` repõe no servidor as verificações que o URL sozinho não garante: o tamanho real e a existência do objeto.
 
 ### Alternatives Considered
 

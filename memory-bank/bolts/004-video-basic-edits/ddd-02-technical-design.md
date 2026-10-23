@@ -222,11 +222,11 @@ As durações previstas são calculadas no cliente para aparecerem sem esperar p
 
 | Requirement | Design Approach |
 |-------------|-----------------|
-| NFR-005 / D-43 (≤ 1 s) | O `validate` e o `planExtras` são cálculos em memória; o FFprobe do *keyframe* corre no worker, nunca na aceitação. |
-| NFR-009 | Progresso da B003 (0,5 s), também na cópia, em que o FFmpeg termina depressa. |
-| NFR-010 (verificação, dona: B001) | Tudo corre no contentor `video_worker` com o FFmpeg 5.1 (D-25). |
-| NFR-013 (verificação, dona: B003) | No máximo uma recodificação: a cópia no *keyframe* e a remoção de áudio de um H.264 não recodificam o vídeo; o FFprobe do *keyframe* não codifica nada. Verificado no log do worker. |
-| NFR-018 (verificação, dona: B003) | Resultado MP4 H.264/AAC (ou sem áudio), verificado com o FFprobe do resultado nas três operações e nas entradas MP4, MOV e AVI. |
+| NFR-004 / D-43 (≤ 1 s) | O `validate` e o `planExtras` são cálculos em memória; o FFprobe do *keyframe* corre no worker, nunca na aceitação. |
+| NFR-008 | Progresso da B003 (0,5 s), também na cópia, em que o FFmpeg termina depressa. |
+| NFR-009 (verificação, dona: B001) | Tudo corre no contentor `video_worker` com o FFmpeg 5.1 (D-25). |
+| NFR-012 (verificação, dona: B003) | No máximo uma recodificação: a cópia no *keyframe* e a remoção de áudio de um H.264 não recodificam o vídeo; o FFprobe do *keyframe* não codifica nada. Verificado no log do worker. |
+| NFR-016 (verificação, dona: B003) | Resultado MP4 H.264/AAC (ou sem áudio), verificado com o FFprobe do resultado nas três operações e nas entradas MP4, MOV e AVI. |
 | AUDIO-005 | Cópia do vídeo verificada pelo `codec`, `profile` e número de pacotes iguais aos do original, e pelo `videoMode` no log. |
 | TRIM-008 / SPEED-006 | Duração do resultado verificada com tolerância de um fotograma. |
 
@@ -250,7 +250,7 @@ Sem dependências novas. FFmpeg/FFprobe 5.1 do worker (D-25): `trim`, `atrim`, `
 
 - **Unitários do serviço de projetos:** `validate`, `estimate` e `copyable` das três operações (limites, D-50 a D-53, MP4/MOV/AVI, rotação, dimensões ímpares); `planExtras` (condições da cópia no *keyframe*, áudio `copy`/`encode`/`none`, `genpts`, `fps` de entrada); `plan.js` com `remove_audio` (`audio: none`, cópia do vídeo, pré-visualização de High 10).
 - **Unitários do worker com FFmpeg 5.1 real:** filtros de cada operação; `keyframe.py` com início num *keyframe*, fora dele, em 0 e com FFprobe a falhar; `atempo` encadeado a 0.25×; `fps=` a 4× e a 0.25×; recorte e remoção de áudio de MP4, MOV e AVI (H.264 e MPEG-4 Part 2).
-- **E2E pela pilha:** cada operação de ponta a ponta com o FFprobe do resultado (duração, resolução, fps, codecs, número de streams de áudio, `videoMode`); rejeições sem tarefa e sem quota (AUDIO-003, TRIM AC3, SPEED AC2); cancelamento e falha com devolução; `sourceVideoIds` e `recipe` no resultado; NFR-010, 013 e 018.
+- **E2E pela pilha:** cada operação de ponta a ponta com o FFprobe do resultado (duração, resolução, fps, codecs, número de streams de áudio, `videoMode`); rejeições sem tarefa e sem quota (AUDIO-003, TRIM AC3, SPEED AC2); cancelamento e falha com devolução; `sourceVideoIds` e `recipe` no resultado; NFR-009, 013 e 018.
 - **Frontend:** unitários do `lib/video-edit.ts`; no navegador, se o `playwright-core` estiver instalado (não estava na B003), os três painéis, o *scrubbing* e o *loop preview*.
 - **Regressão:** os testes das B001 a B003 e o fluxo de imagem.
 
@@ -281,15 +281,15 @@ Se alguma verificação mostrar que a extensão não é possível só com linhas
 
 A D-54 (a) autoriza `applyPlanExtras(plan, steps, inputProps, registry)` a acrescentar também `plan.targets.preview` quando ausente e alguma alternativa puder precisar de pré-visualização. O destino `video_preview/<taskId>.mp4` é calculado no serviço de projetos a partir de `targets.original`, com o mesmo proprietário/projeto. É persistido antes da publicação para republicação e limpeza tardia. Preservam-se `plan.preview`, `plan.output`, destinos existentes e a assinatura aprovada; `plan.js` fica intacto. O worker recebe o destino e não o calcula.
 
-O preflight confirma os pontos adicionais por acréscimo: adaptador em `_filters()` que copia localmente os parâmetros de `speed` e injeta o `step.input` do servidor como `_input` (sobrescreve o cliente; ausência/formato inválido falha); modo de vídeo limitado à entrega atual, reinicializado antes de cada entrega e publicado por `_reply()` apenas em `metadata` de `completed`; helper de opções `-ss/-to` chamado em `task.py` depois de `build_command()` e antes do log/execução, preservando `executor.run()` e os argumentos anteriores. Nenhuma assinatura existente muda. Os painéis obtêm metadados por `useVideoInfo()` e usam `useCanEditProject()`; `useVideoTask()` já invalida a galeria ao concluir.
+O preflight confirma os pontos adicionais por acréscimo: adaptador em `_filters` que copia localmente os parâmetros de `speed` e injeta o `step.input` do servidor como `_input` (sobrescreve o cliente; ausência/formato inválido falha); modo de vídeo limitado à entrega atual, reinicializado antes de cada entrega e publicado por `_reply` apenas em `metadata` de `completed`; helper de opções `-ss/-to` chamado em `task.py` depois de `build_command` e antes do log/execução, preservando `executor.run` e os argumentos anteriores. Nenhuma assinatura existente muda. Os painéis obtêm metadados por `useVideoInfo` e usam `useCanEditProject`; `useVideoTask` já invalida a galeria ao concluir.
 
 ## Ajustes verificados na etapa 5
 
 - **D-55 (a), aprovada:** AUDIO-006 avalia a duração visual e preserva os fotogramas quando a stream de áudio acaba depois do vídeo. A remoção pode encurtar a duração do contentor ao retirar a cauda de áudio; os metadados vêm sempre do ficheiro real.
-- **D-56 (a), aprovada; ADR-009:** uma fila exclusiva adicional no canal de controlo existente permite `basic_get` em `_wait()`, reutilizando `_on_message`. O Pika 1.3.2 adia o dispatch de callbacks reentrantes. Mantêm-se a ligação única, a thread principal e as linhas anteriores da B003.
+- **D-56 (a), aprovada; ADR-009:** uma fila exclusiva adicional no canal de controlo existente permite `basic_get` em `_wait`, reutilizando `_on_message`. O Pika 1.3.2 adia o dispatch de callbacks reentrantes. Mantêm-se a ligação única, a thread principal e as linhas anteriores da B003.
 - **D-57 (a), aprovada; ADR-007:** verificar o prefixo de PTS dos pacotes antes de copiar; um fim não representável por cópia recai na alternativa de recodificação já persistida. Não se alarga a tolerância. Os recortes seguros continuam a copiar; `metadata.videoMode` reflete a escolha real.
 - **Precisão do recorte:** na cópia, contar os fotogramas reais, limitar `-frames:v` e compensar a origem `first_video_pts - format.start_time` nas opções de entrada. Na recodificação, normalizar PTS antes de `trim`/`atrim` e novamente após o corte; o AVI sem PTS verificável usa recuo seguro e não perde os dois primeiros fotogramas pelo desfasamento inicial.
 - **Sincronismo da velocidade:** `atempo` pode terminar ligeiramente antes do último fotograma. Acrescentar silêncio limitado (`apad=pad_dur=0.1`) e limite de saída `-t expectedDurationMs/1000` no helper de comando mantém a tolerância de um fotograma nos testes MP4/MOV de 0.25× a 4×. Preservam-se o filtro `fps` do servidor, as assinaturas e o executor.
-- **Isolamento do plano:** sem passos B004, `applyPlanExtras()` devolve o plano anterior intacto; a operação de teste da B003 não recebe campos novos.
+- **Isolamento do plano:** sem passos B004, `applyPlanExtras` devolve o plano anterior intacto; a operação de teste da B003 não recebe campos novos.
 
 Resultados e limites reais em `ddd-03-test-report.md`; testes manuais pendentes em `manual-test-checklist.md`.

@@ -48,7 +48,7 @@ O `_id` da tarefa já existe antes da publicação, é único e segue a forma de
 ### Negative
 
 - O mesmo valor de ObjectId aparece em duas coleções (`videotasks` e `videos`). Os dois documentos são entidades diferentes, mas quem leia os dados tem de saber que a igualdade é intencional.
-- Uma operação futura que produza vários vídeos a partir de uma tarefa precisaria de outro esquema; nenhuma operação da ERS o faz (a extração de fotogramas, que produz imagens, está fora desta construção, D-06).
+- Uma operação futura que produza vários vídeos a partir de uma tarefa precisaria de outro esquema; nenhuma operação da ERS o faz.
 
 ### Risks
 
@@ -57,7 +57,7 @@ O `_id` da tarefa já existe antes da publicação, é único e segue a forma de
 ## Related
 
 - **Stories**: ST-VID-COM-001 (AC2, AC7)
-- **Requirements**: REQ-VID-COM-002, REQ-VID-COM-003, REQ-VID-NFR-007
+- **Requirements**: REQ-VID-COM-002, REQ-VID-COM-003, REQ-VID-NFR-006
 - **ADD**: T-00 (coleção `videos`), T-03 (idempotência e mesmas chaves), T-08
 - **Decisões**: D-35 (nome do resultado), D-06
 - **Previous ADRs**: ADR-002 (associação das respostas e escritas condicionais), ADR-004

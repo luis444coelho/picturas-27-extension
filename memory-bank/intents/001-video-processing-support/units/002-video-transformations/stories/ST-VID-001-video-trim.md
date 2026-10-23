@@ -27,7 +27,7 @@ implemented: true
 ## Traceability
 
 - **Use case:** UC-VID-001.
-- **Requirements:** `REQ-VID-TRIM-001` a `010`. Consome `REQ-VID-COM-*`. Verifica a `REQ-VID-NFR-010` (dona: ST-VID-000), a `013` e a `018` (donas: ST-VID-COM-001), sem ser dona delas (specsDuvidas D-03). Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
+- **Requirements:** `REQ-VID-TRIM-001` a `010`. Consome `REQ-VID-COM-*`. Verifica a `REQ-VID-NFR-009` (dona: ST-VID-000), a `013` e a `018` (donas: ST-VID-COM-001), sem ser dona delas (specsDuvidas D-03). Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
 - **Decisões do ADD v1.1:** T-01, T-02 (recorte com `trim`/`atrim`), T-05 (formato de trabalho MP4), Q-ADD-25.
 
 ## Dependencies

@@ -8,7 +8,7 @@ created: 2026-10-22T13:32:32Z
 
 ### Objective
 
-Implementar o descarregamento (UC-VID-006, ADD 4.1) e a consulta de informações (UC-VID-007, ADD 4.2) de vídeos do projeto, com autorização de leitura, sem criar tarefa nem debitar quota, sobre a fundação construída pela B001 (coleção `videos`, routers de vídeo com `videoAuth`, `videoUrls.js`, `route/video.js` e `location /s3-video/`).
+Implementar o descarregamento (UC-VID-005, ADD 4.1) e a consulta de informações (UC-VID-006, ADD 4.2) de vídeos do projeto, com autorização de leitura, sem criar tarefa nem debitar quota, sobre a fundação construída pela B001 (coleção `videos`, routers de vídeo com `videoAuth`, `videoUrls.js`, `route/video.js` e `location /s3-video/`).
 
 Fontes, por ordem de autoridade (regra da equipa na B001): `docs/add.md`, `docs/specsDuvidas.md`, `bolt.md` e stories, `docs/requirements/`, `docs/use-cases/`.
 
@@ -19,7 +19,7 @@ Testado no stack em execução (SeaweedFS 4.47, objeto de teste num *bucket* tem
 1. SigV2 sem `response-*`, pelo nginx `/s3-video/` → **200**.
 2. SigV2 com `response-content-disposition` (ASCII simples ou a forma RFC 6266 com `filename*`), pelo nginx → **403**. Confirma a D-29: o nome sugerido não pode ir no URL SigV2.
 3. SigV4 com `response-content-disposition` RFC 6266, direto ao `seaweedfs:9000` → **200** com o `Content-Disposition` certo. O mesmo URL com o `Host` que o nginx envia (`localhost:8080`) → **403**, porque a SigV4 assina o `Host`.
-4. `Range: bytes=60000-` pelo nginx → **206**, `Content-Range: bytes 60000-99999/100000` (DOWNLOAD-007, NFR-025).
+4. `Range: bytes=60000-` pelo nginx → **206**, `Content-Range: bytes 60000-99999/100000` (DOWNLOAD-007, NFR-021).
 5. URL com validade de 2 s, usado depois de expirar → **403** (DOWNLOAD-002).
 
 Conclusão registada como **D-34**, respondida (a): o nome sugerido vai no atributo `download` da âncora, como o ADD 4.1 prevê.
@@ -67,10 +67,10 @@ Conclusão registada como **D-34**, respondida (a): o nome sugerido vai no atrib
 
 ### Technical Approach
 
-- **Autorização (AUTH, NFR-001, NFR-017):** igual às rotas de leitura da B001 (`GET …/videos` e `…/playback`): `videoAuth` no gateway (401/403), `checkSharePermission` + `loadProject` + `rejectAnonymous` no serviço de projetos.
+- **Autorização (AUTH, NFR-001, NFR-015):** igual às rotas de leitura da B001 (`GET …/videos` e `…/playback`): `videoAuth` no gateway (401/403), `checkSharePermission` + `loadProject` + `rejectAnonymous` no serviço de projetos.
 - **Sem custo (DOWNLOAD-004, INFO-007, QUOTA-008):** os dois handlers não importam o módulo de quota, não criam `VideoTask` (que só existe a partir da B003) nem publicam mensagens AMQP; os testes unitários confirmam que a única chamada externa ao serviço de utilizadores é `getUserType`.
 - **Dois momentos (4.1):** `GET …/videos/:video` devolve o `downloadFileName` e os metadados para o diálogo; só a confirmação chama `…/download`, de modo que os 15 min começam na confirmação.
-- **NFR-016:** o ficheiro vai do SeaweedFS ao navegador pelo `/s3-video/`; o API Gateway só transporta o JSON `{url, fileName, expiresAt}`.
+- **NFR-014:** o ficheiro vai do SeaweedFS ao navegador pelo `/s3-video/`; o API Gateway só transporta o JSON `{url, fileName, expiresAt}`.
 - **Regra 2.6:** nenhum ficheiro anterior ao vídeo é alterado. Nos ficheiros criados pela B001 só se acrescentam linhas (rotas, um código de erro, pontos de ligação dos componentes), como a D-08 prevê para a B002.
 - **Ordem de trabalho no Estágio 2:** backend (`fileName.js`, `access.js`, rotas, gateway) → frontend → verificação manual no stack.
 - **Complexidade (D-01):** `avg_uncertainty` = 2 (D-34 e D-35 em aberto no início do bolt, comportamento do SeaweedFS), `max_dependencies` = 1 (só a B001), `testing_scope` = 2 (unitários + E2E pelo nginx; sem worker nem filas).
@@ -82,7 +82,7 @@ Conclusão registada como **D-34**, respondida (a): o nome sugerido vai no atrib
 
 ### Acceptance Criteria
 
-**ST-VID-006 / REQ-VID-DOWNLOAD-001 a 009, NFR-016, NFR-025**
+**ST-VID-006 / REQ-VID-DOWNLOAD-001 a 009, NFR-014, NFR-021**
 
 - [ ] Leitor, editor ou dono de um vídeo `completed` recebe `{url, fileName, expiresAt}`, com `expiresAt` = emissão + 900 s, e o descarregamento inicia-se (001, 002).
 - [ ] Sem acesso ao projeto → 403 (ou 410 para link revogado); anónimo → 403; vídeo inexistente → 404 `NOT_FOUND`; vídeo não `completed` → 409 `RESOURCE_NOT_READY`; objeto em falta → 404 `RESOURCE_UNAVAILABLE` com registo; em nenhum caso é emitido URL (001, 003).
@@ -90,10 +90,10 @@ Conclusão registada como **D-34**, respondida (a): o nome sugerido vai no atrib
 - [ ] O saldo da quota mantém-se depois de descarregamentos (004).
 - [ ] Nome sugerido: original → `ferias.mp4`; resultado de recorte de `ferias.mp4` → `ferias_trim.mp4`; extensão do formato armazenado (005, 006).
 - [ ] Um AVI carregado é descarregado com extensão `.avi` e hash idêntico ao ficheiro carregado; nunca a cópia MP4 (006).
-- [ ] Pedido com `Range` pelo `/s3-video/` → 206 com os bytes em falta (007, NFR-025).
+- [ ] Pedido com `Range` pelo `/s3-video/` → 206 com os bytes em falta (007, NFR-021).
 - [ ] URL usado depois de expirar → 403; repetir o pedido gera um URL novo e válido (002, 008).
 - [ ] Cada emissão regista `correlationId`, utilizador e recurso; nem os logs do serviço nem o *access log* do nginx contêm a assinatura (009, T-10).
-- [ ] Os dados do ficheiro não atravessam o API Gateway (NFR-016).
+- [ ] Os dados do ficheiro não atravessam o API Gateway (NFR-014).
 
 **ST-VID-007 / REQ-VID-INFO-001 a 009**
 

@@ -38,7 +38,7 @@ complexity:
 
 ## Visão geral
 
-Conversão entre MP4, MOV e AVI (UC-VID-012) definida pela matriz do T-05, com cópia de pré-visualização MP4 (T-06) (ADD v1.1, 4.7).
+Conversão entre MP4, MOV e AVI (UC-VID-011) definida pela matriz do T-05, com cópia de pré-visualização MP4 (T-06) (ADD v1.1, 4.7).
 
 ## Objetivo
 
@@ -63,7 +63,7 @@ Acrescentar a operação `convert` `{target: "mp4"|"mov"|"avi"}` ao registo de o
 
 - **D-73:** o nome apresentado do resultado conserva a extensão da origem; o download usa a extensão correta do contentor.
 - **D-74:** a conta `free` perde o crédito no servidor, confirmado por API, MongoDB, VideoTask e logs; o contador do frontend só reflete a alteração após atualização da sessão.
-- **NFR-026:** QuickTime e Windows Media Player não foram testados neste checkpoint. Os ficheiros da matriz passaram em FFprobe, descodificação integral e VLC; os percursos manuais aprovados constam da checklist.
+- **NFR-022:** QuickTime e Windows Media Player não foram testados neste checkpoint. Os ficheiros da matriz passaram em FFprobe, descodificação integral e VLC; os percursos manuais aprovados constam da checklist.
 
 ## Respostas do checkpoint da etapa 1
 
@@ -77,7 +77,7 @@ As opções e respostas completas estão em `docs/specsDuvidas.md`. A B007 trata
 
 ## Requisitos rastreados
 
-REQ-VID-CONVERT-001 a 010; REQ-VID-NFR-012, 026.
+REQ-VID-CONVERT-001 a 010; REQ-VID-NFR-011, 026.
 
 Os critérios de aceitação autoritativos são os dos ficheiros `docs/requirements/REQ-VID-*.md`; a propriedade de cada requisito está em `intents/001-video-processing-support/traceability.md`.
 
@@ -94,12 +94,12 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 - `projects/video/operations/convert.js` (usa o `formats.js` da B003).
 - `Tools/video/ops/convert.py` com saída dupla (T-06).
 - Frontend: painel de conversão (formato atual, destinos sem o atual, indicação de cópia ou recodificação); o leitor usa `preview_key` para resultados MOV e AVI.
-- Testes de descodificação com FFprobe (NFR-012) e de reprodução em VLC e no leitor integrado (NFR-026) para cada caminho da matriz.
+- Testes de descodificação com FFprobe (NFR-011) e de reprodução em VLC e no leitor integrado (NFR-022) para cada caminho da matriz.
 
 ## Critérios de passagem
 
 - [x] Story incluída implementada e validada nos testes e percursos manuais aprovados.
-- [x] Critérios dos requisitos rastreados verificados no âmbito da B007; limitações da NFR-026 documentadas acima.
+- [x] Critérios dos requisitos rastreados verificados no âmbito da B007; limitações da NFR-022 documentadas acima.
 - [x] Nenhuma linha de código existente alterada (regra 2.6 do ADD); fluxo de imagem verificado.
 - [x] Testes automatizados e relatório do bolt registados.
 - [x] Código revisto.
@@ -119,8 +119,8 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 ## Limites
 
 - **Regra 2.6 do ADD ("só acrescentar"):** o código existente não é alterado. Só se acrescentam ficheiros novos e pontos de ligação novos (uma linha `app.use` ou `require`, uma fila, exchange ou *binding* em `rabbitMQ/definitions.json`, um serviço ou volume no `docker-compose.yaml`, um `location` ou `log_format` no `nginx/nginx.conf`, componentes novos no frontend), sem tocar nas linhas existentes nem mudar o comportamento do fluxo de imagem.
-- O utilizador não escolhe codec nem qualidade (UC-VID-012 Q1).
+- O utilizador não escolhe codec nem qualidade (UC-VID-011 Q1).
 
 ## Notas
 
-- Esforço no ADD: UC-VID-012 = M. `avg_complexity` = 2 (maior esforço do ADD no bolt, com S=1, M=2, L=3); `avg_uncertainty`, `max_dependencies` e `testing_scope` são preenchidos no início do bolt na Construção (specsDuvidas D-01).
+- Esforço no ADD: UC-VID-011 = M. `avg_complexity` = 2 (maior esforço do ADD no bolt, com S=1, M=2, L=3); `avg_uncertainty`, `max_dependencies` e `testing_scope` são preenchidos no início do bolt na Construção (specsDuvidas D-01).

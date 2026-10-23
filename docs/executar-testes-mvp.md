@@ -200,4 +200,4 @@ de contas do próprio script, sem Docker:
 
 ```bash
 python3 -m unittest discover -s scripts -p 'test_mvp.py' -v
-```
+`

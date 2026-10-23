@@ -26,8 +26,8 @@ implemented: true
 
 ## Traceability
 
-- **Use case:** UC-VID-007.
-- **Requirements:** `REQ-VID-INFO-001` a `009`. Consome `REQ-VID-AUTH-*`, `REQ-VID-QUOTA-008`, `REQ-VID-STORAGE-002`, `004`, `REQ-VID-NFR-017`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
+- **Use case:** UC-VID-006.
+- **Requirements:** `REQ-VID-INFO-001` a `009`. Consome `REQ-VID-AUTH-*`, `REQ-VID-QUOTA-008`, `REQ-VID-STORAGE-002`, `004`, `REQ-VID-NFR-015`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
 - **Decisões do ADD v1.1:** 4.2, Q-ADD-13 (resolução de apresentação).
 
 ## Dependencies

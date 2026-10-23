@@ -57,7 +57,7 @@ Os pontos que as fontes não decidiam foram registados em `docs/specsDuvidas.md`
 
 **Novos:**
 
-1. `projects/models/video.js`: esquema do T-00 sem `batch_id` (D-06).
+1. `projects/models/video.js`: esquema do T-00 com identificadores de tarefa e recurso.
 2. `projects/video/formats.js`: matriz T-05 e compatibilidade com o navegador (T-06).
 3. `projects/video/profiles.js`: limites por perfil.
 4. `projects/video/display.js`: dimensões de apresentação e instante da miniatura.
@@ -95,7 +95,7 @@ Os pontos que as fontes não decidiam foram registados em `docs/specsDuvidas.md`
 1. Gateway: uma linha `app.use("/projects", videoRoutes)` antes da linha do router `/projects` existente.
 2. Serviço de projetos:
    - uma linha `app.use("/", videoRoutes)` antes do router existente;
-   - um `require("./video/amqp").start()` no arranque.
+   - um `require("./video/amqp").start` no arranque.
 3. `imageStorageService/server.js`: uma linha `app.use("/video", videoRoutes)`.
 4. `wsGateway/index.js`: uma linha no fim, `require("./video")(io)`.
 5. `rabbitMQ/definitions.json`: três filas e três *bindings* novos.
@@ -168,7 +168,7 @@ FE: atualiza a galeria (GET videos) → leitor (GET playback) → <video control
 
 | Table | Columns | Relationships |
 |-------|---------|---------------|
-| `videos` (MongoDB do serviço de projetos; Mongoose, `timestamps: true`) | `_id` ObjectId (= `videoId`); `project_id` ObjectId; `owner_id` ObjectId; `created_by` ObjectId; `original_name` String; `mime_type` String (`video/mp4`, `video/quicktime`, `video/x-msvideo`); `status` enum `queued \| processing \| completed \| failed`; `storage: {original_key, preview_key, thumb_key, first_frame_key}`; `meta: {container, video_codec, audio_codec (null = sem áudio), width, height, rotation, display_width, display_height, fps_num, fps_den, duration_ms, size_bytes, bitrate}`; `source_video_ids` [ObjectId] (`[]`); `recipe` [{operation, version, parameters}] (`[]`); `task_id` ObjectId (`null`); `createdAt`, `updatedAt` | `project_id` → projeto (baseline, sem chave estrangeira; projetos apagados ficam para a rotina da Q-ADD-14, B003); `owner_id` → dono do projeto e bucket; `created_by` → executor. Sem `batch_id` (D-06) |
+| `videos` (MongoDB do serviço de projetos; Mongoose, `timestamps: true`) | `_id` ObjectId (= `videoId`); `project_id` ObjectId; `owner_id` ObjectId; `created_by` ObjectId; `original_name` String; `mime_type` String (`video/mp4`, `video/quicktime`, `video/x-msvideo`); `status` enum `queued \| processing \| completed \| failed`; `storage: {original_key, preview_key, thumb_key, first_frame_key}`; `meta: {container, video_codec, audio_codec (null = sem áudio), width, height, rotation, display_width, display_height, fps_num, fps_den, duration_ms, size_bytes, bitrate}`; `source_video_ids` [ObjectId] (`[]`); `recipe` [{operation, version, parameters}] (`[]`); `task_id` ObjectId (`null`); `createdAt`, `updatedAt` | `project_id` → projeto (baseline, sem chave estrangeira; projetos apagados ficam para a rotina da Q-ADD-14, B003); `owner_id` → dono do projeto e bucket; `created_by` → executor. |
 
 **Índices:** `{project_id: 1, status: 1, createdAt: -1}` (galeria) e `{status: 1, updatedAt: 1}` (para a rotina de limpeza da B003, D-15).
 
@@ -201,7 +201,7 @@ Uma resposta reentregue que não corresponde ao estado esperado é confirmada e 
 | Authentication | `videoAuth` no gateway: o JWT é validado com o segredo partilhado (mesma lógica do `auth.checkToken`). Se faltar, for inválido ou tiver expirado → **401** (AUTH-001, NFR-001). |
 | Authorization | Gateway: utilizador do token ≠ `:user` sem `?share=` → **403**. Serviço de projetos: `checkSharePermission` (leitura) nas rotas de consulta; mais `requireEditPermission` e `enforcePresenceLimit` nas de carregamento (AUTH-003, STORAGE-003); tipo do executor por `GET users:/:user/type` com o `X-Caller-Id` → `anonymous` **403** (AUTH-002). Confirmar e cancelar exigem ainda `created_by` = executor. |
 | Integridade das chaves | O cliente nunca escolhe a chave nem o bucket: o servidor deriva-os do `videoId` e do dono do projeto. O `Content-Type` vai assinado no PUT. A confirmação verifica a existência e o tamanho com `headObject`. |
-| URLs temporários | URLs pré-assinados de 900 s (NFR-017) para o PUT do carregamento, o GET da reprodução e as miniaturas. Os URLs internos do worker não saem da rede Docker. |
+| URLs temporários | URLs pré-assinados de 900 s (NFR-015) para o PUT do carregamento, o GET da reprodução e as miniaturas. Os URLs internos do worker não saem da rede Docker. |
 | Credenciais em logs | O `location /s3-video/` usa o `log_format video_s3`, com `$uri` em vez de `$request_uri`, para a assinatura não ficar nos logs (T-10). Os logs do código novo nunca incluem JWT nem URLs assinados. |
 | Fuga pelo WebSocket | Os eventos levam só identificadores, estado e código de erro, sem nomes nem URLs (risco aceite do T-03). |
 | Data Encryption | TLS terminado no nginx (baseline); encriptação em repouso do SeaweedFS (baseline, data-stack). Nada de novo. |
@@ -211,13 +211,13 @@ Uma resposta reentregue que não corresponde ao estado esperado é confirmada e 
 
 | Requirement | Design Approach |
 |-------------|-----------------|
-| UPLOAD-005 (*streaming*) e NFR-016 | PUT direto do navegador para o SeaweedFS pelo nginx (`proxy_request_buffering off`, `client_max_body_size 2g`); os dados não atravessam o gateway nem o serviço de projetos (D-11). |
-| UPLOAD-018 (progresso 0–100 %) e UPLOAD-006 (cancelar) | O frontend envia com `XMLHttpRequest` (`upload.onprogress`, valores monótonos) e cancela com `xhr.abort()` seguido de `DELETE …/upload`. |
-| NFR-008 (limites) | São verificados três vezes: tamanho declarado no pedido do URL; tamanho real no `headObject` da confirmação; duração depois do FFprobe, no serviço de projetos. O nginx corta acima de 2 GB. Unidade dos limites (D-22). |
+| UPLOAD-005 (*streaming*) e NFR-014 | PUT direto do navegador para o SeaweedFS pelo nginx (`proxy_request_buffering off`, `client_max_body_size 2g`); os dados não atravessam o gateway nem o serviço de projetos (D-11). |
+| UPLOAD-018 (progresso 0–100 %) e UPLOAD-006 (cancelar) | O frontend envia com `XMLHttpRequest` (`upload.onprogress`, valores monótonos) e cancela com `xhr.abort` seguido de `DELETE …/upload`. |
+| NFR-007 (limites) | São verificados três vezes: tamanho declarado no pedido do URL; tamanho real no `headObject` da confirmação; duração depois do FFprobe, no serviço de projetos. O nginx corta acima de 2 GB. Unidade dos limites (D-22). |
 | NFR-003 (matriz) | `formats.js` é a única fonte: extensão e MIME no pedido do URL, codecs depois do FFprobe, plano da cópia (T-05, T-06, D-13). |
-| NFR-010 (Docker) | Worker em `python:3.11-slim` com `apt-get install ffmpeg` e o `Tools/utils/requirements.txt` partilhado; arranca com `docker compose up`. |
-| NFR-011 (filas independentes) | Filas de vídeo próprias. O worker reutiliza `Tools/utils/rabbit_mq.py` e `env.py` sem os alterar: a subclasse `video_rabbit.py` redefine a declaração da fila (com os argumentos *quorum*) e o consumo (`auto_ack=False`, `prefetch_count=1`). Não usa o `tool_msg.py`. |
-| Fiabilidade (NFR-007, I7) | `ack` manual no worker (só depois de publicar a resposta) e no `amqp.js` (só depois de gravar no MongoDB). Reentrega → recomeça do zero e limpa `/tmp/video/<videoId>/`. *Dead-letter* ao fim de 2 entregas → `failed` + compensação. A compensação apaga os objetos de `video_src`, `video_preview` e `video_thumb` e depois o registo, por esta ordem, para não ficarem objetos sem registo que os encontre. |
+| NFR-009 (Docker) | Worker em `python:3.11-slim` com `apt-get install ffmpeg` e o `Tools/utils/requirements.txt` partilhado; arranca com `docker compose up`. |
+| NFR-010 (filas independentes) | Filas de vídeo próprias. O worker reutiliza `Tools/utils/rabbit_mq.py` e `env.py` sem os alterar: a subclasse `video_rabbit.py` redefine a declaração da fila (com os argumentos *quorum*) e o consumo (`auto_ack=False`, `prefetch_count=1`). Não usa o `tool_msg.py`. |
+| Fiabilidade (NFR-006, I7) | `ack` manual no worker (só depois de publicar a resposta) e no `amqp.js` (só depois de gravar no MongoDB). Reentrega → recomeça do zero e limpa `/tmp/video/<videoId>/`. *Dead-letter* ao fim de 2 entregas → `failed` + compensação. A compensação apaga os objetos de `video_src`, `video_preview` e `video_thumb` e depois o registo, por esta ordem, para não ficarem objetos sem registo que os encontre. |
 | Deteção de ficheiros corrompidos (UPLOAD-012) | `ffprobe -show_streams -show_format` e uma segunda passagem `ffprobe -count_packets` sobre a stream de vídeo, que lê todos os pacotes sem descodificar: deteta cabeçalhos ilegíveis e corpos truncados. Qualquer erro → `CORRUPTED_FILE`. Será verificado no Estágio 5 com ficheiros de referência truncados. |
 | Metadados (UPLOAD-013/019, Q-ADD-13) | A rotação vem do `displaymatrix` (`side_data_list`) ou da etiqueta `rotate`, normalizada para 0/90/180/270. `display_*` é calculado em `display.js`, no serviço de projetos. |
 | Miniatura e fotograma 0 (UPLOAD-014, T-07, Q-ADD-22) | Miniatura: `-ss <thumbnailAtMs>` com `thumbnailAtMs = durationMs ≥ 1000 ? 1000 : 0`, um fotograma, JPEG; dimensão e qualidade (D-20). Fotograma 0: `-frames:v 1 -vf scale='min(1280,iw)':-2`. A rotação é aplicada pelo *autorotate* do FFmpeg nos dois. |
@@ -259,7 +259,7 @@ Depois de qualquer `failed`, o serviço de projetos (1) grava `failed`, (2) publ
 | nginx | `/s3-video/` para o PUT e o GET públicos | `location` e `log_format` novos |
 | Frontend: `react-dropzone`, `@tanstack/react-query`, `socket.io-client`, Radix `progress`/`dialog` | Arrastar e largar, pedidos, eventos, UI | Bibliotecas já existentes, usadas em componentes novos; sem dependências novas |
 
-**Sem dependências novas** além das do ADD (secção 6: FFmpeg no Dockerfile do worker). O `archiver` não entra (D-06).
+**Sem dependências novas** além das do ADD (secção 6: FFmpeg no Dockerfile do worker). O `archiver` não entra.
 
 ## Verificações a fazer no Estágio 4 (dependem do código existente)
 

@@ -54,13 +54,13 @@ Ambiente: macOS com Docker em **aarch64**, Python 3.11, FFmpeg e FFprobe 5.1.9-0
   - orientação a partir da apresentação e corte de 1 px;
   - marca de água fixa em todos os fotogramas, com opacidade e áudio (MP3 → AAC, AAC copiado);
   - etiquetas do grafo numa cadeia, recusa de caminho inseguro, plano sem mutação e valores do cliente ignorados;
-  - uma única invocação com um `-filter_complex` (NFR-013).
+  - uma única invocação com um `-filter_complex` (NFR-012).
 - [x] `Tools/video/tests/generate_visual_edit_fixtures.py` e `tests/visual_filters.json` - fixtures da integração e cópia do catálogo como dados de teste.
 - [x] `frontend/test/video-visual.test.mts` - par mais próximo (RESIZE-002: 1000 → 562), predefinições (D-64), avisos, dimensões orientadas e identidade, passos sem `_mark`, ficheiros até 1 MB e mensagens por campo.
 - [x] `projects/test/video/e2e-visual-edits.test.js` - integração real:
   - as cinco operações (proveniência, `recipe`, metadados reais, fps, duração, áudio, original intacto, galeria);
   - equivalência sharp ↔ FFmpeg;
-  - NFR-015;
+  - NFR-013;
   - rejeições, incluindo o `_mark` forjado pelo cliente (ADR-010) e o teto free/Premium;
   - imagens da marca (PNG, JPEG normalizado, galeria, GIF recusado, mais de 1 MB recusado pelo nginx com 413);
   - pré-visualização da marca comparada com o resultado;
@@ -90,7 +90,7 @@ Ambiente: macOS com Docker em **aarch64**, Python 3.11, FFmpeg e FFprobe 5.1.9-0
   - conteúdo vazio, imagem inválida ou acima de 1 MB e geometria fora do quadro recusados antes da tarefa;
   - pré-visualização (diferença de 0,67/255 para o resultado);
   - posição fixa em todos os fotogramas, MP3 → AAC e AAC copiado.
-- ✅ **NFR-015:** p95 de 22,5 ms e máximo de 24,6 ms em 40 pedidos através do nginx (execução final; na anterior, 21,6 e 27). Miniaturas em 20,1 ms, validação em 10 ms, pré-visualização da marca em 15,3 ms.
+- ✅ **NFR-013:** p95 de 22,5 ms e máximo de 24,6 ms em 40 pedidos através do nginx (execução final; na anterior, 21,6 e 27). Miniaturas em 20,1 ms, validação em 10 ms, pré-visualização da marca em 15,3 ms.
 - ✅ **Equivalência sharp ↔ FFmpeg** (critério de passagem do bolt): diferença média por canal de **0,50 a 0,55** nas 7 orientações não identidade (a identidade é verificada contra o fotograma) e **0,35 a 1,36** nos 6 filtros. O limite do teste é 12.
 - ✅ **Antes da tarefa e da quota:** onze rejeições, com 422 na aceitação e a mesma resposta na validação, sem tarefa e com a quota intacta. Aceitação com p95 de 34 ms e máximo de 154 ms (24 aceitações).
 - ✅ **Progresso, cancelamento e resultado parcial:** cancelamento depois de progresso positivo (observado em `video_ws_queue`), `cancelled`, sem resultado, crédito devolvido e o worker responde `cancelled`.
@@ -133,7 +133,7 @@ Ficheiros existentes (só acréscimos):
 ### Notes
 
 - **Limpeza:**
-  - **Integração:** o `after()` apagou só os IDs criados em cada execução (também nas execuções que falharam).
+  - **Integração:** o `after` apagou só os IDs criados em cada execução (também nas execuções que falharam).
   - **Teste de browser:** apagou o utilizador e o projeto pela API (204); os vídeos do projeto apagado ficam para a rotina de manutenção da B003.
   - **Contentores:** os diretórios temporários (`/tmp/b005-*` e `/tmp/b004-e2e-fixtures-b005run`) foram removidos. As fixtures e as capturas ficaram no *scratchpad* da sessão, fora do repositório.
 - **Não executado:** as suites históricas `e2e-*.test.js` das B001 a B003, pelas razões do README da B004 (ambientes próprios, `test_reencode`, reinícios), e testes de carga. A regressão de vídeo fica coberta pelas suites unitárias e pela integração da B004.

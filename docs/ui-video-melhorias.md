@@ -128,7 +128,7 @@ O leitor atual monta sessões separadas para edição básica, edição visual e
 
 O modelo já guarda `source_video_ids`, `recipe` e `task_id`. O endpoint de detalhe devolve `sources` e `recipe`. Porém, o tipo `ProjectVideo` e a listagem atual apenas fornecem os dados do cartão, sem essa proveniência.
 
-Assim, agrupar corretamente os resultados requer mais do que CSS: será necessário disponibilizar a proveniência à galeria. No desenho técnico, escolher uma extensão aditiva da listagem ou um contrato complementar em lote. Evitar uma chamada de detalhe por cartão como solução permanente e não reconstruir relações a partir de nomes.
+Assim, agrupar corretamente os resultados requer mais do que CSS: será necessário disponibilizar a proveniência à galeria. No desenho técnico, escolher uma extensão aditiva da listagem ou um contrato complementar para consultar várias proveniências. Evitar uma chamada de detalhe por cartão como solução permanente e não reconstruir relações a partir de nomes.
 
 Os campos novos, se existirem, devem preservar os consumidores atuais, as permissões de projeto/partilha e a compatibilidade com vídeos históricos. Não é necessária uma nova cópia dos ficheiros para apresentar versões. A ordenação por família pode ser uma projeção dos recursos existentes.
 

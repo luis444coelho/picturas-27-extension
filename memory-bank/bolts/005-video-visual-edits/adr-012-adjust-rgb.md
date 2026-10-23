@@ -28,12 +28,12 @@ D-67 (a), aprovada pela equipa. O brilho não muda.
 
 - **Contraste:** `lutrgb=r=val*c+128·(1−c):g=…:b=…` no worker, uma reta pelo pivô fixo 128 (Q-ADD-18) aplicada a cada canal RGB, e `linear(c, 128·(1−c))` no sharp, como estava.
 - **Saturação:** a matriz `M = s·I + (1−s)·[0.299 0.587 0.114]` (cada linha mistura com a luma BT.601), com `colorchannelmixer` no worker e `recomb(M)` no sharp.
-- **Ordem:** brilho, contraste e saturação, numa passagem do sharp por operação (T-07) e na mesma cadeia do grafo único do worker (NFR-013).
+- **Ordem:** brilho, contraste e saturação, numa passagem do sharp por operação (T-07) e na mesma cadeia do grafo único do worker (NFR-012).
 
 ## Rationale
 
 - O ADD 4.3 quer a pré-visualização igual ao resultado ("pivô fixo, igual ao da pré-visualização sharp") e aceita o risco só "com fotogramas de referência". A medição mostrou que o `eq` não serve esse objetivo.
-- A DQ-020 pede a semântica das ferramentas de imagem. O `ImageEnhance.Contrast` é uma mistura linear em RGB com um pivô (aqui o 128 da Q-ADD-18). O `ImageEnhance.Color` é exatamente a mistura com o `convert("L")` BT.601.
+- A DQ-019 pede a semântica das ferramentas de imagem. O `ImageEnhance.Contrast` é uma mistura linear em RGB com um pivô (aqui o 128 da Q-ADD-18). O `ImageEnhance.Color` é exatamente a mistura com o `convert("L")` BT.601.
 - Na integração real, depois da mudança, a diferença ficou em 0,45 (contraste 1.3), 1,39 (0.6), 1,32 (saturação 0.5) e 0,68 (combinação).
 
 ### Alternatives Considered
@@ -50,7 +50,7 @@ D-67 (a), aprovada pela equipa. O brilho não muda.
 
 ### Negative
 
-- Diverge da letra do ADD 4.3, do T-07 e da A1 do UC-VID-008 (`eq`), o que fica para acertar na próxima revisão do ADD.
+- Diverge da letra do ADD 4.3, do T-07 e da A1 do UC-VID-007 (`eq`), o que fica para acertar na próxima revisão do ADD.
 - O `colorchannelmixer` e o `lutrgb` trabalham em RGB, o que acrescenta conversões no grafo (o ADD 4.3 já o previa para o brilho). A saída continua `yuv420p`.
 
 ### Risks
@@ -59,4 +59,4 @@ D-67 (a), aprovada pela equipa. O brilho não muda.
 
 ## Related
 
-- D-67, Q-ADD-18, Q-ADD-23, DQ-020; ADR-011 (grafo único).
+- D-67, Q-ADD-18, Q-ADD-23, DQ-019; ADR-011 (grafo único).

@@ -25,8 +25,8 @@ implemented: true
 
 ## Traceability
 
-- **Use case:** UC-VID-009.
-- **Requirements:** `REQ-VID-FILTER-001` a `007`. Consome `REQ-VID-COM-*`, `REQ-VID-NFR-015`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
+- **Use case:** UC-VID-008.
+- **Requirements:** `REQ-VID-FILTER-001` a `007`. Consome `REQ-VID-COM-*`, `REQ-VID-NFR-013`. Critérios de aceitação completos e autoritativos nos ficheiros `docs/requirements/` correspondentes (ERS v2.4).
 - **Decisões do ADD v1.1:** 4.4 (`filters.json` com matrizes 3×3 e inversão), T-07, Q-ADD-07 (matrizes de Vintage, Frio e Quente, pendente no ADD), Q-ADD-25.
 
 ## Dependencies
