@@ -755,3 +755,22 @@
   - **(c)** Outro formato de resposta compatível com o endpoint existente e a regra 2.6.
 - **Recomendação:** (a), desde que a verificação V4 confirme que pode ser ligada apenas com linhas novas e sem alterar respostas das operações anteriores.
 - **Resposta:** **(a), aprovada condicionalmente pela equipa.** Acrescentar `videoMode` e `audioMode` apenas à resposta de validação de `convert`, desde que V4 confirme que só entram linhas novas e que as respostas da B004 e B005 não mudam; se a V4 falhar, registar dúvida nova e parar.
+
+## D-73 — Nome apresentado do resultado conserva a extensão da origem
+
+- **Onde:** B007, verificação manual da etapa 3; `projects/video/tasks.js` da B003 e `projects/video/fileName.js` da B001/B003.
+- **Dúvida:** Aceita-se que um MP4 convertido para MOV apareça no projeto com `original_name` terminado em `.mp4`, embora o ficheiro descarregado tenha a extensão `.mov` correta?
+- **O que as fontes dizem:** O `resultVideo` em `tasks.js` da B003 copia `original_name` da origem para o resultado. O download usa `fileName.js`, que escolhe a extensão do contentor guardado. O mesmo nome herdado ocorre nas operações desde a B004. A regra 2.6 do ADD proíbe alterar as linhas existentes do fluxo de publicação.
+- **Opções:** (a) aceitar o nome apresentado como risco residual, mantendo o download com a extensão correta; (b) alterar a atribuição de `original_name` em `tasks.js`, o que exige modificar código existente e viola a regra 2.6; (c) definir numa intervenção futura uma apresentação específica dos resultados sem alterar a publicação histórica.
+- **Recomendação:** (a) neste bolt, por preservar a regra 2.6 e não afetar o formato real nem o download.
+- **Resposta:** **(a), aceite pela equipa como risco residual.** O nome apresentado mantém a extensão da origem; a transferência usa `fileName.js` e recebe a extensão do resultado.
+
+## D-74 — Contador de operações diárias não atualiza após tarefas de vídeo
+
+- **Onde:** B007, verificação manual da etapa 3; `frontend/components/video/use-video-task.ts` da B003, `frontend/app/dashboard/[pid]/page.tsx` (fluxo de imagem), `projects/video/tasks.js`, `projects/video/quota.js` e serviço de utilizadores.
+- **Dúvida:** Numa conta `free`, o contador «Operações diárias restantes» da interface não diminui após uma operação de vídeo. O crédito não é debitado no servidor ou falta atualizar a sessão do frontend?
+- **O que as fontes dizem:** REQ-VID-QUOTA-002/003 exige reservar um crédito na aceitação e mantê-lo debitado após conclusão. A B003 chama `users.getUserType(callerId)`, reserva pela API de utilizadores e guarda `reserved_credits` no VideoTask. `use-video-task.ts` invalida `projectVideos` na conclusão, mas não chama `useUpdateSession`; o fluxo de imagem em `page.tsx` chama `updateSession.mutate` após aceitar o processamento e ao cancelar.
+- **Evidência na pilha real (2026-10-23, conta de diagnóstico `free`, conversão MP4 → MOV):** `users.getUserType` e `GET /users/:user` devolveram `free`; `remaining_operations` passou de **5 antes** para **4 na aceitação** e ficou **4 após `completed`**. No MongoDB de utilizadores, `operations` passou de vazio para o registo do dia com `processed: 1`. O VideoTask tinha `reserved_credits: 1` na aceitação e no fim, `refund.state: none` em ambos os momentos e estado final `completed`. Os logs de `projects` para a tarefa registaram `video.task.accepted` com `cost: 1, reserved: 1`, `video.task.started` e `video.task.completed`; não houve evento de devolução. A conta e o projeto de diagnóstico foram removidos pela limpeza da suite.
+- **Opções:** (a) aceitar como risco residual de atualização da interface: o servidor debita corretamente, e o contador volta ao valor real quando a sessão é atualizada; (b) numa intervenção futura, montar uma extensão nova que refresque a sessão quando uma tarefa de vídeo é aceite, concluída ou cancelada, verificando a regra 2.6 sem alterar linhas existentes; (c) modificar diretamente `use-video-task.ts` da B003 para chamar `useUpdateSession`, o que viola a regra 2.6.
+- **Recomendação:** (a) para a B007, porque a quota no servidor e a cobrança da tarefa estão corretas; planear a atualização do contador numa intervenção aditiva própria.
+- **Resposta:** **(a), aceite pela equipa como risco residual sob a condição de débito no servidor, confirmada pelo diagnóstico acima.** O contador apresentado pode ficar desatualizado durante a sessão após operações de vídeo; a quota efetiva no servidor diminui e impede operações acima do limite.

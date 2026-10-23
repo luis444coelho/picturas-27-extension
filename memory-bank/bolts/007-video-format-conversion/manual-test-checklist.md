@@ -1,6 +1,21 @@
 # Checklist manual no browser — B007
 
-Executar no projeto de teste com `test_reencode` desligada. Abrir a aplicação em `https://localhost:8080` num navegador de referência, entrar como utilizador com permissão de edição e importar os ficheiros de `Tools/video/tests/generate_convert_fixtures.py`. Os resultados abaixo são verificações manuais pendentes; a matriz automatizada e a reprodução VLC constam de `test-walkthrough.md`.
+Executar no projeto de teste com `test_reencode` desligada. Abrir a aplicação em `https://localhost:8080` num navegador de referência, entrar como utilizador com permissão de edição e importar os ficheiros de `Tools/video/tests/generate_convert_fixtures.py`. Os itens assinalados foram aprovados pela equipa no checkpoint da etapa 3; os restantes ficam por verificar. A matriz automatizada e a reprodução VLC constam de `test-walkthrough.md`.
+
+## Verificações manuais aprovadas pela equipa
+
+- [x] MP4 → MOV por cópia direta.
+- [x] MP4 → AVI por recodificação; o AVI descarregado reproduz imagem e som no VLC.
+- [x] AVI H.264/MP3 → MP4.
+- [x] MOV → AVI.
+- [x] Vídeo sem áudio → AVI, sem pista de som como esperado.
+- [x] Galeria e painel de informação apresentam os resultados; o nome herdado da origem tem o risco residual D-73.
+- [x] Regressão B004: recorte de vídeo.
+- [x] Regressão B005: filtro de vídeo.
+- [x] Regressão de imagem: ferramenta Brilho.
+- [ ] QuickTime e Windows Media Player: **não testados** nesta validação da NFR-026.
+
+**Riscos residuais aceites:** D-73 (nome apresentado conserva a extensão da origem; o download usa a extensão correta) e D-74 (numa conta free, o crédito é debitado no servidor, mas o contador da sessão não é atualizado pelo fluxo de vídeo).
 
 ## Painel e aceitação
 
@@ -31,4 +46,4 @@ Reproduzir do início ao fim, procurar no meio e regressar ao início. Verificar
 - [ ] Todos os dez percursos acima reproduzem no leitor integrado. Registar navegador, versão, sistema operativo e qualquer falha.
 - [ ] Para AVI, o resultado descarregado reproduz do início ao fim em VLC; a cópia MP4 é usada apenas no leitor. Repetir para MOV e MP4 em Safari, Chrome e Firefox disponíveis e, quando aplicável, QuickTime/Windows Media Player, conforme NFR-026.
 - [ ] Durante uma conversão longa para AVI, cancelar no painel: o progresso termina como cancelado, não aparece resultado, o crédito volta e uma nova tarefa pode começar.
-- [ ] Abrir um projeto de imagem, aplicar Brilho e descarregar o resultado; confirmar que o fluxo de imagem continua funcional.
+- [x] Abrir um projeto de imagem, aplicar Brilho e descarregar o resultado; o fluxo de imagem continua funcional.

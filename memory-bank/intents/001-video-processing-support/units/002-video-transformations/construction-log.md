@@ -2,7 +2,7 @@
 unit: 002-video-transformations
 intent: 001-video-processing-support
 created: 2026-10-22T16:32:12Z
-last_updated: 2026-10-22T23:34:11Z
+last_updated: 2026-10-23T00:05:25Z
 ---
 
 # Construction Log: 002-video-transformations
@@ -31,7 +31,7 @@ last_updated: 2026-10-22T23:34:11Z
 | 004-video-basic-edits | ST-VID-001, ST-VID-002, ST-VID-003 | ✅ complete | - |
 | 005-video-visual-edits | ST-VID-004, ST-VID-008, ST-VID-009, ST-VID-010, ST-VID-011 | ✅ complete | - |
 | 006-video-frame-export | ST-VID-005 | 🚫 blocked (D-06) | - |
-| 007-video-format-conversion | ST-VID-012 | ⏳ in-progress (Test) | - |
+| 007-video-format-conversion | ST-VID-012 | ✅ complete | - |
 
 ## Execution History
 
@@ -52,6 +52,8 @@ last_updated: 2026-10-22T23:34:11Z
 | 2026-10-22T22:13:29Z | 007-video-format-conversion | started | Stage 1: Plan |
 | 2026-10-22T22:28:37Z | 007-video-format-conversion | stage-complete | Plan → Implement (D-68 a D-72 respondidas) |
 | 2026-10-22T22:47:00Z | 007-video-format-conversion | stage-complete | Implement → Test (ADR-013 e ADR-014 aceites) |
+| 2026-10-23T00:05:25Z | 007-video-format-conversion | stage-complete | Test → complete (D-73 e D-74 aceites; testes manuais aprovados) |
+| 2026-10-23T00:05:25Z | 007-video-format-conversion | completed | All 3 stages done; QuickTime e Windows Media Player não testados |
 
 ## Execution Summary
 
@@ -59,8 +61,8 @@ last_updated: 2026-10-22T23:34:11Z
 |--------|-------|
 | Original bolts planned | 4 |
 | Current bolt count | 4 |
-| Bolts completed | 2 |
-| Bolts in progress | 1 |
+| Bolts completed | 3 |
+| Bolts in progress | 0 |
 | Bolts remaining | 0 (mais 1 `blocked`, D-06) |
 | Replanning events | 0 |
 
@@ -94,3 +96,4 @@ last_updated: 2026-10-22T23:34:11Z
 - 2026-10-22T22:19:56Z: Etapa 1 corrigida por instrução da equipa: fontes ordenadas, âmbito limitado à conversão isolada, plano ligado às D-68 a D-72 pendentes e verificações V1–V8 antes de qualquer código na etapa 2. D-68 regista os valores AVI, D-69/70/71 formalizam Q-ADD-20/21/25 e D-72 trata os modos na resposta de validação. A equipa pediu commit e push por etapa, sem merge para `main`; checkpoint ainda pendente.
 - 2026-10-22T22:28:37Z: Etapa 1 aprovada pela equipa, com D-68 (c: `mpeg4 -q:v 3`, MP3 192k constante), D-69/70/71 (a) e D-72 (a) condicional à V4. Registadas respostas em `specsDuvidas.md`, `bolt.md` e plano; `current_stage: implement`.
 - 2026-10-22T22:34:45Z: V1–V8 confirmadas antes de escrever código, em `implementation-preflight.md`; V4 encontrou acréscimo isolado da validação sem mudar as operações B004/B005, V5 encontrou ramo exclusivo de `convert` para saída dupla AVI/MP4 sem tocar no construtor da B003. Etapa 2 implementada e descrita em `implementation-walkthrough.md`, à espera de checkpoint; ADR-013/014 propostos. Sintaxe JS/Python, TypeScript e ESLint passaram; Prettier passou nos módulos novos e manteve aviso antigo nas duas linhas B004/B005 de `tasks.js`, que a regra 2.6 impede reformatar. Sondagem FFmpeg 9.0.2 no host gerou AVI MPEG-4/MP3 e preview MP4 H.264/AAC na mesma invocação. Testes persistentes, FFmpeg 5.1 do contentor, integração e reprodução ficam para a etapa 3. Nenhum código anterior removido ou alterado.
+- 2026-10-23T00:05:25Z: B007 etapa 3 aprovada pela equipa com verificações manuais MP4→MOV, MP4→AVI (imagem e som em VLC), AVI H.264/MP3→MP4, MOV→AVI, vídeo sem áudio→AVI, galeria/informação, recorte B004, filtro B005 e Brilho de imagem. QuickTime e Windows Media Player não testados. D-73 aceite: `original_name` conserva extensão da origem, download correto. D-74 aceite após diagnóstico numa conta `free`: `users.getUserType` deu `free`, `remaining_operations` 5→4→4, `user.operations.processed` 0→1, VideoTask `reserved_credits: 1` e `refund.state: none`; logs `video.task.accepted/started/completed`. O contador da sessão não atualiza porque `use-video-task.ts` não refresca a sessão, ao contrário do fluxo de imagem. `bolt-complete.cjs` executado com `NODE_PATH` para `fs-extra`/`js-yaml`: bolt e ST-VID-012 em `complete`, `implemented: true`; unit ainda `ready` por B006 bloqueado e intent `in-progress`. Entrada `test` acrescentada a `stages_completed` à mão. Ramo sem merge para `main`.

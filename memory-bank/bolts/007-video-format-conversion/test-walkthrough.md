@@ -48,7 +48,12 @@ A regressão de integração B004 passou 14/15: o teste histórico de Brilho esp
 
 ## Checklist manual e limites
 
-`manual-test-checklist.md` descreve os dez percursos no leitor integrado, as indicações do painel, erros, quota, cancelamento e regressão de imagem. Esta checklist está por executar por uma pessoa no browser. O ensaio VLC usou saída de vídeo/áudio `dummy` para reproduzir e descodificar integralmente sem abrir uma janela; a reprodução visual e sonora no leitor integrado, Safari/Chrome/Firefox, QuickTime e Windows Media Player ainda carece de verificação manual para fechar a parte restante da NFR-026.
+`manual-test-checklist.md` descreve os dez percursos no leitor integrado, as indicações do painel, erros, quota, cancelamento e regressão de imagem. A equipa aprovou manualmente MP4→MOV, MP4→AVI com imagem e som no VLC, AVI H.264/MP3→MP4, MOV→AVI, vídeo sem áudio→AVI, galeria/informação e as regressões B004 (recorte), B005 (filtro) e imagem (Brilho). O ensaio automatizado VLC usou saída de vídeo/áudio `dummy` para reproduzir e descodificar integralmente sem abrir uma janela. Os restantes percursos no leitor integrado, QuickTime e Windows Media Player não foram testados manualmente; a NFR-026 fica com esta limitação documentada.
+
+## Riscos residuais aceites no fecho
+
+- **D-73:** `original_name` do resultado conserva a extensão da origem no projeto; `fileName.js` usa a extensão correta no download.
+- **D-74:** a quota free é debitada no servidor, mas o contador da sessão do frontend não é atualizado por `use-video-task.ts`. Em diagnóstico real, `users.getUserType` devolveu `free`, `remaining_operations` fez 5→4 na aceitação e ficou 4 na conclusão, `user.operations` passou de vazio para `processed: 1`, e o VideoTask permaneceu com `reserved_credits: 1` e `refund.state: none`. Os logs `video.task.accepted` (`cost: 1`, `reserved: 1`), `video.task.started` e `video.task.completed` confirmaram a trajetória. A conta temporária foi limpa pela suite.
 
 ## Auditoria de alterações
 
