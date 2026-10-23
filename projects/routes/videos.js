@@ -147,6 +147,29 @@ router.get(
   }),
 );
 
+// UI provenance projection. The existing video listing keeps its contract.
+router.get(
+  `${VIDEOS}/lineage`,
+  ...canRead,
+  wrap(async (req, res) => {
+    const videos = await Video.find(
+      { project_id: req.videoProject._id, status: "completed" },
+      { source_video_ids: 1, recipe: 1, task_id: 1, "meta.container": 1, "meta.audio_codec": 1 },
+    ).lean();
+    res.status(200).json({
+      videos: videos.map((video) => ({
+        id: String(video._id),
+        sourceVideoIds: (video.source_video_ids || []).map(String),
+        isResult: Boolean(video.task_id),
+        operations: (video.recipe || []).map((step) => step.operation),
+        hasClipOperations: Boolean((video.recipe?.[0]?.parameters?.clips || []).some((clip) => clip.steps?.length)),
+        container: video.meta?.container ?? null,
+        audioCodec: video.meta?.audio_codec ?? null,
+      })),
+    });
+  }),
+);
+
 router.post(
   `${VIDEOS}/:video/upload/complete`,
   ...canEdit,

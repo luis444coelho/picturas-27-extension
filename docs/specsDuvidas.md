@@ -246,6 +246,8 @@
 
 ## D-30 — Criar um projeto a partir de um vídeo (requisito novo da equipa)
 
+- **Revisão:** Revisto pela D-93.
+
 - **Onde:** `docs/requirements/REQ-VID-UPLOAD.md` (REQ-VID-UPLOAD-021); `docs/use-cases/UC-VID-000.md` (FA6 e pré-condições); `frontend/components/video/new-video-project-dialog.tsx`; `frontend/components/dashboard-sidebar/dashboard-sidebar.tsx`.
 - **Dúvida:** Hoje só se cria um projeto com imagens (`new-project-dialog.tsx` exige pelo menos uma). Como começa um utilizador que só tem um vídeo?
 - **O que as fontes dizem:** Nada; o UC-VID-000 parte de um projeto existente. A rota existente `POST /projects/:user` já aceita `imgs` vazio.
@@ -253,12 +255,16 @@
 
 ## D-31 — Vídeos concluídos na área principal do projeto (correção do UC-VID-000, passos 7 e 8)
 
+- **Revisão:** Revisto pela D-92.
+
 - **Onde:** `frontend/components/video/project-video-list.tsx`; `frontend/app/dashboard/[pid]/page.tsx`.
 - **Dúvida:** Na B001, os vídeos concluídos só aparecem dentro da janela "Vídeos". Os passos 7 e 8 pedem que o vídeo apareça "na galeria de recursos do projeto".
 - **O que as fontes dizem:** UC-VID-000, passo 7: o vídeo aparece "na galeria de recursos do projeto com a miniatura gerada, nome do ficheiro e duração formatada"; passo 8: ao selecioná-lo, abre o reprodutor integrado.
 - **Resposta:** **Correção da equipa.** Componente novo `project-video-list.tsx`, montado com uma linha nova em `app/dashboard/[pid]/page.tsx`, junto ao `ProjectImageList` existente, que não muda (regra 2.6). Mostra cada vídeo `completed` com miniatura, nome do ficheiro, duração formatada e um ícone que o distingue das imagens; ao clicar, abre o `VideoPlayer` da B001. Atualiza-se com o evento `video-ingest-update`, para o vídeo aparecer logo que a ingestão termina. A janela "Vídeos" fica como ponto de carregamento.
 
 ## D-32 — Pormenores de interface da D-30 e da D-31 que as fontes não fixam
+
+- **Revisão:** Revisto pela D-92.
 
 - **Onde:** `frontend/components/video/new-video-project-dialog.tsx`; `frontend/components/video/project-video-list.tsx`.
 - **Dúvida:** (1) Na D-30, o projeto abre quando termina a transferência ou só quando termina a ingestão? E abre também quando o carregamento falha? (2) Na D-31, em que lugar da área principal fica a lista de vídeos, e aparece também no modo "results"?
@@ -971,3 +977,23 @@
 - **Opções:** (a) aceitar como risco, sem teto e sem mudar os *threads*; (b) teto configurável de clips ou de resolução × clips (opção (b) da D-88); (c) limitar os *threads* de descodificação por entrada.
 - **Recomendação:** decisão da equipa.
 - **Resposta:** **(a), risco aceite pela equipa.** Não se acrescenta teto nem se mudam os *threads*, por respeito à D-86. Uma junção que esgote a memória do worker falha com `PROCESSING_ERROR`, sem resultado e com os créditos devolvidos.
+
+## D-91 — Exceção à regra 2.6 para a reorganização da interface de vídeo
+
+- **Onde:** `frontend/components/video/`, intervenção UI-VID-01 a UI-VID-12 de `docs/ui-video-melhorias.md`.
+- **Dúvida:** A área de vídeo pode substituir as linhas existentes do leitor, da lista lateral, da janela/galeria e dos hooks de tarefa, edição e composição?
+- **Resposta da equipa:** Sim. São aceites alterações e remoções de linhas existentes em `video-player.tsx`, `project-video-list.tsx`, `video-section.tsx`, `video-gallery.tsx`, `use-video-task.ts`, `use-video-edit.ts` e `use-composition.ts`, em vez das alternativas apenas por acréscimo. A exceção à regra 2.6 fica limitada a `frontend/components/video/`. `page.tsx`, `project-image-list.tsx`, `Toolbar` e o backend existente ficam apenas com acréscimos. Os parâmetros das operações continuam a usar os componentes `*Config` da D-87, sem mudar o conteúdo dos painéis. Operações, custos, quota, cancelamento, recusa de anónimos, partilha e validação no servidor mantêm-se. Cada commit apresenta `git diff --numstat origin/main...HEAD -- . ':!docs'`, com remoções por ficheiro.
+
+## D-92 — Área central de vídeo e revisão da apresentação das D-31/D-32
+
+- **Onde:** `frontend/components/video/project-video-list.tsx`, `video-section.tsx`, `video-gallery.tsx` e `frontend/app/dashboard/[pid]/page.tsx`.
+- **Dúvida:** Como passam a aparecer os vídeos na página do projeto após a proposta UI-VID-01 a UI-VID-12?
+- **Resposta da equipa:** A apresentação das D-31/D-32 fica revista. O espaço de vídeo ocupa a área principal por cima do `Toolbar` e da lista de imagens quando se escolhe «Vídeos», ocultando também o estado vazio das imagens. O seletor «Imagens/Vídeos» alterna as vistas; o botão «Apply» do cabeçalho permanece como está. Em `page.tsx` só se podem acrescentar linhas, sem envolver nem alterar JSX existente. A proveniência vem de `source_video_ids` por uma rota nova `GET …/videos/lineage`, antes de `/:video`, sem mudar a listagem existente. Quando a fonte já não existe, mostra-se «Origem removida»; «Origem indisponível» só se usa quando não há `source_video_ids`. Uma junção mostra «Junção de N clips», fontes na ordem e com repetições. Resultados de junção e Movie Maker constituem um mini grupo próprio. B006 e B009 continuam bloqueadas pela D-06.
+
+## D-93 — Criação de projetos de imagem e vídeo num único botão
+
+- **Revisão:** Após os testes manuais, a equipa pediu que a seleção «Vídeo» mostrasse imediatamente o formulário no mesmo diálogo, sem botão intermédio nem segundo diálogo. O formulário foi extraído para `frontend/components/video/new-video-project-form.tsx` e reutilizado pelo fluxo D-30. A escuta de `video-ingest-update` fica montada fora do conteúdo do diálogo para conservar o aviso de falha após o fecho, conforme a D-32; o fecho continua bloqueado durante o carregamento.
+
+- **Onde:** `frontend/components/dashboard-sidebar/dashboard-sidebar.tsx`; `frontend/components/dashboard-sidebar/new-project-dialog.tsx`; apresentação da D-30.
+- **Dúvida:** Como reunir a criação de projetos sem duplicar o fluxo de vídeo da D-30 nem alterar a criação de imagem?
+- **Resposta da equipa:** A barra lateral mostra só «New Project». O seu diálogo tem um seletor «Imagem / Vídeo», com «Imagem» por omissão. A opção de imagem conserva os campos, a API e a navegação atuais. A opção de vídeo utiliza diretamente `NewVideoProjectForm`, extraído de `NewVideoProjectDialog` da D-30 e partilhado com ele, mantendo a recusa de anónimos e os limites do perfil. A equipa aceita, para esta alteração, a exceção à regra 2.6 limitada a alterações mínimas das linhas existentes de `dashboard-sidebar.tsx` e `new-project-dialog.tsx`; nenhum outro código de imagem muda.

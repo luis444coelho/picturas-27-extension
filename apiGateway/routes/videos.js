@@ -118,6 +118,7 @@ router.use(VIDEOS, (req, res, next) => {
 
 router.post(`${VIDEOS}/uploads`, checkVideoToken, forward("post"));
 router.get(VIDEOS, checkVideoToken, forward("get"));
+router.get(`${VIDEOS}/lineage`, checkVideoToken, forward("get"));
 router.post(
   `${VIDEOS}/:video/upload/complete`,
   checkVideoToken,

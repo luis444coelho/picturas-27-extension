@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "@/providers/session-provider";
 import { useGetSocket } from "@/lib/queries/projects";
+import { useUpdateSession } from "@/lib/mutations/session";
 import type { VideoTarget } from "@/lib/videos";
 import { cancelVideoTask, fetchVideoTask } from "@/lib/video-tasks";
 import {
@@ -39,28 +40,57 @@ export function useVideoTask(target: VideoTarget) {
   const session = useSession();
   const socket = useGetSocket(session.token);
   const qc = useQueryClient();
-  const [task, setTask] = useState<VideoTaskState | null>(null);
+  const updateSession = useUpdateSession();
+  const taskKey = ["videoProjectTask", projectId];
+  const { data: task = null } = useQuery<VideoTaskState | null>({
+    queryKey: taskKey,
+    queryFn: async () => null,
+    enabled: false,
+    initialData: null,
+  });
 
   const apply = useCallback(
     (update: VideoTaskUpdate) => {
-      setTask((current) => applyTaskUpdate(current, update));
-      if (isFinalStatus(update.status)) {
+      const current = qc.getQueryData<VideoTaskState | null>(taskKey) ?? null;
+      const previous =
+        current &&
+        current.taskId !== update.taskId &&
+        isFinalStatus(current.status)
+          ? null
+          : current;
+      const next = applyTaskUpdate(previous, update);
+      if (next === previous) return;
+      qc.setQueryData(taskKey, next);
+      if (
+        isFinalStatus(update.status) &&
+        !isFinalStatus(previous?.status ?? "queued")
+      ) {
         storeTask(projectId, null);
-        if (update.status === "completed")
+        if (update.status === "completed") {
           qc.invalidateQueries({ queryKey: ["projectVideos", projectId] });
+          qc.invalidateQueries({ queryKey: ["videoLineage", projectId] });
+        }
+        updateSession.mutate({
+          userId: session.user._id,
+          token: session.token,
+        });
       }
     },
-    [projectId, qc],
+    // The project id identifies the shared cache; mutation methods are stable.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [projectId, qc, session.user._id, session.token],
   );
 
   // Start following a task accepted by POST …/operations.
   const follow = useCallback(
     (taskId: string) => {
       storeTask(projectId, taskId);
-      setTask(null);
+      qc.setQueryData(taskKey, null);
       apply({ taskId, status: "queued" });
+      updateSession.mutate({ userId: session.user._id, token: session.token });
     },
-    [projectId, apply],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [projectId, apply, qc, session.user._id, session.token],
   );
 
   // Recovery after a reload.
