@@ -2,7 +2,7 @@
 unit: 003-video-composition
 intent: 001-video-processing-support
 created: 2026-10-23T00:31:55Z
-last_updated: 2026-10-23T13:19:44Z
+last_updated: 2026-10-23T14:03:00Z
 ---
 
 # Construction Log: 003-video-composition
@@ -40,6 +40,7 @@ last_updated: 2026-10-23T13:19:44Z
 | 2026-10-23T00:53:52Z | 008-video-concat-chain | stage-complete | ADR Analysis → Implement (ADR-016 a ADR-019; ADR-019 dependente da V6) |
 | 2026-10-23T01:15:27Z | 008-video-concat-chain | stage-complete | Implement → Test (preflight V1–V14; 36 ficheiros, +3370, 0 removidas) |
 | 2026-10-23T13:19:44Z | 008-video-concat-chain | stage-reopened | Test → Technical Design (revisão da equipa: D-86 a D-89) |
+| 2026-10-23T14:03:00Z | 008-video-concat-chain | stage-complete | Technical Design (revisão) → ADR Analysis (D-88 a, D-89 a) |
 
 ## Execution Summary
 
@@ -64,3 +65,4 @@ last_updated: 2026-10-23T13:19:44Z
 - 2026-10-23T01:15:27Z: B008 etapa 4 aprovada pela equipa; etapa 5 (Test) em curso.
 - 2026-10-23T01:34:26Z: B008 etapa 5 executada, à espera do checkpoint: JS 282/282, worker 80/80 (FFmpeg 5.1.9), frontend 68/68 + 8/8 (Bun), integração B008 9/9, B007 3/3, B005 16/16, B004 14/15 (Brilho em ARM, conhecida); resultados reproduzidos no VLC; NFR-013 verificada nos logs. Corrigidos `empty_chain` com `:video` e `concat_not_first` (estrutura antes da rota). Testes manuais pendentes.
 - 2026-10-23T13:19:44Z: B008 etapa 5 não aprovada pela equipa; revisão da etapa 2 escrita (`ddd-02-technical-design.md`, "Revisão da etapa 2"), à espera do checkpoint: três fluxos, componentes de configuração extraídos dos painéis das B004, B005 e B007 (D-87), sem limites fixos (D-86), rota `…/videos/chain/validate` com as propriedades à entrada de cada passo, verificações V15 a V24. D-88 e D-89 pendentes.
+- 2026-10-23T14:03:00Z: B008 revisão da etapa 2 aprovada (D-88 a, D-89 a); prompt retirado do ramo. Etapa 3 da revisão: ADR-020 e nota da D-86 no ADR-016, à espera do checkpoint.

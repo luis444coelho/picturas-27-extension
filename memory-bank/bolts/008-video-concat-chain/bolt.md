@@ -8,7 +8,7 @@ stories: [ST-VID-013, ST-VID-014]
 created: 2026-10-19T17:31:16Z
 started: 2026-10-23T00:31:55Z
 completed: null
-current_stage: design
+current_stage: adr
 stages_completed:
   - name: model
     completed: 2026-10-23T00:39:08Z
@@ -53,8 +53,8 @@ Implementar a operação `concat` com sub-cadeias por clip, a validação em tr�
 ## Etapas
 
 - [x] **1. Domain Model**: Complete (D-78 a D-84) → `ddd-01-domain-model.md`
-- [ ] **2. Technical Design**: Revisão em curso (D-86 a D-89) → `ddd-02-technical-design.md`, secção "Revisão da etapa 2" → `ddd-02-technical-design.md`
-- [x] **3. ADR Analysis**: Complete (ADR-019 dependente da V6) → `adr-016-composition-router.md`, `adr-017-composition-worker-path.md`, `adr-018-preset-structure-validation.md`, `adr-019-task-error-phase.md`
+- [x] **2. Technical Design**: Revisão aprovada (D-86 a D-89) → `ddd-02-technical-design.md`, secção "Revisão da etapa 2" → `ddd-02-technical-design.md`
+- [ ] **3. ADR Analysis**: Revisão no checkpoint (ADR-020, nota da D-86 no ADR-016); antes: ADR-016 a ADR-019 → `adr-016-composition-router.md`, `adr-017-composition-worker-path.md`, `adr-018-preset-structure-validation.md`, `adr-019-task-error-phase.md`
 - [x] **4. Implement**: Aprovado pela equipa → `implementation-preflight.md`, `implementation-report.md` → código nos componentes indicados em "Saídas esperadas"
 - [ ] **5. Test**: Não aprovada; a refazer depois da revisão → `ddd-03-test-report.md`, `manual-test-checklist.md` → `ddd-03-test-report.md`
 
@@ -123,3 +123,4 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 - 2026-10-23T01:15:27Z: Etapa 4 aprovada pela equipa. Etapa 5 em curso, com o âmbito pedido: junções heterogéneas e clip repetido, sub-cadeias e passos finais, cadeia genérica com recorte, marca e filtro, cadeias terminadas em MP4/MOV/AVI, regras D-79/D-85, CHAIN_TOO_LONG, ordem D-80, LIMIT_EXCEEDED D-81, custo N, cancelamento, passo k de N, `error.phase` em falhas simuladas, predefinições (incluindo D-84), nomes D-35/D-75, regressões B001–B007 e imagem, checklist manual.
 - 2026-10-23T01:34:26Z: Etapa 5 executada, à espera do checkpoint (`ddd-03-test-report.md`). JS 282/282 (19 novos), worker 80/80 com FFmpeg 5.1.9 (8 novos), frontend 68/68 no Node (6 novos) mais 8/8 com o Bun, tsc ok; integração B008 9/9, B007 3/3, B005 16/16, B004 14/15 (falha conhecida de Brilho em ARM); 10/10 ficheiros publicados descodificados e reproduzidos no VLC; uma invocação do FFmpeg por tarefa. Dois defeitos corrigidos por acréscimo no router de composição: `empty_chain` com `:video` (CHAIN-007) e `concat_not_first` antes da verificação da rota (D-80). Checklist manual pendente (`manual-test-checklist.md`).
 - 2026-10-23T13:19:44Z: Etapa 5 **não aprovada** pela equipa depois da revisão no browser (`docs/prompt-b008-revisao.md`). Volta-se à etapa 2 só para o que muda: três ações independentes ("Aplicar várias operações", "Juntar vídeos", "Movie Maker"), controlos de configuração iguais aos da edição simples (D-87, exceção à regra 2.6 para os painéis de vídeo das B004, B005 e B007, ADR-020) e sem limites fixos de quantidade (D-86). O backend mantém-se. D-86 e D-87 registadas com a resposta da equipa; D-88 (proteção técnica sem limite) e D-89 (recorte e pré-visualizações num passo que não recebe o original) pendentes. Requisitos CHAIN-008, CONCAT-006, NFR-022, NFR-023 e DQ-015 com a nota "Revisto pela D-86". As entradas de `stages_completed` das etapas 2 a 4 ficam como histórico; as etapas 3, 4 e 5 são refeitas para as partes que mudam.
+- 2026-10-23T14:03:00Z: Revisão da etapa 2 aprovada com D-88 (a) (medir na etapa 5 uma junção de 100 clips curtos e uma cadeia longa num Premium; se falhar, dúvida nova com a opção (b) e paragem) e D-89 (a). `docs/prompt-b008-revisao.md` retirado do ramo (os prompts não vão para o repositório). Etapa 3 da revisão: ADR-020 (D-87) e nota de impacto da D-86 no ADR-016, acrescentados ao `decision-index.md`; paragem no checkpoint.

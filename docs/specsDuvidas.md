@@ -938,7 +938,7 @@
   - **(b)** Um teto técnico configurável por variável de ambiente (sem valor por omissão no código), com um código próprio (`COMPOSITION_TOO_LARGE`), e um valor medido na etapa 5 e escolhido pela equipa.
   - **(c)** Processar junções muito grandes por partes, com ficheiros intermédios. Contraria a NFR-013 e o ADD 4.8, por isso fica de fora.
 - **Recomendação:** (a). Cumpre a D-86 sem inventar números, e a medição da etapa 5 diz se é preciso passar para (b).
-- **Resposta:** _pendente._
+- **Resposta:** **(a), aprovada pela equipa.** Nenhum limite novo. Na etapa 5 mede-se e regista-se a memória e o tempo do worker numa junção de 100 clips curtos num Premium e numa cadeia longa; se algum falhar, regista-se uma dúvida nova com a proposta de teto configurável da opção (b) e para-se. O 413 do `express.json()` é traduzido para `INVALID_REQUEST {field: "steps", reason: "too_large"}` no gateway de vídeo.
 
 ## D-89 — Controlos do recorte e pré-visualizações quando o passo não recebe o vídeo original
 
@@ -956,4 +956,4 @@
   - **(b)** O leitor do original fica sempre ativo, mesmo quando o passo recebe um intermédio. Os instantes escolhidos com o *scrubbing* podem não corresponder ao intermédio (por exemplo, depois de uma velocidade).
   - **(c)** Nas composições, o recorte só tem os campos, sem leitor, mesmo no primeiro passo.
 - **Recomendação:** (a). Mantém a interface da edição simples onde ela é exata, e não mostra posições que não correspondem ao que vai ser recortado.
-- **Resposta:** _pendente._
+- **Resposta:** **(a), aprovada pela equipa.** O leitor, o *scrubbing* e o *loop preview* do recorte só ficam ativos quando o passo recebe o vídeo original (primeiro passo da cadeia de um vídeo ou clip); nos outros passos ficam os campos, a duração prevista e a validação, com os limites do intermédio estimado. As pré-visualizações estáticas usam o fotograma 0 da origem com os passos estáticos anteriores da mesma cadeia (T-07); depois da junção, o primeiro clip depois da sua cadeia.

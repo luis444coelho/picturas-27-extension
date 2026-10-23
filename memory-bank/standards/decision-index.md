@@ -1,6 +1,6 @@
 ---
 last_updated: 2026-10-23
-total_decisions: 19
+total_decisions: 20
 ---
 
 # Decision Index
@@ -19,6 +19,14 @@ Use this to find relevant prior decisions when working on related features.
 ## Decisions
 
 <!-- Entries are appended below in reverse chronological order (newest first) -->
+
+### ADR-020: Extração dos componentes de configuração dos painéis de vídeo (exceção D-87 à regra 2.6)
+- **Status**: accepted
+- **Date**: 2026-10-23
+- **Bolt**: 008-video-concat-chain (003-video-composition)
+- **Path**: `bolts/008-video-concat-chain/adr-020-video-panel-config-extraction.md`
+- **Summary**: As composições da B008 têm de configurar cada operação com os mesmos controlos da edição simples, e os painéis das B004, B005 e B007 juntam configuração e submissão. Por decisão da equipa (D-87), é permitido alterar apenas o frontend de vídeo dessas bolts para extrair nove componentes de configuração sem submissão (`TrimConfig` … `ConvertConfig`, contrato `OperationConfigProps`), que os painéis simples passam a usar sem mudar aspeto nem comportamento. O PictuRAS original e o backend continuam só por acréscimo, e as linhas alteradas são listadas à parte do `numstat`.
+- **Read when**: Changing a video operation panel or its configuration component, adding a new video operation to the simple edit or to compositions, auditing rule 2.6, or working on the "Aplicar várias operações", "Juntar vídeos" or "Movie Maker" flows.
 
 ### ADR-019: Fase da falha (`error.phase`) em todas as tarefas de vídeo
 - **Status**: accepted (condicionado à V6 do Estágio 4)
@@ -50,7 +58,7 @@ Use this to find relevant prior decisions when working on related features.
 - **Bolt**: 008-video-concat-chain (003-video-composition)
 - **Path**: `bolts/008-video-concat-chain/adr-016-composition-router.md`
 - **Summary**: A B003 não faz as fases 1 e 3 da validação, só conhece uma entrada por pedido, e o `validate` da `concat` não recebe as propriedades dos clips. Um router novo, montado antes do router de vídeo, corre estrutura → passos → limites (D-80; sem junção, a fase 2 em memória e `next()` se falhar, para a B003 devolver o `INVALID_STEP_PARAMS`), grava `parameters._clips` por cima do cliente e trata por inteiro os pedidos com junção na rota sem `:video` (D-78), chamando a aceitação do `tasks.js`.
-- **Read when**: Working on chain or concat validation, `POST …/videos/validate` or `…/operations`, the order of validation phases, server-set fields in `parameters` (`_clips`, `_mark`, `_input`), or routes mounted before the video router.
+- **Read when** (impacto da D-86 no fim do ADR: sem `CHAIN_TOO_LONG` nem `TOO_MANY_INPUTS`; rota `…/chain/validate`): Working on chain or concat validation, `POST …/videos/validate` or `…/operations`, the order of validation phases, server-set fields in `parameters` (`_clips`, `_mark`, `_input`), or routes mounted before the video router.
 
 ### ADR-015: Nome apresentado dos resultados de vídeo acompanha o contentor real
 - **Status**: accepted

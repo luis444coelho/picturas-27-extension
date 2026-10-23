@@ -56,3 +56,19 @@ O padrão já foi aceite no ADR-010 (*middleware* montado antes do router de ví
 - **Standards**: regra 2.6; T-01, T-03, 4.8, 4.9
 - **Previous ADRs**: ADR-008, ADR-010, ADR-011
 - **Dúvidas**: D-78, D-79, D-80, D-81; verificações V1, V2, V7, V13, V14
+
+## Impacto da D-86 (revisão da B008)
+
+A equipa retirou os limites fixos de quantidade (D-86): a fase 1 deste router deixa de devolver o `CHAIN_TOO_LONG` (10 passos), e o `concat.checkClips` deixa de devolver o `TOO_MANY_INPUTS` (10/50 clips), em todos os perfis. O resto da decisão mantém-se:
+
+- a ordem estrutura → passos → limites (D-80);
+- as regras da D-79 e da D-85;
+- a contagem N, que passa a servir só para o custo e para o `totalSteps`;
+- o mínimo de 2 clips (`INSUFFICIENT_INPUTS`);
+- os limites de duração e de tamanho por perfil (D-81);
+- a quota dos Registados, verificada antes da tarefa (B003);
+- o `_clips` gravado pelo servidor.
+
+**Proteção técnica (D-88 a):** não há limite novo. Os limites que já existem são os 100 kB do `express.json()`, os 16 MB do documento do `VideoTask` e os recursos do worker. Um 413 passa a `INVALID_REQUEST {field: "steps", reason: "too_large"}` no gateway de vídeo. A etapa 5 mede uma junção de 100 clips curtos e uma cadeia longa num Premium; se alguma falhar, regista-se uma dúvida com o teto configurável da opção (b).
+
+**O router passa a responder também a `POST …/videos/chain/validate`.** A resposta é a do `…/validate`, mais as propriedades estimadas à entrada de cada passo, para os componentes de configuração das composições (ADR-020).

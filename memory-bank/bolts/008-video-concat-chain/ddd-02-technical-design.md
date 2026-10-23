@@ -2,7 +2,7 @@
 unit: 003-video-composition
 bolt: 008-video-concat-chain
 stage: design
-status: revision-checkpoint
+status: complete
 updated: 2026-10-23T00:47:57Z
 ---
 
@@ -495,3 +495,14 @@ interface OperationConfigProps {
 
 1. **D-88:** proteção técnica sem limite fixo (recomendação (a): nenhum limite novo, medição na etapa 5, 413 traduzido para `INVALID_REQUEST`).
 2. **D-89:** recorte e pré-visualizações num passo que não recebe o vídeo original (recomendação (a): leitor só com `isSource`, campos e validação sempre; pré-visualização com os passos estáticos anteriores).
+
+### Decisões tomadas no checkpoint da revisão
+
+Respondidas pela equipa em 2026-10-23T14:03:00Z:
+
+1. Revisão da etapa 2 aprovada.
+2. **D-88 (a):** nenhum limite novo. Na etapa 5 medem-se e registam-se a memória e o tempo do worker numa junção de 100 clips curtos num Premium e numa cadeia longa. Se algum falhar, regista-se uma dúvida nova com o teto configurável da opção (b) e para-se.
+3. **D-89 (a):** leitor, *scrubbing* e *loop preview* do recorte só com `isSource`; pré-visualizações com os passos estáticos anteriores da mesma cadeia.
+4. Os ficheiros de prompts não vão para o repositório: o `docs/prompt-b008-revisao.md` saiu do ramo (`git rm --cached`, a cópia local fica).
+5. Etapa 3: ADR-020 (D-87) e nota de impacto da D-86 no ADR-016.
+
