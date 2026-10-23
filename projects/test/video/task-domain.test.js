@@ -68,6 +68,7 @@ test("test_reencode only exists with VIDEO_TEST_OPERATIONS=1 (D-37)", () => {
       // B005 operations are always active too (same isolation of D-37).
       .filter((name) => !["watermark", "adjust", "filter", "resize", "orient"].includes(name.trim()))
       .filter((name) => name.trim() !== "convert")
+      .filter((name) => name.trim() !== "concat") // B008
       .join(",")
       .trim();
   assert.equal(names({}), "");

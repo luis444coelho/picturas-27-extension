@@ -168,6 +168,8 @@ class CancelledTasksTest(unittest.TestCase):
         names = [name for name in names if name not in {'watermark', 'adjust', 'filter', 'resize', 'orient'}]
         self.assertIn('convert', names)
         names = [name for name in names if name != 'convert']
+        self.assertIn('concat', names)  # B008: always active, set aside like convert
+        names = [name for name in names if name != 'concat']
         self.assertEqual(set(names), {'trim', 'remove_audio', 'speed'})
         out.stdout = str([name for name in names if name not in {'trim', 'remove_audio', 'speed'}])
         self.assertEqual(out.stdout.strip(), '[]')

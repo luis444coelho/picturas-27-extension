@@ -19,27 +19,32 @@ import { useVideoEditValidation, type VideoEditSession } from "./use-video-edit"
 import { useVideoPreview } from "./use-video-preview";
 import { VideoPreviewImage } from "./video-preview-image";
 import { VideoVisualValidation } from "./video-visual-validation";
+import { initialParam, simpleSource, useReportStep, type OperationConfigProps } from "./operation-config";
 
 // UC-VID-009: grid of the six catalog filters with thumbnails of the first
 // frame (FILTER-002), single selection (FILTER-003) and preview (FILTER-004).
-export function VideoFilterPanel({
+// Configuration of the filter (D-87, ADR-020), also used by the compositions.
+export function FilterConfig({
   target,
-  videoId,
-  session,
-}: {
-  target: VideoTarget;
-  videoId: string;
-  session: VideoEditSession;
-}) {
-  const [filter, setFilter] = useState<FilterId | null>(null);
+  source,
+  initial,
+  disabled,
+  chainValidation,
+  onStepChange,
+  renderActions,
+}: OperationConfigProps) {
+  const videoId = source.videoId;
+  const [filter, setFilter] = useState<FilterId | null>(initialParam<FilterId | null>(initial, "filter", null));
   const thumbnails = useQuery({
     queryKey: ["videoFilterThumbnails", target.pid, target.shareId, videoId],
     queryFn: () => fetchFilterThumbnails(target, videoId),
     staleTime: 5 * 60 * 1000,
   });
   const step = filter ? filterStep(filter) : null;
-  const preview = useVideoPreview(target, videoId, step, (t, v, s) => fetchVideoPreview(t, v, [s]), 0);
-  const validation = useVideoEditValidation(target, videoId, step);
+  const preview = useVideoPreview(target, videoId, step, (t, v, s) => fetchVideoPreview(t, v, [...source.previewSteps, s]), 0);
+  const ownValidation = useVideoEditValidation(target, videoId, chainValidation ? null : step);
+  const validation = chainValidation ?? ownValidation;
+  useReportStep(step, onStepChange);
   const thumbOf = (id: FilterId) => thumbnails.data?.find((t) => t.filter === id);
   return (
     <div className="flex flex-col gap-3">
@@ -52,7 +57,7 @@ export function VideoFilterPanel({
               type="button"
               role="radio"
               aria-checked={filter === id}
-              disabled={session.busy}
+              disabled={disabled}
               onClick={() => setFilter(id)}
               className={cn(
                 "flex flex-col items-center gap-1 rounded-md border p-1 text-xs",
@@ -83,14 +88,35 @@ export function VideoFilterPanel({
       )}
       {step && <VideoPreviewImage preview={preview} alt="Primeiro fotograma com o filtro" />}
       <VideoVisualValidation validation={validation} />
-      <Button
-        disabled={!step || !validation.valid || session.busy}
-        onClick={() => {
-          if (step) void session.submit(step);
-        }}
-      >
-        Aplicar filtro · 1 crédito
-      </Button>
+      {renderActions({ step, validation, busy: disabled, beforeSubmit: () => undefined })}
     </div>
+  );
+}
+
+export function VideoFilterPanel({
+  target,
+  videoId,
+  session,
+}: {
+  target: VideoTarget;
+  videoId: string;
+  session: VideoEditSession;
+}) {
+  return (
+    <FilterConfig
+      target={target}
+      source={simpleSource(videoId, {})}
+      disabled={session.busy}
+      renderActions={({ step, validation }) => (
+        <Button
+          disabled={!step || !validation.valid || session.busy}
+          onClick={() => {
+            if (step) void session.submit(step);
+          }}
+        >
+          Aplicar filtro · 1 crédito
+        </Button>
+      )}
+    />
   );
 }

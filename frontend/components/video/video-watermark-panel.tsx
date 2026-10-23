@@ -25,36 +25,49 @@ import { useVideoEditValidation, type VideoEditSession } from "./use-video-edit"
 import { useVideoPreview } from "./use-video-preview";
 import { VideoPreviewImage } from "./video-preview-image";
 import { VideoVisualValidation } from "./video-visual-validation";
+import { initialParam, simpleSource, useReportStep, type OperationConfigProps } from "./operation-config";
+import { fetchChainWatermarkPreview } from "@/lib/video-chain-api";
 
 // UC-VID-004: text or image (WATERMARK-001 to 003), preset or manual position
 // (004), scale 5–50% of the width (005, D-61) and opacity 10–100% (006), with
 // the static preview of the first frame (009, D-62).
-export function VideoWatermarkPanel({
+// Configuration of the watermark (D-87, ADR-020), also used by the compositions.
+// Inside a chain, the preview applies the static steps before the mark (D-89).
+export function WatermarkConfig({
   target,
-  videoId,
-  session,
-}: {
-  target: VideoTarget;
-  videoId: string;
-  session: VideoEditSession;
-}) {
+  source,
+  initial,
+  disabled,
+  chainValidation,
+  onStepChange,
+  renderActions,
+}: OperationConfigProps) {
+  const videoId = source.videoId;
   const project = useProjectInfo();
   const [values, setValues] = useState<WatermarkValues>({
-    type: "text",
-    text: "",
-    watermarkId: null,
-    position: { preset: "bottom-right" },
-    scale: 0.2,
-    opacity: 0.6,
+    type: initialParam<WatermarkValues["type"]>(initial, "type", "text"),
+    text: initialParam(initial, "text", ""),
+    watermarkId: initialParam<string | null>(initial, "watermarkId", null),
+    position: initialParam<WatermarkValues["position"]>(initial, "position", { preset: "bottom-right" }),
+    scale: initialParam(initial, "scale", 0.2),
+    opacity: initialParam(initial, "opacity", 0.6),
   });
   const [uploading, setUploading] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
   const manual = !("preset" in values.position);
   const step = watermarkStep(values);
-  const preview = useVideoPreview(target, videoId, step, fetchWatermarkPreview);
-  const validation = useVideoEditValidation(target, videoId, step);
+  const inChain = !source.isSource || source.previewSteps.length > 0;
+  const preview = useVideoPreview(
+    target,
+    videoId,
+    step,
+    inChain ? (t, v, s) => fetchChainWatermarkPreview(t, v, [...source.previewSteps, s]) : fetchWatermarkPreview,
+  );
+  const ownValidation = useVideoEditValidation(target, videoId, chainValidation ? null : step);
+  const validation = chainValidation ?? ownValidation;
+  useReportStep(step, onStepChange);
   const set = (patch: Partial<WatermarkValues>) => setValues((current) => ({ ...current, ...patch }));
-  const busy = session.busy || uploading;
+  const busy = disabled || uploading;
 
   const acquire = async (load: () => Promise<{ watermarkId: string }>) => {
     setUploading(true);
@@ -227,14 +240,35 @@ export function VideoWatermarkPanel({
         </div>
       ))}
       <VideoVisualValidation validation={validation} />
-      <Button
-        disabled={!step || !validation.valid || busy}
-        onClick={() => {
-          if (step) void session.submit(step);
-        }}
-      >
-        Aplicar marca de água · 1 crédito
-      </Button>
+      {renderActions({ step, validation, busy, beforeSubmit: () => undefined })}
     </div>
+  );
+}
+
+export function VideoWatermarkPanel({
+  target,
+  videoId,
+  session,
+}: {
+  target: VideoTarget;
+  videoId: string;
+  session: VideoEditSession;
+}) {
+  return (
+    <WatermarkConfig
+      target={target}
+      source={simpleSource(videoId, {})}
+      disabled={session.busy}
+      renderActions={({ step, validation, busy }) => (
+        <Button
+          disabled={!step || !validation.valid || busy}
+          onClick={() => {
+            if (step) void session.submit(step);
+          }}
+        >
+          Aplicar marca de água · 1 crédito
+        </Button>
+      )}
+    />
   );
 }

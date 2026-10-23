@@ -1,6 +1,6 @@
 ---
 last_updated: 2026-10-23
-total_decisions: 15
+total_decisions: 20
 ---
 
 # Decision Index
@@ -19,6 +19,46 @@ Use this to find relevant prior decisions when working on related features.
 ## Decisions
 
 <!-- Entries are appended below in reverse chronological order (newest first) -->
+
+### ADR-020: Extração dos componentes de configuração dos painéis de vídeo (exceção D-87 à regra 2.6)
+- **Status**: accepted
+- **Date**: 2026-10-23
+- **Bolt**: 008-video-concat-chain (003-video-composition)
+- **Path**: `bolts/008-video-concat-chain/adr-020-video-panel-config-extraction.md`
+- **Summary**: As composições da B008 têm de configurar cada operação com os mesmos controlos da edição simples, e os painéis das B004, B005 e B007 juntam configuração e submissão. Por decisão da equipa (D-87), é permitido alterar apenas o frontend de vídeo dessas bolts para extrair nove componentes de configuração sem submissão (`TrimConfig` … `ConvertConfig`, contrato `OperationConfigProps`), que os painéis simples passam a usar sem mudar aspeto nem comportamento. O PictuRAS original e o backend continuam só por acréscimo, e as linhas alteradas são listadas à parte do `numstat`.
+- **Read when**: Changing a video operation panel or its configuration component, adding a new video operation to the simple edit or to compositions, auditing rule 2.6, or working on the "Aplicar várias operações", "Juntar vídeos" or "Movie Maker" flows.
+
+### ADR-019: Fase da falha (`error.phase`) em todas as tarefas de vídeo
+- **Status**: accepted (condicionado à V6 do Estágio 4)
+- **Date**: 2026-10-23
+- **Bolt**: 008-video-concat-chain (003-video-composition)
+- **Path**: `bolts/008-video-concat-chain/adr-019-task-error-phase.md`
+- **Summary**: A ST-VID-014 e a exceção 7 do UC-VID-014 pedem a fase da falha em vez do passo (Q-ADD-16, D-82). `Tools/video/phase.py` guarda a fase (`download`, `encode`, `upload`), a resposta `failed` leva `error.phase`, e o `VideoTask`, o GET da tarefa e o `video-task-update` passam-na ao cliente, com o `code` `PROCESSING_ERROR` inalterado; só se aplica se a V6 confirmar que tudo entra com linhas novas, incluindo o `_reply` do `task.py`.
+- **Read when**: Working on worker failure replies, `VideoTask.error`, the task GET or `video-task-update` payload, the task progress UI, or any new worker execution path that must mark its phase.
+
+### ADR-018: Validação da estrutura das predefinições de vídeo delegada pelo gateway ao serviço de projetos
+- **Status**: accepted
+- **Date**: 2026-10-23
+- **Bolt**: 008-video-concat-chain (003-video-composition)
+- **Path**: `bolts/008-video-concat-chain/adr-018-preset-structure-validation.md`
+- **Summary**: As predefinições de vídeo vivem no serviço de utilizadores, mas as regras de estrutura e o registo de operações estão no serviço de projetos (T-01). O router `apiGateway/routes/videoPresets.js` chama a rota interna `POST projects:/video/chain-structure` (`{steps, preset: true}`) em `POST`/`PATCH` e só depois encaminha ao serviço de utilizadores, com os `steps` sem `_mark`, `_input` e `_clips`.
+- **Read when**: Working on video presets (`users/models/videoPreset.js`, `users/routes/videoPresets.js`, `apiGateway/routes/videoPresets.js`), chain structure rules (`chainStructure.js`), new operations that must be allowed in presets, or loading presets into chains or batches.
+
+### ADR-017: Ramo `composition_task.py` no worker para junções e cadeias terminadas em `convert`
+- **Status**: accepted
+- **Date**: 2026-10-23
+- **Bolt**: 008-video-concat-chain (003-video-composition)
+- **Path**: `bolts/008-video-concat-chain/adr-017-composition-worker-path.md`
+- **Summary**: O `executor.build_command` da B003 só monta uma entrada e uma saída H.264, e o ramo do ADR-013 só cobre o `convert` isolado. Um desvio novo no `task.py` envia os planos com `plan.composition` e as cadeias de vários passos terminadas em `convert` para `composition_task.py`, que monta um único `-filter_complex` com uma entrada por ocorrência de clip, sub-grafos normalizados, `concat`, passos finais e, para AVI, a saída dupla com a cópia MP4, reutilizando a execução, o progresso, o cancelamento e a publicação da B003.
+- **Read when**: Working on concat, multi-input FFmpeg graphs, chains ending in `convert`, dual outputs, the worker's `task.py` dispatch, or memory/temp-space limits of compositions.
+
+### ADR-016: Router de composição antes do router de vídeo, com as três fases e o `_clips` gravado pelo servidor
+- **Status**: accepted
+- **Date**: 2026-10-23
+- **Bolt**: 008-video-concat-chain (003-video-composition)
+- **Path**: `bolts/008-video-concat-chain/adr-016-composition-router.md`
+- **Summary**: A B003 não faz as fases 1 e 3 da validação, só conhece uma entrada por pedido, e o `validate` da `concat` não recebe as propriedades dos clips. Um router novo, montado antes do router de vídeo, corre estrutura → passos → limites (D-80; sem junção, a fase 2 em memória e `next()` se falhar, para a B003 devolver o `INVALID_STEP_PARAMS`), grava `parameters._clips` por cima do cliente e trata por inteiro os pedidos com junção na rota sem `:video` (D-78), chamando a aceitação do `tasks.js`.
+- **Read when** (impacto da D-86 no fim do ADR: sem `CHAIN_TOO_LONG` nem `TOO_MANY_INPUTS`; rota `…/chain/validate`): Working on chain or concat validation, `POST …/videos/validate` or `…/operations`, the order of validation phases, server-set fields in `parameters` (`_clips`, `_mark`, `_input`), or routes mounted before the video router.
 
 ### ADR-015: Nome apresentado dos resultados de vídeo acompanha o contentor real
 - **Status**: accepted

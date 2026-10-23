@@ -2,11 +2,11 @@
 id: ST-VID-013
 unit: 003-video-composition
 intent: 001-video-processing-support
-status: ready
+status: complete
 priority: must
-created: 2026-10-19T17:31:16Z
+created: 2026-10-19T17:31:16.000Z
 assigned_bolt: 008-video-concat-chain
-implemented: false
+implemented: true
 ---
 
 # Story: ST-VID-013 — Juntar vídeos

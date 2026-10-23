@@ -8,6 +8,8 @@ var videosRouter = require("./routes/videos");
 var videoVisualRouter = require("./routes/videoVisual");
 var projectsRouter = require("./routes/projects");
 var usersRouter = require("./routes/users");
+var videoPresetsRouter = require("./routes/videoPresets");
+var videoPayloadErrors = require("./routes/videoPayloadErrors");
 var subscriptionsRouter = require("./routes/subscriptions");
 var app = express();
 
@@ -27,8 +29,10 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/projects", videosRouter);
 app.use("/projects", videoVisualRouter);
 app.use("/projects", projectsRouter);
+app.use("/users", videoPresetsRouter);
 app.use("/users", usersRouter);
 app.use("/subscriptions", subscriptionsRouter);
+app.use(videoPayloadErrors); // B008 (D-88): 413 of the video routes in the video error format
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
