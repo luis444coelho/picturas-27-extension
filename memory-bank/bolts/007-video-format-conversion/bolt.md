@@ -3,19 +3,35 @@ id: 007-video-format-conversion
 unit: 002-video-transformations
 intent: 001-video-processing-support
 type: simple-construction-bolt
-status: planned
-stories: [ST-VID-012]
-created: 2026-10-19T17:31:16Z
-started: null
-completed: null
+status: complete
+stories:
+  - ST-VID-012
+created: 2026-10-19T17:31:16.000Z
+started: 2026-10-22T22:13:29.000Z
+completed: "2026-10-23T00:05:25Z"
 current_stage: null
-stages_completed: []
-requires_bolts: [003-video-task-foundation]
-enables_bolts: [008-video-concat-chain]
-requires_units: [001-video-lifecycle]
+stages_completed:
+  - name: plan
+    completed: 2026-10-22T22:28:37.000Z
+    artifact: implementation-plan.md
+  - name: implement
+    completed: 2026-10-22T22:47:00.000Z
+    artifact: implementation-walkthrough.md
+  - name: test
+    completed: 2026-10-23T00:05:25Z
+    artifact: test-walkthrough.md
+requires_bolts:
+  - 003-video-task-foundation
+enables_bolts:
+  - 008-video-concat-chain
+requires_units:
+  - 001-video-lifecycle
 blocks: true
-# avg_complexity: maior esforço do ADD no bolt (S=1, M=2, L=3); os outros campos são preenchidos no início do bolt na Construção (specsDuvidas D-01)
-complexity: {avg_complexity: 2, avg_uncertainty: null, max_dependencies: null, testing_scope: null}
+complexity:
+  avg_complexity: 2
+  avg_uncertainty: 2
+  max_dependencies: 2
+  testing_scope: 3
 ---
 
 # Bolt: 007-video-format-conversion
@@ -39,9 +55,25 @@ Acrescentar a operação `convert` `{target: "mp4"|"mov"|"avi"}` ao registo de o
 
 ## Etapas
 
-- [ ] **1. Plan**: Pending → `implementation-plan.md`
-- [ ] **2. Implement**: Pending → código + `implementation-walkthrough.md`
-- [ ] **3. Test**: Pending → `test-walkthrough.md`
+- ✅ **1. Plan**: aprovado → `implementation-plan.md`
+- ✅ **2. Implement**: aprovado → código + `implementation-walkthrough.md`; ADR-013/014 aceites
+- ✅ **3. Test**: aprovado → `test-walkthrough.md` e `manual-test-checklist.md`
+
+## Riscos residuais aceites no fecho
+
+- **D-73:** o nome apresentado do resultado conserva a extensão da origem; o download usa a extensão correta do contentor.
+- **D-74:** a conta `free` perde o crédito no servidor, confirmado por API, MongoDB, VideoTask e logs; o contador do frontend só reflete a alteração após atualização da sessão.
+- **NFR-026:** QuickTime e Windows Media Player não foram testados neste checkpoint. Os ficheiros da matriz passaram em FFprobe, descodificação integral e VLC; os percursos manuais aprovados constam da checklist.
+
+## Respostas do checkpoint da etapa 1
+
+- **D-68 (c):** AVI com `mpeg4 -q:v 3 -pix_fmt yuv420p` e `libmp3lame -b:a 192k` em taxa constante; verificar reprodução na etapa 3.
+- **D-69 (a):** cópia MP4 também para originais e resultados MP4 com H.264 incompatível.
+- **D-70 (a):** cópia por stream apenas se o codec de origem for igual ao de saída da matriz.
+- **D-71 (a):** corte de 1 px nas dimensões ímpares quando há recodificação.
+- **D-72 (a), condicional:** `videoMode`/`audioMode` apenas na validação da conversão, se V4 confirmar ligação só por acréscimo e respostas B004/B005 intactas.
+
+As opções e respostas completas estão em `docs/specsDuvidas.md`. A B007 trata só a conversão isolada; a validação estrutural de cadeias (CONVERT-009) é da B008. Antes de escrever código na etapa 2, confirmar V1–V8; uma falha que impeça a extensão só por acréscimo origina dúvida nova a partir da D-73 e paragem.
 
 ## Requisitos rastreados
 
@@ -66,12 +98,12 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 
 ## Critérios de passagem
 
-- [ ] Stories incluídas implementadas e respetivos critérios de aceitação cumpridos.
-- [ ] Critérios de aceitação dos requisitos rastreados (ficheiros `docs/requirements/REQ-VID-*.md`) verificados por testes.
-- [ ] Nenhuma linha de código existente alterada (regra 2.6 do ADD); o fluxo de imagem continua a funcionar como antes.
-- [ ] Testes automatizados e relatório do bolt registados; nenhum resultado de teste é presumido nesta fase.
-- [ ] Código revisto.
-- [ ] Cada caminho da matriz produz o contentor e os codecs da CONVERT-005, com cópia só nos casos da CONVERT-006, e o resultado é descodificável e reproduzível.
+- [x] Story incluída implementada e validada nos testes e percursos manuais aprovados.
+- [x] Critérios dos requisitos rastreados verificados no âmbito da B007; limitações da NFR-026 documentadas acima.
+- [x] Nenhuma linha de código existente alterada (regra 2.6 do ADD); fluxo de imagem verificado.
+- [x] Testes automatizados e relatório do bolt registados.
+- [x] Código revisto.
+- [x] Cada caminho da matriz produz o contentor e os codecs da CONVERT-005, com cópia só nos casos da CONVERT-006; FFprobe, descodificação integral e VLC passaram.
 
 ## Dependências
 

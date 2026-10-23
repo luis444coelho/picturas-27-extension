@@ -1,6 +1,6 @@
 ---
-last_updated: 2026-10-22T22:04:24Z
-total_decisions: 12
+last_updated: 2026-10-22T23:34:11Z
+total_decisions: 14
 ---
 
 # Decision Index
@@ -19,6 +19,22 @@ Use this to find relevant prior decisions when working on related features.
 ## Decisions
 
 <!-- Entries are appended below in reverse chronological order (newest first) -->
+
+### ADR-014: Modos de stream na validação apenas de `convert`
+- **Status**: accepted
+- **Date**: 2026-10-22
+- **Bolt**: 007-video-format-conversion (002-video-transformations)
+- **Path**: `bolts/007-video-format-conversion/adr-014-convert-validation-modes.md`
+- **Summary**: D-72 (a): campos `videoMode`/`audioMode` apenas no `output` da validação de `convert`, por extensão aditiva após `plan.decide`; erros de formato 422 preservam os códigos específicos. As respostas B004/B005 permanecem iguais.
+- **Read when**: Adding conversion UI, validating video steps, changing the `output` response or handling `SAME_FORMAT`/`UNSUPPORTED_TARGET_FORMAT`.
+
+### ADR-013: Ramo aditivo para a conversão isolada no worker
+- **Status**: accepted
+- **Date**: 2026-10-22
+- **Bolt**: 007-video-format-conversion (002-video-transformations)
+- **Path**: `bolts/007-video-format-conversion/adr-013-convert-worker-path.md`
+- **Summary**: Um ramo novo exclusivo de `convert` no `task.py` chama `convert_task.py`; produz AVI e preview MP4 numa só invocação com `split`/`asplit`, reutilizando execução, cancelamento, FFprobe e storage da B003 sem alterar o executor existente. O plano persiste `previewInSameInvocation` via extras no padrão ADR-008/011.
+- **Read when**: Working on conversion, dual FFmpeg outputs, worker task execution, preview copies or B008 chain integration.
 
 ### ADR-012: Contraste e saturação do ajuste em RGB nos dois motores (`lutrgb` e matriz de luma BT.601)
 - **Status**: accepted

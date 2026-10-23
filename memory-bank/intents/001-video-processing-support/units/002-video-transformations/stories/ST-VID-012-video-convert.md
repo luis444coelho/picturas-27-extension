@@ -2,11 +2,11 @@
 id: ST-VID-012
 unit: 002-video-transformations
 intent: 001-video-processing-support
-status: ready
+status: complete
 priority: must
-created: 2026-10-19T17:31:16Z
+created: 2026-10-19T17:31:16.000Z
 assigned_bolt: 007-video-format-conversion
-implemented: false
+implemented: true
 ---
 
 # Story: ST-VID-012 — Converter formato

@@ -166,6 +166,8 @@ class CancelledTasksTest(unittest.TestCase):
         # B005 is always active as well: present, then set aside like B004.
         self.assertTrue({'watermark', 'adjust', 'filter', 'resize', 'orient'}.issubset(names))
         names = [name for name in names if name not in {'watermark', 'adjust', 'filter', 'resize', 'orient'}]
+        self.assertIn('convert', names)
+        names = [name for name in names if name != 'convert']
         self.assertEqual(set(names), {'trim', 'remove_audio', 'speed'})
         out.stdout = str([name for name in names if name not in {'trim', 'remove_audio', 'speed'}])
         self.assertEqual(out.stdout.strip(), '[]')

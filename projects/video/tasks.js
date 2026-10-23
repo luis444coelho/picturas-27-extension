@@ -8,6 +8,11 @@ const chain = require("./chain");
 const plans = require("./plan");
 const { applyPlanExtras } = require("./planExtras");
 const { applyVisualPlanExtras } = require("./planExtrasVisual");
+const {
+  applyConvertPlanExtras,
+  annotateConvertValidation,
+  throwConvertStepError,
+} = require("./convertPlanExtras");
 const { VideoError, MESSAGES } = require("./errors");
 const { DUPLICATE_KEY } = require("./locks");
 
@@ -250,6 +255,7 @@ function createTasks({
 
     // 7. plan decisions (the targets need the task id, added on submit).
     const decided = plans.decide(steps, inputVideos, checked.props, registry);
+    annotateConvertValidation(decided, steps);
     return {
       profile,
       stepError: null,
@@ -289,6 +295,7 @@ function createTasks({
     correlationId,
   }) {
     const prepared = await prepare({ callerId, inputVideos, steps });
+    throwConvertStepError(steps, prepared.stepError, VideoError);
     if (prepared.stepError)
       throw new VideoError(422, "INVALID_STEP_PARAMS", prepared.stepError);
 
@@ -339,6 +346,7 @@ function createTasks({
     });
     applyPlanExtras(plan, steps, chain.propsFromMeta(inputVideos[0].meta), registry);
     applyVisualPlanExtras(plan, steps, chain.propsFromMeta(inputVideos[0].meta), registry);
+    applyConvertPlanExtras(plan, steps);
     const at = now();
     let task;
     try {

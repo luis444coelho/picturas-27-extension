@@ -4,10 +4,12 @@
 const VIDEO = {
   h264: { codec: "libx264", preset: "veryfast", crf: 23, pixFmt: "yuv420p" },
 };
+VIDEO.mpeg4 = { codec: "mpeg4", quality: 3, pixFmt: "yuv420p" }; // D-68
 
 const AUDIO = {
   aac: { codec: "aac", bitrate: "128k" },
 };
+AUDIO.mp3 = { codec: "libmp3lame", bitrate: "192k" }; // D-68
 
 const FASTSTART_CONTAINERS = ["mp4", "mov"];
 
