@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   Clapperboard,
   Combine,
+  Droplet,
   FileVideo,
   Gauge,
   Layers3,
@@ -14,7 +15,6 @@ import {
   Scaling,
   Scissors,
   SlidersHorizontal,
-  Stamp,
   VolumeX,
   type LucideIcon,
 } from "lucide-react";
@@ -61,7 +61,7 @@ const actionIcons: Record<Action, LucideIcon> = {
   filter: Palette,
   resize: Scaling,
   orient: RotateCw,
-  watermark: Stamp,
+  watermark: Droplet,
   convert: FileVideo,
   multi: Layers3,
   concat: Combine,

@@ -85,8 +85,9 @@ test.describe("D-30 and D-31 in the browser", { skip }, () => {
     await page.goto(`${BASE}/dashboard`);
     await page.getByRole("button", { name: "New Project" }).click();
     await page.getByRole("tab", { name: "Vídeo" }).click();
-    await page.getByRole("button", { name: "Novo projeto com vídeo" }).click();
-    const dialog = page.getByRole("dialog").last();
+    const dialog = page.getByRole("dialog");
+    assert.equal(await dialog.count(), 1, "the video form stays in the New Project dialog");
+    assert.equal(await page.getByRole("button", { name: "Novo projeto com vídeo" }).count(), 0);
     await dialog.getByLabel("Nome do projeto").fill(name);
     await dialog.locator('input[type="file"]').setInputFiles(files);
     return dialog;
@@ -140,6 +141,27 @@ test.describe("D-30 and D-31 in the browser", { skip }, () => {
     assert.equal(await player.getAttribute("controls"), "");
     await shot(page, "d31-player");
     await page.keyboard.press("Escape");
+  });
+
+  test("D-93/D-32: the Video mode creates a project and reports ingestion failure after the dialog closes", async () => {
+    const dialog = await openNewVideoProject("UI ingestão falhada", {
+      name: "invalido.mp4",
+      mimeType: "video/mp4",
+      buffer: Buffer.alloc(4096, 7),
+    });
+    await dialog.getByRole("button", { name: "Criar" }).click();
+    await page.waitForURL(/\/dashboard\/[0-9a-f]{24}/);
+    await page.getByRole("dialog").waitFor({ state: "hidden" });
+    assert.equal(await page.getByRole("dialog").count(), 0, "dialog closed after upload");
+    const projectId = projectIdOf(page.url());
+    await page.getByText(/O ficheiro de vídeo está corrompido ou incompleto/).first().waitFor({ timeout: 60000 });
+    await page.getByText(/O projeto foi criado sem vídeo/).first().waitFor({ timeout: 10000 });
+    assert.equal(await Video.countDocuments({ project_id: projectId }), 0);
+    const project = await api("GET", `/projects/${user.id}/${projectId}`, {
+      token: user.token,
+    });
+    assert.equal(project.json.name, "UI ingestão falhada");
+    assert.equal(project.json.imgs.length, 0);
   });
 
   test("D-31: a video uploaded elsewhere shows up without reloading, by video-ingest-update", async () => {
@@ -199,6 +221,10 @@ test.describe("D-30 and D-31 in the browser", { skip }, () => {
     await dialog.getByRole("button", { name: "Criar" }).click();
     await dialog.getByText(/^[1-9]\d?%$/).waitFor({ timeout: 30000 });
     await shot(page, "d30-progress");
+    await page.keyboard.press("Escape");
+    assert.equal(await dialog.isVisible(), true, "Escape cannot close during upload");
+    await dialog.getByRole("button", { name: "Close" }).click();
+    assert.equal(await dialog.isVisible(), true, "the close button cannot close during upload");
     await dialog.getByRole("button", { name: "Cancelar carregamento" }).click();
 
     await page.waitForURL(/\/dashboard\/[0-9a-f]{24}/);

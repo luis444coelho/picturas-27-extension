@@ -531,11 +531,10 @@ test(
       assert.ok(await evaluate(`document.querySelector('[role=tab][aria-selected=true]')?.innerText === 'Imagem'`), "image selected by default");
       assert.ok(await evaluate(`Boolean(document.querySelector('#project-name'))`), "existing image fields");
       assert.ok(await evaluate(click("[role=tab]", "Vídeo")), "choose video");
-      await until(() => evaluate(`Boolean([...document.querySelectorAll('[role=dialog] button')].find((button) => button.innerText.includes('Novo projeto com vídeo')))`), "video flow entry");
-      assert.ok(await evaluate(click("button", "Novo projeto com vídeo")), "open D-30 video dialog");
-      await until(() => evaluate(`Boolean(document.querySelector('#video-project-name'))`), "D-30 video fields");
-      await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
-      await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+      await until(() => evaluate(`Boolean(document.querySelector('#video-project-name'))`), "D-30 form in the same dialog");
+      assert.equal(await evaluate(`document.querySelectorAll('[role=dialog]').length`), 1, "no second video dialog");
+      assert.equal(await evaluate(`[...document.querySelectorAll('button')].filter((button) => button.innerText.includes('Novo projeto com vídeo')).length`), 0, "no intermediate video button");
+      assert.ok(await evaluate(`document.querySelector('[role=dialog]')?.innerText.includes('Limite do teu perfil')`), "profile limit shown");
       await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
       await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
       assert.ok(await evaluate(`document.querySelector('.video-workspace-root button')?.innerText.includes('Adicionar vídeo')`), "add video button");
@@ -564,6 +563,7 @@ test(
         await until(() => evaluate(`${region}?.innerText.includes(${JSON.stringify(label)})`), `${label} region`);
       }
       assert.ok(await evaluate(`[...document.querySelectorAll('[aria-label="Ferramentas de vídeo"] button')].filter((button) => button.querySelector('svg')).length >= 12`), "icons for all operations");
+      assert.ok(await evaluate(`Boolean([...document.querySelectorAll('[aria-label="Ferramentas de vídeo"] button')].find((button) => button.innerText.includes('Marca de água'))?.querySelector('svg.lucide-droplet'))`), "watermark uses Droplet");
       const videoRoute = `/projects/${workspace.user.id}/${workspace.project}/videos`;
       const trimmed = await api("POST", `${videoRoute}/${workspace.video}/operations`, workspace.user.token, {
         steps: [{ operation: "trim", version: 1, parameters: { startMs: 0, endMs: 2000 } }],

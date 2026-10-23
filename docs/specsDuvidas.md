@@ -992,6 +992,8 @@
 
 ## D-93 — Criação de projetos de imagem e vídeo num único botão
 
+- **Revisão:** Após os testes manuais, a equipa pediu que a seleção «Vídeo» mostrasse imediatamente o formulário no mesmo diálogo, sem botão intermédio nem segundo diálogo. O formulário foi extraído para `frontend/components/video/new-video-project-form.tsx` e reutilizado pelo fluxo D-30. A escuta de `video-ingest-update` fica montada fora do conteúdo do diálogo para conservar o aviso de falha após o fecho, conforme a D-32; o fecho continua bloqueado durante o carregamento.
+
 - **Onde:** `frontend/components/dashboard-sidebar/dashboard-sidebar.tsx`; `frontend/components/dashboard-sidebar/new-project-dialog.tsx`; apresentação da D-30.
 - **Dúvida:** Como reunir a criação de projetos sem duplicar o fluxo de vídeo da D-30 nem alterar a criação de imagem?
 - **Resposta da equipa:** A barra lateral mostra só «New Project». O seu diálogo tem um seletor «Imagem / Vídeo», com «Imagem» por omissão. A opção de imagem conserva os campos, a API e a navegação atuais. A opção de vídeo utiliza o componente `NewVideoProjectDialog` da D-30, mantendo a recusa de anónimos e os limites do perfil. A equipa aceita, para esta alteração, a exceção à regra 2.6 limitada a alterações mínimas das linhas existentes de `dashboard-sidebar.tsx` e `new-project-dialog.tsx`; nenhum outro código de imagem muda.

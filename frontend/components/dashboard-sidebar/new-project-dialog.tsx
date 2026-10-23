@@ -17,7 +17,7 @@ import { useSession } from "@/providers/session-provider";
 import { LoaderCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getErrorMessage } from "@/lib/error-messages";
-import { NewVideoProjectDialog } from "../video/new-video-project-dialog";
+import { NewVideoProjectForm } from "../video/new-video-project-form";
 
 export default function NewProjectDialog({
   files = [],
@@ -33,6 +33,7 @@ export default function NewProjectDialog({
 
   const [open, setOpen] = useState<boolean>(false);
   const [mode, setMode] = useState<"image" | "video">("image");
+  const [videoBusy, setVideoBusy] = useState(false);
   const [name, setName] = useState<string>("");
   const [imageFiles, setImageFiles] = useState<File[]>([]);
 
@@ -83,11 +84,18 @@ export default function NewProjectDialog({
   }, [open, setFiles]);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (mode !== "video" || !videoBusy) setOpen(next);
+      }}
+    >
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create New Project</DialogTitle>
+          <DialogTitle>
+            {mode === "video" ? "Novo projeto com vídeo" : "Create New Project"}
+          </DialogTitle>
         </DialogHeader>
         <div className="flex gap-2" role="tablist" aria-label="Tipo de projeto">
           <Button
@@ -95,6 +103,7 @@ export default function NewProjectDialog({
             role="tab"
             aria-selected={mode === "image"}
             variant={mode === "image" ? "default" : "outline"}
+            disabled={videoBusy}
             onClick={() => setMode("image")}
           >
             Imagem
@@ -138,10 +147,11 @@ export default function NewProjectDialog({
             </DialogFooter>
           </>
         ) : (
-          <div className="flex flex-col gap-3 text-sm">
-            <p>Continua para escolher o nome e carregar o vídeo.</p>
-            <NewVideoProjectDialog />
-          </div>
+          <NewVideoProjectForm
+            onClose={() => setOpen(false)}
+            onBusyChange={setVideoBusy}
+            showTitle={false}
+          />
         )}
       </DialogContent>
     </Dialog>
