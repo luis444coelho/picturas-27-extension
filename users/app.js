@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 
 var usersRouter = require("./routes/users");
 var presetsRouter = require("./routes/presets");
+var videoPresetsRouter = require("./routes/videoPresets");
 
 // Run Docker
 const mongoDB = "mongodb://users_mongoDB:27019/user";
@@ -30,6 +31,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", usersRouter);
 app.use("/", presetsRouter);
+app.use("/", videoPresetsRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

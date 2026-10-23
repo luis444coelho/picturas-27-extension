@@ -52,7 +52,7 @@ Implementar a operação `concat` com sub-cadeias por clip, a validação em tr�
 - [x] **1. Domain Model**: Complete (D-78 a D-84) → `ddd-01-domain-model.md`
 - [x] **2. Technical Design**: Complete (D-85; fase 2 antes da fase 3 sem junção) → `ddd-02-technical-design.md` → `ddd-02-technical-design.md`
 - [x] **3. ADR Analysis**: Complete (ADR-019 dependente da V6) → `adr-016-composition-router.md`, `adr-017-composition-worker-path.md`, `adr-018-preset-structure-validation.md`, `adr-019-task-error-phase.md`
-- [ ] **4. Implement**: In progress (preflight V1–V14 primeiro) → código nos componentes indicados em "Saídas esperadas"
+- [ ] **4. Implement**: Checkpoint → `implementation-preflight.md`, `implementation-report.md` → código nos componentes indicados em "Saídas esperadas"
 - [ ] **5. Test**: Pending → `ddd-03-test-report.md`
 
 ## Requisitos rastreados
@@ -116,3 +116,4 @@ Os critérios de aceitação autoritativos são os dos ficheiros `docs/requireme
 - 2026-10-23T00:47:57Z: Estágio 2 aprovado com uma correção (sem junção, a fase 2 corre no router antes da fase 3 e, se falhar, `next()` para a B003 devolver o `INVALID_STEP_PARAMS`) e a D-85 (a). Estágio 3: ADR-016 a ADR-019 escritos e acrescentados ao `decision-index.md`; paragem no checkpoint.
 - 2026-10-23T00:53:52Z: Estágio 3 aprovado (ADR-016 a ADR-019). O ADR-019 depende da V6: se falhar, dúvida nova a partir da D-86, ADR-019 marcado `proposed` no ficheiro e no `decision-index.md` e paragem antes de escrever código. Estágio 4 em curso: `implementation-preflight.md` com as V1 a V14 confirmadas no código, commit e push do preflight antes de qualquer código.
 - 2026-10-23T00:58:42Z: Preflight da etapa 4 (`implementation-preflight.md`): V1 a V14 confirmadas no código, todas com pontos de acréscimo; V6 passa (fase só com linhas novas, incluindo uma linha nova no `_reply` do `task.py`), ADR-019 continua `accepted`; sem dúvida nova. Quatro ajustes por acréscimo: `totalSteps` da junção, áudio e entradas distintas da junção, montagem do router de composição depois do da B005, desvio do `composition_task` só para junções e cadeias terminadas em AVI (nota no ADR-017). `Tools/video/compiler.py` não existe.
+- 2026-10-23T01:10:39Z: Etapa 4 implementada, à espera do checkpoint (`implementation-report.md`). Código: 36 ficheiros, +3370, 0 removidas face à `origin/main`; 20 ficheiros CRLF intactos. TypeScript, ESLint e Prettier passaram; testes unitários do serviço de projetos 263/263 (uma linha nova no teste de registo da D-37, como nas B004, B005 e B007). Sondagens isoladas do grafo da junção, da cadeia AVI e do domínio passaram. Testes do worker no contentor, integração e navegador ficam para a etapa 5.

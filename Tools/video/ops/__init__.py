@@ -7,6 +7,7 @@ from ops import test_reencode
 from ops import trim, remove_audio, speed
 from ops import watermark, adjust, filter, resize, orient
 from ops import convert
+from ops import concat
 
 OPERATIONS = {}
 OPERATIONS[trim.NAME] = trim
@@ -18,6 +19,7 @@ OPERATIONS[filter.NAME] = filter
 OPERATIONS[resize.NAME] = resize
 OPERATIONS[orient.NAME] = orient
 OPERATIONS[convert.NAME] = convert
+OPERATIONS[concat.NAME] = concat
 
 # Test operation of D-37, only with VIDEO_TEST_OPERATIONS=1.
 if os.getenv('VIDEO_TEST_OPERATIONS') == '1':

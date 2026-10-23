@@ -56,6 +56,9 @@ function emit(io, msg) {
     const payload = { projectId, taskId, status, step, totalSteps, progress };
     if (content.resultVideoId) payload.resultVideoId = content.resultVideoId;
     if (content.error?.code) payload.error = { code: content.error.code };
+    // B008 (D-82, ADR-019): phase of a failed task.
+    if (content.error?.phase && payload.error)
+      payload.error.phase = content.error.phase;
 
     io.to([userId, `project:${projectId}`]).emit("video-task-update", payload);
   }

@@ -13,6 +13,7 @@ const {
   annotateConvertValidation,
   throwConvertStepError,
 } = require("./convertPlanExtras");
+const { applyCompositionPlanExtras } = require("./planExtrasComposition");
 const { VideoError, MESSAGES } = require("./errors");
 const { DUPLICATE_KEY } = require("./locks");
 
@@ -52,6 +53,7 @@ function createTasks({
     if (task.result_video_id) body.resultVideoId = String(task.result_video_id);
     if (task.error)
       body.error = { code: task.error.code, message: task.error.message };
+    if (task.error?.phase) body.error.phase = task.error.phase; // D-82, ADR-019
     return body;
   }
 
@@ -68,6 +70,9 @@ function createTasks({
       totalSteps: task.total_steps,
       progress: task.progress,
       ...extra,
+      ...(extra.error && task.error?.phase
+        ? { error: { ...extra.error, phase: task.error.phase } }
+        : {}), // D-82, ADR-019
     };
     try {
       await bus.publishWs(event);
@@ -164,6 +169,8 @@ function createTasks({
   // call won the transition, null otherwise.
   async function finish(task, status, fields = {}) {
     const set = { status, status_changed_at: now(), ...fields };
+    if (fields.error && task.error_phase)
+      set.error = { ...fields.error, phase: task.error_phase }; // D-82
     if (status !== "completed" && task.reserved_credits > 0)
       set.refund = { state: "pending", at: null };
 
@@ -262,6 +269,10 @@ function createTasks({
       decided,
       cost: chain.chainCost(steps, registry),
       totalSteps: steps.length,
+      // B008: with a concat, N counts the steps of every clip (CHAIN-008, CHAIN-012).
+      ...(chain.taskKind(steps) === "concat"
+        ? { totalSteps: chain.chainCost(steps, registry) }
+        : {}),
     };
   }
 
@@ -347,6 +358,12 @@ function createTasks({
     applyPlanExtras(plan, steps, chain.propsFromMeta(inputVideos[0].meta), registry);
     applyVisualPlanExtras(plan, steps, chain.propsFromMeta(inputVideos[0].meta), registry);
     applyConvertPlanExtras(plan, steps);
+    applyCompositionPlanExtras(
+      plan,
+      steps,
+      chain.propsFromMeta(inputVideos[0].meta),
+      registry,
+    );
     const at = now();
     let task;
     try {
@@ -628,6 +645,7 @@ function createTasks({
           reply.error?.code === "RESOURCE_UNAVAILABLE"
             ? "RESOURCE_UNAVAILABLE"
             : "PROCESSING_ERROR";
+        if (reply.error?.phase) task.error_phase = String(reply.error.phase); // D-82
         if (ACTIVE.includes(task.status) || task.status === "failed")
           return fail(task, code, "worker", reply.error?.message);
         return undefined;

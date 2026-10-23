@@ -28,6 +28,15 @@ const MESSAGES = {
   TASK_NOT_ACTIVE: "A tarefa já terminou e não pode ser cancelada.",
   QUOTA_EXCEEDED:
     "Atingiste o limite diário de operações. Tenta amanhã ou passa a Premium.",
+  INSUFFICIENT_INPUTS: "Escolhe pelo menos dois vídeos para juntar.",
+  TOO_MANY_INPUTS:
+    "A junção tem mais vídeos do que o teu perfil permite. Remove alguns clips.",
+  INVALID_CHAIN:
+    "A cadeia de operações não é válida. Corrige a regra indicada e tenta novamente.",
+  CHAIN_TOO_LONG:
+    "Uma cadeia pode ter no máximo 10 passos. Remove alguns passos.",
+  PRESET_NAME_TAKEN:
+    "Já tens uma predefinição com esse nome. Escolhe outro nome.",
 };
 
 class VideoError extends Error {

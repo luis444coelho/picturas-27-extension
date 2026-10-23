@@ -20,6 +20,7 @@ const errorSchema = new mongoose.Schema(
   {
     code: { type: String, required: true },
     message: { type: String },
+    phase: { type: String }, // D-82, ADR-019: download | encode | upload
   },
   { _id: false },
 );

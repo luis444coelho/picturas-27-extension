@@ -8,6 +8,7 @@ const mongoose = require("mongoose");
 const { router: projectsRouter, process_msg } = require("./routes/projects");
 const videosRouter = require("./routes/videos");
 const videoVisualRouter = require("./routes/videoVisual");
+const videoCompositionRouter = require("./routes/videoComposition");
 
 // Run Docker
 const mongoDB = "mongodb://projects_mongoDB:27018/project";
@@ -34,6 +35,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", videoVisualRouter);
+app.use("/", videoCompositionRouter);
 app.use("/", videosRouter);
 app.use("/", projectsRouter);
 

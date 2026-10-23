@@ -2,7 +2,7 @@
 unit: 003-video-composition
 intent: 001-video-processing-support
 created: 2026-10-23T00:31:55Z
-last_updated: 2026-10-23T00:58:42Z
+last_updated: 2026-10-23T01:10:39Z
 ---
 
 # Construction Log: 003-video-composition
@@ -57,3 +57,4 @@ last_updated: 2026-10-23T00:58:42Z
 - 2026-10-23T00:47:57Z: B008 Estágio 2 aprovado com uma correção da equipa (sem junção, o router de composição corre a fase 2 em memória antes da fase 3 e, se falhar, faz `next()` para a B003 devolver o `INVALID_STEP_PARAMS`; teste unitário acrescentado) e a D-85 (a): `INVALID_CHAIN {rule: "concat_in_preset", index}`. Estágio 3 escrito, à espera do checkpoint: ADR-016 (router de composição e `_clips`), ADR-017 (`composition_task.py`), ADR-018 (estrutura das predefinições validada pelo serviço de projetos) e ADR-019 (`error.phase`, condicionado à V6; paragem se o `_reply` do `task.py` tiver de mudar), acrescentados ao `decision-index.md`.
 - 2026-10-23T00:53:52Z: B008 Estágio 3 aprovado (ADR-016 a ADR-019; ADR-019 dependente da V6). Estágio 4 iniciado pelo preflight V1–V14.
 - 2026-10-23T00:58:42Z: B008 preflight da etapa 4: V1 a V14 confirmadas no código (ficheiro e linha de cada acréscimo); V6 passa e o ADR-019 continua `accepted`; sem dúvida nova; quatro ajustes por acréscimo registados no preflight e uma nota no ADR-017. Commit e push do preflight antes de qualquer código.
+- 2026-10-23T01:10:39Z: B008 etapa 4 implementada, à espera do checkpoint: router de composição, `concat`, validação em três fases, `_clips`, extras do plano, `composition_task.py`, `error.phase`, predefinições (serviço de utilizadores e gateway) e editor de cadeia e linha temporal no frontend. `git diff --numstat origin/main` no código: 36 ficheiros, +3370, 0 removidas; CRLF intacto; TypeScript, ESLint e Prettier passaram; unitários do serviço de projetos 263/263. Testes do worker no contentor, integração e navegador na etapa 5.
