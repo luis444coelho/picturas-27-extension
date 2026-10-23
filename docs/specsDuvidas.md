@@ -764,6 +764,7 @@
 - **Opções:** (a) aceitar o nome apresentado como risco residual, mantendo o download com a extensão correta; (b) alterar a atribuição de `original_name` em `tasks.js`, o que exige modificar código existente e viola a regra 2.6; (c) definir numa intervenção futura uma apresentação específica dos resultados sem alterar a publicação histórica.
 - **Recomendação:** (a) neste bolt, por preservar a regra 2.6 e não afetar o formato real nem o download.
 - **Resposta:** **(a), aceite pela equipa como risco residual.** O nome apresentado mantém a extensão da origem; a transferência usa `fileName.js` e recebe a extensão do resultado.
+- **Revista pela D-75:** A equipa decidiu corrigir o nome apresentado dos novos resultados de vídeo; os resultados já guardados não são alterados.
 
 ## D-74 — Contador de operações diárias não atualiza após tarefas de vídeo
 
@@ -774,3 +775,39 @@
 - **Opções:** (a) aceitar como risco residual de atualização da interface: o servidor debita corretamente, e o contador volta ao valor real quando a sessão é atualizada; (b) numa intervenção futura, montar uma extensão nova que refresque a sessão quando uma tarefa de vídeo é aceite, concluída ou cancelada, verificando a regra 2.6 sem alterar linhas existentes; (c) modificar diretamente `use-video-task.ts` da B003 para chamar `useUpdateSession`, o que viola a regra 2.6.
 - **Recomendação:** (a) para a B007, porque a quota no servidor e a cobrança da tarefa estão corretas; planear a atualização do contador numa intervenção aditiva própria.
 - **Resposta:** **(a), aceite pela equipa como risco residual sob a condição de débito no servidor, confirmada pelo diagnóstico acima.** O contador apresentado pode ficar desatualizado durante a sessão após operações de vídeo; a quota efetiva no servidor diminui e impede operações acima do limite.
+
+## D-75 — Extensão real no nome apresentado dos novos resultados de vídeo
+
+- **Onde:** Correção pontual após a B007; `projects/models/video.js`, galeria, leitor e painel de informação; ADR-015.
+- **Dúvida:** Que nome deve aparecer num vídeo produzido por uma tarefa quando o contentor de saída difere do da origem?
+- **O que as fontes dizem:** ADD 4.1/4.2 e REQ-VID-DOWNLOAD-005 distinguem o nome apresentado do nome sugerido para descarregamento. A D-35 põe o sufixo das operações apenas no descarregamento, através de `projects/video/fileName.js`. A D-73 aceitou temporariamente que `tasks.js` copiasse o `original_name` da origem, incluindo a extensão antiga. ADD 2.6 só permite acrescentar linhas ao código existente.
+- **Opções:**
+  - **(a)** Nos documentos novos com `task_id`, um hook `pre("validate")` no schema, antes de `mongoose.model`, troca apenas a última extensão do `original_name` pela de `formats.CONTAINERS[meta.container].extension`; mantém o nome base sem sufixos, os originais da ingestão e os resultados já guardados.
+  - **(b)** Alterar a atribuição em `tasks.js`, substituindo código existente.
+  - **(c)** Corrigir só a apresentação em cada interface, mantendo o nome antigo no documento.
+- **Recomendação:** (a), por manter um nome coerente nas três vistas, preservar o contrato de download da D-35 e cumprir a regra 2.6 no código de produção.
+- **Resposta:** **(a), aprovada pela equipa.** Por exemplo, `Quando Tu Entras Em Campo - SC Braga.mp4` convertido para AVI fica `Quando Tu Entras Em Campo - SC Braga.avi` na galeria, no leitor e na informação; o descarregamento fica `Quando Tu Entras Em Campo - SC Braga_convert.avi`. O hook só atua em documentos novos com `task_id` preenchido, usa a extensão do contentor real e não migra resultados existentes. As D-76 e D-77 foram esclarecidas antes da implementação.
+
+## D-76 — Teste existente exige o nome anterior do resultado (V4)
+
+- **Onde:** Verificação V4 da correção D-75; `projects/test/video/tasks.test.js:492`.
+- **Dúvida:** Como atualizar a expectativa do teste da B003 sem violar a regra 2.6, depois da decisão D-75?
+- **O que as fontes dizem:** A asserção `assert.equal(video.original_name, "férias.mov", "first source's name (D-35)")` verifica o objeto emitido por `tasks.js` antes do middleware do Mongoose: o teste injeta a coleção falsa `createCollection()` na linha 65, por isso o hook `pre("validate")` não corre. A atribuição do nome da origem em `tasks.js` mantém-se. Um teste novo com `new Video(doc).validate()` cobre o comportamento persistido; o teste de ingestão cobre um original sem `task_id`.
+- **Opções:**
+  - **(a)** Manter a asserção da coleção falsa e acrescentar testes com o schema real para o comportamento do hook.
+  - **(b)** Alterar a expectativa do teste da B003, apesar de ele não usar Mongoose.
+  - **(c)** Adiar a correção D-75 até existir uma revisão da regra 2.6 aplicável aos testes históricos.
+- **Recomendação:** (a), porque a asserção continua a verificar corretamente `tasks.js` e o teste novo cobre o comportamento persistido, sem base de dados.
+- **Resposta:** **(a), esclarecida pela equipa.** A asserção da linha 492 não muda e continua a passar: usa `createCollection()`, não o modelo Mongoose. O teste novo com o schema real verifica que um resultado novo com `task_id` recebe a extensão de `meta.container`, um original sem `task_id` não muda e um documento já existente também não muda. A V4 fica satisfeita sem alterar linhas existentes.
+
+## D-77 — A main remota ainda não contém a B007
+
+- **Onde:** Preparação do ramo `fix/video-result-name` a partir de `origin/main`, em 2026-10-23.
+- **Dúvida:** Como criar o ramo pedido a partir da main com a B007 quando a main remota ainda aponta para a B005?
+- **O que as fontes dizem:** A equipa indica que a B007 está fechada e na main e pede um ramo criado dessa base, sem merge para a main. Após `git fetch origin main`, `main` e `origin/main` apontam para `270161f` (merge da B005); `origin/bolt/007-video-format-conversion` aponta para `204c4b9`. Criar o ramo agora a partir de `origin/main` deixaria a B007 de fora.
+- **Opções:**
+  - **(a)** Atualizar a main remota com a B007 pelo processo da equipa e só depois criar `fix/video-result-name` a partir dela.
+  - **(b)** Criar o ramo a partir do ramo da B007 e aceitar que o diff contra `origin/main` inclui toda a B007 até a main ser atualizada.
+  - **(c)** Criar o ramo a partir da B005, incorporando a B007 no próprio ramo da correção.
+- **Recomendação:** (a), para respeitar a base pedida e permitir atribuir o numstat da correção apenas a esta intervenção.
+- **Resposta:** **(a), resolvida pela equipa.** A B007 foi integrada e enviada para `origin/main` (`69dc977`); o ramo `fix/video-result-name` foi criado a partir desse commit. As alterações de documentação foram transportadas para o ramo.
