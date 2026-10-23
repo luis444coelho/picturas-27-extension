@@ -2,7 +2,7 @@
 unit: 003-video-composition
 bolt: 008-video-concat-chain
 stage: design
-status: complete
+status: revision-checkpoint
 updated: 2026-10-23T00:47:57Z
 ---
 
@@ -11,6 +11,8 @@ updated: 2026-10-23T00:47:57Z
 Fontes, por ordem de precedência: `docs/add.md` (ADD v1.1, mestre: 2.6, T-00 a T-06, T-08, T-10, 4.8, 4.9, Q-ADD-13, Q-ADD-16, Q-ADD-25), `docs/specsDuvidas.md` (D-23, D-35, D-39, D-40, D-42 a D-45, D-47, D-49, D-60, D-61, D-68, D-75, D-78 a D-85), `memory-bank/standards/decision-index.md` (ADR-004, ADR-005, ADR-007 a ADR-011, ADR-013 a ADR-015), `bolt.md` e as stories ST-VID-013 e 014, `docs/requirements/REQ-VID-CONCAT.md`, `REQ-VID-CHAIN.md`, `REQ-VID-NFR.md`, `docs/use-cases/UC-VID-013.md` e `014.md`. Base: `ddd-01-domain-model.md` (aprovado com as D-78 a D-84). Os componentes das B001 a B007 que este bolt estende são descritos a partir dos seus artefactos (`ddd-02-technical-design.md` da B003 e da B004, `implementation-walkthrough.md` da B005 e da B007, ADR-007 a ADR-014). Não se leu código (restrição do estágio); o que depende do código está em "Verificações a fazer no Estágio 4".
 
 Uma dúvida nova surgiu neste estágio, **D-85** (código de uma predefinição com junção), respondida (a) pela equipa no checkpoint.
+
+> **Revisão (D-86, D-87):** a secção "Revisão da etapa 2", no fim deste documento, substitui as secções "Frontend" e "Componentes e ficheiros → Novos, no frontend", e tudo o que aqui fala de limites de quantidade (`CHAIN_TOO_LONG`, `TOO_MANY_INPUTS`, `maxClips`, `MAX_STEPS`). O resto do backend mantém-se.
 
 ## Architecture Pattern
 
@@ -363,3 +365,133 @@ Respondidas pela equipa em 2026-10-23T00:47:57Z:
 2. **D-85 (a):** predefinição com junção → 422 `INVALID_CHAIN {rule: "concat_in_preset", index}`.
 3. Estágio 3: os quatro ADR propostos, ADR-016 (router de composição e `_clips`), ADR-017 (`composition_task.py`), ADR-018 (validação da estrutura das predefinições delegada ao serviço de projetos) e ADR-019 (`error.phase`, condicionado à V6), acrescentados ao `decision-index.md`.
 4. V6: se a fase não puder entrar na resposta `failed` sem mudar a linha existente do `_reply` em `task.py`, regista-se a dúvida e para-se.
+
+## Revisão da etapa 2 (D-86, D-87)
+
+A equipa reviu a etapa 5 no browser e não aprovou a interface: queria três ações independentes, controlos de configuração iguais aos da edição simples e nenhum limite fixo de quantidade. Esta revisão só trata do que muda; o backend das etapas 4 e 5 mantém-se. Não se leu código novo para esta revisão: as afirmações sobre o código vêm do preflight e do relatório da etapa 4, e o resto está nas verificações V15 a V24.
+
+### O que se mantém
+
+- Rotas, router de composição (ADR-016), `concat` com `_clips`, as três fases pela ordem da D-80, `planExtrasComposition.js`, `composition_task.py` (ADR-017), `error.phase` (ADR-019), predefinições (ADR-018, D-83 a D-85), nomes (D-35, D-75) e os testes do backend.
+- O modelo D-78: `[concat {clips: [{videoId, steps}]}, ...passos finais]` para composições; `steps` sem junção na rota com `:video`.
+- Custo N (1 crédito por passo; a junção conta 1, DQ-014), reserva antes da tarefa e devolução em falha ou cancelamento (D-45), resultado atómico.
+
+### O que muda no backend (D-86)
+
+1. `chainStructure.checkStructure` deixa de devolver `CHAIN_TOO_LONG`. Ficam as regras da D-79 e da D-85 e a contagem N, usada no custo e no `totalSteps`.
+2. `concat.checkClips` deixa de devolver `TOO_MANY_INPUTS`. Ficam o `INVALID_REQUEST` da forma e o `INSUFFICIENT_INPUTS` (mínimo de 2, CONCAT-005).
+3. `compositionLimits.js` fica só com `MIN_CLIPS` e `maxDurationMs`. As linhas `TOO_MANY_INPUTS` e `CHAIN_TOO_LONG` acrescentadas pela B008 ao `errors.js` saem. São linhas que a B008 tinha acrescentado e que não estão na `main`, por isso o `numstat` face à `origin/main` continua sem linhas removidas.
+4. Limites que ficam: a duração e o tamanho por perfil (entradas, saída de cada clip, soma da junção e resultado, D-81), a quota dos Registados (`QUOTA_EXCEEDED` antes da tarefa, B003), a recusa dos anónimos, o formato e as permissões.
+5. **Proteção técnica:** fica pendente na D-88. A recomendação (a) não acrescenta limite: medem-se na etapa 5 uma junção grande e uma cadeia longa, e um 413 do `express.json()` passa a `INVALID_REQUEST {field: "steps", reason: "too_large"}` no gateway de vídeo.
+6. **Rota nova `POST …/videos/chain/validate`** (router de composição e uma linha no gateway). O corpo é o mesmo do `…/validate`: `{videoId, steps}` sem junção, ou `{steps}` com junção. A resposta é a da B003 (`{valid, cost, totalSteps, output, errors}`), mais `inputs: {steps: [PropriedadesVideo], clips: [[PropriedadesVideo]]}`, com as propriedades estimadas **à entrada** de cada passo do topo e de cada passo de cada clip. Esses valores vêm dos `estimates` que o `chain.validateChain` já devolve.
+   - Sem junção, a rota usa a `tasks.validate` da B003 para a resposta comum e acrescenta os `inputs`.
+   - Com junção, usa a `validateConcat` da B008.
+   - É disto que os componentes de configuração precisam, numa cadeia, para os limites de cada passo: por exemplo, a duração de um recorte depois de uma velocidade (CHAIN-003). O `…/validate` da B003 não muda.
+
+### Três fluxos na interface
+
+O `video-chain-editor.tsx`, o `video-chain-step-form.tsx` e o `video-chain-actions.tsx` saem. São ficheiros novos da B008, ainda não estão na `main`. Do que existe, aproveitam-se:
+
+- a `SortableList` (`video-chain-step-list.tsx`);
+- o `video-clip-picker.tsx`;
+- o `video-chain-presets.tsx`;
+- o `video-task-phase.tsx`;
+- o `lib/video-chain.ts`, sem os limites;
+- o `lib/video-chain-api.ts`, com a rota nova.
+
+| Ação | Onde | Pedido | Custo | Conteúdo |
+|------|------|--------|-------|----------|
+| **Aplicar várias operações** | Botão no leitor de um vídeo (onde estava "Encadear operações") | `steps` sem junção, rota com `:video` | N passos | Lista ordenada de operações sobre o vídeo do leitor: acrescentar, configurar, reordenar e remover, sem limite fixo (D-86); predefinições (carregar e guardar); duração estimada; Executar; progresso "passo k de N" e fase da falha |
+| **Juntar vídeos** | Botão na janela "Vídeos" do projeto | `[concat {clips: [{videoId, steps: []}…]}]`, rota sem `:video` | 1 | Escolher 2 ou mais vídeos do projeto (repetições permitidas, sem limite fixo); reordenar (arrastar e setas) e remover; duração total, resolução e fps estimados; sem operações; Executar; progresso |
+| **Movie Maker** | Botão na janela "Vídeos" do projeto | `[concat {clips: [{videoId, steps}…]}, ...passos finais]`, rota sem `:video` | 1 + passos dos clips + passos finais | Lista ordenável de clips, cada um com o seu cartão e a sua cadeia (acrescentar, configurar, remover e reordenar operações; pode ficar vazia); secção "Depois da junção" com a sua cadeia; predefinições em cada cadeia; custo, duração e estimativas; Executar; progresso |
+
+O "Movie Maker" é a forma geral `((V1 × F…) + … + (Vn × F…)) × F…` da revisão. Expõe por inteiro o modelo D-78: N clips, cadeias independentes por clip e N passos finais. A ordem da cadeia é a ordem da lista, e a junção é sempre feita sobre os resultados das cadeias (`_clips`, ADR-016).
+
+**Componentes novos (frontend):**
+
+1. `video-operation-config.tsx`: o registo `operation → componente de configuração` (os nove da D-87) e o contrato comum (ver abaixo).
+2. `video-operation-chain.tsx`: lista ordenável de operações, com "Acrescentar operação" (escolha entre as operações permitidas naquela cadeia: sem `convert` nos clips, com `convert` só no fim, D-79). Cada operação abre num diálogo o seu componente de configuração, com o mesmo aspeto do painel simples; também se pode configurar, remover e reordenar. Mostra os erros de cada passo e tem o espaço das predefinições.
+3. `use-composition.ts`: estado da composição, validação com *debounce* pela rota nova (descartando respostas antigas), submissão, acompanhamento da tarefa (`useVideoTask` da B003) e fase da falha.
+4. `video-composition-summary.tsx`: custo, duração, resolução e fps estimados, aviso de quota do Registado (DQ-025), erros gerais, Executar, progresso e fase.
+5. `video-multi-operations.tsx`, `video-concat-videos.tsx` e `video-movie-maker.tsx`: os três fluxos.
+6. `video-composition-actions.tsx`: o botão "Aplicar várias operações" (leitor) e os botões "Juntar vídeos" e "Movie Maker" (janela "Vídeos"). As montagens são as duas linhas que a B008 já acrescentou ao `video-player.tsx` e ao `video-section.tsx`, que mudam de componente.
+
+### Componentes de configuração extraídos (D-87, ADR-020)
+
+Um por operação, extraído do painel simples e usado por ele, sem mudar o aspeto nem o comportamento da edição simples:
+
+| Operação | Painel de origem | Componente |
+|----------|------------------|------------|
+| Recorte | `video-trim-panel.tsx` (B004) | `TrimConfig` |
+| Remoção de áudio | `video-remove-audio-panel.tsx` (B004) | `RemoveAudioConfig` (resumo; a confirmação AUDIO-004 continua na submissão do painel simples e é repetida no "Executar" de uma composição com remoção de áudio) |
+| Velocidade | `video-speed-panel.tsx` (B004) | `SpeedConfig` |
+| Marca de água | `video-watermark-panel.tsx` (B005) | `WatermarkConfig` |
+| Ajuste | `video-adjust-panel.tsx` (B005) | `AdjustConfig` |
+| Filtro | `video-filter-panel.tsx` (B005) | `FilterConfig` |
+| Redimensionar | `video-resize-panel.tsx` (B005) | `ResizeConfig` |
+| Rodar/espelhar | `video-orient-panel.tsx` (B005) | `OrientConfig` |
+| Converter | `ConvertPanel` em `video-convert-actions.tsx` (B007) | `ConvertConfig` |
+
+**Contrato comum:**
+
+```ts
+interface OperationConfigProps {
+  target: VideoTarget;
+  source: {
+    videoId: string;              // vídeo de origem da cadeia (no topo de um Movie Maker: o primeiro clip)
+    inputProps: VideoProps;       // propriedades estimadas à entrada do passo (rota nova) ou do vídeo (edição simples)
+    isSource: boolean;            // o passo recebe o vídeo original (primeiro passo da cadeia de um vídeo ou clip) (D-89)
+    previewSteps: VideoRecipeStep[]; // passos estáticos anteriores da mesma cadeia, para a pré-visualização do T-07
+  };
+  value: VideoRecipeStep | null;  // passo a editar, ou null para os valores por omissão do painel simples
+  onChange: (step: VideoRecipeStep | null) => void; // null enquanto o formulário não forma um passo
+  validation: { pending: boolean; errors: StepError[]; output?: VideoProps }; // do painel simples ou da composição
+  disabled?: boolean;
+}
+```
+
+- **Edição simples:** o painel passa o vídeo do leitor (`isSource: true`, `previewSteps: []`) e a sua validação (`useVideoEditValidation`), e mantém a sua submissão e o seu acompanhamento.
+- **Composições:** passam as propriedades à entrada de cada passo (rota nova) e os erros do passo (D-80).
+- **Recorte e pré-visualizações** (D-89, recomendação (a), pendente): o leitor, o *scrubbing* e o *loop preview* do recorte só ficam ativos com `isSource`. As pré-visualizações estáticas usam o fotograma 0 da origem com os `previewSteps` (T-07).
+
+**Regra das alterações D-87:** só se mexe nos ficheiros de vídeo das B004, B005 e B007 listados acima e, se a V15 o pedir, nos `frontend/lib/video-*.ts` dessas bolts, para mover a configuração para o componente novo e fazer o painel usá-lo. O JSX visível, os textos, os valores por omissão, os intervalos, os passos e as validações ficam iguais. O relatório da etapa 4 lista cada linha alterada ou removida ao abrigo da D-87, separada do `numstat` do resto do código.
+
+### Verificações a fazer na etapa 4 (V15 a V24)
+
+15. **V15:** estrutura de cada um dos nove painéis.
+    - Que estado é de configuração e que estado é de submissão.
+    - Que *hooks* usam (`useVideoInfo`, URL de reprodução, pré-visualização, miniaturas, carregamento da marca).
+    - Se a configuração se extrai com o mesmo JSX e os mesmos textos; o que fica no painel simples (botão, confirmação, progresso).
+    - Se for preciso mudar `frontend/lib/video-*.ts` das B004, B005 e B007, o que muda.
+16. **V16:** o leitor próprio do painel de recorte (URL de reprodução, *scrubbing*, *loop preview*) e a forma de o desativar com `isSource: false` sem mudar o recorte simples (D-89).
+17. **V17:** os endpoints da B005.
+    - `…/:video/preview` aplica uma lista de passos estáticos pela ordem.
+    - O `…/:video/watermark-preview` e as miniaturas dos filtros aceitam o vídeo de origem de uma cadeia.
+    - O que acontece com propriedades estimadas diferentes das do fotograma 0.
+18. **V18:** o painel de conversão numa cadeia: a origem é estimada (MP4); a indicação "Cópia direta"/"Recodificação" do ADR-014 só existe para o `convert` isolado; os destinos vêm das propriedades à entrada.
+19. **V19:** a `tasks.validate` e o `chain.validateChain` chegam para a rota `…/chain/validate` (`estimates` por passo e por clip) sem mudar linhas da B003.
+20. **V20 (D-88):** o limite do `express.json()` no gateway e no serviço de projetos, e o caminho de um 413 até ao cliente.
+21. **V21:** as duas montagens da B008 (`video-player.tsx`, `video-section.tsx`) passam para o `video-composition-actions.tsx`, sem tocar nas linhas das B001 a B007.
+22. **V22:** os testes existentes do frontend (`video-edit`, `video-visual`, `video-convert`) e o que fica por verificar só na checklist visual (os painéis não têm testes de componentes).
+23. **V23:** as linhas que a B008 acrescentou e que saem com a D-86 (`errors.js`, `chainStructure.js`, `concat.js`, `compositionLimits.js`, frontend) e os testes que as cobriam (11 passos, 11/51 clips), que passam a provar a ausência de limite.
+24. **V24:** o método de auditoria. O `git diff --numstat origin/main...HEAD` fica separado em dois: os ficheiros abrangidos pela D-87 (linhas alteradas ou removidas listadas) e o resto do código (0 removidas).
+
+### Testes da etapa 5 (acrescentam aos atuais)
+
+- **Edição simples sem mudanças:** os testes atuais das B004, B005 e B007 e a checklist visual de cada painel.
+- **Aplicar várias operações:** 12 ou mais passos num Premium.
+- **Juntar vídeos:** 12 ou mais vídeos num Premium, com repetições e sem operações, com custo 1.
+- **Movie Maker:** 3 clips com cadeias diferentes (uma vazia) e 2 ou mais passos depois da junção.
+- **Quota e anónimos:** quota insuficiente num Registado recusada com `QUOTA_EXCEEDED` antes da tarefa; anónimo recusado.
+- **Falha a meio:** não deixa resultado e devolve os créditos.
+- **Medição da D-88:** junção grande e cadeia longa (memória e tempo do worker, tamanho do pedido).
+
+### Candidatos a ADR (etapa 3)
+
+1. **ADR-020 (D-87):** exceção à regra 2.6 para extrair os componentes de configuração dos painéis de vídeo das B004, B005 e B007.
+2. **Impacto da D-86:** nota no ADR-016, que deixa de ter o `CHAIN_TOO_LONG` na fase 1. Um ADR próprio só se a D-88 escolher um teto técnico (b).
+
+### Questões abertas no checkpoint da revisão
+
+1. **D-88:** proteção técnica sem limite fixo (recomendação (a): nenhum limite novo, medição na etapa 5, 413 traduzido para `INVALID_REQUEST`).
+2. **D-89:** recorte e pré-visualizações num passo que não recebe o vídeo original (recomendação (a): leitor só com `isSource`, campos e validação sempre; pré-visualização com os passos estáticos anteriores).

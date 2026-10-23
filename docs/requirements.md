@@ -683,3 +683,7 @@ As questões de arquitetura e de implementação estão nas Q-ADD-01 a Q-ADD-25 
 - [x] As decisões de qualidade e arquitetura (`DQ-001` a `DQ-025`) encontram-se catalogadas com justificações técnicas e ligação aos requisitos correspondentes.
 - [x] Os novos requisitos RF1 a RF10 (as dez funcionalidades novas pedidas no enunciado da Fase 1) foram especificados nos casos de uso `UC-VID-006` a `UC-VID-015` e nos ficheiros `REQ-VID-DOWNLOAD`, `INFO`, `ADJUST`, `FILTER`, `RESIZE`, `ORIENT`, `CONVERT`, `CONCAT`, `CHAIN` e `BATCH` (101 requisitos funcionais), com 6 requisitos comuns, 2 de carregamento e 5 não funcionais adicionais.
 - [x] O encadeamento de operações e o processamento em lote de vídeos foram incluídos no MVP e a matriz de formatos foi alargada a MP4, MOV e AVI, com cópia de pré-visualização MP4 (DQ-002, DQ-012 a DQ-017).
+
+---
+
+**Revisto pela D-86** (`docs/specsDuvidas.md`, decisão da equipa na revisão da B008): na **DQ-015**, deixam de valer nesta construção o número máximo de vídeos por junção (10 Registado, 50 Premium) e o máximo de 10 passos por cadeia, em todos os perfis. Mantêm-se o mínimo de 2 vídeos numa junção e a duração total da junção limitada pelo perfil. A parte de lotes fica fora desta construção (D-06). O texto original acima não foi alterado.

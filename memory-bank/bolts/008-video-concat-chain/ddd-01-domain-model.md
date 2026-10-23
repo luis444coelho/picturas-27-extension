@@ -183,3 +183,11 @@ Respondidas pela equipa em 2026-10-23T00:39:08Z e registadas em `docs/specsDuvid
 5. **D-82 (a), condicionada:** `error.phase` em todas as tarefas, com `PROCESSING_ERROR`; a etapa 2 acrescenta uma verificação V, confirmada na etapa 4, de que a fase entra na resposta `failed` do worker e no `VideoTask` só com linhas novas; se não der, dúvida nova e paragem.
 6. **D-83 (a), alterada:** mudança de nome e de passos por `PATCH /users/:user/video-presets/:id`, como o `presets.js`; sem limite de número (o limite de 4 é das predefinições de imagem); uma verificação V na etapa 2 regista onde o padrão de `presets.js` difere.
 7. **D-84 (a):** a marca de imagem fica na predefinição com o `watermarkId`; noutro projeto dá `INVALID_WATERMARK_CONTENT` e o painel pede outra imagem.
+
+## Revisão depois da etapa 5 (D-86, D-87)
+
+A equipa reviu o resultado no browser e reabriu a etapa 2. O modelo do backend mantém-se: sub-cadeia por clip → junção → passos finais (D-78), uma tarefa e uma invocação FFmpeg, custo N (DQ-014), reserva e devolução (D-45), resultado atómico, originais intactos, fase da falha (D-82), predefinições (D-83 a D-85) e nomes (D-35, D-75). Mudam apenas:
+
+- **Limites de quantidade (D-86):** a ContagemPassos deixa de ter o máximo de 10 e os ParametrosJuncao deixam de ter o máximo de 10/50 clips, em todos os perfis; o `CHAIN_TOO_LONG` e o `TOO_MANY_INPUTS` saem do ErroCadeia. Mantêm-se o mínimo de 2 clips, os limites de duração e de tamanho (LimitesPerfil sem `maxClips` nem `maxSteps`), a quota dos Registados e a recusa dos anónimos.
+- **Interface:** o mesmo modelo é exposto por três ações independentes. "Aplicar várias operações" é uma cadeia sem junção sobre um vídeo. "Juntar vídeos" é uma junção com sub-cadeias vazias e sem passos finais, com custo 1. "Movie Maker" é a composição completa, com N clips, cada um com a sua cadeia (possivelmente vazia), e N passos depois da junção. O EditorCadeia e a LinhaTemporalJuncao deste modelo dão lugar a esses três fluxos (ver o `ddd-02-technical-design.md`, secção "Revisão da etapa 2").
+- **Configuração de cada passo (D-87):** os controlos são os componentes da edição simples das B004, B005 e B007, extraídos dos painéis (ADR-020).

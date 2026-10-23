@@ -903,3 +903,57 @@
 - **Opções:** (a) 422 `INVALID_CHAIN` com `{rule: "concat_in_preset", index}`, uma sexta regra só usada pelas predefinições; (b) 422 `INVALID_CHAIN` com `{rule: "multiple_concat"}`, que descreve mal o caso; (c) 422 `INVALID_REQUEST` com `{field: "steps"}` (D-23).
 - **Recomendação:** (a). O editor já traduz o `{rule}` e a mensagem diz exatamente porque a cadeia não pode ser guardada; o botão "Guardar como predefinição" fica desativado no editor quando há junção, por isso o código só aparece a quem chama a API diretamente.
 - **Resposta:** **(a), aprovada pela equipa.** Predefinição com junção → 422 `INVALID_CHAIN` com `{rule: "concat_in_preset", index}`.
+
+## D-86 — Limites de quantidade nas composições
+
+- **Onde:** B008, revisão da etapa 2 depois da revisão da equipa no browser; `projects/video/chainStructure.js`, `projects/video/compositionLimits.js`, `projects/video/operations/concat.js`, interface das composições.
+- **Dúvida:** A equipa quer composições sem limite fixo de passos por cadeia nem de vídeos por junção. O que deixa de valer e o que se mantém?
+- **O que as fontes dizem:** DQ-015: junção com 2–10 (Registado) ou 2–50 (Premium) vídeos, cadeia com no máximo 10 passos. REQ-VID-CHAIN-008, REQ-VID-CONCAT-006, REQ-VID-NFR-022 e NFR-023 aplicam esses limites (`CHAIN_TOO_LONG`, `TOO_MANY_INPUTS`). CONCAT-005 (mínimo de 2), CONCAT-007, NFR-024 e D-81 (duração), DQ-014 (custo), QUOTA-001/007 (quota) e RN1 (anónimos).
+- **Opções:** decisão da equipa.
+- **Recomendação:** —
+- **Resposta:** **Decisão da equipa.** Deixam de existir limites fixos de número de passos por cadeia e de número de vídeos por junção, para todos os perfis (revoga, para esta construção, o `CHAIN_TOO_LONG` e o `TOO_MANY_INPUTS` da DQ-015, REQ-VID-CHAIN-008, REQ-VID-CONCAT-006, REQ-VID-NFR-022 e NFR-023). Mantêm-se: o mínimo de 2 vídeos numa junção (CONCAT-005), os limites de duração e tamanho por perfil (CONCAT-007, NFR-024, D-81), a quota diária dos Registados (cada passo 1 crédito, verificada e reservada antes da tarefa, com `QUOTA_EXCEEDED` se não chegar), a recusa dos anónimos e as validações de formato, permissões e integridade. Os Premium não têm débito de créditos. Os requisitos ficam com a nota "Revisto pela D-86", sem apagar o texto original, e o impacto fica no ADR correspondente. Uma proteção técnica que a ausência de limite exija é registada como dúvida nova (D-88), sem inventar um número.
+
+## D-87 — Exceção à regra 2.6 para os painéis de vídeo das B004, B005 e B007
+
+- **Onde:** `frontend/components/video/*` e `frontend/lib/video-*.ts` das B004, B005 e B007; editores das composições da B008.
+- **Dúvida:** Os controlos de configuração de cada operação nas composições têm de ser exatamente os da edição simples, mas os painéis das B004, B005 e B007 submetem a operação e não expõem a configuração em separado. Pode mudar-se esse código?
+- **O que as fontes dizem:** ADD 2.6: não se alteram linhas existentes. ADD 4.9: o editor de cadeia usa a configuração dos painéis do 4.3 a 4.7. Preflight da B008 (V10): os painéis não são reutilizáveis sem mudanças.
+- **Opções:** decisão da equipa.
+- **Recomendação:** —
+- **Resposta:** **Decisão da equipa (ADR-020).** É permitido alterar código de frontend de vídeo criado pelos bolts desta construção (`frontend/components/video/*` e `frontend/lib/video-*.ts` das B004, B005 e B007), apenas para extrair de cada painel o componente de configuração da operação (sem submissão) e fazer o painel simples usá-lo. O comportamento e o aspeto da edição simples não podem mudar. A exceção não abrange o código original do PictuRAS (fluxo de imagem e serviços), nem o backend das B001 a B007, que continuam só por acréscimo. O relatório lista cada linha alterada ou removida ao abrigo da D-87, separada do `numstat` do resto do código, que continua com 0 linhas removidas.
+
+## D-88 — Proteção técnica sem limite fixo de passos e de vídeos (D-86)
+
+- **Onde:** B008, revisão da etapa 2; `express.json()` do API Gateway e do serviço de projetos, mensagem `task.run` e `VideoTask.plan`, comando FFmpeg do `composition_task.py`.
+- **Dúvida:** Sem `CHAIN_TOO_LONG` nem `TOO_MANY_INPUTS`, o tamanho de uma composição só fica limitado pela duração do resultado e pela quota. Que proteção técnica fica, e com que comportamento quando é atingida?
+- **O que as fontes dizem:**
+  - D-86: não inventar um número; registar uma dúvida.
+  - ADD 4.8, riscos: "todas as entradas ficam abertas ao mesmo tempo (um descodificador por clip): a memória cresce com N". ADD T-02: uma só invocação (NFR-013).
+  - O `express.json()` do gateway e do serviço de projetos usa o limite de omissão do Express (100 kB), que não se pode mudar nas linhas existentes (regra 2.6). Um pedido maior é recusado com 413 antes de chegar às rotas de vídeo, com o formato de erro do *handler* existente e não o do vídeo.
+  - O documento MongoDB do `VideoTask` (com `steps` e `plan`) tem um máximo de 16 MB.
+  - Para o Registado, a quota (5 créditos por dia) já limita uma cadeia a 5 passos, mas uma junção custa 1 crédito, qualquer que seja o número de vídeos (DQ-014). O Premium não tem quota.
+  - A duração mínima de um clip é um fotograma, por isso o limite de duração do perfil (5 min ou 60 min) não limita o número de clips.
+- **Opções:**
+  - **(a)** Sem limite novo. Ficam só os limites que já existem: os 100 kB do corpo do pedido (centenas de passos ou de clips), os 16 MB do documento e os recursos do worker. Mede-se na etapa 5 uma junção grande (por exemplo, 100 clips curtos no Premium: memória e tempo do worker) e regista-se o resultado. Um 413 do Express é traduzido pelo gateway de vídeo para `INVALID_REQUEST {field: "steps", reason: "too_large"}`, por acréscimo.
+  - **(b)** Um teto técnico configurável por variável de ambiente (sem valor por omissão no código), com um código próprio (`COMPOSITION_TOO_LARGE`), e um valor medido na etapa 5 e escolhido pela equipa.
+  - **(c)** Processar junções muito grandes por partes, com ficheiros intermédios. Contraria a NFR-013 e o ADD 4.8, por isso fica de fora.
+- **Recomendação:** (a). Cumpre a D-86 sem inventar números, e a medição da etapa 5 diz se é preciso passar para (b).
+- **Resposta:** _pendente._
+
+## D-89 — Controlos do recorte e pré-visualizações quando o passo não recebe o vídeo original
+
+- **Onde:** B008, revisão da etapa 2; componentes de configuração extraídos dos painéis das B004 e B005 (D-87), usados nos três fluxos.
+- **Dúvida:** Na edição simples, o recorte usa o leitor do vídeo para o *scrubbing* ("Definir início/fim") e para o *loop preview*. Os painéis visuais usam a pré-visualização estática do fotograma 0 do vídeo (T-07). Numa cadeia, o passo pode receber um vídeo intermédio estimado: por exemplo, um recorte depois de uma velocidade de 2×, em que o instante 00:10 do intermédio corresponde a 00:20 do original. Também pode ser um passo depois da junção, que não tem um vídeo único. Como se comportam esses controlos?
+- **O que as fontes dizem:**
+  - REQ-VID-TRIM-003 e 007: o *scrubbing* e o *loop preview* sobre "o vídeo".
+  - REQ-VID-CHAIN-003: cada passo é validado face às propriedades estimadas à saída do anterior.
+  - ADD T-07: a pré-visualização usa sempre o fotograma 0 da origem (limitação aceite).
+  - Revisão da equipa: os controlos têm de ser os mesmos da edição simples, com o mesmo comportamento.
+- **Opções:**
+  - **(a)** Os controlos são sempre os mesmos.
+    - **Recorte:** o leitor, o *scrubbing* e o *loop preview* só ficam ativos quando o passo recebe o vídeo original, ou seja, quando é o primeiro passo da cadeia de um vídeo (ou de um clip). Nos outros passos, os campos `hh:mm:ss.mmm`, a duração prevista e a validação ficam iguais, os limites vêm da duração estimada do intermédio, e o leitor dá lugar a uma indicação de que o recorte se aplica ao resultado do passo anterior.
+    - **Pré-visualizações estáticas:** usam o fotograma 0 da origem com os passos estáticos anteriores da mesma cadeia (T-07). Depois da junção, usam o primeiro clip, depois da sua cadeia.
+  - **(b)** O leitor do original fica sempre ativo, mesmo quando o passo recebe um intermédio. Os instantes escolhidos com o *scrubbing* podem não corresponder ao intermédio (por exemplo, depois de uma velocidade).
+  - **(c)** Nas composições, o recorte só tem os campos, sem leitor, mesmo no primeiro passo.
+- **Recomendação:** (a). Mantém a interface da edição simples onde ela é exata, e não mostra posições que não correspondem ao que vai ser recortado.
+- **Resposta:** _pendente._
